@@ -27,42 +27,64 @@
   </header>
 
   <main>
-    <section id="hero" class="hero">
-      <div class="hero-content">
-        <p class="eyebrow">Open-source quantum learning</p>
-        <h1>The Quantum Classroom</h1>
+    <!-- Hyde-style two-column hero with sidebar + content -->
+    <section id="hero" class="hero hero-hyde">
+      <aside class="hero-sidebar">
+        <div class="hero-sidebar-inner">
+          <p class="eyebrow">Open-source quantum learning</p>
+          <h1>The Quantum Classroom</h1>
+          <p class="hero-subtitle">
+            A brazen two-column layout inspired by the Hyde Jekyll theme —
+            pairing a fixed sidebar with uncluttered content for quantum, AI, and physics learning.
+          </p>
+          <nav class="hero-sidebar-nav">
+            <a href="#projects">Projects</a>
+            <a href="#tracks">Learning Tracks</a>
+            <a href="#lectures">Lecture Series</a>
+            <a href="#contact">Contact</a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="hero-main">
         <p class="lead">
           Open-Source Learning for Quantum Computing, Programming, Physics, and Maths — inspired by
-          the community-first playbook at <a href="https://monitsharma.github.io/" target="_blank" rel="noreferrer">monitsharma.github.io</a>.
+          the community-first playbook at
+          <a href="https://monitsharma.github.io/" target="_blank" rel="noreferrer">monitsharma.github.io</a>
+          and the tidy two-column feel of the
+          <a href="https://jekyllthemes.io/theme/hyde" target="_blank" rel="noreferrer">Hyde Jekyll theme</a>.
         </p>
+
         <div class="hero-cta">
           <a class="btn primary" href="#projects">Explore projects</a>
           <a class="btn secondary" href="#tracks">Choose a track</a>
         </div>
-        <ul class="hero-meta">
-          <li>
+
+        <div class="hero-strips">
+          <article class="hero-strip">
             <span class="meta-label">20+ tracks</span>
             <p>Parallel Adventures through CUDA, C/C++, JAX, Qiskit, QML, and more.</p>
-          </li>
-          <li>
+          </article>
+          <article class="hero-strip">
             <span class="meta-label">500+ LeetCode drills</span>
             <p>Curated Java, Python, and C++ solutions to sharpen fundamentals.</p>
-          </li>
-          <li>
+          </article>
+          <article class="hero-strip">
             <span class="meta-label">IBM Qiskit streak</span>
             <p>Summer school labs, hackathons, and Quantum Challenge walkthroughs.</p>
-          </li>
-        </ul>
-      </div>
-      <aside class="hero-panel">
-        <p class="eyebrow">Weekly focus</p>
-        <h2>Parallel Adventures</h2>
-        <p>Dive into CUDA kernels, cross-compile C/C++, and prototype on JAX — one cohesive workspace for GPU intuition.</p>
-        <div class="hero-panel__links">
-          <a href="#tracks">View curriculum</a>
-          <a href="https://github.com/hnath" target="_blank" rel="noreferrer">GitHub repos</a>
+          </article>
         </div>
-      </aside>
+
+        <section class="hero-focus">
+          <p class="eyebrow">Weekly focus</p>
+          <h2>Parallel Adventures</h2>
+          <p>Dive into CUDA kernels, cross-compile C/C++, and prototype on JAX — one cohesive workspace for GPU intuition.</p>
+          <div class="hero-panel__links">
+            <a href="#tracks">View curriculum</a>
+            <a href="https://github.com/hnath" target="_blank" rel="noreferrer">GitHub repos</a>
+          </div>
+        </section>
+      </div>
     </section>
 
     <section id="projects" class="section projects">
