@@ -1,29 +1,34 @@
-const typingAnimation = document.getElementById('typing-animation');
-const roles = ["Software Engineer", "Web Developer", "Tech Enthusiast"];
-let roleIndex = 0;
-let charIndex = 0;
+document.addEventListener('DOMContentLoaded', () => {
+  const nav = document.querySelector('#site-nav');
+  const toggle = document.querySelector('.nav-toggle');
+  const links = nav ? nav.querySelectorAll('.nav-link') : [];
+  const sections = document.querySelectorAll('section[id]');
 
-function type() {
-    if (charIndex < roles[roleIndex].length) {
-        typingAnimation.textContent += roles[roleIndex].charAt(charIndex);
-        charIndex++;
-        setTimeout(type, 100);
-    } else {
-        setTimeout(erase, 2000);
-    }
-}
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    });
+  }
 
-function erase() {
-    if (charIndex > 0) {
-        typingAnimation.textContent = roles[roleIndex].substring(0, charIndex - 1);
-        charIndex--;
-        setTimeout(erase, 50);
-    } else {
-        roleIndex = (roleIndex + 1) % roles.length;
-        setTimeout(type, 500);
-    }
-}
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      nav.classList.remove('open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
+  });
 
-document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(type, 1000);
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        links.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, { threshold: 0.35 });
+
+  sections.forEach(section => observer.observe(section));
 });
+
