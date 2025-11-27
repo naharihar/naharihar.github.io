@@ -13,75 +13,155 @@
 <body>
   <header class="site-header" id="top">
     <div class="brand">
-      <p class="eyebrow">Narihar Hnath</p>
-      <a href="#hero" class="logo">The Quantum Classroom</a>
+      <a href="#hero" class="logo">Narihar Hnath</a>
     </div>
     <button class="nav-toggle" aria-controls="site-nav" aria-expanded="false">Menu</button>
     <nav class="site-nav" id="site-nav">
-      <a class="nav-link" href="#hero">Home</a>
+      <a class="nav-link" href="#hero">Resume</a>
       <a class="nav-link" href="#projects">Projects</a>
-      <a class="nav-link" href="#tracks">Learning Tracks</a>
-      <a class="nav-link" href="#lectures">Lecture Series</a>
       <a class="nav-link" href="#contact">Contact</a>
     </nav>
   </header>
 
   <main>
-    <!-- Hyde-style two-column hero with sidebar + content -->
-    <section id="hero" class="hero hero-hyde">
-      <aside class="hero-sidebar">
-        <div class="hero-sidebar-inner">
-          <p class="eyebrow">Open-source quantum learning</p>
-          <h1>The Quantum Classroom</h1>
-          <p class="hero-subtitle">
-            A brazen two-column layout inspired by the Hyde Jekyll theme —
-            pairing a fixed sidebar with uncluttered content for quantum, AI, and physics learning.
-          </p>
-          <nav class="hero-sidebar-nav">
-            <a href="#projects">Projects</a>
-            <a href="#tracks">Learning Tracks</a>
-            <a href="#lectures">Lecture Series</a>
-            <a href="#contact">Contact</a>
-          </nav>
+    <!-- Resume-style two-column layout -->
+    <section id="hero" class="hero-resume">
+      <aside class="resume-sidebar">
+        <div class="resume-sidebar-inner">
+          <h1 class="resume-name">Narihar Hnath</h1>
+          <p class="resume-title">Software Engineer | Quantum Computing | AI/ML</p>
+          
+          <div class="resume-contact">
+            <p><a href="mailto:your.email@example.com">your.email@example.com</a></p>
+            <p>+1 (123) 456-7890</p>
+            <p><a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noreferrer">linkedin.com/in/yourprofile</a></p>
+            <p><a href="https://github.com/hnath" target="_blank" rel="noreferrer">github.com/hnath</a></p>
+          </div>
+
+          <section class="resume-sidebar-section">
+            <h2>PROJECTS</h2>
+            <div class="resume-project">
+              <h3>Interactive Data Visualization Tool</h3>
+              <p>An immersive project simplifying data analysis through interactive visualizations and real-time insights.</p>
+            </div>
+            <div class="resume-project">
+              <h3>Real-Time Messaging Protocol Library</h3>
+              <p>A lightweight library for efficient, low-latency real-time messaging across distributed systems.</p>
+            </div>
+          </section>
+
+          <section class="resume-sidebar-section">
+            <h2>KEY ACHIEVEMENTS</h2>
+            <ul class="resume-achievements">
+              <li>Led migration to cloud infrastructure, reducing costs by 40% and improving scalability</li>
+              <li>Increased system scalability by 200% through database optimization and caching strategies</li>
+              <li>Recipient of 'Tech Innovator' Award for outstanding contributions to product development</li>
+              <li>Championed automated testing culture, increasing test coverage from 30% to 85%</li>
+            </ul>
+          </section>
+
+          <section class="resume-sidebar-section">
+            <h2>SKILLS</h2>
+            <div class="resume-skills">
+              <div class="skill-category">
+                <strong>Programming:</strong> Java, Python, C++, JavaScript, TypeScript
+              </div>
+              <div class="skill-category">
+                <strong>Frameworks:</strong> React, Node.js, Spring Boot, TensorFlow, PyTorch
+              </div>
+              <div class="skill-category">
+                <strong>Databases:</strong> PostgreSQL, MongoDB, Redis, MySQL
+              </div>
+              <div class="skill-category">
+                <strong>Cloud:</strong> AWS, Azure, Docker, Kubernetes
+              </div>
+              <div class="skill-category">
+                <strong>Tools:</strong> Git, CI/CD, Jenkins, Terraform
+              </div>
+              <div class="skill-category">
+                <strong>Methodologies:</strong> Agile, Scrum, DevOps, Microservices
+              </div>
+            </div>
+          </section>
         </div>
       </aside>
 
-      <div class="hero-main">
-        <p class="lead">
-          Open-Source Learning for Quantum Computing, Programming, Physics, and Maths — inspired by
-          the community-first playbook at
-          <a href="https://monitsharma.github.io/" target="_blank" rel="noreferrer">monitsharma.github.io</a>
-          and the tidy two-column feel of the
-          <a href="https://jekyllthemes.io/theme/hyde" target="_blank" rel="noreferrer">Hyde Jekyll theme</a>.
-        </p>
+      <div class="resume-main">
+        <section class="resume-section">
+          <h2>SUMMARY</h2>
+          <p class="resume-summary">
+            Highly motivated and results-oriented Software Engineer with 8+ years of experience in software development, 
+            specializing in quantum computing, AI/ML, and distributed systems. Possess solid knowledge of modern 
+            programming languages, microservices architecture, and real-time analytics. Career marked by significant 
+            contributions to product development, leading to substantial improvements in system performance and user engagement.
+          </p>
+        </section>
 
-        <div class="hero-cta">
-          <a class="btn primary" href="#projects">Explore projects</a>
-          <a class="btn secondary" href="#tracks">Choose a track</a>
-        </div>
+        <section class="resume-section">
+          <h2>EXPERIENCE</h2>
+          
+          <div class="resume-item">
+            <div class="resume-item-header">
+              <h3>Principal Software Engineer</h3>
+              <span class="resume-date">2019 - Present</span>
+            </div>
+            <p class="resume-company">Princeton Innovation Solutions, Princeton, NJ</p>
+            <ul class="resume-duties">
+              <li>Designed and developed a high-throughput analytics engine processing 10M+ events daily, reducing latency by 60%</li>
+              <li>Led a team of 5 software engineers, implementing agile methodologies and improving delivery time by 35%</li>
+              <li>Implemented a new data streaming pipeline using Apache Kafka, enhancing real-time processing capabilities</li>
+              <li>Architected microservices-based solutions, improving system scalability and maintainability</li>
+            </ul>
+          </div>
 
-        <div class="hero-strips">
-          <article class="hero-strip">
-            <span class="meta-label">20+ tracks</span>
-            <p>Parallel Adventures through CUDA, C/C++, JAX, Qiskit, QML, and more.</p>
-          </article>
-          <article class="hero-strip">
-            <span class="meta-label">500+ LeetCode drills</span>
-            <p>Curated Java, Python, and C++ solutions to sharpen fundamentals.</p>
-          </article>
-          <article class="hero-strip">
-            <span class="meta-label">IBM Qiskit streak</span>
-            <p>Summer school labs, hackathons, and Quantum Challenge walkthroughs.</p>
-          </article>
-        </div>
+          <div class="resume-item">
+            <div class="resume-item-header">
+              <h3>Senior Java Developer</h3>
+              <span class="resume-date">2017 - 2019</span>
+            </div>
+            <p class="resume-company">Digital Global Media, New York, NY</p>
+            <ul class="resume-duties">
+              <li>Developed and maintained critical backend services handling 5M+ API requests per day</li>
+              <li>Optimized database queries, reducing response time by 45% and improving overall system performance</li>
+              <li>Mentored junior developers, conducting code reviews and providing technical guidance</li>
+              <li>Collaborated with cross-functional teams to deliver features on time and within budget</li>
+            </ul>
+          </div>
 
-        <section class="hero-focus">
-          <p class="eyebrow">Weekly focus</p>
-          <h2>Parallel Adventures</h2>
-          <p>Dive into CUDA kernels, cross-compile C/C++, and prototype on JAX — one cohesive workspace for GPU intuition.</p>
-          <div class="hero-panel__links">
-            <a href="#tracks">View curriculum</a>
-            <a href="https://github.com/hnath" target="_blank" rel="noreferrer">GitHub repos</a>
+          <div class="resume-item">
+            <div class="resume-item-header">
+              <h3>Software Engineer</h3>
+              <span class="resume-date">2015 - 2017</span>
+            </div>
+            <p class="resume-company">Enterprise Software Inc., Boston, MA</p>
+            <ul class="resume-duties">
+              <li>Developed new features and enhancements for enterprise-level applications using Java and Spring Framework</li>
+              <li>Participated in code reviews, ensuring code quality and adherence to best practices</li>
+              <li>Collaborated with product managers and designers to translate requirements into technical specifications</li>
+              <li>Wrote comprehensive unit and integration tests, maintaining 80%+ code coverage</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="resume-section">
+          <h2>EDUCATION</h2>
+          
+          <div class="resume-item">
+            <div class="resume-item-header">
+              <h3>Master of Science in Computer Science</h3>
+              <span class="resume-date">2015 - 2017</span>
+            </div>
+            <p class="resume-company">Rutgers University, New Brunswick, NJ</p>
+            <p>Specialized in Distributed Systems and Machine Learning. Thesis on "Scalable Quantum Computing Algorithms for Optimization Problems."</p>
+          </div>
+
+          <div class="resume-item">
+            <div class="resume-item-header">
+              <h3>Bachelor of Science in Computer Science</h3>
+              <span class="resume-date">2011 - 2015</span>
+            </div>
+            <p class="resume-company">State University, City, State</p>
+            <p>Graduated Magna Cum Laude. Relevant coursework: Data Structures, Algorithms, Database Systems, Software Engineering.</p>
           </div>
         </section>
       </div>
