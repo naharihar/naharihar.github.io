@@ -287,6 +287,7 @@ main {
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 0.3rem;
+  gap: 1rem;
 }
 
 .resume-item-header h3 {
@@ -300,6 +301,10 @@ main {
   font-size: 0.9rem;
   color: #6d6bff;
   font-weight: 500;
+}
+
+.resume-date:empty {
+  display: none;
 }
 
 .resume-company {
@@ -333,11 +338,21 @@ main {
   font-weight: bold;
 }
 
+.resume-duties li strong {
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
 .resume-section p {
   font-size: 0.95rem;
   color: #4a4a4a;
   line-height: 1.7;
   margin: 0.5rem 0;
+}
+
+.resume-achievements li strong {
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .section {
