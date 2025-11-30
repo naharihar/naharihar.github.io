@@ -1,2 +1,3 @@
-# Flashcards
-General distributed systems flashcards without company-specific info.
+
+# Flashcards (Generic)
+Flashcards for public distributed systems patterns based on widely known architectures.

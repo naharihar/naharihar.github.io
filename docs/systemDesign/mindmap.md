@@ -1,2 +1,3 @@
-# Mindmap
-(See earlier structure; no proprietary references.)
+
+# Mindmap (Generic)
+See mermaid structure previously provided.

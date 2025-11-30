@@ -1,4 +1,4 @@
-# Table of Contents
+# TOC
 - 01-clocks-and-time.md
 - 02-consensus-and-coordination.md
 - 03-logs-and-replication.md
