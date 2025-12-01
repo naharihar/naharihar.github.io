@@ -441,12 +441,19 @@ main {
   justify-content: space-between;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .track-card:hover {
   border-color: #6d6bff;
   box-shadow: 0 8px 16px rgba(109, 107, 255, 0.12);
   transform: translateY(-2px);
+}
+
+.track-card:visited {
+  color: inherit;
 }
 
 .track-card h3 {
