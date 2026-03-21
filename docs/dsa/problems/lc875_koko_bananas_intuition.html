@@ -164,6 +164,29 @@
   pre .nm { color: #d4b26a; }
   pre .fn { color: #c9a0dc; }
 
+  .code-tabs { margin: 1.5rem 0; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-bottom: 0; }
+  .tab-btn {
+    padding: 0.5rem 1.1rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--ink-muted);
+    transition: all 0.15s;
+    margin-bottom: -1px;
+  }
+  .tab-btn.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .tab-panel pre {
+    border-radius: 0 0 10px 10px;
+    margin: 0;
+  }
+
   .problem-box,
   .visual-box,
   .comparison-box {
@@ -402,7 +425,12 @@
     <div class="section">
       <div class="section-label">03 — Brute Force</div>
       <h2>The naive solution is completely reasonable</h2>
-<pre><span class="kw">class</span> <span class="ty">Solution</span> {
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'kokoBruteJava')">Java</button>
+          <button class="tab-btn" onclick="switchTab(this,'kokoBrutePython')">Python</button>
+        </div>
+        <div class="tab-panel active" id="kokoBruteJava"><pre><span class="kw">class</span> <span class="ty">Solution</span> {
     <span class="kw">public</span> <span class="ty">int</span> <span class="fn">minEatingSpeed</span>(<span class="ty">int</span>[] piles, <span class="ty">int</span> h) {
         <span class="ty">int</span> maxPile = <span class="nm">0</span>;
         <span class="kw">for</span> (<span class="ty">int</span> pile : piles) {
@@ -423,7 +451,22 @@
 
         <span class="kw">return</span> maxPile;
     }
-}</pre>
+}</pre></div>
+        <div class="tab-panel" id="kokoBrutePython"><pre><span class="kw">class</span> <span class="ty">Solution</span>:
+    <span class="kw">def</span> <span class="fn">minEatingSpeed</span>(self, piles: <span class="ty">list</span>[<span class="ty">int</span>], h: <span class="ty">int</span>) -> <span class="ty">int</span>:
+        max_pile = <span class="ty">max</span>(piles)
+
+        <span class="kw">for</span> speed <span class="kw">in</span> <span class="ty">range</span>(<span class="nm">1</span>, max_pile + <span class="nm">1</span>):
+            hours_needed = <span class="nm">0</span>
+
+            <span class="kw">for</span> pile <span class="kw">in</span> piles:
+                hours_needed += (pile + speed - <span class="nm">1</span>) // speed
+
+            <span class="kw">if</span> hours_needed &lt;= h:
+                <span class="kw">return</span> speed
+
+        <span class="kw">return</span> max_pile</pre></div>
+      </div>
       <p>This code is not a hack. It reflects the direct reasoning process. We are literally asking: <em>what is the smallest speed that works?</em></p>
     </div>
 
@@ -535,16 +578,65 @@ Space = O(1)</pre>
       <div class="section-label">08 — Binary Search</div>
       <h2>Optimize the search over speeds</h2>
       <p>Once we notice the false-to-true transition, we stop testing every speed one by one. Instead, we binary search the speed range <code>1 .. maxPile</code> and ask the same feasibility question only for the middle candidates.</p>
-<pre><span class="kw">while</span> (left &lt;= right) {
-    <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'kokoBinaryJava')">Java</button>
+          <button class="tab-btn" onclick="switchTab(this,'kokoBinaryPython')">Python</button>
+        </div>
+        <div class="tab-panel active" id="kokoBinaryJava"><pre><span class="kw">class</span> <span class="ty">Solution</span> {
+    <span class="kw">public</span> <span class="ty">int</span> <span class="fn">minEatingSpeed</span>(<span class="ty">int</span>[] piles, <span class="ty">int</span> h) {
+        <span class="ty">int</span> left = <span class="nm">1</span>;
+        <span class="ty">int</span> right = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="ty">int</span> pile : piles) {
+            right = Math.max(right, pile);
+        }
 
-    <span class="kw">if</span> (canFinish(mid)) {
-        answer = mid;      <span class="cm">// mid works, try smaller</span>
-        right = mid - <span class="nm">1</span>;
-    } <span class="kw">else</span> {
-        left = mid + <span class="nm">1</span>;  <span class="cm">// mid is too slow, go higher</span>
+        <span class="ty">int</span> answer = right;
+
+        <span class="kw">while</span> (left &lt;= right) {
+            <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+
+            <span class="kw">if</span> (<span class="fn">canFinish</span>(piles, mid, h)) {
+                answer = mid;
+                right = mid - <span class="nm">1</span>;
+            } <span class="kw">else</span> {
+                left = mid + <span class="nm">1</span>;
+            }
+        }
+
+        <span class="kw">return</span> answer;
     }
-}</pre>
+
+    <span class="kw">private boolean</span> <span class="fn">canFinish</span>(<span class="ty">int</span>[] piles, <span class="ty">int</span> speed, <span class="ty">int</span> h) {
+        <span class="ty">int</span> hoursNeeded = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="ty">int</span> pile : piles) {
+            hoursNeeded += (pile + speed - <span class="nm">1</span>) / speed;
+        }
+        <span class="kw">return</span> hoursNeeded &lt;= h;
+    }
+}</pre></div>
+        <div class="tab-panel" id="kokoBinaryPython"><pre><span class="kw">class</span> <span class="ty">Solution</span>:
+    <span class="kw">def</span> <span class="fn">minEatingSpeed</span>(self, piles: <span class="ty">list</span>[<span class="ty">int</span>], h: <span class="ty">int</span>) -> <span class="ty">int</span>:
+        left, right = <span class="nm">1</span>, <span class="ty">max</span>(piles)
+        answer = right
+
+        <span class="kw">while</span> left &lt;= right:
+            mid = left + (right - left) // <span class="nm">2</span>
+
+            <span class="kw">if</span> self.<span class="fn">can_finish</span>(piles, mid, h):
+                answer = mid
+                right = mid - <span class="nm">1</span>
+            <span class="kw">else</span>:
+                left = mid + <span class="nm">1</span>
+
+        <span class="kw">return</span> answer
+
+    <span class="kw">def</span> <span class="fn">can_finish</span>(self, piles, speed, h):
+        hours_needed = <span class="nm">0</span>
+        <span class="kw">for</span> pile <span class="kw">in</span> piles:
+            hours_needed += (pile + speed - <span class="nm">1</span>) // speed
+        <span class="kw">return</span> hours_needed &lt;= h</pre></div>
+      </div>
       <p>We still compute <code>hoursNeeded</code> the same way. The optimization is that we test only <code>log maxPile</code> candidate speeds instead of every speed from <code>1</code> to <code>maxPile</code>.</p>
     </div>
 
@@ -585,5 +677,17 @@ Space = O(1)</pre>
   <footer class="site-footer">
     Part of the Binary Search pattern series · <a href="lc875_koko_bananas.html">Problem page</a> · <a href="../binary_search_blog.html">Main article</a>
   </footer>
+<script>
+function switchTab(btn, id) {
+  btn.closest('.code-tabs').querySelectorAll('.tab-btn').forEach(function(tab) {
+    tab.classList.remove('active');
+  });
+  btn.closest('.code-tabs').querySelectorAll('.tab-panel').forEach(function(panel) {
+    panel.classList.remove('active');
+  });
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
 </body>
 </html>
