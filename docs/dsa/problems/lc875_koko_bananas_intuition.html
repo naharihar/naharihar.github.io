@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 875 — Koko Eating Bananas Intuition · Binary Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1814;
+    --ink-muted: #6b6760;
+    --ink-faint: #b5b2ab;
+    --paper: #faf9f6;
+    --paper-warm: #f3f1ec;
+    --paper-deep: #ede9e1;
+    --rule: #dedad2;
+    --accent: #c8411f;
+    --accent-soft: #f5ece8;
+    --accent-mid: #e07050;
+    --blue: #2357a0;
+    --blue-soft: #e8eef8;
+    --teal: #1a6b57;
+    --teal-soft: #e3f0ec;
+    --amber: #9c5a0a;
+    --amber-soft: #f7f0e2;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 17px;
+    font-weight: 300;
+  }
+
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(250,249,246,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+  .site-header .logo { font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink); text-decoration: none; }
+  .site-header nav { display: flex; gap: 1.5rem; }
+  .site-header nav a { font-size: 0.82rem; font-weight: 400; color: var(--ink-muted); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+  .site-header nav a:hover { color: var(--ink); }
+
+  .hero {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 5rem 2rem 3rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero-kicker {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    line-height: 1.12;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--ink-muted);
+    max-width: 640px;
+    font-weight: 300;
+    line-height: 1.65;
+  }
+  .hero-meta {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .content-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .section { padding: 3.5rem 0; border-bottom: 1px solid var(--rule); }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+    color: var(--ink);
+  }
+  h2 em { font-style: italic; }
+  h3 {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 2rem 0 0.75rem;
+    color: var(--ink);
+  }
+  p { margin-bottom: 1.1rem; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 500; color: var(--ink); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--paper-deep);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    background: #1e1c18;
+    color: #e8e4d8;
+    padding: 1.5rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.7;
+  }
+  pre .kw { color: #e07050; }
+  pre .ty { color: #78b7d0; }
+  pre .cm { color: #7a7568; font-style: italic; }
+  pre .nm { color: #d4b26a; }
+  pre .fn { color: #c9a0dc; }
+
+  .problem-box,
+  .visual-box,
+  .comparison-box {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.6rem;
+    margin: 1.75rem 0;
+  }
+  .box-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 0.75rem;
+  }
+  .io-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.45rem; }
+  .io-row span { font-family: var(--mono); font-size: 0.82rem; }
+  .io-label { color: var(--ink-muted); font-weight: 500; }
+  .io-val { color: var(--ink); }
+
+  .pullquote {
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
+    margin: 2rem 0;
+    background: var(--accent-soft);
+    border-radius: 0 6px 6px 0;
+  }
+  .pullquote p {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .steps { margin: 1.75rem 0; }
+  .step {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--paper-deep);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .step-body strong {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .step-body p {
+    color: var(--ink-muted);
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  .ft-condition {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--blue);
+    background: var(--blue-soft);
+    border: 1px solid #9ab8e0;
+    padding: 0.45rem 0.8rem;
+    border-radius: 7px;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+  .ft-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0.65rem;
+  }
+  .ft-cell {
+    width: 56px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    border: 1px solid var(--rule);
+    flex-direction: column;
+    line-height: 1.2;
+  }
+  .ft-cell .val { font-size: 0.62rem; color: inherit; opacity: 0.85; }
+  .ft-cell.f { background: var(--paper-deep); color: var(--ink-faint); }
+  .ft-cell.t { background: var(--teal-soft); color: var(--teal); border-color: #9fd4c4; }
+  .ft-cell.t.first { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .ft-caption { font-size: 0.86rem; color: var(--ink-muted); }
+
+  .callout {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    margin: 1.25rem 0;
+    border: 1px solid;
+    font-size: 0.9rem;
+  }
+  .callout-tip { background: var(--teal-soft); border-color: #9fd4c4; color: var(--teal); }
+  .callout-info { background: var(--blue-soft); border-color: #9ab8e0; color: var(--blue); }
+  .callout-icon { flex-shrink: 0; }
+  .callout p { margin: 0; }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 1rem;
+  }
+  .compare-card {
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    background: var(--paper);
+  }
+  .compare-card .cc-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 0.35rem;
+  }
+  .compare-card .cc-value {
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  .compare-card p {
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    margin-top: 0.4rem;
+  }
+
+  .site-footer {
+    padding: 2rem clamp(1.5rem, 4vw, 4rem) 3rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  .site-footer a { color: inherit; }
+
+  @media (max-width: 640px) {
+    .site-header { padding: 1rem 1.25rem; }
+    .site-header nav { gap: 0.9rem; }
+    .hero { padding: 3rem 1.25rem 2rem; }
+    .content-wrap { padding: 0 1.25rem; }
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="../binary_search_blog.html" class="logo">AlgorithmCraft</a>
+    <nav>
+      <a href="../binary_search_blog.html">Pattern Map</a>
+      <a href="lc875_koko_bananas.html">Problem Page</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <p class="hero-kicker">LC 875 — First Principles</p>
+    <h1>Koko Eating Bananas — <em>build the intuition before the optimization</em></h1>
+    <p class="hero-sub">Start from the brute-force thought process, understand exactly what work is repeated, and then earn the binary-search optimization instead of memorizing it.</p>
+    <div class="hero-meta">
+      <span>Search on Answer</span>
+      <span>Brute force to optimized</span>
+      <span>Same style as the main binary-search guide</span>
+    </div>
+  </section>
+
+  <main class="content-wrap">
+    <div class="section">
+      <div class="section-label">01 — Problem</div>
+      <h2>What are we actually minimizing?</h2>
+      <div class="problem-box">
+        <div class="box-label">Problem Statement</div>
+        <p>We need the <strong>minimum integer eating speed</strong> <code>k</code> such that Koko can finish all banana piles within <code>h</code> hours.</p>
+        <div class="io-row"><span class="io-label">Input:</span><span class="io-val">piles = [3, 6, 7, 11], h = 8</span></div>
+        <div class="io-row"><span class="io-label">Goal:</span><span class="io-val">Find the smallest speed k that lets her finish in time</span></div>
+      </div>
+      <p>The important subtlety: the answer is <em>not</em> inside the array. We are not looking for a target element. We are looking for the smallest speed that satisfies a constraint.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">02 — First Principles</div>
+      <h2>If we knew nothing about binary search, what would we do?</h2>
+      <p>The most natural idea is to try every possible speed, starting from the slowest.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Pick a candidate speed.</strong>
+            <p>Start with <code>k = 1</code>, then <code>2</code>, then <code>3</code>, and so on.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Compute how many hours that speed needs.</strong>
+            <p>For one pile of size <code>pile</code>, hours needed is <code>ceil(pile / k)</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Return the first speed that works.</strong>
+            <p>Because we are trying speeds in increasing order, the first valid one must be the minimum answer.</p>
+          </div>
+        </div>
+      </div>
+      <div class="pullquote">
+        <p>The brute-force algorithm is simply: test every speed from 1 to max(piles), and stop at the first one that finishes within h hours.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">03 — Brute Force</div>
+      <h2>The naive solution is completely reasonable</h2>
+<pre><span class="kw">class</span> <span class="ty">Solution</span> {
+    <span class="kw">public</span> <span class="ty">int</span> <span class="fn">minEatingSpeed</span>(<span class="ty">int</span>[] piles, <span class="ty">int</span> h) {
+        <span class="ty">int</span> maxPile = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="ty">int</span> pile : piles) {
+            maxPile = Math.max(maxPile, pile);
+        }
+
+        <span class="kw">for</span> (<span class="ty">int</span> speed = <span class="nm">1</span>; speed <= maxPile; speed++) {
+            <span class="ty">int</span> hoursNeeded = <span class="nm">0</span>;
+
+            <span class="kw">for</span> (<span class="ty">int</span> pile : piles) {
+                hoursNeeded += (pile + speed - <span class="nm">1</span>) / speed;
+            }
+
+            <span class="kw">if</span> (hoursNeeded <= h) {
+                <span class="kw">return</span> speed;
+            }
+        }
+
+        <span class="kw">return</span> maxPile;
+    }
+}</pre>
+      <p>This code is not a hack. It reflects the direct reasoning process. We are literally asking: <em>what is the smallest speed that works?</em></p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">04 — Walkthrough</div>
+      <h2>Run the brute force with real values</h2>
+      <div class="visual-box">
+        <div class="box-label">Example</div>
+        <div class="io-row"><span class="io-label">piles</span><span class="io-val">[3, 6, 7, 11]</span></div>
+        <div class="io-row"><span class="io-label">h</span><span class="io-val">8</span></div>
+      </div>
+      <h3>Try speed = 1</h3>
+      <p>Hours needed = <code>3 + 6 + 7 + 11 = 27</code>. Too slow.</p>
+      <h3>Try speed = 2</h3>
+      <p>Hours needed = <code>ceil(3/2) + ceil(6/2) + ceil(7/2) + ceil(11/2) = 2 + 3 + 4 + 6 = 15</code>. Still too slow.</p>
+      <h3>Try speed = 3</h3>
+      <p>Hours needed = <code>1 + 2 + 3 + 4 = 10</code>. Still too slow.</p>
+      <h3>Try speed = 4</h3>
+      <p>Hours needed = <code>1 + 2 + 2 + 3 = 8</code>. This works, so we return <code>4</code>.</p>
+      <div class="callout callout-info">
+        <span class="callout-icon">→</span>
+        <p><strong>Why return on <code>hoursNeeded &lt;= h</code>?</strong> Because the problem says Koko must finish <em>within</em> <code>h</code> hours. Equal is valid, smaller is also valid.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">05 — Complexity</div>
+      <h2>Why does brute force get expensive?</h2>
+      <div class="comparison-box">
+        <div class="box-label">Brute-Force Cost</div>
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label">Candidate speeds</div>
+            <div class="cc-value">1 .. maxPile</div>
+            <p>If the largest pile is huge, there are many possible speeds to test.</p>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label">Work per speed</div>
+            <div class="cc-value">O(n)</div>
+            <p>Each speed requires scanning every pile to compute total hours.</p>
+          </div>
+        </div>
+      </div>
+      <p>That gives us:</p>
+      <pre>Time = O(n * maxPile)
+Space = O(1)</pre>
+      <p>So if <code>maxPile</code> is large, brute force wastes time checking lots of impossible speeds one by one.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">06 — Repetition</div>
+      <h2>What work are we repeating?</h2>
+      <p>For every candidate speed, we ask the same yes/no question:</p>
+      <div class="ft-condition">canFinish(speed) = totalHours(speed) &lt;= h ?</div>
+      <p>That repeated feasibility check is the heart of the problem. The only thing changing is the candidate speed.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Choose a speed.</strong>
+            <p><code>speed = 1</code>, then <code>2</code>, then <code>3</code>, then <code>4</code>...</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Recompute hours across all piles.</strong>
+            <p>The full pile scan happens again and again for each speed candidate.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Check true or false.</strong>
+            <p>Does this speed finish within <code>h</code> hours or not?</p>
+          </div>
+        </div>
+      </div>
+      <div class="pullquote">
+        <p>We are not optimizing the formula for hours. We are optimizing how many candidate speeds we need to test.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">07 — Optimization Insight</div>
+      <h2>The answers form a monotonic map</h2>
+      <p>If a speed works, then every faster speed also works. If a speed fails, every slower speed also fails.</p>
+      <div class="visual-box">
+        <div class="box-label">For piles = [3, 6, 7, 11], h = 8</div>
+        <div class="ft-row">
+          <div class="ft-cell f"><span class="val">k=1</span>F</div>
+          <div class="ft-cell f"><span class="val">k=2</span>F</div>
+          <div class="ft-cell f"><span class="val">k=3</span>F</div>
+          <div class="ft-cell t first"><span class="val">k=4</span>T</div>
+          <div class="ft-cell t"><span class="val">k=5</span>T</div>
+          <div class="ft-cell t"><span class="val">k=6</span>T</div>
+          <div class="ft-cell t"><span class="val">k=7</span>T</div>
+          <div class="ft-cell t"><span class="val">k=8</span>T</div>
+        </div>
+        <div class="ft-caption">This is the classic binary-search shape: false, false, false, then true forever.</div>
+      </div>
+      <div class="callout callout-tip">
+        <span class="callout-icon">→</span>
+        <p><strong>This is the key shift:</strong> the piles are not sorted, but the <em>answer space</em> is monotonic. That is what binary search needs.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">08 — Binary Search</div>
+      <h2>Optimize the search over speeds</h2>
+      <p>Once we notice the false-to-true transition, we stop testing every speed one by one. Instead, we binary search the speed range <code>1 .. maxPile</code> and ask the same feasibility question only for the middle candidates.</p>
+<pre><span class="kw">while</span> (left &lt;= right) {
+    <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+
+    <span class="kw">if</span> (canFinish(mid)) {
+        answer = mid;      <span class="cm">// mid works, try smaller</span>
+        right = mid - <span class="nm">1</span>;
+    } <span class="kw">else</span> {
+        left = mid + <span class="nm">1</span>;  <span class="cm">// mid is too slow, go higher</span>
+    }
+}</pre>
+      <p>We still compute <code>hoursNeeded</code> the same way. The optimization is that we test only <code>log maxPile</code> candidate speeds instead of every speed from <code>1</code> to <code>maxPile</code>.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">09 — Comparison</div>
+      <h2>What exactly improved?</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label">Brute force</div>
+          <div class="cc-value">O(n * maxPile)</div>
+          <p>Checks every possible speed one by one until it finds the first valid one.</p>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label">Binary search</div>
+          <div class="cc-value">O(n log maxPile)</div>
+          <p>Keeps the same <code>canFinish(speed)</code> check, but cuts the candidate-speed range in half each step.</p>
+        </div>
+      </div>
+      <p>The repeated work is still there, but binary search massively reduces how many times we perform it.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">10 — Pattern</div>
+      <h2>The reusable lesson</h2>
+      <p>Whenever your brute-force approach looks like this:</p>
+      <pre>for every possible answer:
+    check if this answer works</pre>
+      <p>ask one follow-up question:</p>
+      <div class="ft-condition">Do the check results form F F F ... T T T ?</div>
+      <p>If yes, you likely have a binary-search-on-answer problem.</p>
+      <div class="callout callout-info">
+        <span class="callout-icon">→</span>
+        <p><strong>For Koko:</strong> the formula did not change, the feasibility check did not change, only the way we searched the candidate answers changed.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Part of the Binary Search pattern series · <a href="lc875_koko_bananas.html">Problem page</a> · <a href="../binary_search_blog.html">Main article</a>
+  </footer>
+</body>
+</html>

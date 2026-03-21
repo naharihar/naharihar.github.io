@@ -427,6 +427,10 @@ code {
     <div class="section-label">Intuition</div>
     <h2>The answer is a <em>speed</em>, not an index</h2>
     <p>The key shift: we're not searching an array for a target. We're searching the space of possible speeds (1 to max(piles)) for the minimum speed that works. This is Binary Search on Answer.</p>
+    <div class="callout callout-info">
+      <span class="callout-icon">→</span>
+      <p><strong>Want to build this from first principles?</strong> Read <a href="lc875_koko_bananas_intuition.html" style="color:inherit; text-decoration: underline;">the deeper intuition article</a> for the brute-force solution, complexity breakdown, and the exact optimization leap to binary search.</p>
+    </div>
     <div class="pullquote">
       <p>If speed k works, speed k+1 also works. If speed k fails, speed k-1 also fails. This monotonic property is exactly what binary search needs.</p>
     </div>
