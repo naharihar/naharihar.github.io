@@ -413,6 +413,24 @@
   .cheat-table tr:last-child td { border-bottom: none; }
   .cheat-table tr:hover td { background: var(--paper-warm); }
   .cheat-table .lc { font-family: var(--mono); font-size: 0.78rem; color: var(--blue); font-weight: 500; }
+  .cheat-table .lc a {
+    color: var(--blue) !important;
+    text-decoration: underline;
+    text-decoration-color: currentColor !important;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 4px;
+    transition: color 0.18s ease, background 0.18s ease;
+  }
+  .cheat-table .lc a:hover,
+  .cheat-table .lc a:focus-visible {
+    color: #153b74 !important;
+    background: var(--blue-soft);
+    outline: none;
+  }
   .cheat-table .pattern-badge {
     display: inline-block;
     font-size: 0.68rem;
