@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Search: The Boundary-Finding Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1814;
+    --ink-muted: #6b6760;
+    --ink-faint: #b5b2ab;
+    --paper: #faf9f6;
+    --paper-warm: #f3f1ec;
+    --paper-deep: #ede9e1;
+    --rule: #dedad2;
+    --accent: #c8411f;
+    --accent-soft: #f5ece8;
+    --accent-mid: #e07050;
+    --blue: #2357a0;
+    --blue-soft: #e8eef8;
+    --teal: #1a6b57;
+    --teal-soft: #e3f0ec;
+    --amber: #9c5a0a;
+    --amber-soft: #f7f0e2;
+    --purple: #5a3a8a;
+    --purple-soft: #f0eaf8;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 17px;
+    font-weight: 300;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(250,249,246,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+  .site-header .logo { font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink); }
+  .site-header nav { display: flex; gap: 1.5rem; }
+  .site-header nav a { font-size: 0.82rem; font-weight: 400; color: var(--ink-muted); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+  .site-header nav a:hover { color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 5rem 2rem 3rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero-kicker {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    line-height: 1.12;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--ink-muted);
+    max-width: 600px;
+    font-weight: 300;
+    line-height: 1.65;
+  }
+  .hero-meta {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+  /* ── LAYOUT ── */
+  .content-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── ARTICLE BODY ── */
+  .section { padding: 3.5rem 0; border-bottom: 1px solid var(--rule); }
+  .section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+    color: var(--ink);
+  }
+  h2 em { font-style: italic; }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 2rem 0 0.75rem;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+
+  p { margin-bottom: 1.1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 500; color: var(--ink); }
+
+  /* ── PULLQUOTE ── */
+  .pullquote {
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
+    margin: 2rem 0;
+    background: var(--accent-soft);
+    border-radius: 0 6px 6px 0;
+  }
+  .pullquote p {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* ── CODE ── */
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--paper-deep);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    background: #1e1c18;
+    color: #e8e4d8;
+    padding: 1.5rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.7;
+  }
+  pre .kw { color: #e07050; }
+  pre .ty { color: #78b7d0; }
+  pre .cm { color: #7a7568; font-style: italic; }
+  pre .st { color: #a8c97a; }
+  pre .nm { color: #d4b26a; }
+
+  /* ── BOOLEAN VISUALIZER ── */
+  .bool-demo {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin: 2rem 0;
+  }
+  .bool-demo-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 1rem;
+  }
+  .bool-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .bool-cell {
+    width: 52px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .bool-cell.f { background: var(--paper-deep); color: var(--ink-faint); border: 1px solid var(--rule); }
+  .bool-cell.t { background: var(--teal-soft); color: var(--teal); border: 1px solid #9fd4c4; }
+  .bool-cell.t.first { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .bool-cell.active { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .bool-arrow { font-size: 1.3rem; color: var(--accent); margin: 0 4px; }
+  .bool-caption { font-size: 0.85rem; color: var(--ink-muted); margin-top: 0.75rem; }
+
+  /* ── INTERACTIVE BINARY SEARCH ── */
+  .bs-demo {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin: 2rem 0;
+  }
+  .bs-demo-title {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 1.25rem;
+  }
+  .bs-array {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .bs-cell {
+    width: 54px;
+    height: 54px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    transition: all 0.3s;
+    font-size: 0.82rem;
+    border: 1px solid var(--rule);
+    background: var(--paper-deep);
+    color: var(--ink-muted);
+  }
+  .bs-cell .idx { font-size: 0.62rem; color: var(--ink-faint); margin-bottom: 2px; }
+  .bs-cell.range { background: var(--blue-soft); border-color: #9ab8e0; color: var(--blue); }
+  .bs-cell.mid { background: var(--amber-soft); border-color: #e8c07a; color: var(--amber); }
+  .bs-cell.found { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .bs-cell.eliminated { opacity: 0.3; }
+  .bs-controls { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .bs-btn {
+    padding: 0.45rem 1rem;
+    border-radius: 7px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .bs-btn:hover { background: var(--paper-deep); border-color: var(--ink-faint); }
+  .bs-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 500; }
+  .bs-btn.primary:hover { background: #a8341a; }
+  .bs-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .bs-log {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    min-height: 2.5rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--paper-deep);
+    border-radius: 7px;
+    border: 1px solid var(--rule);
+  }
+  .bs-target-wrap { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--ink-muted); }
+  .bs-target-wrap input { width: 70px; font-family: var(--mono); }
+  .bs-legend { display: flex; gap: 12px; margin-top: 0.75rem; flex-wrap: wrap; }
+  .bs-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--ink-muted); }
+  .bs-legend-box { width: 14px; height: 14px; border-radius: 3px; }
+
+  /* ── PATTERN CARDS ── */
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 1.75rem 0;
+  }
+  .pattern-card {
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.25rem;
+    background: var(--paper);
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .pattern-card:hover { background: var(--paper-warm); border-color: var(--ink-faint); }
+  .pattern-card .pc-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--accent-mid);
+    margin-bottom: 0.5rem;
+  }
+  .pattern-card h4 {
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .pattern-card p { font-size: 0.82rem; color: var(--ink-muted); margin: 0; line-height: 1.5; }
+  .pattern-card .pc-tag {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.7rem;
+    font-family: var(--mono);
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    background: var(--paper-deep);
+    color: var(--ink-muted);
+  }
+
+  /* ── FT CONVERTER ── */
+  .ft-converter {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin: 2rem 0;
+  }
+  .ft-tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .ft-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--sans);
+    font-weight: 400;
+    color: var(--ink-muted);
+  }
+  .ft-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .ft-content { display: none; }
+  .ft-content.active { display: block; }
+  .ft-array-label { font-size: 0.78rem; color: var(--ink-muted); margin-bottom: 0.5rem; font-family: var(--mono); }
+  .ft-row { display: flex; gap: 4px; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .ft-item {
+    min-width: 48px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    border: 1px solid var(--rule);
+  }
+  .ft-item.val { background: var(--paper-deep); color: var(--ink); }
+  .ft-item.f { background: var(--paper-deep); color: var(--ink-faint); }
+  .ft-item.t { background: var(--teal-soft); color: var(--teal); border-color: #9fd4c4; font-weight: 500; }
+  .ft-item.t.first { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .ft-condition { font-size: 0.85rem; background: var(--paper-deep); padding: 0.5rem 0.75rem; border-radius: 7px; margin-bottom: 0.75rem; font-family: var(--mono); color: var(--blue); }
+  .ft-explanation { font-size: 0.85rem; color: var(--ink-muted); margin-top: 0.75rem; line-height: 1.55; }
+
+  /* ── CHEAT SHEET TABLE ── */
+  .cheat-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+  .cheat-table th {
+    text-align: left;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .cheat-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--paper-deep); }
+  .cheat-table tr:last-child td { border-bottom: none; }
+  .cheat-table tr:hover td { background: var(--paper-warm); }
+  .cheat-table .lc { font-family: var(--mono); font-size: 0.78rem; color: var(--blue); font-weight: 500; }
+  .cheat-table .pattern-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 0.2em 0.55em;
+    border-radius: 4px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-classic { background: var(--blue-soft); color: var(--blue); }
+  .badge-first { background: var(--teal-soft); color: var(--teal); }
+  .badge-last { background: var(--purple-soft); color: var(--purple); }
+  .badge-answer { background: var(--amber-soft); color: var(--amber); }
+  .badge-peak { background: var(--accent-soft); color: var(--accent); }
+
+  /* ── RECIPE / STEP BOX ── */
+  .steps { margin: 1.75rem 0; }
+  .step { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--paper-deep); }
+  .step:last-child { border-bottom: none; }
+  .step-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 500; margin-top: 0.1rem; }
+  .step-body { flex: 1; }
+  .step-body strong { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; }
+  .step-body p { font-size: 0.85rem; color: var(--ink-muted); margin: 0; }
+
+  /* ── INLINE DIAGRAM ── */
+  .diagram-wrap {
+    margin: 2rem 0;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .diagram-wrap svg { display: block; width: 100%; }
+  .diagram-caption { padding: 0.6rem 1rem; font-size: 0.78rem; color: var(--ink-muted); border-top: 1px solid var(--rule); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+    border: 1px solid;
+    font-size: 0.9rem;
+  }
+  .callout-tip { background: var(--teal-soft); border-color: #9fd4c4; color: var(--teal); }
+  .callout-warning { background: var(--amber-soft); border-color: #e8c07a; color: var(--amber); }
+  .callout-info { background: var(--blue-soft); border-color: #9ab8e0; color: var(--blue); }
+  .callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .callout p { margin: 0; line-height: 1.55; }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    margin-top: 4rem;
+    padding: 2rem;
+    border-top: 1px solid var(--rule);
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .hero { padding: 3rem 1.25rem 2rem; }
+    .content-wrap { padding: 0 1.25rem; }
+    .bs-cell { width: 44px; height: 44px; font-size: 0.75rem; }
+    .pattern-grid { grid-template-columns: 1fr; }
+    .site-header nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">AlgorithmCraft</div>
+  <nav>
+    <a href="#core-idea">The Idea</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#converter">F→T Converter</a>
+    <a href="#cheatsheet">Cheat Sheet</a>
+  </nav>
+</header>
+
+<article>
+
+  <div class="hero">
+    <div class="hero-kicker">Deep Dive &nbsp;·&nbsp; Algorithms</div>
+    <h1>Binary search is not about<em> finding numbers</em></h1>
+    <p class="hero-sub">Most tutorials teach it wrong. Binary search is actually a boundary-finding algorithm — and once you see that, a huge class of hard problems becomes obvious.</p>
+    <div class="hero-meta">
+      <span>15 min read</span>
+      <span>·</span>
+      <span>Interactive examples</span>
+      <span>·</span>
+      <span>Covers LC 33, 153, 162, 875 &amp; more</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────── SECTION 1 ─────────────────────── -->
+  <div class="content-wrap">
+  <div class="section" id="core-idea">
+    <div class="section-label">01 — The Core Insight</div>
+    <h2>Searching for a boundary, not a value</h2>
+
+    <p>Every intro course teaches binary search the same way: sorted array, target number, halve the range until you find it. Clean, simple, and — crucially — <strong>incomplete</strong>.</p>
+
+    <p>That framing handles maybe 20% of binary search problems. The other 80% involve no target number at all. They involve rotated arrays, mountain peaks, minimum shipping capacities, eating speeds. And engineers fail them not because they don't know the template, but because they haven't understood what binary search is <em>really</em> doing.</p>
+
+    <div class="pullquote">
+      <p>Binary search works whenever a condition transitions from false to true (or true to false) exactly once across a range. Your job is to find that transition point.</p>
+    </div>
+
+    <p>Imagine a hidden boolean array. Binary search doesn't care that it's "hidden" — it just halves the search space on each step until it pinpoints the boundary:</p>
+
+    <div class="bool-demo">
+      <div class="bool-demo-label">The boundary pattern — click "Step" to watch binary search converge</div>
+      <div class="bool-row" id="boolRow"></div>
+      <div style="display:flex;gap:8px;margin-top:0.75rem;flex-wrap:wrap;">
+        <button class="bs-btn primary" onclick="boolStep()">Step →</button>
+        <button class="bs-btn" onclick="boolReset()">Reset</button>
+      </div>
+      <div class="bs-log" id="boolLog" style="margin-top:0.75rem;">Ready — press Step to begin.</div>
+      <p class="bool-caption">F = false (condition not met) &nbsp;·&nbsp; T = true (condition met) &nbsp;·&nbsp; The gold outline shows the current <code>mid</code></p>
+    </div>
+
+    <p>That's the whole game. The condition could be anything — "is this element less than the last element?", "can we ship all packages with this capacity?", "are we on the descending slope?" — but the shape of the answer is always that same row of F's followed by T's.</p>
+
+    <h3>Try the classic version first</h3>
+    <p>Before we get abstract, here's an interactive classic binary search. Pick a target and watch it find the boundary between "too small" and "found it":</p>
+
+    <div class="bs-demo">
+      <div class="bs-demo-title">Interactive binary search — sorted array</div>
+      <div class="bs-controls">
+        <div class="bs-target-wrap">
+          Target: <input type="number" id="bsTarget" value="27" min="1" max="99">
+        </div>
+        <button class="bs-btn primary" onclick="bsStep()" id="bsStepBtn">Step →</button>
+        <button class="bs-btn" onclick="bsReset()">Reset</button>
+      </div>
+      <div class="bs-array" id="bsArray"></div>
+      <div class="bs-log" id="bsLog">Press Step to begin searching.</div>
+      <div class="bs-legend">
+        <div class="bs-legend-item"><div class="bs-legend-box" style="background:var(--paper-deep);border:1px solid var(--rule)"></div> Out of range</div>
+        <div class="bs-legend-item"><div class="bs-legend-box" style="background:var(--blue-soft);border:1px solid #9ab8e0"></div> Active range</div>
+        <div class="bs-legend-item"><div class="bs-legend-box" style="background:var(--amber-soft);border:1px solid #e8c07a"></div> Mid (current guess)</div>
+        <div class="bs-legend-item"><div class="bs-legend-box" style="background:var(--teal);border:1px solid var(--teal)"></div> Found!</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────────── SECTION 2 ─────────────────────── -->
+  <div class="section" id="patterns">
+    <div class="section-label">02 — The Five Patterns</div>
+    <h2>Every binary search problem fits one of <em>five shapes</em></h2>
+
+    <p>Once you can identify which shape a problem is, you know which template to reach for. The condition differs — the structure doesn't.</p>
+
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <div class="pc-num">1</div>
+        <h4>Classic Search</h4>
+        <p>Find an exact value in a sorted array. The only pattern where <code>nums[mid] == target</code> is a meaningful check.</p>
+        <span class="pc-tag">LC 704, 35, 34</span>
+      </div>
+      <div class="pattern-card">
+        <div class="pc-num">2</div>
+        <h4>First True</h4>
+        <p>Find the leftmost index where a condition flips from false to true. The workhorse pattern. Most "find minimum" problems are this.</p>
+        <span class="pc-tag">LC 278, 153, 875</span>
+      </div>
+      <div class="pattern-card">
+        <div class="pc-num">3</div>
+        <h4>Last True</h4>
+        <p>Find the rightmost index where a condition still holds. Used in "maximize the minimum" and upper-bound problems.</p>
+        <span class="pc-tag">LC 1552, 1011 (variant)</span>
+      </div>
+      <div class="pattern-card">
+        <div class="pc-num">4</div>
+        <h4>Binary Search on Answer</h4>
+        <p>The search space isn't an array — it's a range of possible answers. You ask "does this value work?" and binary search the feasibility.</p>
+        <span class="pc-tag">LC 875, 1011, 410</span>
+      </div>
+      <div class="pattern-card">
+        <div class="pc-num">5</div>
+        <h4>Peak / Slope</h4>
+        <p>The array isn't sorted, but has a directional property. Compare adjacent elements to determine which half contains a peak.</p>
+        <span class="pc-tag">LC 162, 852, 1095</span>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">→</span>
+      <p><strong>Recognition shortcut:</strong> If a problem asks for <em>minimum X such that a condition works</em>, or <em>first occurrence of something</em>, it's almost certainly Pattern 2 — First True. This covers Koko Bananas, Ship Packages, First Bad Version, and Rotated Array Minimum all at once.</p>
+    </div>
+
+    <h3>The templates</h3>
+    <p>Two templates handle patterns 2–4. Pick one and stick to it — mixing them causes infinite loops and off-by-one bugs.</p>
+
+<pre><span class="cm">// ── FIRST TRUE (AlgoMonster style) ──────────────────────────</span>
+<span class="ty">int</span> left = <span class="nm">0</span>, right = n - <span class="nm">1</span>, boundary = -<span class="nm">1</span>;
+
+<span class="kw">while</span> (left <= right) {
+    <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+
+    <span class="kw">if</span> (condition(mid)) {
+        boundary = mid;   <span class="cm">// save — this might be the answer</span>
+        right = mid - <span class="nm">1</span>; <span class="cm">// but search left for an earlier one</span>
+    } <span class="kw">else</span> {
+        left = mid + <span class="nm">1</span>;  <span class="cm">// definitely not here, go right</span>
+    }
+}
+<span class="kw">return</span> boundary;
+
+<span class="cm">// ── LAST TRUE ────────────────────────────────────────────────</span>
+<span class="ty">int</span> left = <span class="nm">0</span>, right = n - <span class="nm">1</span>, boundary = -<span class="nm">1</span>;
+
+<span class="kw">while</span> (left <= right) {
+    <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+
+    <span class="kw">if</span> (condition(mid)) {
+        boundary = mid;   <span class="cm">// save — this might be the answer</span>
+        left = mid + <span class="nm">1</span>;  <span class="cm">// but search right for a later one</span>
+    } <span class="kw">else</span> {
+        right = mid - <span class="nm">1</span>;
+    }
+}
+<span class="kw">return</span> boundary;</pre>
+
+    <div class="callout callout-warning">
+      <span class="callout-icon">!</span>
+      <p><strong>The three most common mistakes:</strong> (1) Infinite loop — forgetting that <code>mid</code> must always be excluded from one side. (2) Losing the boundary — not storing <code>mid</code> when the condition is true before searching further. (3) Mixing templates — using <code>while(left &lt; right)</code> with <code>right = mid - 1</code> pointer updates that assume <code>while(left &lt;= right)</code>. Pick one template per problem and stay consistent.</p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────────── SECTION 3 ─────────────────────── -->
+  <div class="section" id="converter">
+    <div class="section-label">03 — Converting to F→T</div>
+    <h2>The skill that unlocks <em>every problem</em></h2>
+
+    <p>Converting a problem into an F/T boolean array is the hardest skill to teach and the most valuable to have. Once you can look at a problem and immediately visualise the underlying boolean pattern, the algorithm becomes mechanical.</p>
+
+    <p>Here's the conversion for four classic problems. Notice the pattern is always the same — only the condition changes:</p>
+
+    <div class="ft-converter">
+      <div class="ft-tabs">
+        <button class="ft-tab active" onclick="switchFt(this,'rotated')">Rotated Min</button>
+        <button class="ft-tab" onclick="switchFt(this,'koko')">Koko Bananas</button>
+        <button class="ft-tab" onclick="switchFt(this,'badbug')">First Bad Version</button>
+        <button class="ft-tab" onclick="switchFt(this,'peak')">Mountain Peak</button>
+      </div>
+
+      <!-- Rotated Array Min -->
+      <div class="ft-content active" id="ft-rotated">
+        <div class="ft-array-label">Array: [4, 5, 6, 7, 0, 1, 2]</div>
+        <div class="ft-row">
+          <div class="ft-item val">4</div><div class="ft-item val">5</div>
+          <div class="ft-item val">6</div><div class="ft-item val">7</div>
+          <div class="ft-item val">0</div><div class="ft-item val">1</div>
+          <div class="ft-item val">2</div>
+        </div>
+        <div class="ft-condition">condition: nums[i] &lt;= nums[last] &nbsp;(last = 2)</div>
+        <div class="ft-array-label">Boolean result:</div>
+        <div class="ft-row">
+          <div class="ft-item f">F</div><div class="ft-item f">F</div>
+          <div class="ft-item f">F</div><div class="ft-item f">F</div>
+          <div class="ft-item t first">T*</div><div class="ft-item t">T</div>
+          <div class="ft-item t">T</div>
+        </div>
+        <div class="ft-explanation">
+          The minimum element is the first place where an element is &lt;= the last element. The "upper half" (4,5,6,7) is all larger than the last element. The "lower half" (0,1,2) is all smaller. The first T — index 4, value 0 — is our answer.<br><br>
+          <strong>Edge case:</strong> if the array isn't rotated (e.g. [1,2,3,4,5]), all elements are &lt;= 5, so the result is T T T T T and index 0 is returned correctly.
+        </div>
+      </div>
+
+      <!-- Koko -->
+      <div class="ft-content" id="ft-koko">
+        <div class="ft-array-label">piles = [3, 6, 7, 11], h = 8 &nbsp;·&nbsp; Search space: speed 1..11</div>
+        <div class="ft-row">
+          <div class="ft-item val">1</div><div class="ft-item val">2</div>
+          <div class="ft-item val">3</div><div class="ft-item val">4</div>
+          <div class="ft-item val">5</div><div class="ft-item val">6</div>
+          <div class="ft-item val">7</div><div class="ft-item val">8</div>
+          <div class="ft-item val">9</div><div class="ft-item val">10</div>
+          <div class="ft-item val">11</div>
+        </div>
+        <div class="ft-condition">condition: canEatAll(speed) in &lt;= 8 hours</div>
+        <div class="ft-array-label">Boolean result (F = can't finish, T = finishes in time):</div>
+        <div class="ft-row">
+          <div class="ft-item f">F</div><div class="ft-item f">F</div>
+          <div class="ft-item f">F</div><div class="ft-item t first">T*</div>
+          <div class="ft-item t">T</div><div class="ft-item t">T</div>
+          <div class="ft-item t">T</div><div class="ft-item t">T</div>
+          <div class="ft-item t">T</div><div class="ft-item t">T</div>
+          <div class="ft-item t">T</div>
+        </div>
+        <div class="ft-explanation">
+          At speed 4: ceil(3/4)+ceil(6/4)+ceil(7/4)+ceil(11/4) = 1+2+2+3 = 8 hours. Exactly fits! Speeds 1–3 take too long. The answer (minimum working speed) is the first T.
+        </div>
+      </div>
+
+      <!-- First Bad -->
+      <div class="ft-content" id="ft-badbug">
+        <div class="ft-array-label">Versions 1–8, first bad version = 5</div>
+        <div class="ft-row">
+          <div class="ft-item val">1</div><div class="ft-item val">2</div>
+          <div class="ft-item val">3</div><div class="ft-item val">4</div>
+          <div class="ft-item val">5</div><div class="ft-item val">6</div>
+          <div class="ft-item val">7</div><div class="ft-item val">8</div>
+        </div>
+        <div class="ft-condition">condition: isBad(version)</div>
+        <div class="ft-array-label">Boolean result:</div>
+        <div class="ft-row">
+          <div class="ft-item f">F</div><div class="ft-item f">F</div>
+          <div class="ft-item f">F</div><div class="ft-item f">F</div>
+          <div class="ft-item t first">T*</div><div class="ft-item t">T</div>
+          <div class="ft-item t">T</div><div class="ft-item t">T</div>
+        </div>
+        <div class="ft-explanation">
+          Once a build is bad, all subsequent builds are bad (they inherit the bug). This is the clearest possible monotonic property. First True = first bad version. One API call is needed per check, so binary search's O(log n) is a huge win over linear O(n).
+        </div>
+      </div>
+
+      <!-- Mountain Peak -->
+      <div class="ft-content" id="ft-peak">
+        <div class="ft-array-label">Array: [1, 3, 5, 7, 6, 4, 2]</div>
+        <div class="ft-row">
+          <div class="ft-item val">1</div><div class="ft-item val">3</div>
+          <div class="ft-item val">5</div><div class="ft-item val">7</div>
+          <div class="ft-item val">6</div><div class="ft-item val">4</div>
+          <div class="ft-item val">2</div>
+        </div>
+        <div class="ft-condition">condition: arr[i] &gt; arr[i+1] &nbsp;(or i == last)</div>
+        <div class="ft-array-label">Boolean result:</div>
+        <div class="ft-row">
+          <div class="ft-item f">F</div><div class="ft-item f">F</div>
+          <div class="ft-item f">F</div><div class="ft-item t first">T*</div>
+          <div class="ft-item t">T</div><div class="ft-item t">T</div>
+          <div class="ft-item t">T</div>
+        </div>
+        <div class="ft-explanation">
+          The peak is the <em>first place where the array starts descending</em>. Before the peak, every element is smaller than the next (ascending = false). At the peak and beyond, every element is larger than the next (descending = true). The edge case: the last element has no next element, so we treat it as true (imagine arr[n] = −∞).
+        </div>
+      </div>
+    </div>
+
+    <h3>The three-question test</h3>
+    <p>When you read a problem, run through this mentally:</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Does it ask for minimum/maximum/first/last?</strong>
+          <p>Keywords like "minimum X such that", "first occurrence", "smallest valid", "earliest position" are all signals. If yes, continue.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Can I test a candidate answer?</strong>
+          <p>Given a value X, can I write a function that returns true/false in polynomial time? If yes, binary search is possible.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Does the condition flip only once?</strong>
+          <p>If the condition is true for X, is it guaranteed true for all X+1, X+2, ...? (or false for all smaller values?) This is monotonicity — the requirement for binary search to be correct.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">→</span>
+      <p><strong>Interview sentence that signals expertise:</strong> "The condition transitions from false to true monotonically across the search space, so I can binary search for the first true boundary in O(log n)." Interviewers recognize this framing immediately.</p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────────── SECTION 4: LC33 deep dive ─────────────────────── -->
+  <div class="section">
+    <div class="section-label">04 — Deep Dive: LC 33</div>
+    <h2>Search in Rotated Sorted Array — <em>the variant everyone struggles with</em></h2>
+
+    <p>LC 153 (find minimum in rotated array) maps cleanly to First True. LC 33 (search for a target in a rotated array) is slightly different — you're not finding a boundary, you're exploiting the invariant that <strong>one half is always sorted</strong>.</p>
+
+    <p>At any <code>mid</code>, either the left half or the right half is guaranteed sorted. You check which half is sorted, then check whether the target lives inside that sorted half. If yes, go there. If no, go to the other half.</p>
+
+<pre><span class="ty">int</span> left = <span class="nm">0</span>, right = nums.length - <span class="nm">1</span>;
+
+<span class="kw">while</span> (left <= right) {
+    <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+
+    <span class="kw">if</span> (nums[mid] == target) <span class="kw">return</span> mid;
+
+    <span class="cm">// Determine which half is sorted</span>
+    <span class="kw">if</span> (nums[left] <= nums[mid]) {
+        <span class="cm">// Left half is sorted</span>
+        <span class="kw">if</span> (target >= nums[left] && target < nums[mid])
+            right = mid - <span class="nm">1</span>; <span class="cm">// target is in left half</span>
+        <span class="kw">else</span>
+            left = mid + <span class="nm">1</span>;  <span class="cm">// target must be in right half</span>
+    } <span class="kw">else</span> {
+        <span class="cm">// Right half is sorted</span>
+        <span class="kw">if</span> (target > nums[mid] && target <= nums[right])
+            left = mid + <span class="nm">1</span>;  <span class="cm">// target is in right half</span>
+        <span class="kw">else</span>
+            right = mid - <span class="nm">1</span>; <span class="cm">// target must be in left half</span>
+    }
+}
+<span class="kw">return</span> -<span class="nm">1</span>;</pre>
+
+    <p>The mental model: think of the rotated array as two sorted segments stuck together. At each step you figure out which segment your <code>mid</code> is in, and whether the target is inside the sorted range you can see. You discard the half that <em>can't</em> contain the target.</p>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">→</span>
+      <p><strong>LC 33 vs LC 153:</strong> LC 153 is "find the boundary" (First True pattern). LC 33 is "search using the sorted-half invariant". The rotation structure is the same — the strategy differs because the goal differs.</p>
+    </div>
+  </div>
+
+  <!-- ─────────────────────── SECTION 5: CHEAT SHEET ─────────────────────── -->
+  <div class="section" id="cheatsheet">
+    <div class="section-label">05 — Reference</div>
+    <h2>The pattern map — <em>25 problems, 5 patterns</em></h2>
+
+    <p>Every binary search problem on LeetCode fits one of the five patterns. Here's the full map. Sort by pattern, find the problem, know the approach.</p>
+
+    <table class="cheat-table">
+      <thead>
+        <tr>
+          <th>Problem</th>
+          <th>Pattern</th>
+          <th>Condition</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="lc">LC 704 — Binary Search</td><td><span class="pattern-badge badge-classic">Classic</span></td><td><code>nums[mid] == target</code></td></tr>
+        <tr><td class="lc">LC 35 — Search Insert Position</td><td><span class="pattern-badge badge-first">First True</span></td><td><code>nums[mid] &gt;= target</code></td></tr>
+        <tr><td class="lc">LC 34 — First &amp; Last Position</td><td><span class="pattern-badge badge-first">First True</span> + <span class="pattern-badge badge-last">Last True</span></td><td><code>nums[mid] == target</code> (run twice)</td></tr>
+        <tr><td class="lc">LC 278 — First Bad Version</td><td><span class="pattern-badge badge-first">First True</span></td><td><code>isBad(mid)</code></td></tr>
+        <tr><td class="lc">LC 153 — Min Rotated Array</td><td><span class="pattern-badge badge-first">First True</span></td><td><code>nums[mid] &lt;= nums[last]</code></td></tr>
+        <tr><td class="lc">LC 154 — Min Rotated Array II</td><td><span class="pattern-badge badge-first">First True</span></td><td>same + handle duplicates</td></tr>
+        <tr><td class="lc">LC 33 — Search Rotated Array</td><td><span class="pattern-badge badge-classic">Classic variant</span></td><td>sorted-half detection</td></tr>
+        <tr><td class="lc">LC 162 — Find Peak Element</td><td><span class="pattern-badge badge-peak">Peak</span></td><td><code>nums[mid] &gt; nums[mid+1]</code></td></tr>
+        <tr><td class="lc">LC 852 — Peak in Mountain Array</td><td><span class="pattern-badge badge-peak">Peak</span></td><td><code>arr[mid] &gt; arr[mid+1]</code></td></tr>
+        <tr><td class="lc">LC 875 — Koko Eating Bananas</td><td><span class="pattern-badge badge-answer">Search Answer</span></td><td><code>canEat(speed, h)</code></td></tr>
+        <tr><td class="lc">LC 1011 — Ship Packages in D Days</td><td><span class="pattern-badge badge-answer">Search Answer</span></td><td><code>canShip(capacity, days)</code></td></tr>
+        <tr><td class="lc">LC 410 — Split Array Largest Sum</td><td><span class="pattern-badge badge-answer">Search Answer</span></td><td><code>canSplit(maxSum, m)</code></td></tr>
+        <tr><td class="lc">LC 1482 — Min Days to Bloom</td><td><span class="pattern-badge badge-answer">Search Answer</span></td><td><code>canBloom(day, m, k)</code></td></tr>
+        <tr><td class="lc">LC 1552 — Magnetic Force Balls</td><td><span class="pattern-badge badge-last">Last True</span></td><td><code>canPlace(minDist, m)</code></td></tr>
+        <tr><td class="lc">LC 2187 — Min Time Complete Trips</td><td><span class="pattern-badge badge-answer">Search Answer</span></td><td><code>tripsIn(time) &gt;= total</code></td></tr>
+        <tr><td class="lc">LC 69 — Sqrt(x)</td><td><span class="pattern-badge badge-last">Last True</span></td><td><code>mid * mid &lt;= x</code></td></tr>
+        <tr><td class="lc">LC 74 — Search 2D Matrix</td><td><span class="pattern-badge badge-classic">Classic</span></td><td>map 1D index to 2D cell</td></tr>
+        <tr><td class="lc">LC 540 — Single Element Sorted Array</td><td><span class="pattern-badge badge-first">First True</span></td><td>parity of index after mid</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The 6-problem learning path</h3>
+    <p>If you want to master binary search in the shortest time, do these six problems in order. They cover every pattern and build on each other:</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>LC 704 — Binary Search</strong>
+          <p>Core mechanics. Mid calculation, shrinking search space, pointer updates. Do this even if you think you know it — muscle memory matters.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>LC 278 — First Bad Version</strong>
+          <p>Your first First True problem. The F→T mapping is obvious (good → bad), which makes the template click clearly.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>LC 153 — Find Minimum in Rotated Array</strong>
+          <p>First True on a non-obvious condition. Practice converting the array to a boolean pattern using <code>nums[mid] &lt;= nums[last]</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>LC 33 — Search in Rotated Array</strong>
+          <p>The classic variant. Uses the sorted-half invariant rather than First True. Tests whether you understand the rotation structure, not just the template.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>LC 162 — Find Peak Element</strong>
+          <p>Peak/Slope pattern. No sorted structure, but slope direction is enough. Solidifies the idea that binary search doesn't need a fully sorted input.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <strong>LC 875 — Koko Eating Bananas</strong>
+          <p>Binary Search on Answer. The search space is "possible speeds", not an array. Once this clicks, LC 1011, 410, and 1482 all feel identical.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────────── CLOSING ─────────────────────── -->
+  <div class="section" style="border-bottom:none">
+    <div class="section-label">06 — The Mental Model</div>
+    <h2>One sentence that covers <em>everything</em></h2>
+
+    <div class="pullquote">
+      <p>Binary search works whenever you can test a candidate answer in polynomial time and the condition is monotonic — false before some threshold, true after it.</p>
+    </div>
+
+    <p>The number-in-sorted-array case is just the simplest version of this. Once you've internalised the boundary-finding frame, you'll start seeing binary search opportunities everywhere — in problems that never mention arrays at all.</p>
+
+    <p>The engineers who solve these problems in interviews in under ten minutes are not smarter. They've just seen the F→T pattern enough times that converting a new problem takes seconds, not minutes. Build that pattern recognition through deliberate practice on the six problems above, and the rest follows.</p>
+  </div>
+  </div><!-- end content-wrap -->
+
+</article>
+
+<footer class="site-footer">
+  <p>Binary Search deep dive &nbsp;·&nbsp; Covers LeetCode patterns 1–5 &nbsp;·&nbsp; All examples and code are original</p>
+</footer>
+
+<script>
+// ── Boolean boundary demo ──────────────────────────────────────────────────
+const DATA = [false,false,false,false,true,true,true,true];
+let bLeft=0, bRight=DATA.length-1, bDone=false;
+
+function renderBool(mid=-1) {
+  const row = document.getElementById('boolRow');
+  row.innerHTML = DATA.map((v,i)=>{
+    let cls = v ? 't' : 'f';
+    if (v && (i===0||!DATA[i-1])) cls += ' first';
+    if (i===mid) cls += ' active';
+    return `<div class="bool-cell ${cls}">${v?'T':'F'}</div>`;
+  }).join('')
+  + `<span style="color:var(--ink-faint);font-size:0.8rem;margin-left:8px">[indices 0–7]</span>`;
+}
+
+function boolStep() {
+  if (bDone) { boolReset(); return; }
+  const mid = Math.floor((bLeft+bRight)/2);
+  renderBool(mid);
+  if (DATA[mid]) {
+    document.getElementById('boolLog').textContent =
+      `mid=${mid} → condition TRUE → save as boundary, search left (right = ${mid-1})`;
+    if (bLeft > mid-1) { boolFinish(mid); return; }
+    bRight = mid-1;
+  } else {
+    document.getElementById('boolLog').textContent =
+      `mid=${mid} → condition FALSE → search right (left = ${mid+1})`;
+    bLeft = mid+1;
+  }
+  if (bLeft > bRight) { boolFinish(4); }
+}
+
+function boolFinish(ans) {
+  bDone = true;
+  renderBool(ans);
+  document.getElementById('boolLog').textContent =
+    `Converged! First TRUE is at index ${ans}. Search complete.`;
+}
+
+function boolReset() {
+  bLeft=0; bRight=DATA.length-1; bDone=false;
+  renderBool(); document.getElementById('boolLog').textContent='Ready — press Step to begin.';
+}
+renderBool();
+
+// ── Classic binary search demo ──────────────────────────────────────────────
+const NUMS = [3,8,12,17,22,27,31,38,44,50,58,65];
+let bsLeft, bsRight, bsState;
+
+function bsReset() {
+  bsLeft=0; bsRight=NUMS.length-1; bsState='searching';
+  renderBs(-1); document.getElementById('bsLog').textContent='Press Step to begin searching.';
+  document.getElementById('bsStepBtn').disabled=false;
+}
+
+function renderBs(mid) {
+  const arr = document.getElementById('bsArray');
+  arr.innerHTML = NUMS.map((v,i)=>{
+    let cls='bs-cell';
+    if (bsState==='found' && i===mid) cls+=' found';
+    else if (i<bsLeft||i>bsRight) cls+=' eliminated';
+    else if (i===mid) cls+=' mid';
+    else cls+=' range';
+    return `<div class="${cls}"><span class="idx">[${i}]</span>${v}</div>`;
+  }).join('');
+}
+
+function bsStep() {
+  const target = parseInt(document.getElementById('bsTarget').value);
+  if (isNaN(target)) return;
+  if (bsLeft===undefined) bsReset();
+  if (bsState!=='searching') { bsReset(); return; }
+
+  const mid = Math.floor((bsLeft+bsRight)/2);
+  if (NUMS[mid]===target) {
+    bsState='found'; renderBs(mid);
+    document.getElementById('bsLog').textContent=`Found! NUMS[${mid}] = ${target}`;
+    document.getElementById('bsStepBtn').disabled=true; return;
+  }
+  if (bsLeft>bsRight) {
+    bsState='notfound'; renderBs(-1);
+    document.getElementById('bsLog').textContent=`Target ${target} not in array.`;
+    document.getElementById('bsStepBtn').disabled=true; return;
+  }
+  let msg;
+  if (NUMS[mid]<target) {
+    msg=`NUMS[${mid}]=${NUMS[mid]} < ${target} → search right half (left=${mid+1})`;
+    bsLeft=mid+1;
+  } else {
+    msg=`NUMS[${mid}]=${NUMS[mid]} > ${target} → search left half (right=${mid-1})`;
+    bsRight=mid-1;
+  }
+  renderBs(mid);
+  document.getElementById('bsLog').textContent=msg;
+  if (bsLeft>bsRight) {
+    setTimeout(()=>{
+      document.getElementById('bsLog').textContent=`Target ${target} not in array.`;
+      document.getElementById('bsStepBtn').disabled=true;
+    },400);
+  }
+}
+
+bsReset();
+
+// ── F/T Tab switcher ────────────────────────────────────────────────────────
+function switchFt(btn, id) {
+  document.querySelectorAll('.ft-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ft-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ft-'+id).classList.add('active');
+}
+</script>
+</body>
+</html>
