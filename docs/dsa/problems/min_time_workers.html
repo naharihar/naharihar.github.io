@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LC 410 — Split Array Largest Sum · Binary Search</title>
+<title>Minimum Time to Complete Tasks with K Workers · Binary Search</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap');
 
@@ -235,6 +235,37 @@ strong { font-weight: 500; }
   display: inline-block;
 }
 
+/* ── TABLES ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.25rem;
+  font-size: 0.84rem;
+}
+.data-table th,
+.data-table td {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+}
+.data-table th {
+  background: var(--paper-warm);
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.data-table td:first-child {
+  color: var(--ink-muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+.data-table tr:hover td { background: #f7f4ee; }
+.ok { color: var(--teal); font-weight: 600; }
+.bad { color: var(--accent); font-weight: 600; }
+
 /* ── WALKTHROUGH STEPS ── */
 .walkthrough { margin: 1.5rem 0; }
 .wt-step {
@@ -401,12 +432,12 @@ code {
 </header>
 <div class="problem-hero">
   <div class="hero-meta-row">
-    <span class="lc-badge">LC 410</span>
+    <span class="lc-badge">Custom</span>
     <span class="pattern-badge">Search on Answer</span>
     <span class="diff-badge diff-hard">Hard</span>
   </div>
-  <h1>Split Array Largest Sum</h1>
-  <p class="tagline">The hardest Search on Answer problem in this set. But the binary search structure is the same — only the feasibility check is more subtle.</p>
+  <h1>Minimum Time to Complete Tasks with K Workers</h1>
+  <p class="tagline">A custom binary-search-on-answer problem where the search shell is familiar, but the feasibility check becomes a greedy contiguous-block assignment.</p>
 </div>
 <div class="content-wrap">
 
@@ -415,11 +446,11 @@ code {
     <h2>What are we solving?</h2>
     <div class="problem-box">
       <div class="pb-label">Problem Statement</div>
-      <p>Given an integer array <code>nums</code> and an integer <code>k</code>, split <code>nums</code> into <code>k</code> non-empty subarrays such that the largest subarray sum is minimized. Return the minimized largest sum.</p>
+      <p>Given an integer array <code>tasks</code> where <code>tasks[i]</code> is the work required for task <em>i</em>, and an array <code>speeds</code> of worker speeds, assign <strong>contiguous blocks</strong> of tasks to workers. A worker with speed <code>s</code> assigned total work <code>W</code> finishes in time <code>W / s</code>. Return the <strong>minimum possible time</strong> needed to finish all tasks.</p>
       <div class="example"><div class="example-label">Example</div>
-        <div class="io-row"><span class="io-label">Input:</span><span class="io-val">nums = [7, 2, 5, 10, 8], k = 2</span></div>
-        <div class="io-row"><span class="io-label">Output:</span><span class="io-val">18</span></div>
-        <div class="io-row"><span class="io-label">Explanation:</span><span class="io-val">Split into [7,2,5] and [10,8] — largest sum = 18</span></div>
+        <div class="io-row"><span class="io-label">Input:</span><span class="io-val">tasks = [3, 2, 5, 4, 1, 6], speeds = [2, 1, 3]</span></div>
+        <div class="io-row"><span class="io-label">Output:</span><span class="io-val">5.0</span></div>
+        <div class="io-row"><span class="io-label">Explanation:</span><span class="io-val">At T = 5, budgets are [10, 5, 15]. We can assign [3,2,5], [4,1], [6]. T = 4 fails, so 5.0 is the minimum feasible bound.</span></div>
       </div>
     </div>
   </div>
@@ -427,28 +458,42 @@ code {
   <div class="section">
     <div class="section-label">Intuition</div>
     <h2>Minimize the maximum — classic <em>search on answer</em></h2>
-    <p>"Minimize the maximum" is the most common phrasing for Last/First True binary search on answer. We binary search the answer (the max subarray sum) and ask: "if I cap each subarray sum at X, can I split into at most k parts?"</p>
+    <p>We are not searching for a task assignment directly. We binary search a candidate time limit <code>T</code> and ask one yes/no question: <em>if every worker is allowed at most T time, can the tasks be covered in order?</em></p>
     <div class="pullquote">
-      <p>If max sum X is feasible, any larger X is also feasible. The feasibility function is monotonic — perfect for binary search.</p>
+      <p>If time limit T works, every larger time also works. That false-to-true transition is exactly the shape binary search needs.</p>
     </div>
     <div class="ft-visual">
-      <div class="fv-label">nums=[7,2,5,10,8], k=2 · Search space: max(nums)..sum(nums)</div>
-      <div class="ft-condition">condition: canSplit(maxSum, k) — can split into ≤ k parts?</div>
+      <div class="fv-label">tasks=[3,2,5,4,1,6], speeds=[2,1,3] · Search space: T from 0 to sum(tasks)</div>
+      <div class="ft-condition">condition: canFinish(T) — can all workers cover the tasks within time T?</div>
       <div class="ft-row">
-        <div class="ft-cell f"><span class="val">X=10</span>F</div>
-        <div class="ft-cell f"><span class="val">X=15</span>F</div>
-        <div class="ft-cell f"><span class="val">X=17</span>F</div>
-        <div class="ft-cell t first"><span class="val">X=18</span>T*</div>
-        <div class="ft-cell t"><span class="val">X=20</span>T</div>
-        <div class="ft-cell t"><span class="val">X=32</span>T</div>
+        <div class="ft-cell f"><span class="val">T=2</span>F</div>
+        <div class="ft-cell f"><span class="val">T=3</span>F</div>
+        <div class="ft-cell f"><span class="val">T=4</span>F</div>
+        <div class="ft-cell t first"><span class="val">T=5</span>T*</div>
+        <div class="ft-cell t"><span class="val">T=7</span>T</div>
+        <div class="ft-cell t"><span class="val">T=10</span>T</div>
       </div>
-      <div class="ft-caption">At X=18: [7,2,5]→14, [10,8]→18. Two parts, max=18. Answer = 18.</div>
+      <div class="ft-caption">At T = 5, worker budgets are 10, 5, and 15. That is just enough to greedily cover all tasks in order. T = 4 is too tight, so the first true boundary is 5.</div>
     </div>
     <h3>The feasibility check</h3>
-    <p>Greedily accumulate elements into the current subarray. When adding the next element would exceed the cap, start a new subarray and increment the part count. If parts ever exceed k, return false.</p>
+    <p>Walk left to right through <code>tasks</code>. For a candidate time <code>T</code>, worker <code>i</code> can cover at most <code>T × speeds[i]</code> total work. Greedily give that worker as many consecutive tasks as fit; once the next task would overflow the budget, move to the next worker.</p>
+    <table class="data-table">
+      <thead>
+        <tr><th>Worker</th><th>Speed</th><th>Budget at T=5</th><th>Tasks taken</th><th>Work used</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>A</td><td>2</td><td>10</td><td>[3, 2, 5]</td><td>10</td><td class="ok">Fits</td></tr>
+        <tr><td>B</td><td>1</td><td>5</td><td>[4, 1]</td><td>5</td><td class="ok">Fits</td></tr>
+        <tr><td>C</td><td>3</td><td>15</td><td>[6]</td><td>6</td><td class="ok">Fits</td></tr>
+      </tbody>
+    </table>
     <div class="callout callout-info">
       <span class="callout-icon">→</span>
-      <p><strong>Identical to LC 1011:</strong> This is exactly the same feasibility check as Ship Packages — just with "subarrays" instead of "days" and "maxSum" instead of "capacity". Recognising this family means one template covers both.</p>
+      <p><strong>Why greedy is correct:</strong> task order is fixed and assignments must be contiguous. Once a worker stops at task <em>i</em>, the next worker must start at <em>i+1</em>. There is no better rearrangement to search for, so greedily filling each worker’s budget is optimal for the feasibility check.</p>
+    </div>
+    <div class="callout callout-tip">
+      <span class="callout-icon">→</span>
+      <p><strong>Closest LeetCode relative:</strong> this is structurally closest to <a href="lc410_split_array.html" style="color:inherit; text-decoration: underline;">LC 410 — Split Array Largest Sum</a>. Both minimize the maximum load across contiguous blocks; this version adds worker speeds and makes the answer a floating-point time bound.</p>
     </div>
   </div>
 
@@ -457,77 +502,92 @@ code {
     <h2>Clean implementation</h2>
     <div class="code-tabs">
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab(this,'java410')">Java</button>
-        <button class="tab-btn" onclick="switchTab(this,'py410')">Python</button>
+        <button class="tab-btn active" onclick="switchTab(this,'javaWorkers')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'pyWorkers')">Python</button>
       </div>
-      <div class="tab-panel active" id="java410"><pre><span class="kw">class</span> <span class="ty">Solution</span> {
-    <span class="kw">public</span> <span class="ty">int</span> <span class="fn">splitArray</span>(<span class="ty">int</span>[] nums, <span class="ty">int</span> k) {
-        <span class="ty">int</span> left = <span class="nm">0</span>, right = <span class="nm">0</span>;
-        <span class="kw">for</span> (<span class="ty">int</span> n : nums) { left = Math.max(left, n); right += n; }
-        <span class="ty">int</span> boundary = right;
+      <div class="tab-panel active" id="javaWorkers"><pre><span class="kw">class</span> <span class="ty">Solution</span> {
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">minTime</span>(<span class="ty">int</span>[] tasks, <span class="ty">int</span>[] speeds) {
+        <span class="ty">double</span> left = <span class="nm">0.0</span>, right = <span class="nm">0.0</span>;
+        <span class="kw">for</span> (<span class="ty">int</span> t : tasks) right += t;  <span class="cm">// speed 1 worker is a safe upper bound</span>
 
-        <span class="kw">while</span> (left <= right) {
-            <span class="ty">int</span> mid = left + (right - left) / <span class="nm">2</span>;
-            <span class="kw">if</span> (<span class="fn">canSplit</span>(nums, mid, k)) {
-                boundary = mid;
-                right = mid - <span class="nm">1</span>;
+        <span class="ty">double</span> eps = <span class="nm">1e-9</span>;
+        <span class="kw">while</span> (right - left > eps) {
+            <span class="ty">double</span> mid = left + (right - left) / <span class="nm">2.0</span>;
+            <span class="kw">if</span> (<span class="fn">canFinish</span>(tasks, speeds, mid)) {
+                right = mid;          <span class="cm">// feasible — try tighter</span>
             } <span class="kw">else</span> {
-                left = mid + <span class="nm">1</span>;
+                left = mid;           <span class="cm">// too small — need more time</span>
             }
         }
-        <span class="kw">return</span> boundary;
+        <span class="kw">return</span> right;
     }
 
-    <span class="kw">private boolean</span> <span class="fn">canSplit</span>(<span class="ty">int</span>[] nums, <span class="ty">int</span> maxSum, <span class="ty">int</span> k) {
-        <span class="ty">int</span> parts = <span class="nm">1</span>, cur = <span class="nm">0</span>;
-        <span class="kw">for</span> (<span class="ty">int</span> n : nums) {
-            <span class="kw">if</span> (cur + n > maxSum) { parts++; cur = <span class="nm">0</span>; }
-            cur += n;
-            <span class="kw">if</span> (parts > k) <span class="kw">return false</span>;
+    <span class="kw">private boolean</span> <span class="fn">canFinish</span>(<span class="ty">int</span>[] tasks, <span class="ty">int</span>[] speeds, <span class="ty">double</span> timeLimit) {
+        <span class="ty">int</span> taskIdx = <span class="nm">0</span>;
+
+        <span class="kw">for</span> (<span class="ty">int</span> speed : speeds) {
+            <span class="ty">double</span> budget = timeLimit * speed;
+            <span class="ty">double</span> used = <span class="nm">0.0</span>;
+
+            <span class="kw">while</span> (taskIdx < tasks.length && used + tasks[taskIdx] <= budget) {
+                used += tasks[taskIdx];
+                taskIdx++;
+            }
+
+            <span class="kw">if</span> (taskIdx == tasks.length) <span class="kw">return true</span>;
         }
-        <span class="kw">return true</span>;
+        <span class="kw">return false</span>;
     }
 }</pre></div>
-      <div class="tab-panel" id="py410"><pre><span class="kw">class</span> <span class="ty">Solution</span>:
-    <span class="kw">def</span> <span class="fn">splitArray</span>(self, nums: <span class="ty">list</span>[<span class="ty">int</span>], k: <span class="ty">int</span>) -> <span class="ty">int</span>:
-        left, right = <span class="ty">max</span>(nums), <span class="ty">sum</span>(nums)
-        boundary = right
+      <div class="tab-panel" id="pyWorkers"><pre><span class="kw">class</span> <span class="ty">Solution</span>:
+    <span class="kw">def</span> <span class="fn">min_time</span>(self, tasks: <span class="ty">list</span>[<span class="ty">int</span>], speeds: <span class="ty">list</span>[<span class="ty">int</span>]) -> <span class="ty">float</span>:
+        left, right = <span class="nm">0.0</span>, <span class="ty">float</span>(<span class="ty">sum</span>(tasks))
+        eps = <span class="nm">1e-9</span>
 
-        <span class="kw">while</span> left <= right:
-            mid = left + (right - left) // <span class="nm">2</span>
-            <span class="kw">if</span> self.<span class="fn">can_split</span>(nums, mid, k):
-                boundary = mid
-                right = mid - <span class="nm">1</span>
+        <span class="kw">while</span> right - left > eps:
+            mid = left + (right - left) / <span class="nm">2.0</span>
+            <span class="kw">if</span> self.<span class="fn">can_finish</span>(tasks, speeds, mid):
+                right = mid
             <span class="kw">else</span>:
-                left = mid + <span class="nm">1</span>
-        <span class="kw">return</span> boundary
+                left = mid
+        <span class="kw">return</span> right
 
-    <span class="kw">def</span> <span class="fn">can_split</span>(self, nums, max_sum, k):
-        parts, cur = <span class="nm">1</span>, <span class="nm">0</span>
-        <span class="kw">for</span> n <span class="kw">in</span> nums:
-            <span class="kw">if</span> cur + n > max_sum:
-                parts += <span class="nm">1</span>
-                cur = <span class="nm">0</span>
-            cur += n
-            <span class="kw">if</span> parts > k: <span class="kw">return False</span>
-        <span class="kw">return True</span></pre></div>
+    <span class="kw">def</span> <span class="fn">can_finish</span>(self, tasks, speeds, time_limit):
+        task_idx = <span class="nm">0</span>
+
+        <span class="kw">for</span> speed <span class="kw">in</span> speeds:
+            budget = time_limit * speed
+            used = <span class="nm">0.0</span>
+
+            <span class="kw">while</span> task_idx < <span class="ty">len</span>(tasks) <span class="kw">and</span> used + tasks[task_idx] <= budget:
+                used += tasks[task_idx]
+                task_idx += <span class="nm">1</span>
+
+            <span class="kw">if</span> task_idx == <span class="ty">len</span>(tasks):
+                <span class="kw">return</span> <span class="kw">True</span>
+
+        <span class="kw">return</span> <span class="kw">False</span></pre></div>
     </div>
     <h3>Complexity</h3>
     <div class="complexity-grid">
-      <div class="complexity-card"><div class="cc-label">Time</div><div class="cc-val">O(n log S)</div><div class="cc-why">S = sum(nums). log S binary search iterations, each O(n) greedy check.</div></div>
-      <div class="complexity-card"><div class="cc-label">Space</div><div class="cc-val">O(1)</div><div class="cc-why">Greedy scan uses constant space.</div></div>
+      <div class="complexity-card"><div class="cc-label">Time</div><div class="cc-val">O(n log S)</div><div class="cc-why">S = sum(tasks). Binary search performs a constant number of floating-point iterations, each with one O(n) greedy pass.</div></div>
+      <div class="complexity-card"><div class="cc-label">Space</div><div class="cc-val">O(1)</div><div class="cc-why">The feasibility check only tracks the current task index and worker budget.</div></div>
+    </div>
+    <div class="callout callout-warning">
+      <span class="callout-icon">→</span>
+      <p><strong>Why floating-point binary search?</strong> the optimal time can be fractional, because a worker may finish a block in <code>W / speed</code> hours. So we search with an epsilon instead of integer boundaries.</p>
     </div>
   </div>
 
   <div class="problem-nav">
-    <a class="nav-btn prev" href="lc1011_ship_packages.html">
+    <a class="nav-btn prev" href="lc410_split_array.html">
       <span class="nb-dir">Previous</span>
-      <span class="nb-title">LC 1011 — Ship Packages</span>
+      <span class="nb-title">LC 410 — Split Array Largest Sum</span>
     </a>
     <a class="nav-center" href="../binary_search_blog.html">↑ Pattern map</a>
-    <a class="nav-btn next" href="min_time_workers.html">
+    <a class="nav-btn next" href="lc1482_min_days_bloom.html">
       <span class="nb-dir">Next problem</span>
-      <span class="nb-title">Custom — Min Time with K Workers</span>
+      <span class="nb-title">LC 1482 — Min Days to Bloom</span>
     </a>
   </div>
 </div>
