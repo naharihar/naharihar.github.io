@@ -150,6 +150,27 @@ pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-fam
         <div class="example-row"><span class="example-key">Goal</span><span class="example-val">Find grouping that minimizes total fatigue</span></div>
       </div>
     </div>
+    <div class="callout callout-blue">
+      <strong>Human version of the problem</strong>
+      Think of the courier making several round trips from home. On each trip, they can carry at most <code>k</code> packages, and because the addresses are already ordered along one road, a trip always takes the next consecutive block of packages. The farther that trip goes and the more total weight it carries, the more tiring it is.
+    </div>
+    <table class="data-table">
+      <thead><tr><th>What is fixed?</th><th>What can we choose?</th><th>What are we minimizing?</th></tr></thead>
+      <tbody>
+        <tr><td>Package order, positions, weights, and max <code>k</code> per trip</td><td>Where to cut the trips</td><td>Total fatigue across all trips</td></tr>
+      </tbody>
+    </table>
+    <div class="walkthrough">
+      <div class="wt-header">What one trip cost actually means</div>
+      <div class="wt-row"><div class="wt-label">Trip</div><div class="wt-detail">packages at positions [2, 5] with weights [3, 1]</div></div>
+      <div class="wt-row"><div class="wt-label">Furthest point</div><div class="wt-detail">5</div></div>
+      <div class="wt-row"><div class="wt-label">Total weight</div><div class="wt-detail">3 + 1 = 4</div></div>
+      <div class="wt-row"><div class="wt-label">Fatigue</div><div class="wt-detail">5 × 4 = 20</div></div>
+    </div>
+    <div class="callout callout-orange">
+      <strong>The easy-to-miss constraint</strong>
+      Trips must be <strong>contiguous</strong>. If trip 1 takes packages 0 and 1, trip 2 must start at package 2. You are choosing cut points, not arbitrary subsets.
+    </div>
     <p>The answer is not inside the array. We need to find the best way to split packages into trips — and the cost of each split is a non-linear function (position × weight).</p>
   </section>
 

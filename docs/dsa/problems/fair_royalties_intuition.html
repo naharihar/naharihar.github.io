@@ -143,6 +143,26 @@ pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-fam
         <div class="example-row"><span class="example-key">Goal</span><span class="example-val">Minimize the max part royalty (sum²)</span></div>
       </div>
     </div>
+    <div class="callout callout-blue">
+      <strong>Human version of the problem</strong>
+      Imagine a publisher splitting one book into exactly <code>k</code> printed volumes. Each volume gets a royalty bill based on the square of its total pages. Your job is to place the cut points so that the <em>most expensive</em> volume is as cheap as possible.
+    </div>
+    <table class="data-table">
+      <thead><tr><th>What is fixed?</th><th>What can we choose?</th><th>What are we minimizing?</th></tr></thead>
+      <tbody>
+        <tr><td>Chapter order, page counts, and exactly <code>k</code> contiguous parts</td><td>Where the <code>k-1</code> cut points go</td><td>The largest royalty among the parts</td></tr>
+      </tbody>
+    </table>
+    <div class="walkthrough">
+      <div class="wt-header">Why the square changes the feel of the problem</div>
+      <div class="wt-row"><div class="wt-label">Part A</div><div class="wt-detail">sum = 5 pages → royalty = 5² = 25</div></div>
+      <div class="wt-row"><div class="wt-label">Part B</div><div class="wt-detail">sum = 10 pages → royalty = 10² = 100</div></div>
+      <div class="wt-row"><div class="wt-label">Takeaway</div><div class="wt-detail">doubling pages quadruples royalty, so large parts get punished heavily</div></div>
+    </div>
+    <div class="callout callout-orange">
+      <strong>The easy-to-miss constraint</strong>
+      You are not allowed to reorder chapters. This is still a contiguous partition problem, just like Split Array Largest Sum — the square only changes how we measure the cost of each part.
+    </div>
     <p>The square makes the cost non-linear — a part twice as long costs four times as much. This makes it impossible to just greedily balance parts by page count.</p>
   </section>
 

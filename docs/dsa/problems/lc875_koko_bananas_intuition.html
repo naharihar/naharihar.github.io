@@ -387,6 +387,25 @@
         <div class="io-row"><span class="io-label">Input:</span><span class="io-val">piles = [3, 6, 7, 11], h = 8</span></div>
         <div class="io-row"><span class="io-label">Goal:</span><span class="io-val">Find the smallest speed k that lets her finish in time</span></div>
       </div>
+      <div class="callout callout-info">
+        <span class="callout-icon">→</span>
+        <p><strong>Human version of the problem:</strong> Koko has one knob she can control: how fast she eats per hour. Everything else is fixed — the pile sizes and the total number of hours. We are looking for the smallest speed that is still “fast enough.”</p>
+      </div>
+      <div class="comparison-box">
+        <div class="box-label">What Is Fixed Vs What We Choose</div>
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label">Fixed</div>
+            <div class="cc-value">piles and h</div>
+            <p>The banana piles and the deadline do not change.</p>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label">We choose</div>
+            <div class="cc-value">speed k</div>
+            <p>We only control Koko’s eating speed, and want the smallest valid one.</p>
+          </div>
+        </div>
+      </div>
       <p>The important subtlety: the answer is <em>not</em> inside the array. We are not looking for a target element. We are looking for the smallest speed that satisfies a constraint.</p>
     </div>
 

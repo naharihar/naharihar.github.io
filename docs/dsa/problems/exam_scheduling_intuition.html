@@ -143,6 +143,26 @@ pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-fam
         <div class="example-row"><span class="example-key">Goal</span><span class="example-val">Minimum T such that everyone can be scheduled in hours 0..T-1</span></div>
       </div>
     </div>
+    <div class="callout callout-blue">
+      <strong>Human version of the problem</strong>
+      The school wants to open exam rooms for as few hours as possible. Each student is only available during a personal time window, and each hour has room for at most <code>r</code> students. We need the smallest schedule length that can still fit everyone.
+    </div>
+    <table class="data-table">
+      <thead><tr><th>What is fixed?</th><th>What can we choose?</th><th>What are we minimizing?</th></tr></thead>
+      <tbody>
+        <tr><td>Each student’s allowed window and room capacity <code>r</code> per hour</td><td>Which hour each student is assigned to</td><td>Total number of hours the school must open</td></tr>
+      </tbody>
+    </table>
+    <div class="walkthrough">
+      <div class="wt-header">What a candidate T really means</div>
+      <div class="wt-row"><div class="wt-label">If T = 4</div><div class="wt-detail">available hours are 0, 1, 2, 3</div></div>
+      <div class="wt-row"><div class="wt-label">If r = 2</div><div class="wt-detail">each hour can host at most 2 students</div></div>
+      <div class="wt-row"><div class="wt-label">Total capacity</div><div class="wt-detail">up to 4 × 2 = 8 exam seats, but window restrictions may still make scheduling impossible</div></div>
+    </div>
+    <div class="callout callout-orange">
+      <strong>The easy-to-miss constraint</strong>
+      This is not just “do we have enough total seats?” Students can only use hours inside their own windows, so timing conflicts matter more than raw capacity.
+    </div>
     <p>The key difficulty: students have individual availability windows. Opening more hours doesn't always help if students' windows are short. You cannot reschedule — a student must be assigned within their window.</p>
   </section>
 
