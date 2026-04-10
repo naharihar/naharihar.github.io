@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Exam Scheduling · Binary Search + Greedy (EDF)</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#f0f2f5;
+  --border:#d0d7de; --text:#1f2328; --muted:#656d76;
+  --accent:#0969da; --accent2:#0550ae;
+  --green:#1a7f37; --green-bg:#dafbe1; --green-border:#aceebb;
+  --yellow:#9a6700; --yellow-bg:#fff8c5;
+  --purple:#6639ba; --purple-bg:#fbefff; --purple-border:#d8b9f7;
+  --red:#cf222e; --red-bg:#fff0ee;
+  --blue-bg:#ddf4ff; --blue-border:#80ccff;
+  --orange:#bc4c00; --orange-bg:#fff1e5; --orange-border:#ffa657;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:15px; line-height:1.7; }
+nav { border-bottom:1px solid var(--border); padding:13px 0; background:var(--bg); position:sticky; top:0; z-index:100; }
+.nav-inner { max-width:860px; margin:0 auto; padding:0 24px; display:flex; align-items:center; gap:24px; }
+.nav-brand { font-weight:700; font-size:15px; color:var(--text); text-decoration:none; }
+.nav-back  { font-size:13px; color:var(--muted); text-decoration:none; }
+.nav-back::before { content:'← '; }
+.nav-back:hover { color:var(--accent); }
+main { max-width:860px; margin:0 auto; padding:48px 24px 96px; }
+.tag-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+.tag { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; }
+.tag-custom  { background:var(--bg2);       color:var(--muted);  border-color:var(--border); }
+.tag-bs      { background:#ddf4ff;           color:#0550ae;       border-color:#80ccff; }
+.tag-sched   { background:var(--yellow-bg);  color:var(--yellow); border-color:var(--yellow); }
+.tag-hard    { background:var(--red-bg);     color:var(--red);    border-color:#ffb0a0; }
+h1 { font-size:28px; font-weight:700; line-height:1.25; letter-spacing:-.4px; margin-bottom:10px; }
+.subtitle { font-size:15px; color:var(--muted); margin-bottom:40px; }
+.section { margin-bottom:52px; }
+.section-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+h2 { font-size:20px; font-weight:700; margin-bottom:14px; }
+h3 { font-size:15px; font-weight:600; margin:24px 0 10px; }
+p { margin-bottom:14px; }
+p:last-child { margin-bottom:0; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--bg2); color:var(--red); padding:1.5px 5px; border-radius:4px; border:1px solid var(--border); }
+.info-box { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin-bottom:16px; }
+.info-box h3 { margin-top:0; margin-bottom:8px; }
+.example-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+.example-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:8px 18px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.example-body { padding:14px 18px; }
+.example-row { display:flex; gap:10px; margin-bottom:5px; }
+.example-key { color:var(--muted); min-width:90px; font-size:13px; }
+.example-val { font-family:var(--mono); font-size:13.5px; color:var(--accent2); font-weight:500; }
+.example-note { font-size:13px; color:var(--muted); margin-top:10px; line-height:1.6; }
+.callout { border-left:3px solid; border-radius:0 6px 6px 0; padding:12px 16px; margin:18px 0; font-size:14px; line-height:1.6; }
+.callout-green  { border-color:var(--green);  background:var(--green-bg); }
+.callout-yellow { border-color:var(--yellow); background:var(--yellow-bg); }
+.callout-purple { border-color:var(--purple); background:var(--purple-bg); }
+.callout-blue   { border-color:var(--accent); background:var(--blue-bg); }
+.callout-orange { border-color:var(--orange); background:var(--orange-bg); }
+.callout strong { display:block; margin-bottom:4px; font-size:13px; }
+.callout-green  strong { color:var(--green); }
+.callout-yellow strong { color:var(--yellow); }
+.callout-purple strong { color:var(--purple); }
+.callout-blue   strong { color:var(--accent2); }
+.callout-orange strong { color:var(--orange); }
+.search-space { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin-bottom:16px; }
+.ss-caption { font-size:13px; color:var(--muted); margin-bottom:10px; }
+.ss-row { display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end; margin-bottom:10px; }
+.ss-cell { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.ss-val { width:54px; height:36px; border-radius:6px; border:1px solid; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600; }
+.ss-val.false  { background:var(--red-bg);   border-color:#ffb0a0; color:var(--red); }
+.ss-val.true   { background:var(--green-bg); border-color:var(--green-border); color:var(--green); }
+.ss-val.answer { background:var(--green-bg); border-color:var(--green); color:var(--green); box-shadow:0 0 0 2px var(--green); }
+.ss-label { font-size:11px; color:var(--muted); font-family:var(--mono); }
+.ss-note  { font-size:13px; color:var(--muted); margin-top:10px; }
+.ss-note span { color:var(--text); font-weight:500; }
+.data-table { width:100%; border-collapse:collapse; font-size:13.5px; margin:14px 0; }
+.data-table th { background:var(--bg2); color:var(--muted); padding:9px 14px; text-align:left; border:1px solid var(--border); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+.data-table td { padding:9px 14px; border:1px solid var(--border); }
+.data-table tr:hover td { background:var(--bg2); }
+.data-table td:first-child { color:var(--muted); font-size:12.5px; font-weight:600; }
+.ok  { color:var(--green); font-weight:600; }
+.bad { color:var(--red);   font-weight:600; }
+.complexity-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+.complexity-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 18px; }
+.complexity-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600; }
+.complexity-val   { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--accent2); }
+.complexity-note  { font-size:12px; color:var(--muted); margin-top:5px; line-height:1.5; }
+.code-block { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.tab-bar { background:var(--bg2); border-bottom:1px solid var(--border); display:flex; padding:0 14px; }
+.tab-btn { background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-size:13px; font-family:var(--sans); padding:9px 12px; cursor:pointer; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-btn:hover:not(.active) { color:var(--text); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-family:var(--mono); font-size:13px; line-height:1.65; color:var(--text); }
+.kw{color:#cf222e;} .fn{color:#6639ba;} .cm{color:#8a929e;font-style:italic;} .st{color:#0a3069;} .nm{color:#0550ae;} .tp{color:#953800;}
+.footer-nav { display:grid; grid-template-columns:1fr auto 1fr; gap:12px; border-top:1px solid var(--border); padding-top:32px; margin-top:64px; }
+.fn-link { display:flex; flex-direction:column; gap:4px; text-decoration:none; padding:14px 16px; border:1px solid var(--border); border-radius:8px; background:var(--bg); transition:border-color .12s; }
+.fn-link:hover { border-color:var(--accent); }
+.fn-dir   { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
+.fn-title { font-size:14px; font-weight:600; color:var(--accent); }
+.fn-right { text-align:right; }
+.fn-center-wrap { display:flex; align-items:center; justify-content:center; }
+.fn-center-link { text-decoration:none; font-size:12px; color:var(--muted); padding:8px 10px; }
+.fn-center-link:hover { color:var(--accent); }
+.site-footer { text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--border); padding:22px 24px; }
+.site-footer a { color:var(--accent); text-decoration:none; }
+.intuition-link { display:inline-flex; align-items:center; gap:8px; font-size:14px; color:var(--accent); text-decoration:none; font-weight:500; padding:10px 16px; border:1px solid var(--border); border-radius:6px; background:var(--bg2); margin:16px 0; transition:border-color .12s; }
+.intuition-link:hover { border-color:var(--accent); }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="../binary_search_blog.html" class="nav-brand">AlgorithmCraft</a>
+    <a href="../binary_search_blog.html" class="nav-back">Back to main article</a>
+  </div>
+</nav>
+<main>
+  <header>
+    <div class="tag-row">
+      <span class="tag tag-custom">Original Problem</span>
+      <span class="tag tag-bs">Binary Search on Answer</span>
+      <span class="tag tag-sched">EDF Scheduling</span>
+      <span class="tag tag-hard">Hard</span>
+    </div>
+    <h1>Exam Scheduling</h1>
+    <p class="subtitle">Binary search the number of hours; EDF (Earliest Deadline First) greedily schedules students at each hour. Two classic algorithms meet.</p>
+  </header>
+
+  <section class="section">
+    <div class="section-label">Problem</div>
+    <h2>What are we solving?</h2>
+    <div class="info-box">
+      <h3>Problem Statement</h3>
+      <p>A school has <code>n</code> students. Student <code>i</code> is available only during the window <code>[start[i], end[i]]</code> (hours, 0-indexed). The school has <code>r</code> exam rooms, each holds one student per hour. Find the minimum number of hours T (a contiguous block <code>[0, T-1]</code>) so that every student gets exactly one exam slot within their availability window.</p>
+    </div>
+    <div class="example-box">
+      <div class="example-header">Example</div>
+      <div class="example-body">
+        <div class="example-row"><span class="example-key">n students</span><span class="example-val">5</span></div>
+        <div class="example-row"><span class="example-key">windows</span><span class="example-val">[[0,2],[0,1],[1,3],[2,4],[3,4]]</span></div>
+        <div class="example-row"><span class="example-key">r (rooms)</span><span class="example-val">2</span></div>
+        <div class="example-row"><span class="example-key">Output</span><span class="example-val">4</span></div>
+        <p class="example-note">With T=4 (hours 0..3) and 2 rooms: hour 0 → students 0,1 &nbsp;|&nbsp; hour 1 → student 2 &nbsp;|&nbsp; hour 2 → student 3 &nbsp;|&nbsp; hour 3 → student 4. All scheduled. T=3 is infeasible.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Intuition</div>
+    <h2>Binary search T; EDF schedules each hour</h2>
+    <p>For a given T, can all students be scheduled in hours 0..T-1 with r rooms per hour? This is a classic scheduling feasibility check.</p>
+    <p>The feasibility is monotone: if T hours are enough, T+1 are also enough. Binary search finds the boundary.</p>
+
+    <div class="search-space">
+      <div class="ss-caption">n=5 students, r=2 rooms &nbsp;·&nbsp; condition: canSchedule(T)</div>
+      <div class="ss-row">
+        <div class="ss-cell"><div class="ss-val false">T=1</div><div class="ss-label">F</div></div>
+        <div class="ss-cell"><div class="ss-val false">T=2</div><div class="ss-label">F</div></div>
+        <div class="ss-cell"><div class="ss-val false">T=3</div><div class="ss-label">F</div></div>
+        <div class="ss-cell"><div class="ss-val answer">T=4</div><div class="ss-label">T*</div></div>
+        <div class="ss-cell"><div class="ss-val true">T=5</div><div class="ss-label">T</div></div>
+        <div class="ss-cell"><div class="ss-val true">T=n</div><div class="ss-label">T</div></div>
+      </div>
+      <p class="ss-note">At T=4: all 5 students can be assigned to hours 0..3 with 2 rooms. <span>Answer = 4.</span></p>
+    </div>
+
+    <h3>The feasibility check: EDF (Earliest Deadline First)</h3>
+    <p>For a given T, scan hour by hour from 0 to T-1. At each hour h, all students available at hour h (i.e. <code>start[i] ≤ h ≤ end[i]</code>) are candidates. Among unscheduled candidates, greedily assign up to <code>r</code> students with the <strong>earliest deadline</strong> (smallest <code>end[i]</code>) first.</p>
+    <p>This is the EDF (Earliest Deadline First) algorithm — a classical result that provably minimizes deadline misses. A student whose deadline is closest should be scheduled before a student with a later deadline.</p>
+
+    <div class="callout callout-blue">
+      <strong>Why EDF is optimal for feasibility</strong>
+      If any valid schedule exists for time T, EDF will find one. Swapping a later-deadline student into an earlier slot cannot help — but swapping an earlier-deadline student into the earliest possible slot can only help (it frees later slots for others). EDF always makes the greedy-correct choice.
+    </div>
+
+    <h3>EDF walkthrough at T = 4</h3>
+    <table class="data-table">
+      <thead><tr><th>Hour</th><th>Available (unscheduled)</th><th>EDF picks (r=2)</th><th>Remaining</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>S0 [0,2], S1 [0,1]</td><td>S1 (deadline 1), S0 (deadline 2)</td><td>S2,S3,S4</td></tr>
+        <tr><td>1</td><td>S2 [1,3]</td><td>S2</td><td>S3,S4</td></tr>
+        <tr><td>2</td><td>S3 [2,4]</td><td>S3</td><td>S4</td></tr>
+        <tr><td>3</td><td>S4 [3,4]</td><td>S4</td><td class="ok">—  all scheduled ✓</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-purple">
+      <strong>→ Unique combination: Binary Search × EDF Scheduling</strong>
+      This problem doesn't appear in the LeetCode library. Binary search on answer is a standard tool; EDF is a classical scheduling algorithm. Combining them is the novel insight — binary search handles "how long?", EDF handles "is it possible?".
+    </div>
+
+    <a href="exam_scheduling_intuition.html" class="intuition-link">→ Build this from brute force — step-by-step intuition page</a>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Solution</div>
+    <h2>Binary search on T, EDF feasibility check</h2>
+
+    <div class="code-block">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="tab-java">
+<pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> <span class="tp">Solution</span> {
+
+    <span class="kw">public int</span> <span class="fn">minHours</span>(<span class="kw">int</span>[][] windows, <span class="kw">int</span> r) {
+        <span class="kw">int</span> n = windows.length;
+        <span class="kw">int</span> lo = <span class="nm">1</span>, hi = n;   <span class="cm">// at most n hours needed (1 per student)</span>
+
+        <span class="kw">while</span> (lo &lt; hi) {
+            <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+            <span class="kw">if</span> (<span class="fn">canSchedule</span>(windows, r, mid)) {
+                hi = mid;
+            } <span class="kw">else</span> {
+                lo = mid + <span class="nm">1</span>;
+            }
+        }
+        <span class="kw">return</span> lo;
+    }
+
+    <span class="kw">private boolean</span> <span class="fn">canSchedule</span>(<span class="kw">int</span>[][] windows, <span class="kw">int</span> r, <span class="kw">int</span> T) {
+        <span class="cm">// min-heap ordered by deadline (end time)</span>
+        <span class="tp">PriorityQueue</span>&lt;<span class="tp">int</span>[]&gt; active = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(
+            (<span class="nm">a</span>, <span class="nm">b</span>) -&gt; a[<span class="nm">1</span>] - b[<span class="nm">1</span>]);
+        <span class="cm">// sort students by start time so we add them as hours pass</span>
+        <span class="kw">int</span>[][] sorted = windows.clone();
+        <span class="tp">Arrays</span>.<span class="fn">sort</span>(sorted, (<span class="nm">a</span>, <span class="nm">b</span>) -&gt; a[<span class="nm">0</span>] - b[<span class="nm">0</span>]);
+
+        <span class="kw">int</span> idx = <span class="nm">0</span>, scheduled = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> h = <span class="nm">0</span>; h &lt; T; h++) {
+            <span class="cm">// add all students whose window starts at or before h</span>
+            <span class="kw">while</span> (idx &lt; sorted.length &amp;&amp; sorted[idx][<span class="nm">0</span>] &lt;= h)
+                active.<span class="fn">offer</span>(sorted[idx++]);
+            <span class="cm">// remove students whose deadline has already passed</span>
+            <span class="kw">while</span> (!active.<span class="fn">isEmpty</span>() &amp;&amp; active.<span class="fn">peek</span>()[<span class="nm">1</span>] &lt; h)
+                active.<span class="fn">poll</span>();
+            <span class="cm">// schedule up to r students with the earliest deadline</span>
+            <span class="kw">for</span> (<span class="kw">int</span> slot = <span class="nm">0</span>; slot &lt; r &amp;&amp; !active.<span class="fn">isEmpty</span>(); slot++) {
+                active.<span class="fn">poll</span>();
+                scheduled++;
+            }
+        }
+        <span class="kw">return</span> scheduled == windows.length;
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Solution</span> sol = <span class="kw">new</span> <span class="tp">Solution</span>();
+        <span class="kw">int</span>[][] windows = {{<span class="nm">0</span>,<span class="nm">2</span>},{<span class="nm">0</span>,<span class="nm">1</span>},{<span class="nm">1</span>,<span class="nm">3</span>},{<span class="nm">2</span>,<span class="nm">4</span>},{<span class="nm">3</span>,<span class="nm">4</span>}};
+        <span class="tp">System</span>.out.println(sol.<span class="fn">minHours</span>(windows, <span class="nm">2</span>));  <span class="cm">// 4</span>
+    }
+}</pre>
+      </div>
+      <div class="tab-panel" id="tab-python">
+<pre><span class="kw">import</span> heapq
+<span class="kw">from</span> typing <span class="kw">import</span> <span class="tp">List</span>
+
+<span class="kw">class</span> <span class="tp">Solution</span>:
+    <span class="kw">def</span> <span class="fn">min_hours</span>(<span class="kw">self</span>, windows: <span class="tp">List</span>[<span class="tp">List</span>[<span class="kw">int</span>]], r: <span class="kw">int</span>) -> <span class="kw">int</span>:
+        n = <span class="fn">len</span>(windows)
+        lo, hi = <span class="nm">1</span>, n
+
+        <span class="kw">while</span> lo &lt; hi:
+            mid = lo + (hi - lo) // <span class="nm">2</span>
+            <span class="kw">if</span> <span class="kw">self</span>.<span class="fn">can_schedule</span>(windows, r, mid):
+                hi = mid
+            <span class="kw">else</span>:
+                lo = mid + <span class="nm">1</span>
+        <span class="kw">return</span> lo
+
+    <span class="kw">def</span> <span class="fn">can_schedule</span>(<span class="kw">self</span>, windows, r, T):
+        <span class="cm"># sort by start time; min-heap on deadline</span>
+        sorted_w = <span class="fn">sorted</span>(windows, key=<span class="kw">lambda</span> x: x[<span class="nm">0</span>])
+        heap = []   <span class="cm"># (deadline, student_index)</span>
+        idx, scheduled = <span class="nm">0</span>, <span class="nm">0</span>
+
+        <span class="kw">for</span> h <span class="kw">in</span> <span class="fn">range</span>(T):
+            <span class="cm"># add students whose window starts at or before h</span>
+            <span class="kw">while</span> idx &lt; <span class="fn">len</span>(sorted_w) <span class="kw">and</span> sorted_w[idx][<span class="nm">0</span>] &lt;= h:
+                heapq.<span class="fn">heappush</span>(heap, sorted_w[idx][<span class="nm">1</span>])  <span class="cm"># push deadline</span>
+                idx += <span class="nm">1</span>
+            <span class="cm"># evict students whose deadline has passed</span>
+            <span class="kw">while</span> heap <span class="kw">and</span> heap[<span class="nm">0</span>] &lt; h:
+                heapq.<span class="fn">heappop</span>(heap)
+            <span class="cm"># schedule r earliest-deadline students</span>
+            <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(r):
+                <span class="kw">if not</span> heap: <span class="kw">break</span>
+                heapq.<span class="fn">heappop</span>(heap)
+                scheduled += <span class="nm">1</span>
+
+        <span class="kw">return</span> scheduled == <span class="fn">len</span>(windows)
+
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    s = <span class="tp">Solution</span>()
+    windows = [[<span class="nm">0</span>,<span class="nm">2</span>],[<span class="nm">0</span>,<span class="nm">1</span>],[<span class="nm">1</span>,<span class="nm">3</span>],[<span class="nm">2</span>,<span class="nm">4</span>],[<span class="nm">3</span>,<span class="nm">4</span>]]
+    <span class="fn">print</span>(s.<span class="fn">min_hours</span>(windows, <span class="nm">2</span>))  <span class="cm"># 4</span></pre>
+      </div>
+    </div>
+
+    <h3>Complexity</h3>
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="complexity-label">Time</div>
+        <div class="complexity-val">O(n log²n)</div>
+        <div class="complexity-note">O(log n) binary search steps × O(n log n) per EDF check (heap operations).</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-label">Space</div>
+        <div class="complexity-val">O(n)</div>
+        <div class="complexity-note">Heap holds at most n students at once.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-yellow">
+      <strong>Search bounds</strong>
+      Lower bound = 1 (must open at least 1 hour). Upper bound = n (worst case: every student has a unique hour, r=1). Could tighten to <code>ceil(n/r)</code> but n is safe and simple.
+    </div>
+  </section>
+
+  <div class="footer-nav">
+    <a href="fair_royalties.html" class="fn-link"><span class="fn-dir">Previous</span><span class="fn-title">Fair Royalties</span></a>
+    <div class="fn-center-wrap"><a href="exam_scheduling_intuition.html" class="fn-center-link">Full intuition →</a></div>
+    <a href="lc1482_min_days_bloom.html" class="fn-link fn-right"><span class="fn-dir">Next problem</span><span class="fn-title">LC 1482 — Min Days to Bloom</span></a>
+  </div>
+</main>
+<footer class="site-footer">Part of the Binary Search pattern series · <a href="../binary_search_blog.html">Main article</a></footer>
+<script>
+function switchTab(btn, lang) {
+  const b = btn.closest('.code-block');
+  b.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  b.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
+  b.querySelector('#tab-' + lang).classList.add('active');
+}
+</script>
+</body>
+</html>

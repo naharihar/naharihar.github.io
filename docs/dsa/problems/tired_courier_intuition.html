@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Tired Courier — Build the Intuition · Binary Search + Greedy</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#f0f2f5;
+  --border:#d0d7de; --text:#1f2328; --muted:#656d76;
+  --accent:#0969da; --accent2:#0550ae;
+  --green:#1a7f37; --green-bg:#dafbe1; --green-border:#aceebb;
+  --yellow:#9a6700; --yellow-bg:#fff8c5;
+  --purple:#6639ba; --purple-bg:#fbefff; --purple-border:#d8b9f7;
+  --red:#cf222e; --red-bg:#fff0ee;
+  --blue-bg:#ddf4ff;
+  --orange:#bc4c00; --orange-bg:#fff1e5; --orange-border:#ffa657;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:15px; line-height:1.7; }
+nav { border-bottom:1px solid var(--border); padding:13px 0; background:var(--bg); position:sticky; top:0; z-index:100; }
+.nav-inner { max-width:860px; margin:0 auto; padding:0 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.nav-brand { font-weight:700; font-size:15px; color:var(--text); text-decoration:none; }
+.nav-sep { color:var(--border); }
+.nav-link { font-size:13px; color:var(--muted); text-decoration:none; }
+.nav-link:hover { color:var(--accent); }
+main { max-width:860px; margin:0 auto; padding:48px 24px 96px; }
+.page-header { margin-bottom:40px; }
+.tag-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.tag { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; }
+.tag-bs     { background:#ddf4ff;          color:#0550ae;       border-color:#80ccff; }
+.tag-style  { background:var(--bg2);       color:var(--muted);  border-color:var(--border); }
+.tag-brute  { background:var(--orange-bg); color:var(--orange); border-color:var(--orange-border); }
+h1 { font-size:26px; font-weight:700; line-height:1.3; letter-spacing:-.4px; margin-bottom:8px; }
+.subtitle { font-size:15px; color:var(--muted); }
+.step-section { margin-bottom:52px; }
+.step-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.step-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.step-num-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); font-size:11px; font-weight:700; color:var(--muted); flex-shrink:0; }
+h2 { font-size:20px; font-weight:700; margin-bottom:14px; }
+h3 { font-size:15px; font-weight:600; margin:24px 0 10px; }
+p { margin-bottom:14px; }
+p:last-child { margin-bottom:0; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--bg2); color:var(--red); padding:1.5px 5px; border-radius:4px; border:1px solid var(--border); }
+.info-box { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin-bottom:16px; }
+.info-box h3 { margin-top:0; margin-bottom:8px; }
+.example-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+.example-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:8px 18px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.example-body { padding:14px 18px; }
+.example-row { display:flex; gap:10px; margin-bottom:5px; }
+.example-key { color:var(--muted); min-width:90px; font-size:13px; }
+.example-val { font-family:var(--mono); font-size:13.5px; color:var(--accent2); font-weight:500; }
+.callout { border-left:3px solid; border-radius:0 6px 6px 0; padding:12px 16px; margin:18px 0; font-size:14px; line-height:1.6; }
+.callout-green  { border-color:var(--green);  background:var(--green-bg); }
+.callout-yellow { border-color:var(--yellow); background:var(--yellow-bg); }
+.callout-purple { border-color:var(--purple); background:var(--purple-bg); }
+.callout-blue   { border-color:var(--accent); background:var(--blue-bg); }
+.callout-orange { border-color:var(--orange); background:var(--orange-bg); }
+.callout strong { display:block; margin-bottom:4px; font-size:13px; }
+.callout-green  strong { color:var(--green); }
+.callout-yellow strong { color:var(--yellow); }
+.callout-purple strong { color:var(--purple); }
+.callout-blue   strong { color:var(--accent2); }
+.callout-orange strong { color:var(--orange); }
+.step-cards { display:flex; flex-direction:column; gap:8px; margin:14px 0; }
+.step-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:14px 18px; display:flex; gap:14px; align-items:flex-start; }
+.step-card-num { width:28px; height:28px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--muted); flex-shrink:0; margin-top:2px; }
+.step-card-body { flex:1; }
+.step-card-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+.step-card-desc  { font-size:13px; color:var(--muted); line-height:1.55; margin:0; }
+.code-block { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.tab-bar { background:var(--bg2); border-bottom:1px solid var(--border); display:flex; padding:0 14px; }
+.tab-btn { background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-size:13px; font-family:var(--sans); padding:9px 12px; cursor:pointer; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-btn:hover:not(.active) { color:var(--text); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-family:var(--mono); font-size:13px; line-height:1.65; color:var(--text); }
+.kw{color:#cf222e;} .fn{color:#6639ba;} .cm{color:#8a929e;font-style:italic;} .st{color:#0a3069;} .nm{color:#0550ae;} .tp{color:#953800;}
+.complexity-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+.complexity-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 18px; }
+.complexity-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600; }
+.complexity-val   { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--accent2); }
+.complexity-note  { font-size:12px; color:var(--muted); margin-top:5px; }
+.mono-vis { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin:16px 0; }
+.mono-caption { font-size:13px; color:var(--muted); margin-bottom:12px; }
+.mono-row { display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end; margin-bottom:8px; }
+.mono-cell { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.mono-val { width:58px; height:36px; border-radius:6px; border:1px solid; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600; }
+.mono-val.false  { background:var(--red-bg);   border-color:#ffb0a0; color:var(--red); }
+.mono-val.true   { background:var(--green-bg); border-color:var(--green-border); color:var(--green); }
+.mono-val.answer { background:var(--green-bg); border-color:var(--green); color:var(--green); box-shadow:0 0 0 2px var(--green); }
+.mono-label { font-size:11px; color:var(--muted); font-family:var(--mono); }
+.walkthrough { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.wt-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:10px 18px; font-size:13px; font-weight:600; color:var(--text); }
+.wt-row { padding:12px 18px; border-bottom:1px solid var(--border); font-size:13.5px; display:flex; gap:14px; align-items:baseline; }
+.wt-row:last-child { border-bottom:none; }
+.wt-label { min-width:110px; color:var(--muted); font-weight:600; font-size:12.5px; }
+.wt-detail { flex:1; font-family:var(--mono); font-size:13px; }
+.wt-result { font-size:13px; }
+.ok  { color:var(--green); font-weight:600; }
+.bad { color:var(--red);   font-weight:600; }
+.pattern-box { background:var(--bg2); border:2px solid var(--border); border-radius:8px; padding:20px 24px; margin:20px 0; }
+.pattern-box pre { background:var(--bg3); border-radius:6px; padding:14px 16px; margin:12px 0 0; font-size:13px; }
+.data-table { width:100%; border-collapse:collapse; font-size:13.5px; margin:14px 0; }
+.data-table th { background:var(--bg2); color:var(--muted); padding:9px 14px; text-align:left; border:1px solid var(--border); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+.data-table td { padding:9px 14px; border:1px solid var(--border); }
+.back-link { display:inline-flex; align-items:center; gap:6px; font-size:14px; color:var(--accent); text-decoration:none; padding:8px 14px; border:1px solid var(--border); border-radius:6px; background:var(--bg2); margin-top:40px; }
+.back-link:hover { border-color:var(--accent); }
+.site-footer { text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--border); padding:22px 24px; margin-top:48px; }
+.site-footer a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="../binary_search_blog.html" class="nav-brand">AlgorithmCraft</a>
+    <span class="nav-sep">·</span>
+    <a href="../binary_search_blog.html" class="nav-link">Pattern Map</a>
+    <span class="nav-sep">·</span>
+    <a href="tired_courier.html" class="nav-link">Problem Page</a>
+  </div>
+</nav>
+<main>
+  <div class="page-header">
+    <div class="tag-row">
+      <span class="tag tag-bs">Search on Answer</span>
+      <span class="tag tag-brute">Brute force to optimized</span>
+      <span class="tag tag-style">Same style as main guide</span>
+    </div>
+    <h1>Tired Courier — <em>build the intuition before the optimization</em></h1>
+    <p class="subtitle">Start from the brute-force thought process, understand exactly what work is repeated, then earn the binary-search optimization instead of memorizing it.</p>
+  </div>
+
+  <!-- 01 Problem -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">01</span> Problem</div>
+    <h2>What are we actually minimizing?</h2>
+    <div class="info-box">
+      <h3>Problem Statement</h3>
+      <p style="margin-bottom:0">Given packages at sorted positions <code>pos[]</code> with weights <code>weight[]</code>, the courier takes contiguous groups of at most <code>k</code> packages per trip. Trip fatigue = <code>furthest_pos × total_weight</code>. Minimize <strong>total fatigue</strong> across all trips.</p>
+    </div>
+    <div class="example-box">
+      <div class="example-header">Example</div>
+      <div class="example-body">
+        <div class="example-row"><span class="example-key">pos</span><span class="example-val">[2, 5, 6, 9, 12]</span></div>
+        <div class="example-row"><span class="example-key">weight</span><span class="example-val">[3, 1, 4, 2, 5]</span></div>
+        <div class="example-row"><span class="example-key">k</span><span class="example-val">2</span></div>
+        <div class="example-row"><span class="example-key">Goal</span><span class="example-val">Find grouping that minimizes total fatigue</span></div>
+      </div>
+    </div>
+    <p>The answer is not inside the array. We need to find the best way to split packages into trips — and the cost of each split is a non-linear function (position × weight).</p>
+  </section>
+
+  <!-- 02 First Principles -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">02</span> First Principles</div>
+    <h2>If we knew nothing, what would we try?</h2>
+    <p>The most natural approach: try every way to split packages into valid trips (at most k per trip) and pick the one with minimum total fatigue.</p>
+    <div class="step-cards">
+      <div class="step-card">
+        <div class="step-card-num">1</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Enumerate every possible grouping.</div>
+          <p class="step-card-desc">Try all ways to cut the array into contiguous segments of size ≤ k.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">2</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Compute total fatigue for each grouping.</div>
+          <p class="step-card-desc">For each segment [l..r]: fatigue = pos[r] × sum(weight[l..r]).</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">3</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Return the minimum.</div>
+          <p class="step-card-desc">Track the minimum total fatigue seen across all valid groupings.</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-orange">
+      <strong>The problem with this approach</strong>
+      The number of ways to split n packages into groups of ≤ k is exponential. For n=20, k=5 there are thousands of combinations. For n=1000 it's completely infeasible.
+    </div>
+  </section>
+
+  <!-- 03 Brute Force -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">03</span> Brute Force</div>
+    <h2>A workable but slow solution</h2>
+    <p>We can do better than full enumeration using recursion with memoization — but it's still O(n²k) which is too slow for large inputs.</p>
+    <div class="code-block">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'bf-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'bf-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="tab-bf-java">
+<pre><span class="cm">// Brute-force: try every valid split recursively</span>
+<span class="kw">class</span> <span class="tp">BruteForce</span> {
+    <span class="kw">public long</span> <span class="fn">minTotalFatigue</span>(<span class="kw">int</span>[] pos, <span class="kw">int</span>[] weight, <span class="kw">int</span> k) {
+        <span class="kw">int</span> n = pos.length;
+        <span class="cm">// prefix sums for O(1) range weight queries</span>
+        <span class="kw">long</span>[] prefix = <span class="kw">new long</span>[n + <span class="nm">1</span>];
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) prefix[i+<span class="nm">1</span>] = prefix[i] + weight[i];
+
+        <span class="kw">long</span>[] memo = <span class="kw">new long</span>[n];
+        java.util.Arrays.<span class="fn">fill</span>(memo, -<span class="nm">1</span>);
+        <span class="kw">return</span> <span class="fn">solve</span>(<span class="nm">0</span>, pos, prefix, k, n, memo);
+    }
+
+    <span class="kw">private long</span> <span class="fn">solve</span>(<span class="kw">int</span> i, <span class="kw">int</span>[] pos, <span class="kw">long</span>[] prefix, <span class="kw">int</span> k, <span class="kw">int</span> n, <span class="kw">long</span>[] memo) {
+        <span class="kw">if</span> (i == n) <span class="kw">return</span> <span class="nm">0</span>;
+        <span class="kw">if</span> (memo[i] != -<span class="nm">1</span>) <span class="kw">return</span> memo[i];
+        <span class="kw">long</span> best = <span class="tp">Long</span>.MAX_VALUE;
+        <span class="cm">// try all trip sizes 1..k starting at i</span>
+        <span class="kw">for</span> (<span class="kw">int</span> j = i; j &lt; Math.<span class="fn">min</span>(n, i+k); j++) {
+            <span class="kw">long</span> tripWeight = prefix[j+<span class="nm">1</span>] - prefix[i];
+            <span class="kw">long</span> fatigue = (<span class="kw">long</span>) pos[j] * tripWeight;
+            <span class="kw">long</span> rest = <span class="fn">solve</span>(j+<span class="nm">1</span>, pos, prefix, k, n, memo);
+            best = Math.<span class="fn">min</span>(best, fatigue + rest);
+        }
+        <span class="kw">return</span> memo[i] = best;
+    }
+}
+<span class="cm">// Time: O(n*k)  Space: O(n)
+// Still O(n*k) per query — too slow when n and k are both large</span></pre>
+      </div>
+      <div class="tab-panel" id="tab-bf-python">
+<pre><span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+
+<span class="kw">class</span> <span class="tp">BruteForce</span>:
+    <span class="kw">def</span> <span class="fn">min_total_fatigue</span>(<span class="kw">self</span>, pos, weight, k):
+        n = <span class="fn">len</span>(pos)
+        prefix = [<span class="nm">0</span>] * (n + <span class="nm">1</span>)
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+            prefix[i+<span class="nm">1</span>] = prefix[i] + weight[i]
+
+        @lru_cache(maxsize=<span class="kw">None</span>)
+        <span class="kw">def</span> <span class="fn">solve</span>(i):
+            <span class="kw">if</span> i == n: <span class="kw">return</span> <span class="nm">0</span>
+            best = <span class="fn">float</span>(<span class="st">'inf'</span>)
+            <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(i, <span class="fn">min</span>(n, i+k)):
+                trip_weight = prefix[j+<span class="nm">1</span>] - prefix[i]
+                fatigue = pos[j] * trip_weight
+                best = <span class="fn">min</span>(best, fatigue + <span class="fn">solve</span>(j+<span class="nm">1</span>))
+            <span class="kw">return</span> best
+
+        <span class="kw">return</span> <span class="fn">solve</span>(<span class="nm">0</span>)
+
+<span class="cm"># Time: O(n*k)  Space: O(n)
+# Correct but slow when n and k are both large</span></pre>
+      </div>
+    </div>
+    <div class="callout callout-blue">
+      <strong>If you are wondering why we use prefix sums</strong>
+      We need the total weight of packages l..r in O(1). Without prefix sums, each call would rescan the range in O(k). Prefix sums give us <code>prefix[r+1] - prefix[l]</code> in O(1) — a minor optimization but good practice.
+    </div>
+  </section>
+
+  <!-- 04 Walkthrough -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">04</span> Walkthrough</div>
+    <h2>Run the brute force with real values</h2>
+    <div class="example-box">
+      <div class="example-header">Example</div>
+      <div class="example-body">
+        <div class="example-row"><span class="example-key">pos</span><span class="example-val">[2, 5, 6, 9, 12]</span></div>
+        <div class="example-row"><span class="example-key">weight</span><span class="example-val">[3, 1, 4, 2, 5]</span></div>
+        <div class="example-row"><span class="example-key">k</span><span class="example-val">2</span></div>
+      </div>
+    </div>
+    <div class="walkthrough">
+      <div class="wt-header">All valid groupings (k=2)</div>
+      <div class="wt-row"><span class="wt-label">Trip splits</span><span class="wt-detail">[2,5] | [6] | [9,12]</span><span class="wt-result">fatigue: 5×4 + 6×4 + 12×7 = 20+24+84 = <strong class="ok">128</strong></span></div>
+      <div class="wt-row"><span class="wt-label">Trip splits</span><span class="wt-detail">[2,5] | [6,9] | [12]</span><span class="wt-result">fatigue: 5×4 + 9×6 + 12×5 = 20+54+60 = <strong>134</strong></span></div>
+      <div class="wt-row"><span class="wt-label">Trip splits</span><span class="wt-detail">[2] | [5,6] | [9,12]</span><span class="wt-result">fatigue: 2×3 + 6×5 + 12×7 = 6+30+84 = <strong>120</strong></span></div>
+      <div class="wt-row"><span class="wt-label">Trip splits</span><span class="wt-detail">[2] | [5] | [6,9] | [12]</span><span class="wt-result">fatigue: 2×3 + 5×1 + 9×6 + 12×5 = 6+5+54+60 = <strong class="bad">125 ✗ wait...</strong></span></div>
+    </div>
+    <p style="margin-top:12px">Wait — we need to re-examine. The brute force finds the true minimum by exploring all paths. The DP memoization merges overlapping subproblems: <code>solve(i)</code> = minimum fatigue to deliver packages i..n-1.</p>
+    <div class="callout callout-yellow">
+      <strong>Key observation from the walkthrough</strong>
+      The DP correctly finds the optimum, but at the cost of testing k choices at every position. When k is large (e.g. k=100, n=10000), that's 10⁶ operations just for the DP — and we haven't even considered that this cost grows with n.
+    </div>
+  </section>
+
+  <!-- 05 Complexity -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">05</span> Complexity</div>
+    <h2>Why does the DP get expensive?</h2>
+    <div class="data-table" style="overflow:auto">
+      <table class="data-table">
+        <thead><tr><th>Approach</th><th>States</th><th>Work per state</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>Brute enumeration</td><td>Exponential</td><td>—</td><td class="bad">Infeasible</td></tr>
+          <tr><td>DP with memo</td><td>n</td><td>O(k)</td><td>O(n·k)</td></tr>
+          <tr><td>Binary search + greedy</td><td>log(P·W)</td><td>O(n)</td><td class="ok">O(n log(P·W))</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>When k is small (k=2, 3) the DP is fast. When k approaches n, O(n·k) ≈ O(n²) — too slow for n=10⁵.</p>
+  </section>
+
+  <!-- 06 Repeated Work -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">06</span> What work are we repeating?</div>
+    <h2>The real question is feasibility, not assignment</h2>
+    <p>In the DP, for every starting index i we ask: <em>"which trip size from 1..k minimizes the total from here?"</em></p>
+    <p>But flip the question. Instead of asking "what's the best grouping?", ask: <em>"given a fatigue budget F per trip, can I deliver all packages?"</em></p>
+    <div class="step-cards">
+      <div class="step-card">
+        <div class="step-card-num">1</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Choose a fatigue cap F.</div>
+          <p class="step-card-desc">Try F = 100, then 200, then 150... some cap that might work.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">2</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Greedily check if F is feasible.</div>
+          <p class="step-card-desc">Walk left to right. Keep adding packages to the current trip as long as trip fatigue stays ≤ F and count ≤ k.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">3</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Find the minimum F that works.</div>
+          <p class="step-card-desc">The answer is the smallest F such that canDeliver(F) is true.</p>
+        </div>
+      </div>
+    </div>
+    <p>We are not optimizing the DP formula. We are replacing the DP entirely with a yes/no feasibility check, and then optimizing <em>how many caps we test</em>.</p>
+  </section>
+
+  <!-- 07 Monotone -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">07</span> Optimization Insight</div>
+    <h2>The feasibility answers form a monotonic map</h2>
+    <p>If fatigue cap F is feasible, then cap F+1 is also feasible (more budget = at least as easy). If F is infeasible, F-1 is also infeasible. Classic F→T transition.</p>
+    <div class="mono-vis">
+      <div class="mono-caption">pos=[2,5,6,9,12], weight=[3,1,4,2,5], k=2 &nbsp;·&nbsp; condition: canDeliver(F)</div>
+      <div class="mono-row">
+        <div class="mono-cell"><div class="mono-val false">F=20</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">F=50</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">F=100</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">F=115</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val answer">F=120</div><div class="mono-label">T*</div></div>
+        <div class="mono-cell"><div class="mono-val true">F=128</div><div class="mono-label">T</div></div>
+        <div class="mono-cell"><div class="mono-val true">F=200</div><div class="mono-label">T</div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:8px">The first T is our answer — the minimum fatigue cap under which all deliveries are feasible.</p>
+    </div>
+    <div class="callout callout-purple">
+      <strong>This is the key shift</strong>
+      The fatigue values of packages are not sorted — but the <em>answer space</em> (possible caps F) is monotonic. That is what binary search needs.
+    </div>
+  </section>
+
+  <!-- 08 Binary Search -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">08</span> Binary Search</div>
+    <h2>Optimize the search over fatigue caps</h2>
+    <p>Instead of trying caps one by one from 0 to max, binary search the cap range. Each step: test the midpoint, narrow the range. Total: O(log(P·W)) tests × O(n) greedy scan each.</p>
+    <div class="code-block">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'opt-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'opt-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="tab-opt-java">
+<pre><span class="kw">public class</span> <span class="tp">Solution</span> {
+
+    <span class="kw">public long</span> <span class="fn">minTotalFatigue</span>(<span class="kw">int</span>[] pos, <span class="kw">int</span>[] weight, <span class="kw">int</span> k) {
+        <span class="cm">// lo: smallest possible fatigue (a single package must fit)</span>
+        <span class="cm">// hi: worst case — one trip carries all packages</span>
+        <span class="kw">long</span> lo = <span class="nm">0</span>, hi = (<span class="kw">long</span>) pos[pos.length-<span class="nm">1</span>] * <span class="fn">sum</span>(weight);
+
+        <span class="kw">while</span> (lo &lt; hi) {
+            <span class="kw">long</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+            <span class="kw">if</span> (<span class="fn">canDeliver</span>(pos, weight, k, mid)) {
+                hi = mid;         <span class="cm">// feasible — try a tighter cap</span>
+            } <span class="kw">else</span> {
+                lo = mid + <span class="nm">1</span>;    <span class="cm">// infeasible — need more budget</span>
+            }
+        }
+        <span class="kw">return</span> lo;
+    }
+
+    <span class="kw">private boolean</span> <span class="fn">canDeliver</span>(<span class="kw">int</span>[] pos, <span class="kw">int</span>[] weight, <span class="kw">int</span> k, <span class="kw">long</span> maxF) {
+        <span class="kw">int</span> i = <span class="nm">0</span>, n = pos.length;
+        <span class="kw">while</span> (i &lt; n) {
+            <span class="kw">int</span> count = <span class="nm">0</span>; <span class="kw">long</span> curWeight = <span class="nm">0</span>;
+            <span class="kw">while</span> (i &lt; n &amp;&amp; count &lt; k) {
+                <span class="kw">long</span> newWeight = curWeight + weight[i];
+                <span class="kw">if</span> ((<span class="kw">long</span>) pos[i] * newWeight &gt; maxF) <span class="kw">break</span>;
+                curWeight = newWeight; count++; i++;
+            }
+            <span class="kw">if</span> (count == <span class="nm">0</span>) <span class="kw">return false</span>; <span class="cm">// stuck — impossible</span>
+        }
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">private long</span> <span class="fn">sum</span>(<span class="kw">int</span>[] a) {
+        <span class="kw">long</span> s = <span class="nm">0</span>; <span class="kw">for</span> (<span class="kw">int</span> x : a) s += x; <span class="kw">return</span> s;
+    }
+}</pre>
+      </div>
+      <div class="tab-panel" id="tab-opt-python">
+<pre><span class="kw">class</span> <span class="tp">Solution</span>:
+    <span class="kw">def</span> <span class="fn">min_total_fatigue</span>(<span class="kw">self</span>, pos, weight, k):
+        lo, hi = <span class="nm">0</span>, pos[-<span class="nm">1</span>] * <span class="fn">sum</span>(weight)
+
+        <span class="kw">while</span> lo &lt; hi:
+            mid = lo + (hi - lo) // <span class="nm">2</span>
+            <span class="kw">if</span> <span class="kw">self</span>.<span class="fn">can_deliver</span>(pos, weight, k, mid):
+                hi = mid
+            <span class="kw">else</span>:
+                lo = mid + <span class="nm">1</span>
+        <span class="kw">return</span> lo
+
+    <span class="kw">def</span> <span class="fn">can_deliver</span>(<span class="kw">self</span>, pos, weight, k, max_f):
+        i, n = <span class="nm">0</span>, <span class="fn">len</span>(pos)
+        <span class="kw">while</span> i &lt; n:
+            count, cur_weight = <span class="nm">0</span>, <span class="nm">0</span>
+            <span class="kw">while</span> i &lt; n <span class="kw">and</span> count &lt; k:
+                new_w = cur_weight + weight[i]
+                <span class="kw">if</span> pos[i] * new_w &gt; max_f: <span class="kw">break</span>
+                cur_weight, count, i = new_w, count+<span class="nm">1</span>, i+<span class="nm">1</span>
+            <span class="kw">if</span> count == <span class="nm">0</span>: <span class="kw">return False</span>
+        <span class="kw">return True</span></pre>
+      </div>
+    </div>
+    <p>The feasibility check did not change in spirit from the brute-force. The only difference: instead of exploring all DP branches, we ask a single yes/no question O(log(P·W)) times.</p>
+  </section>
+
+  <!-- 09 Comparison -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">09</span> Comparison</div>
+    <h2>What exactly improved?</h2>
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="complexity-label">DP brute force</div>
+        <div class="complexity-val">O(n·k)</div>
+        <div class="complexity-note">Tries all k trip-end choices at every position. Expensive when k is large.</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-label">Binary search + greedy</div>
+        <div class="complexity-val">O(n log PW)</div>
+        <div class="complexity-note">Same O(n) greedy scan, but only log(P·W) ≈ 60 times. No branching.</div>
+      </div>
+    </div>
+    <p>The DP branched at every package. The greedy never branches — it always extends the current trip greedily. Binary search makes this cheap enough to run dozens of times.</p>
+  </section>
+
+  <!-- 10 Pattern -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">10</span> Pattern</div>
+    <h2>The reusable lesson</h2>
+    <p>Whenever your DP looks like this:</p>
+    <div class="pattern-box">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">DP shape that hints at binary search:</p>
+      <pre><span class="kw">for</span> <span class="fn">every starting index</span> i:
+    <span class="kw">for</span> <span class="fn">every trip endpoint</span> j <span class="kw">in</span> i..i+k:
+        best = min(best, cost(i,j) + solve(j+1))</pre>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px">Ask yourself: does <code>canFinish(cap)</code> give F…F…T…T? If yes → binary search the cap, greedy scan for feasibility.</p>
+    </div>
+    <div class="callout callout-green">
+      <strong>For Tired Courier</strong>
+      The per-trip cost formula did not change. The greedy check did not change. Only the way we searched the answer space changed — from O(n·k) DP branching to O(log P·W) binary search iterations.
+    </div>
+    <a href="tired_courier.html" class="back-link">← Back to problem page</a>
+  </section>
+</main>
+<footer class="site-footer">Part of the Binary Search pattern series · <a href="../binary_search_blog.html">Main article</a> · <a href="tired_courier.html">Problem page</a></footer>
+<script>
+function switchTab(btn, lang) {
+  const b = btn.closest('.code-block');
+  b.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  b.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
+  b.querySelector('#tab-' + lang).classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fair Royalties — Build the Intuition · Binary Search + Prefix Sums</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#f0f2f5;
+  --border:#d0d7de; --text:#1f2328; --muted:#656d76;
+  --accent:#0969da; --accent2:#0550ae;
+  --green:#1a7f37; --green-bg:#dafbe1; --green-border:#aceebb;
+  --yellow:#9a6700; --yellow-bg:#fff8c5;
+  --purple:#6639ba; --purple-bg:#fbefff; --purple-border:#d8b9f7;
+  --red:#cf222e; --red-bg:#fff0ee;
+  --blue-bg:#ddf4ff;
+  --orange:#bc4c00; --orange-bg:#fff1e5; --orange-border:#ffa657;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:15px; line-height:1.7; }
+nav { border-bottom:1px solid var(--border); padding:13px 0; background:var(--bg); position:sticky; top:0; z-index:100; }
+.nav-inner { max-width:860px; margin:0 auto; padding:0 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.nav-brand { font-weight:700; font-size:15px; color:var(--text); text-decoration:none; }
+.nav-sep { color:var(--border); }
+.nav-link { font-size:13px; color:var(--muted); text-decoration:none; }
+.nav-link:hover { color:var(--accent); }
+main { max-width:860px; margin:0 auto; padding:48px 24px 96px; }
+.tag-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.tag { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; }
+.tag-bs    { background:#ddf4ff;          color:#0550ae;       border-color:#80ccff; }
+.tag-style { background:var(--bg2);       color:var(--muted);  border-color:var(--border); }
+.tag-brute { background:var(--orange-bg); color:var(--orange); border-color:var(--orange-border); }
+h1 { font-size:26px; font-weight:700; line-height:1.3; letter-spacing:-.4px; margin-bottom:8px; }
+.subtitle { font-size:15px; color:var(--muted); }
+.step-section { margin-bottom:52px; }
+.step-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.step-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.step-num-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); font-size:11px; font-weight:700; color:var(--muted); flex-shrink:0; }
+h2 { font-size:20px; font-weight:700; margin-bottom:14px; }
+h3 { font-size:15px; font-weight:600; margin:24px 0 10px; }
+p { margin-bottom:14px; }
+p:last-child { margin-bottom:0; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--bg2); color:var(--red); padding:1.5px 5px; border-radius:4px; border:1px solid var(--border); }
+.info-box { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin-bottom:16px; }
+.info-box h3 { margin-top:0; margin-bottom:8px; }
+.example-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+.example-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:8px 18px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.example-body { padding:14px 18px; }
+.example-row { display:flex; gap:10px; margin-bottom:5px; }
+.example-key { color:var(--muted); min-width:90px; font-size:13px; }
+.example-val { font-family:var(--mono); font-size:13.5px; color:var(--accent2); font-weight:500; }
+.callout { border-left:3px solid; border-radius:0 6px 6px 0; padding:12px 16px; margin:18px 0; font-size:14px; line-height:1.6; }
+.callout-green  { border-color:var(--green);  background:var(--green-bg); }
+.callout-yellow { border-color:var(--yellow); background:var(--yellow-bg); }
+.callout-purple { border-color:var(--purple); background:var(--purple-bg); }
+.callout-blue   { border-color:var(--accent); background:var(--blue-bg); }
+.callout-orange { border-color:var(--orange); background:var(--orange-bg); }
+.callout strong { display:block; margin-bottom:4px; font-size:13px; }
+.callout-green  strong { color:var(--green); }
+.callout-yellow strong { color:var(--yellow); }
+.callout-purple strong { color:var(--purple); }
+.callout-blue   strong { color:var(--accent2); }
+.callout-orange strong { color:var(--orange); }
+.step-cards { display:flex; flex-direction:column; gap:8px; margin:14px 0; }
+.step-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:14px 18px; display:flex; gap:14px; align-items:flex-start; }
+.step-card-num { width:28px; height:28px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--muted); flex-shrink:0; margin-top:2px; }
+.step-card-body { flex:1; }
+.step-card-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+.step-card-desc  { font-size:13px; color:var(--muted); line-height:1.55; margin:0; }
+.code-block { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.tab-bar { background:var(--bg2); border-bottom:1px solid var(--border); display:flex; padding:0 14px; }
+.tab-btn { background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-size:13px; font-family:var(--sans); padding:9px 12px; cursor:pointer; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-btn:hover:not(.active) { color:var(--text); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-family:var(--mono); font-size:13px; line-height:1.65; color:var(--text); }
+.kw{color:#cf222e;} .fn{color:#6639ba;} .cm{color:#8a929e;font-style:italic;} .st{color:#0a3069;} .nm{color:#0550ae;} .tp{color:#953800;}
+.complexity-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+.complexity-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 18px; }
+.complexity-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600; }
+.complexity-val   { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--accent2); }
+.complexity-note  { font-size:12px; color:var(--muted); margin-top:5px; }
+.mono-vis { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin:16px 0; }
+.mono-caption { font-size:13px; color:var(--muted); margin-bottom:12px; }
+.mono-row { display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end; }
+.mono-cell { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.mono-val { width:58px; height:36px; border-radius:6px; border:1px solid; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600; }
+.mono-val.false  { background:var(--red-bg);   border-color:#ffb0a0; color:var(--red); }
+.mono-val.true   { background:var(--green-bg); border-color:var(--green-border); color:var(--green); }
+.mono-val.answer { background:var(--green-bg); border-color:var(--green); color:var(--green); box-shadow:0 0 0 2px var(--green); }
+.mono-label { font-size:11px; color:var(--muted); font-family:var(--mono); }
+.data-table { width:100%; border-collapse:collapse; font-size:13.5px; margin:14px 0; }
+.data-table th { background:var(--bg2); color:var(--muted); padding:9px 14px; text-align:left; border:1px solid var(--border); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+.data-table td { padding:9px 14px; border:1px solid var(--border); }
+.data-table tr:hover td { background:var(--bg2); }
+.data-table td:first-child { color:var(--muted); font-size:12.5px; font-weight:600; }
+.ok  { color:var(--green); font-weight:600; }
+.bad { color:var(--red);   font-weight:600; }
+.pattern-box { background:var(--bg2); border:2px solid var(--border); border-radius:8px; padding:20px 24px; margin:20px 0; }
+.pattern-box pre { background:var(--bg3); border-radius:6px; padding:14px 16px; margin:12px 0 0; font-size:13px; }
+.back-link { display:inline-flex; align-items:center; gap:6px; font-size:14px; color:var(--accent); text-decoration:none; padding:8px 14px; border:1px solid var(--border); border-radius:6px; background:var(--bg2); margin-top:40px; }
+.back-link:hover { border-color:var(--accent); }
+.site-footer { text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--border); padding:22px 24px; margin-top:48px; }
+.site-footer a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="../binary_search_blog.html" class="nav-brand">AlgorithmCraft</a>
+    <span class="nav-sep">·</span>
+    <a href="../binary_search_blog.html" class="nav-link">Pattern Map</a>
+    <span class="nav-sep">·</span>
+    <a href="fair_royalties.html" class="nav-link">Problem Page</a>
+  </div>
+</nav>
+<main>
+  <div style="margin-bottom:40px">
+    <div class="tag-row">
+      <span class="tag tag-bs">Search on Answer</span>
+      <span class="tag tag-brute">Brute force to optimized</span>
+      <span class="tag tag-style">Same style as main guide</span>
+    </div>
+    <h1>Fair Royalties — <em>build the intuition before the optimization</em></h1>
+    <p class="subtitle">The squared cost function looks intimidating. Strip it away, see the familiar pattern underneath, then add it back.</p>
+  </div>
+
+  <!-- 01 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">01</span> Problem</div>
+    <h2>What are we actually minimizing?</h2>
+    <div class="info-box">
+      <h3>Problem Statement</h3>
+      <p style="margin-bottom:0">Split <code>n</code> chapters (page counts <code>pages[]</code>) into exactly <code>k</code> contiguous parts. Each part's royalty = <strong>(sum of pages)²</strong>. Minimize the maximum royalty.</p>
+    </div>
+    <div class="example-box">
+      <div class="example-header">Example</div>
+      <div class="example-body">
+        <div class="example-row"><span class="example-key">pages</span><span class="example-val">[4, 3, 2, 5, 1, 6]</span></div>
+        <div class="example-row"><span class="example-key">k</span><span class="example-val">3</span></div>
+        <div class="example-row"><span class="example-key">Goal</span><span class="example-val">Minimize the max part royalty (sum²)</span></div>
+      </div>
+    </div>
+    <p>The square makes the cost non-linear — a part twice as long costs four times as much. This makes it impossible to just greedily balance parts by page count.</p>
+  </section>
+
+  <!-- 02 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">02</span> First Principles</div>
+    <h2>Simplify: what if the cost were linear?</h2>
+    <p>Forget the square for a moment. If royalty = sum of pages (not squared), this is exactly LC 410 Split Array Largest Sum. We'd binary search the max sum cap, greedily extend each part until the next chapter would exceed it.</p>
+    <p>Now add the square back. The only thing that changes in the greedy: instead of checking <code>sum ≤ cap</code>, we check <code>sum² ≤ cap</code>, which is the same as <code>sum ≤ √cap</code>.</p>
+    <div class="callout callout-blue">
+      <strong>The square is just a change of units</strong>
+      Binary search over royalty R = sum². Greedy check: extend current part while <code>prefix_sum² ≤ R</code>. The feasibility structure is identical to the linear case.
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">03</span> Brute Force</div>
+    <h2>The naive solution: try every split</h2>
+    <div class="code-block">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'bf-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'bf-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="tab-bf-java">
+<pre><span class="cm">// Brute-force DP: try every split point</span>
+<span class="kw">class</span> <span class="tp">BruteForce</span> {
+    <span class="kw">public long</span> <span class="fn">minMaxRoyalty</span>(<span class="kw">int</span>[] pages, <span class="kw">int</span> k) {
+        <span class="kw">int</span> n = pages.length;
+        <span class="kw">long</span>[] prefix = <span class="kw">new long</span>[n+<span class="nm">1</span>];
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) prefix[i+<span class="nm">1</span>] = prefix[i] + pages[i];
+
+        <span class="cm">// dp[i][j] = min max royalty using first i chapters with j parts</span>
+        <span class="kw">long</span>[][] dp = <span class="kw">new long</span>[n+<span class="nm">1</span>][k+<span class="nm">1</span>];
+        <span class="kw">for</span> (<span class="kw">long</span>[] row : dp) java.util.Arrays.<span class="fn">fill</span>(row, <span class="tp">Long</span>.MAX_VALUE / <span class="nm">2</span>);
+        dp[<span class="nm">0</span>][<span class="nm">0</span>] = <span class="nm">0</span>;
+
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">1</span>; j &lt;= k; j++) {
+            <span class="kw">for</span> (<span class="kw">int</span> i = j; i &lt;= n; i++) {
+                <span class="kw">for</span> (<span class="kw">int</span> m = j-<span class="nm">1</span>; m &lt; i; m++) {
+                    <span class="kw">long</span> s = prefix[i] - prefix[m];
+                    <span class="kw">long</span> royalty = s * s;
+                    dp[i][j] = Math.<span class="fn">min</span>(dp[i][j], Math.<span class="fn">max</span>(dp[m][j-<span class="nm">1</span>], royalty));
+                }
+            }
+        }
+        <span class="kw">return</span> dp[n][k];
+    }
+}
+<span class="cm">// Time: O(n²k)  Space: O(nk) — too slow for n=10⁴</span></pre>
+      </div>
+      <div class="tab-panel" id="tab-bf-python">
+<pre><span class="kw">class</span> <span class="tp">BruteForce</span>:
+    <span class="kw">def</span> <span class="fn">min_max_royalty</span>(<span class="kw">self</span>, pages, k):
+        n = <span class="fn">len</span>(pages)
+        prefix = [<span class="nm">0</span>] * (n+<span class="nm">1</span>)
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): prefix[i+<span class="nm">1</span>] = prefix[i] + pages[i]
+
+        INF = <span class="fn">float</span>(<span class="st">'inf'</span>)
+        dp = [[INF]*(k+<span class="nm">1</span>) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n+<span class="nm">1</span>)]
+        dp[<span class="nm">0</span>][<span class="nm">0</span>] = <span class="nm">0</span>
+
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, k+<span class="nm">1</span>):
+            <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(j, n+<span class="nm">1</span>):
+                <span class="kw">for</span> m <span class="kw">in</span> <span class="fn">range</span>(j-<span class="nm">1</span>, i):
+                    s = prefix[i] - prefix[m]
+                    dp[i][j] = <span class="fn">min</span>(dp[i][j], <span class="fn">max</span>(dp[m][j-<span class="nm">1</span>], s*s))
+        <span class="kw">return</span> dp[n][k]
+
+<span class="cm"># Time: O(n²k)  Space: O(nk)</span></pre>
+      </div>
+    </div>
+    <p>The DP is correct but O(n²k). For n=10⁴, k=100, that's 10¹⁰ operations — completely infeasible.</p>
+  </section>
+
+  <!-- 04 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">04</span> Walkthrough</div>
+    <h2>Trace a few splits by hand</h2>
+    <table class="data-table">
+      <thead><tr><th>Split</th><th>Part sums</th><th>Royalties (sum²)</th><th>Max royalty</th></tr></thead>
+      <tbody>
+        <tr><td>[4,3,2] | [5,1] | [6]</td><td>9, 6, 6</td><td>81, 36, 36</td><td class="ok">81 ← best</td></tr>
+        <tr><td>[4,3] | [2,5,1] | [6]</td><td>7, 8, 6</td><td>49, 64, 36</td><td>64</td></tr>
+        <tr><td>[4] | [3,2,5] | [1,6]</td><td>4, 10, 7</td><td>16, 100, 49</td><td class="bad">100</td></tr>
+        <tr><td>[4,3,2,5] | [1] | [6]</td><td>14, 1, 6</td><td>196, 1, 36</td><td class="bad">196</td></tr>
+      </tbody>
+    </table>
+    <p>The DP finds the minimum of the "max royalty" column = 81. But it tries O(n²k) combinations to get there.</p>
+    <div class="callout callout-yellow">
+      <strong>Key observation from the walkthrough</strong>
+      We are not trying to find the optimal split directly. We just need to know: <em>"is there any valid split where every part's royalty ≤ R?"</em> This yes/no question is much cheaper to answer.
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">05</span> Complexity</div>
+    <h2>Why does the DP get expensive?</h2>
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="complexity-label">DP brute force</div>
+        <div class="complexity-val">O(n²k)</div>
+        <div class="complexity-note">For every (chapter, part) pair, tries all possible previous split points.</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-label">Binary search + greedy</div>
+        <div class="complexity-val">O(n log S²)</div>
+        <div class="complexity-note">~100 binary search iterations × O(n) greedy with prefix sum O(1) lookups.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">06</span> Repeated Work</div>
+    <h2>What work are we repeating?</h2>
+    <p>In the DP, for every chapter index i and part count j, we scan all possible last split points m. This explores all possible histories of splits to find the best one.</p>
+    <p>But we don't need the best split. We need to answer: <em>"given royalty cap R, can I split into ≤ k parts each with royalty ≤ R?"</em> This is a single left-to-right pass — O(n) — using a greedy.</p>
+    <div class="step-cards">
+      <div class="step-card">
+        <div class="step-card-num">1</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Choose a royalty cap R.</div>
+          <p class="step-card-desc">Binary search over possible values of R.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">2</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Greedy check using prefix sums.</div>
+          <p class="step-card-desc">Walk left to right. Extend the current part while <code>sum² ≤ R</code>. Close the part when the next chapter would exceed it. Use prefix sums for O(1) range sums.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">3</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Count parts used.</div>
+          <p class="step-card-desc">If parts ≤ k → feasible. Binary search then narrows R.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">07</span> Optimization Insight</div>
+    <h2>The feasibility answers are monotonic</h2>
+    <p>If royalty cap R is feasible, R+1 is also feasible. If R is infeasible, R-1 also is. The familiar F→T shape.</p>
+    <div class="mono-vis">
+      <div class="mono-caption">pages=[4,3,2,5,1,6], k=3 &nbsp;·&nbsp; condition: canSplit(R)</div>
+      <div class="mono-row">
+        <div class="mono-cell"><div class="mono-val false">R=25</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">R=36</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">R=64</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val answer">R=81</div><div class="mono-label">T*</div></div>
+        <div class="mono-cell"><div class="mono-val true">R=100</div><div class="mono-label">T</div></div>
+        <div class="mono-cell"><div class="mono-val true">R=441</div><div class="mono-label">T</div></div>
+      </div>
+    </div>
+    <div class="callout callout-purple">
+      <strong>The key shift</strong>
+      Chapter page counts are not sorted — but the royalty <em>caps</em> form a monotonic answer space. Binary search the caps; greedy + prefix sums checks each one in O(n).
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">08</span> Why prefix sums?</div>
+    <h2>The role of prefix sums in the greedy</h2>
+    <p>During the greedy scan, we need to know the sum of chapters from <code>start</code> to <code>end</code>. Without prefix sums, each check re-sums the range — O(n) per check × O(n) checks per feasibility call = O(n²) per binary search step.</p>
+    <p>With prefix sums built once in O(n), each range sum is O(1): <code>prefix[end+1] - prefix[start]</code>. The entire feasibility check drops to O(n).</p>
+    <div class="callout callout-green">
+      <strong>The combination</strong>
+      Binary search handles the search over answer space (which cap R to try). Prefix sums make each feasibility check O(n) instead of O(n²). Together: O(n log S²) total.
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">09</span> Comparison</div>
+    <h2>What exactly improved?</h2>
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="complexity-label">DP brute force</div>
+        <div class="complexity-val">O(n²k)</div>
+        <div class="complexity-note">Tries every split point for every (chapter, part) pair. Stores all subproblem results.</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-label">Binary search + greedy</div>
+        <div class="complexity-val">O(n log S²)</div>
+        <div class="complexity-note">~120 iterations × O(n) greedy. No DP table. O(n) prefix array only.</div>
+      </div>
+    </div>
+    <p>The DP found the optimal split. The greedy never finds the split — it just answers "feasible or not?" That's all binary search needs.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">10</span> Pattern</div>
+    <h2>The reusable lesson</h2>
+    <div class="pattern-box">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">DP shape that hints at binary search:</p>
+      <pre><span class="kw">for</span> every (i, j) in (chapters, parts):
+    <span class="kw">for</span> every split point m:
+        dp[i][j] = min(dp[i][j], max(dp[m][j-1], cost(m+1..i)))</pre>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px">When <code>cost()</code> is monotone increasing in range length → binary search the cost cap, greedy for feasibility.</p>
+    </div>
+    <div class="callout callout-green">
+      <strong>For Fair Royalties</strong>
+      The squared cost is monotone in range length (more pages = higher royalty — always). That's the only property binary search needs. The square is irrelevant to the algorithm structure; it's just a number we compare against the cap.
+    </div>
+    <a href="fair_royalties.html" class="back-link">← Back to problem page</a>
+  </section>
+</main>
+<footer class="site-footer">Part of the Binary Search pattern series · <a href="../binary_search_blog.html">Main article</a> · <a href="fair_royalties.html">Problem page</a></footer>
+<script>
+function switchTab(btn, lang) {
+  const b = btn.closest('.code-block');
+  b.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  b.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
+  b.querySelector('#tab-' + lang).classList.add('active');
+}
+</script>
+</body>
+</html>

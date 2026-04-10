@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Exam Scheduling — Build the Intuition · Binary Search + EDF</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#f0f2f5;
+  --border:#d0d7de; --text:#1f2328; --muted:#656d76;
+  --accent:#0969da; --accent2:#0550ae;
+  --green:#1a7f37; --green-bg:#dafbe1; --green-border:#aceebb;
+  --yellow:#9a6700; --yellow-bg:#fff8c5;
+  --purple:#6639ba; --purple-bg:#fbefff; --purple-border:#d8b9f7;
+  --red:#cf222e; --red-bg:#fff0ee;
+  --blue-bg:#ddf4ff;
+  --orange:#bc4c00; --orange-bg:#fff1e5; --orange-border:#ffa657;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:15px; line-height:1.7; }
+nav { border-bottom:1px solid var(--border); padding:13px 0; background:var(--bg); position:sticky; top:0; z-index:100; }
+.nav-inner { max-width:860px; margin:0 auto; padding:0 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.nav-brand { font-weight:700; font-size:15px; color:var(--text); text-decoration:none; }
+.nav-sep { color:var(--border); }
+.nav-link { font-size:13px; color:var(--muted); text-decoration:none; }
+.nav-link:hover { color:var(--accent); }
+main { max-width:860px; margin:0 auto; padding:48px 24px 96px; }
+.tag-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.tag { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; }
+.tag-bs    { background:#ddf4ff;          color:#0550ae;       border-color:#80ccff; }
+.tag-style { background:var(--bg2);       color:var(--muted);  border-color:var(--border); }
+.tag-brute { background:var(--orange-bg); color:var(--orange); border-color:var(--orange-border); }
+h1 { font-size:26px; font-weight:700; line-height:1.3; letter-spacing:-.4px; margin-bottom:8px; }
+.subtitle { font-size:15px; color:var(--muted); }
+.step-section { margin-bottom:52px; }
+.step-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.step-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.step-num-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); font-size:11px; font-weight:700; color:var(--muted); flex-shrink:0; }
+h2 { font-size:20px; font-weight:700; margin-bottom:14px; }
+h3 { font-size:15px; font-weight:600; margin:24px 0 10px; }
+p { margin-bottom:14px; }
+p:last-child { margin-bottom:0; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--bg2); color:var(--red); padding:1.5px 5px; border-radius:4px; border:1px solid var(--border); }
+.info-box { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin-bottom:16px; }
+.info-box h3 { margin-top:0; margin-bottom:8px; }
+.example-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+.example-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:8px 18px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.example-body { padding:14px 18px; }
+.example-row { display:flex; gap:10px; margin-bottom:5px; }
+.example-key { color:var(--muted); min-width:90px; font-size:13px; }
+.example-val { font-family:var(--mono); font-size:13.5px; color:var(--accent2); font-weight:500; }
+.callout { border-left:3px solid; border-radius:0 6px 6px 0; padding:12px 16px; margin:18px 0; font-size:14px; line-height:1.6; }
+.callout-green  { border-color:var(--green);  background:var(--green-bg); }
+.callout-yellow { border-color:var(--yellow); background:var(--yellow-bg); }
+.callout-purple { border-color:var(--purple); background:var(--purple-bg); }
+.callout-blue   { border-color:var(--accent); background:var(--blue-bg); }
+.callout-orange { border-color:var(--orange); background:var(--orange-bg); }
+.callout strong { display:block; margin-bottom:4px; font-size:13px; }
+.callout-green  strong { color:var(--green); }
+.callout-yellow strong { color:var(--yellow); }
+.callout-purple strong { color:var(--purple); }
+.callout-blue   strong { color:var(--accent2); }
+.callout-orange strong { color:var(--orange); }
+.step-cards { display:flex; flex-direction:column; gap:8px; margin:14px 0; }
+.step-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:14px 18px; display:flex; gap:14px; align-items:flex-start; }
+.step-card-num { width:28px; height:28px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--muted); flex-shrink:0; margin-top:2px; }
+.step-card-body { flex:1; }
+.step-card-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+.step-card-desc  { font-size:13px; color:var(--muted); line-height:1.55; margin:0; }
+.code-block { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.tab-bar { background:var(--bg2); border-bottom:1px solid var(--border); display:flex; padding:0 14px; }
+.tab-btn { background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-size:13px; font-family:var(--sans); padding:9px 12px; cursor:pointer; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-btn:hover:not(.active) { color:var(--text); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+pre { background:#f6f8fa; padding:20px 22px; overflow-x:auto; margin:0; font-family:var(--mono); font-size:13px; line-height:1.65; color:var(--text); }
+.kw{color:#cf222e;} .fn{color:#6639ba;} .cm{color:#8a929e;font-style:italic;} .st{color:#0a3069;} .nm{color:#0550ae;} .tp{color:#953800;}
+.complexity-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+.complexity-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 18px; }
+.complexity-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600; }
+.complexity-val   { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--accent2); }
+.complexity-note  { font-size:12px; color:var(--muted); margin-top:5px; }
+.mono-vis { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin:16px 0; }
+.mono-caption { font-size:13px; color:var(--muted); margin-bottom:12px; }
+.mono-row { display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end; }
+.mono-cell { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.mono-val { width:52px; height:36px; border-radius:6px; border:1px solid; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600; }
+.mono-val.false  { background:var(--red-bg);   border-color:#ffb0a0; color:var(--red); }
+.mono-val.true   { background:var(--green-bg); border-color:var(--green-border); color:var(--green); }
+.mono-val.answer { background:var(--green-bg); border-color:var(--green); color:var(--green); box-shadow:0 0 0 2px var(--green); }
+.mono-label { font-size:11px; color:var(--muted); font-family:var(--mono); }
+.data-table { width:100%; border-collapse:collapse; font-size:13.5px; margin:14px 0; }
+.data-table th { background:var(--bg2); color:var(--muted); padding:9px 14px; text-align:left; border:1px solid var(--border); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+.data-table td { padding:9px 14px; border:1px solid var(--border); }
+.data-table tr:hover td { background:var(--bg2); }
+.data-table td:first-child { color:var(--muted); font-size:12.5px; font-weight:600; }
+.ok  { color:var(--green); font-weight:600; }
+.bad { color:var(--red);   font-weight:600; }
+.pattern-box { background:var(--bg2); border:2px solid var(--border); border-radius:8px; padding:20px 24px; margin:20px 0; }
+.pattern-box pre { background:var(--bg3); border-radius:6px; padding:14px 16px; margin:12px 0 0; font-size:13px; }
+.back-link { display:inline-flex; align-items:center; gap:6px; font-size:14px; color:var(--accent); text-decoration:none; padding:8px 14px; border:1px solid var(--border); border-radius:6px; background:var(--bg2); margin-top:40px; }
+.back-link:hover { border-color:var(--accent); }
+.site-footer { text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--border); padding:22px 24px; margin-top:48px; }
+.site-footer a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="../binary_search_blog.html" class="nav-brand">AlgorithmCraft</a>
+    <span class="nav-sep">·</span>
+    <a href="../binary_search_blog.html" class="nav-link">Pattern Map</a>
+    <span class="nav-sep">·</span>
+    <a href="exam_scheduling.html" class="nav-link">Problem Page</a>
+  </div>
+</nav>
+<main>
+  <div style="margin-bottom:40px">
+    <div class="tag-row">
+      <span class="tag tag-bs">Search on Answer</span>
+      <span class="tag tag-brute">Brute force to optimized</span>
+      <span class="tag tag-style">Same style as main guide</span>
+    </div>
+    <h1>Exam Scheduling — <em>build the intuition before the optimization</em></h1>
+    <p class="subtitle">Two algorithms meet here: binary search handles "how many hours?", EDF (Earliest Deadline First) handles "is it possible?". Understand each separately, then see why they combine perfectly.</p>
+  </div>
+
+  <!-- 01 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">01</span> Problem</div>
+    <h2>What are we actually minimizing?</h2>
+    <div class="info-box">
+      <h3>Problem Statement</h3>
+      <p style="margin-bottom:0">Each student <code>i</code> can only take an exam during <code>[start[i], end[i]]</code>. The school has <code>r</code> rooms (each handles 1 student per hour). Find the minimum number of hours T to schedule everyone.</p>
+    </div>
+    <div class="example-box">
+      <div class="example-header">Example</div>
+      <div class="example-body">
+        <div class="example-row"><span class="example-key">windows</span><span class="example-val">[[0,2],[0,1],[1,3],[2,4],[3,4]]</span></div>
+        <div class="example-row"><span class="example-key">r</span><span class="example-val">2</span></div>
+        <div class="example-row"><span class="example-key">Goal</span><span class="example-val">Minimum T such that everyone can be scheduled in hours 0..T-1</span></div>
+      </div>
+    </div>
+    <p>The key difficulty: students have individual availability windows. Opening more hours doesn't always help if students' windows are short. You cannot reschedule — a student must be assigned within their window.</p>
+  </section>
+
+  <!-- 02 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">02</span> First Principles</div>
+    <h2>If we knew nothing, what would we try?</h2>
+    <p>For a fixed T, try all possible assignments of students to time slots. This is an assignment problem — NP-hard in general. But our structure (interval windows + uniform room capacity) admits a greedy solution.</p>
+    <div class="step-cards">
+      <div class="step-card">
+        <div class="step-card-num">1</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Try T = 1, 2, 3, ... hours.</div>
+          <p class="step-card-desc">For each T, check if it's possible to schedule all students in hours 0..T-1.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">2</div>
+        <div class="step-card-body">
+          <div class="step-card-title">For each T, exhaustively try all assignments.</div>
+          <p class="step-card-desc">Assign each student to some valid hour. Check if any assignment works with ≤ r students per hour.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">3</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Return the first T that works.</div>
+          <p class="step-card-desc">Since we try T in increasing order, the first valid T is the minimum.</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-orange">
+      <strong>Problem with this approach</strong>
+      The number of possible assignments is exponential (each student has multiple valid slots). For n=50 students, this is completely infeasible.
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">03</span> The EDF Insight</div>
+    <h2>You don't need to try all assignments</h2>
+    <p>For a fixed T, the best strategy is <strong>Earliest Deadline First (EDF)</strong>: at each hour, among all available unscheduled students, always schedule the ones whose window ends soonest.</p>
+    <p>The intuition: if student A has window [1,2] and student B has window [1,5], and we can only fit one at hour 1 — schedule A. B has more future options; A has only one. Delaying A risks missing their only slot.</p>
+    <div class="callout callout-blue">
+      <strong>EDF is provably optimal for feasibility</strong>
+      This is a classical result in scheduling theory (Jackson's rule, 1955). If any valid schedule exists for time T, EDF will find one. You never need to try other strategies.
+    </div>
+    <h3>EDF walkthrough at T=3 (infeasible)</h3>
+    <table class="data-table">
+      <thead><tr><th>Hour</th><th>Available (unscheduled)</th><th>EDF picks (r=2)</th><th>Issue</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>S0[0,2], S1[0,1]</td><td>S1 (deadline 1), S0 (deadline 2)</td><td></td></tr>
+        <tr><td>1</td><td>S2[1,3]</td><td>S2</td><td></td></tr>
+        <tr><td>2</td><td>S3[2,4]</td><td>S3</td><td></td></tr>
+        <tr><td colspan="3" style="text-align:center;color:var(--muted);font-size:13px">T=3 ends here — S4[3,4] never became available</td><td class="bad">✗ S4 unscheduled</td></tr>
+      </tbody>
+    </table>
+    <h3>EDF walkthrough at T=4 (feasible)</h3>
+    <table class="data-table">
+      <thead><tr><th>Hour</th><th>Available (unscheduled)</th><th>EDF picks (r=2)</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>S0[0,2], S1[0,1]</td><td>S1 (deadline 1), S0 (deadline 2)</td><td></td></tr>
+        <tr><td>1</td><td>S2[1,3]</td><td>S2</td><td></td></tr>
+        <tr><td>2</td><td>S3[2,4]</td><td>S3</td><td></td></tr>
+        <tr><td>3</td><td>S4[3,4]</td><td>S4</td><td class="ok">✓ all scheduled</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 04 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">04</span> Brute Force</div>
+    <h2>The naive solution: try every T with EDF</h2>
+    <div class="code-block">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'bf-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'bf-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="tab-bf-java">
+<pre><span class="cm">// Brute force: try every T from 1 to n</span>
+<span class="kw">import</span> java.util.*;
+<span class="kw">class</span> <span class="tp">BruteForce</span> {
+    <span class="kw">public int</span> <span class="fn">minHours</span>(<span class="kw">int</span>[][] windows, <span class="kw">int</span> r) {
+        <span class="kw">for</span> (<span class="kw">int</span> T = <span class="nm">1</span>; T &lt;= windows.length; T++) {
+            <span class="kw">if</span> (<span class="fn">canScheduleEDF</span>(windows, r, T)) <span class="kw">return</span> T;
+        }
+        <span class="kw">return</span> windows.length;
+    }
+
+    <span class="kw">private boolean</span> <span class="fn">canScheduleEDF</span>(<span class="kw">int</span>[][] windows, <span class="kw">int</span> r, <span class="kw">int</span> T) {
+        <span class="tp">PriorityQueue</span>&lt;<span class="kw">int</span>[]&gt; heap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;((<span class="nm">a</span>,<span class="nm">b</span>) -&gt; a[<span class="nm">1</span>]-b[<span class="nm">1</span>]);
+        <span class="kw">int</span>[][] sorted = windows.clone();
+        <span class="tp">Arrays</span>.<span class="fn">sort</span>(sorted, (<span class="nm">a</span>,<span class="nm">b</span>) -&gt; a[<span class="nm">0</span>]-b[<span class="nm">0</span>]);
+        <span class="kw">int</span> idx = <span class="nm">0</span>, scheduled = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> h = <span class="nm">0</span>; h &lt; T; h++) {
+            <span class="kw">while</span> (idx &lt; sorted.length &amp;&amp; sorted[idx][<span class="nm">0</span>] &lt;= h) heap.<span class="fn">offer</span>(sorted[idx++]);
+            <span class="kw">while</span> (!heap.<span class="fn">isEmpty</span>() &amp;&amp; heap.<span class="fn">peek</span>()[<span class="nm">1</span>] &lt; h) heap.<span class="fn">poll</span>();
+            <span class="kw">for</span> (<span class="kw">int</span> s = <span class="nm">0</span>; s &lt; r &amp;&amp; !heap.<span class="fn">isEmpty</span>(); s++) { heap.<span class="fn">poll</span>(); scheduled++; }
+        }
+        <span class="kw">return</span> scheduled == windows.length;
+    }
+}
+<span class="cm">// Time: O(n² log n) — tries all T values, each EDF check O(n log n)</span></pre>
+      </div>
+      <div class="tab-panel" id="tab-bf-python">
+<pre><span class="kw">import</span> heapq
+
+<span class="kw">class</span> <span class="tp">BruteForce</span>:
+    <span class="kw">def</span> <span class="fn">min_hours</span>(<span class="kw">self</span>, windows, r):
+        <span class="kw">for</span> T <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="fn">len</span>(windows) + <span class="nm">1</span>):
+            <span class="kw">if</span> <span class="kw">self</span>.<span class="fn">can_schedule_edf</span>(windows, r, T):
+                <span class="kw">return</span> T
+        <span class="kw">return</span> <span class="fn">len</span>(windows)
+
+    <span class="kw">def</span> <span class="fn">can_schedule_edf</span>(<span class="kw">self</span>, windows, r, T):
+        sorted_w = <span class="fn">sorted</span>(windows, key=<span class="kw">lambda</span> x: x[<span class="nm">0</span>])
+        heap, idx, scheduled = [], <span class="nm">0</span>, <span class="nm">0</span>
+        <span class="kw">for</span> h <span class="kw">in</span> <span class="fn">range</span>(T):
+            <span class="kw">while</span> idx &lt; <span class="fn">len</span>(sorted_w) <span class="kw">and</span> sorted_w[idx][<span class="nm">0</span>] &lt;= h:
+                heapq.<span class="fn">heappush</span>(heap, sorted_w[idx][<span class="nm">1</span>])
+                idx += <span class="nm">1</span>
+            <span class="kw">while</span> heap <span class="kw">and</span> heap[<span class="nm">0</span>] &lt; h:
+                heapq.<span class="fn">heappop</span>(heap)
+            <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(r):
+                <span class="kw">if not</span> heap: <span class="kw">break</span>
+                heapq.<span class="fn">heappop</span>(heap)
+                scheduled += <span class="nm">1</span>
+        <span class="kw">return</span> scheduled == <span class="fn">len</span>(windows)
+
+<span class="cm"># Time: O(n² log n)  Space: O(n)</span></pre>
+      </div>
+    </div>
+    <p>The brute force is correct: it tries T=1, 2, 3,... and stops at the first T where EDF succeeds. The waste: each run from T=1 to T=answer-1 is a failed EDF check that we throw away.</p>
+  </section>
+
+  <!-- 05 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">05</span> Complexity</div>
+    <h2>Why does linear scan waste work?</h2>
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="complexity-label">Brute force</div>
+        <div class="complexity-val">O(n² log n)</div>
+        <div class="complexity-note">n possible T values × O(n log n) EDF check each. Redundant for early T values that obviously fail.</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-label">Binary search</div>
+        <div class="complexity-val">O(n log²n)</div>
+        <div class="complexity-note">log n T candidates × O(n log n) EDF. Factor of n improvement.</div>
+      </div>
+    </div>
+    <p>The EDF check itself is not the bottleneck — it's always O(n log n). The bottleneck is how many times we run it. The brute force runs it n times; binary search runs it log n times.</p>
+  </section>
+
+  <!-- 06 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">06</span> Repeated Work</div>
+    <h2>What work are we repeating?</h2>
+    <p>The brute force runs EDF for T=1, T=2, ..., T=answer. For small T values that obviously fail (T=1 when there are 10 students and r=1), we do a full O(n log n) EDF check just to confirm it fails.</p>
+    <p>The key insight: <em>can we skip ahead to a better T candidate?</em></p>
+    <p>Yes — because the feasibility is monotone. If T=3 fails, T=2 also fails. If T=7 works, T=8 also works. Binary search exploits this to test only ~log n candidates.</p>
+  </section>
+
+  <!-- 07 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">07</span> Monotone Map</div>
+    <h2>The feasibility answers form a monotonic map</h2>
+    <div class="mono-vis">
+      <div class="mono-caption">n=5, r=2 &nbsp;·&nbsp; condition: canSchedule(T)</div>
+      <div class="mono-row">
+        <div class="mono-cell"><div class="mono-val false">T=1</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">T=2</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val false">T=3</div><div class="mono-label">F</div></div>
+        <div class="mono-cell"><div class="mono-val answer">T=4</div><div class="mono-label">T*</div></div>
+        <div class="mono-cell"><div class="mono-val true">T=5</div><div class="mono-label">T</div></div>
+      </div>
+    </div>
+    <div class="callout callout-purple">
+      <strong>The key shift</strong>
+      The student windows are not sorted — but the feasibility across possible T values is monotone. Binary search finds the first T where EDF succeeds, testing only log n candidates.
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">08</span> Why EDF + Binary Search?</div>
+    <h2>The two algorithms are independent</h2>
+    <p>Binary search answers: <em>which T to test?</em> It narrows the T range in half each step.</p>
+    <p>EDF answers: <em>is this T feasible?</em> Given T, it greedily schedules students in the optimal order.</p>
+    <div class="step-cards">
+      <div class="step-card">
+        <div class="step-card-num">1</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Binary search picks a candidate T.</div>
+          <p class="step-card-desc">Sets lo=1, hi=n, tests mid = (lo+hi)/2 each iteration.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">2</div>
+        <div class="step-card-body">
+          <div class="step-card-title">EDF checks if T is feasible in O(n log n).</div>
+          <p class="step-card-desc">Scans hours 0..T-1, uses a min-heap to always schedule the earliest-deadline student available.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">3</div>
+        <div class="step-card-body">
+          <div class="step-card-title">Binary search adjusts based on EDF result.</div>
+          <p class="step-card-desc">If feasible → try smaller T (hi = mid). If infeasible → try larger T (lo = mid+1).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">09</span> Comparison</div>
+    <h2>What exactly improved?</h2>
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="complexity-label">Brute force</div>
+        <div class="complexity-val">O(n² log n)</div>
+        <div class="complexity-note">Runs EDF for every T from 1 to answer. Most checks are wasted on clearly infeasible T values.</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-label">Binary search</div>
+        <div class="complexity-val">O(n log²n)</div>
+        <div class="complexity-note">Runs EDF only ~log n times. Same EDF check, dramatically fewer calls.</div>
+      </div>
+    </div>
+    <p>The EDF algorithm is unchanged. Binary search simply reduces from n to log n the number of times we call it.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="step-section">
+    <div class="step-label"><span class="step-num-badge">10</span> Pattern</div>
+    <h2>The reusable lesson</h2>
+    <div class="pattern-box">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Brute-force shape that hints at binary search:</p>
+      <pre><span class="kw">for</span> T = 1, 2, 3, ..., n:
+    <span class="kw">if</span> <span class="fn">canSchedule</span>(T):   <span class="cm">// O(n log n) EDF check</span>
+        <span class="kw">return</span> T          <span class="cm">// first T that works</span></pre>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px">Since <code>canSchedule(T)</code> is monotone, binary search finds the first T with O(log n) calls instead of O(n).</p>
+    </div>
+    <div class="callout callout-green">
+      <strong>For Exam Scheduling</strong>
+      EDF did not change. The feasibility check did not change. Only the number of T values tested changed — from O(n) to O(log n). The factor of n improvement in outer iterations, combined with the O(n log n) inner check, gives the final O(n log²n).
+    </div>
+    <a href="exam_scheduling.html" class="back-link">← Back to problem page</a>
+  </section>
+</main>
+<footer class="site-footer">Part of the Binary Search pattern series · <a href="../binary_search_blog.html">Main article</a> · <a href="exam_scheduling.html">Problem page</a></footer>
+<script>
+function switchTab(btn, lang) {
+  const b = btn.closest('.code-block');
+  b.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  b.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
+  b.querySelector('#tab-' + lang).classList.add('active');
+}
+</script>
+</body>
+</html>
