@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadline Scheduling in the Wild</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1814;
+    --ink2: #3d3a34;
+    --ink3: #7a7670;
+    --paper: #f5f2ec;
+    --paper2: #ede9e0;
+    --paper3: #e2ddd3;
+    --accent: #c94f1e;
+    --teal: #1a6b5a;
+    --teal-light: #e8f4f1;
+    --amber: #b5740a;
+    --amber-light: #fdf3e0;
+    --blue: #1e4b8c;
+    --blue-light: #e8eef8;
+    --red: #a02020;
+    --red-light: #faeaea;
+    --green: #2a6b2a;
+    --green-light: #eaf4ea;
+    --rule: #ccc8be;
+    --mono: 'DM Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --sans: 'Instrument Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--paper); border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 2rem;
+    height: 52px;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.02em;
+  }
+  nav .brand { font-family: var(--mono); color: var(--accent); font-size: 13px; margin-right: auto; text-decoration: none; }
+  nav a { color: var(--ink3); text-decoration: none; transition: color 0.15s; }
+  nav a:hover { color: var(--ink); }
+
+  .hero {
+    max-width: 740px; margin: 0 auto;
+    padding: 80px 2rem 56px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero-tag {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--accent); }
+  h1 {
+    font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.1; color: var(--ink); margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  h1 em { color: var(--accent); font-style: italic; }
+  .hero-sub { font-size: 18px; color: var(--ink2); line-height: 1.65; max-width: 580px; margin-bottom: 2rem; }
+  .hero-meta { font-size: 13px; color: var(--ink3); font-family: var(--mono); display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .hero-meta span::before { content: '· '; }
+  .hero-meta span:first-child::before { content: ''; }
+
+  .content { max-width: 740px; margin: 0 auto; padding: 0 2rem; }
+  section { padding: 64px 0 0; }
+  .section-tag {
+    font-family: var(--mono); font-size: 11px; color: var(--ink3);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+  h2 {
+    font-family: var(--serif); font-size: clamp(1.7rem, 3vw, 2.3rem);
+    line-height: 1.15; color: var(--ink); margin-bottom: 1.25rem; letter-spacing: -0.01em;
+  }
+  h2 em { color: var(--accent); font-style: italic; }
+  h3 {
+    font-family: var(--sans); font-size: 1.05rem; font-weight: 600;
+    color: var(--ink); margin: 2rem 0 0.6rem; letter-spacing: -0.01em;
+  }
+  p { margin-bottom: 1.1rem; color: var(--ink2); }
+  strong { color: var(--ink); font-weight: 600; }
+
+  .callout {
+    background: var(--paper2); border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0; padding: 1rem 1.25rem; margin: 1.5rem 0;
+    font-size: 15px; color: var(--ink2);
+  }
+  .callout strong { color: var(--accent); }
+  .callout.teal { border-color: var(--teal); background: var(--teal-light); }
+  .callout.teal strong { color: var(--teal); }
+  .callout.amber { border-color: var(--amber); background: var(--amber-light); }
+  .callout.amber strong { color: var(--amber); }
+  .callout.blue { border-color: var(--blue); background: var(--blue-light); }
+  .callout.blue strong { color: var(--blue); }
+  .callout.red { border-color: var(--red); background: var(--red-light); }
+  .callout.red strong { color: var(--red); }
+  .callout.green { border-color: var(--green); background: var(--green-light); }
+  .callout.green strong { color: var(--green); }
+
+  hr { border: none; border-top: 1px solid var(--rule); margin: 48px 0 0; }
+
+  pre {
+    background: var(--ink); color: #e8e2d8;
+    border-radius: 8px; padding: 1.25rem 1.4rem;
+    font-family: var(--mono); font-size: 13px; line-height: 1.7;
+    overflow-x: auto; margin: 1.25rem 0; tab-size: 2;
+  }
+  code {
+    font-family: var(--mono); font-size: 13px;
+    background: var(--paper3); padding: 2px 6px; border-radius: 3px; color: var(--ink);
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  .kw { color: #f4a261; } .cm { color: #8a8070; font-style: italic; }
+  .fn { color: #7ec8a0; } .str { color: #d4a878; } .num { color: #c3e8b0; }
+
+  .scene {
+    background: var(--paper2); border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent); border-radius: 0 0 8px 8px;
+    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  }
+  .scene-label {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .scene p { font-style: italic; color: var(--ink2); margin-bottom: 0.6rem; font-size: 16px; }
+  .scene p:last-child { margin: 0; }
+  .scene p strong { font-style: normal; color: var(--ink); }
+
+  .think {
+    background: var(--amber-light); border-left: 3px solid var(--amber);
+    border-radius: 0 6px 6px 0; padding: 1rem 1.25rem; margin: 1.5rem 0;
+  }
+  .think-label {
+    font-family: var(--mono); font-size: 11px; color: var(--amber);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+  .think p { color: var(--ink2); font-size: 15px; margin: 0; }
+
+  .reveal-btn {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    background: transparent; border: 1px solid var(--rule);
+    color: var(--ink3); padding: 8px 16px; cursor: pointer;
+    border-radius: 4px; transition: all 0.15s; margin: 0.5rem 0;
+  }
+  .reveal-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .reveal-body {
+    display: none; margin-top: 0.5rem;
+    background: var(--teal-light); border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0; padding: 1rem 1.25rem;
+  }
+  .reveal-body.open { display: block; }
+  .reveal-body p { color: var(--ink2); font-size: 15px; margin-bottom: 0.6rem; }
+  .reveal-body p:last-child { margin: 0; }
+  .reveal-body strong { color: var(--teal); }
+
+  .reality {
+    background: var(--paper2); border: 1px solid var(--rule);
+    border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0;
+    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  }
+  .reality-label {
+    font-family: var(--mono); font-size: 11px; color: var(--blue);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;
+  }
+  .reality p { color: var(--ink2); font-size: 15px; margin-bottom: 0.6rem; }
+  .reality p:last-child { margin: 0; }
+  .reality strong { color: var(--blue); }
+  .reality code { background: var(--blue-light); }
+
+  .viz-wrap {
+    background: var(--paper2); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 1.25rem 1.4rem; margin: 1.5rem 0;
+  }
+  .viz-title {
+    font-family: var(--mono); font-size: 11px; color: var(--ink3);
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .viz-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+  .btn {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    padding: 6px 14px; border-radius: 4px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--paper);
+    color: var(--ink2); transition: all 0.15s; letter-spacing: 0.02em;
+  }
+  .btn:hover { background: var(--paper3); color: var(--ink); }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.primary:hover { background: #a83e10; }
+  .btn.teal { background: var(--teal); color: white; border-color: var(--teal); }
+  .btn.teal:hover { background: #155748; }
+
+  .scenario-map {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin: 1.5rem 0;
+  }
+  @media (max-width: 580px) { .scenario-map { grid-template-columns: 1fr; } }
+  .scenario-chip {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 0.9rem 1.1rem;
+    border-top: 3px solid var(--rule); cursor: pointer; transition: border-color 0.15s;
+  }
+  .scenario-chip:hover { border-top-color: var(--accent); }
+  .scenario-chip.s1 { border-top-color: var(--teal); }
+  .scenario-chip.s2 { border-top-color: var(--blue); }
+  .scenario-chip.s3 { border-top-color: var(--amber); }
+  .scenario-chip.s4 { border-top-color: var(--red); }
+  .scenario-chip.s5 { border-top-color: var(--accent); }
+  .scenario-chip .sc-num { font-family: var(--mono); font-size: 10px; color: var(--ink3); margin-bottom: 3px; }
+  .scenario-chip h4 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .scenario-chip p { font-size: 12px; color: var(--ink3); margin: 0; }
+
+  .pill {
+    display: inline-block; font-family: var(--mono); font-size: 11px;
+    padding: 2px 8px; border-radius: 3px; vertical-align: middle;
+    font-weight: 500; letter-spacing: 0.03em;
+  }
+  .pill-teal { background: var(--teal-light); color: var(--teal); }
+  .pill-blue { background: var(--blue-light); color: var(--blue); }
+  .pill-amber { background: var(--amber-light); color: var(--amber); }
+  .pill-red { background: var(--red-light); color: var(--red); }
+
+  .sum-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 14px; }
+  .sum-table th {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--ink3);
+    border-bottom: 1px solid var(--rule); padding: 8px 12px; text-align: left; font-weight: 500;
+  }
+  .sum-table td { padding: 9px 12px; border-bottom: 1px solid var(--paper3); vertical-align: top; }
+  .sum-table tr:last-child td { border-bottom: none; }
+  .sum-table a { color: var(--blue); text-decoration: none; }
+  .sum-table a:hover { text-decoration: underline; }
+
+  footer {
+    border-top: 1px solid var(--rule); padding: 3rem 2rem;
+    text-align: center; margin-top: 80px;
+    font-family: var(--mono); font-size: 12px; color: var(--ink3);
+  }
+  footer a { color: inherit; }
+  canvas { display: block; }
+  @media (max-width: 600px) { nav a:not(.brand) { display: none; } pre { font-size: 12px; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="deadline_scheduling_blog.html">Deadline Scheduling</a>
+  <a href="#scenarios">Overview</a>
+  <a href="#hotel">Hotel</a>
+  <a href="#exams">Exams</a>
+  <a href="#university">University</a>
+  <a href="#rideshare">Dispatch</a>
+  <a href="#closing">Patterns</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Algorithms in the Wild</div>
+  <h1>You've already used this algorithm <em>a hundred times</em></h1>
+  <p class="hero-sub">
+    Booking a hotel room, registering for an exam, picking university courses — a scheduling algorithm quietly runs every time. Most people never notice. Once you see it, you can't unsee it.
+  </p>
+  <div class="hero-meta">
+    <span>Four real scenarios</span>
+    <span>Pattern-first, intuition-driven</span>
+    <span>Honest about how databases actually work</span>
+    <span>Companion to the scheduling track</span>
+  </div>
+</div>
+
+<div class="content">
+
+<section id="scenarios">
+  <div class="section-tag">00 — Overview</div>
+  <h2>Four places where scheduling algorithms <em>live</em></h2>
+
+  <p>
+    Each scenario below grounds one core pattern. The goal isn't to memorize algorithms — it's to reach the moment where you walk into a hotel lobby, a testing center, or a university registration portal and think: <em>"I know what question that system is answering right now."</em>
+  </p>
+
+  <div class="scenario-map" id="scenarios-map">
+    <div class="scenario-chip s1">
+      <div class="sc-num">01</div>
+      <h4>Hotel Front Desk</h4>
+      <p>Overlap detection + conflict check</p>
+    </div>
+    <div class="scenario-chip s2">
+      <div class="sc-num">02</div>
+      <h4>Exam Center</h4>
+      <p>Fleet sizing + EDF assignment</p>
+    </div>
+    <div class="scenario-chip s3">
+      <div class="sc-num">03</div>
+      <h4>University Registration</h4>
+      <p>Maximize courses without conflicts</p>
+    </div>
+    <div class="scenario-chip s4">
+      <div class="sc-num">04</div>
+      <h4>Ride-Share Dispatch</h4>
+      <p>Earliest-free resource assignment</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>A note on accuracy:</strong> Real production systems use databases, caches, and distributed locks — not in-memory sorted arrays. Each scenario names both the <em>conceptual algorithm</em> and the <em>real production mechanism</em>. Both matter.
+  </div>
+</section>
+
+<hr>
+
+<section id="hotel">
+  <div class="section-tag">01 — Hotel Front Desk</div>
+  <h2>The question behind <em>"Is this room available?"</em></h2>
+
+  <div class="scene">
+    <div class="scene-label">Grand Hyatt · Front Desk · 3:47 PM</div>
+    <p>You walk up. The receptionist turns to her screen. <strong>"Do you have a room from the 14th to the 18th?"</strong></p>
+    <p>A moment passes. <strong>"Yes, we have a king available on the 12th floor."</strong></p>
+    <p>What did the computer just answer?</p>
+  </div>
+
+  <p>
+    At its core, the system is answering one question: does your requested stay conflict with any existing reservation for that room type? Think of each reservation as a pair <code>[checkIn, checkOut]</code>, and your request as another pair: <code>[14, 18]</code>. The question becomes: does your interval overlap with any existing one?
+  </p>
+  <p>
+    Two intervals conflict if and only if they overlap. The overlap condition is:
+  </p>
+
+  <div class="callout teal">
+    <strong>Overlap condition:</strong> intervals <code>[a, b]</code> and <code>[c, d]</code> overlap when <code>a &lt; d AND c &lt; b</code>.<br><br>
+    The clearest way to derive it: first identify when they do <em>not</em> overlap — either your stay ends before theirs starts (<code>b ≤ c</code>), or theirs ends before yours starts (<code>d ≤ a</code>). Negate both conditions and you get the overlap formula.
+  </div>
+
+  <div class="think">
+    <div class="think-label">Pause and think</div>
+    <p>A hotel has 80,000 reservations across all rooms. Your check-in is the 14th. For a given room, how would you quickly find whether any existing booking overlaps [14, 18] — without scanning all bookings?</p>
+  </div>
+
+  <button class="reveal-btn" onclick="toggle(this)">▼ What's your answer? See the algorithmic approach</button>
+  <div class="reveal-body">
+    <p><strong>For the coding problem (LC 729 — My Calendar I):</strong> keep bookings for a room in a sorted data structure. To check <code>[14, 18]</code>, find the first booking whose start is less than 18 and check whether its end is greater than 14.</p>
+    <p>This is exactly what LC 729 asks you to implement. The interval overlap condition is the core of the solution.</p>
+  </div>
+
+  <h3>How real hotel systems approach this</h3>
+  <p>
+    The conceptual model above — a sorted list of bookings per room, checked with binary search — is exactly what LC 729 tests. But production hotel systems at any meaningful scale are unlikely to work this way. Availability needs to be fast for millions of concurrent searches.
+  </p>
+
+  <div class="reality">
+    <div class="reality-label">One way production systems approach this</div>
+    <p>A common pattern is to pre-aggregate availability rather than scan booking records directly. One simplified version: maintain a table with one row per room type per date, tracking an available count. Checking availability for <code>[14, 18]</code> might then look like this:</p>
+    <pre style="margin:0.75rem 0 0.5rem;font-size:12px;border-radius:6px;padding:1rem"><span class="cm">-- Simplified illustration — real queries vary significantly</span>
+<span class="kw">SELECT</span> <span class="fn">MIN</span>(available_count)
+<span class="kw">FROM</span>   inventory
+<span class="kw">WHERE</span>  room_type_id = <span class="num">42</span>
+  <span class="kw">AND</span>  date <span class="kw">BETWEEN</span> <span class="str">'2024-01-14'</span> <span class="kw">AND</span> <span class="str">'2024-01-17'</span>;
+<span class="cm">-- If MIN > 0, the room is available for the whole stay</span></pre>
+    <p>This touches only as many rows as there are days in the requested stay. The overlap logic moves into how counts are decremented when a booking is made, rather than being checked at query time.</p>
+  </div>
+
+  <div class="callout blue">
+    <strong>Concurrency is the hard part.</strong> The real challenge isn't checking availability — it's handling two guests simultaneously checking the same room. Production systems typically address this with database-level locking or optimistic concurrency controls.
+  </div>
+
+  <div class="viz-wrap">
+    <div class="viz-title">Overlap checker — drag the gold bar to test your request against existing bookings</div>
+    <canvas id="hotel-canvas" height="120"></canvas>
+    <div id="hotel-msg" style="font-family:var(--mono);font-size:12px;color:var(--ink3);margin-top:8px;">Drag the gold bar left or right to test different check-in dates.</div>
+  </div>
+
+  <h3>The pattern this maps to</h3>
+  <p>
+    <strong>LC 729 — My Calendar I</strong> <span class="pill pill-teal">Conflict check</span><br>
+    New bookings arrive one at a time. Accept the booking if it doesn't overlap any existing one.
+  </p>
+  <p>
+    <strong>LC 731 — My Calendar II</strong> <span class="pill pill-teal">Double-booking</span><br>
+    Extends to: allow a booking even if it creates a single overlap, but reject it if it would cause triple overlap.
+  </p>
+</section>
+
+<hr>
+
+<section id="exams">
+  <div class="section-tag">02 — The Exam Center</div>
+  <h2>How many cubicles does a testing center <em>need?</em></h2>
+
+  <div class="scene">
+    <div class="scene-label">Prometric Testing Center · 9:12 AM</div>
+    <p>You arrive for your GRE. There are 24 individual testing cubicles. Most are occupied. The proctor checks you in: <strong>"You're in cubicle 7. Your exam starts at 9:15."</strong></p>
+    <p>Three things are worth asking: How did 24 become the number? When someone finishes early, how does the system decide who gets their cubicle next? And why does your exam slot have a hard expiry window?</p>
+  </div>
+
+  <h3>Question 1: How many cubicles?</h3>
+  <p>
+    The relevant algorithmic question is: <strong>given a set of exam bookings, what is the maximum number running simultaneously at any point?</strong> That peak is the minimum number of cubicles needed.
+  </p>
+
+  <button class="reveal-btn" onclick="toggle(this)">▼ See the algorithm</button>
+  <div class="reveal-body">
+    <p><strong>Sort by start time. Use a min-heap of end times.</strong> Process each exam in start-time order. When a new exam begins, check if the smallest end time in the heap is ≤ the new exam's start. If so, that cubicle is free to reuse. Otherwise, add a new cubicle.</p>
+    <p><strong>This is LC 253 — Meeting Rooms II.</strong> Cubicles are meeting rooms. Exams are meetings. The algorithm is identical.</p>
+  </div>
+
+  <div class="reality">
+    <div class="reality-label">The algorithm vs. the real decision</div>
+    <p>Physical capacity decisions involve demand forecasts, building layout, licensing rules, and budget. The min-heap algorithm is still the correct conceptual tool for answering "what peak concurrency does the data imply?"</p>
+  </div>
+
+  <h3>Question 2: Who gets the next free cubicle?</h3>
+  <p>
+    When cubicle 7 frees up at 11:00 AM and three candidates are waiting, which one should be assigned first? This is where deadline scheduling enters the exam center.
+  </p>
+  <p>
+    Each candidate has a testing window. If Candidate A's window closes at 1 PM and Candidate B's closes at 5 PM, giving the cubicle to A first is the right call.
+  </p>
+
+  <div class="callout teal">
+    <strong>Earliest Deadline First (EDF):</strong> always assign the available resource to the candidate whose window expires soonest. If any assignment schedule can serve all candidates within their windows, EDF will find one.
+  </div>
+
+  <button class="reveal-btn" onclick="toggle(this)">▼ Think it through</button>
+  <div class="reveal-body">
+    <p>EDF maximizes the <em>number</em> of candidates served, not fairness to any individual.</p>
+    <p>This maps directly to <strong>LC 630 — Course Schedule III</strong>: sort by deadline, use a max-heap to swap out the longest course if time exceeds a deadline.</p>
+  </div>
+
+  <div class="viz-wrap">
+    <div class="viz-title">EDF assignment — step through candidate scheduling</div>
+    <canvas id="edf-canvas" height="150"></canvas>
+    <div id="edf-state" style="font-family:var(--mono);font-size:12px;color:var(--ink3);margin-top:8px;">Press Step to assign candidates by earliest deadline first.</div>
+    <div class="viz-controls">
+      <button class="btn primary" onclick="edfStep()">Step ▶</button>
+      <button class="btn" onclick="edfReset()">↺ Reset</button>
+    </div>
+  </div>
+
+  <h3>The fleet-sizing pattern in other domains</h3>
+  <p>
+    The same "how many resources do I need?" question appears everywhere: ICU beds, rental fleets, courtrooms, cloud servers. All of these reduce to: given N intervals of resource usage, what is the maximum number overlapping at any moment?
+  </p>
+</section>
+
+<hr>
+
+<section id="university">
+  <div class="section-tag">03 — University Course Registration</div>
+  <h2>Picking courses is a <em>scheduling optimization</em> problem</h2>
+
+  <div class="scene">
+    <div class="scene-label">University Portal · Registration Week</div>
+    <p>You open the course catalog. You want to take Algorithms, Computer Networks, Linear Algebra, and Film Studies. But Algorithms is Mon/Wed 10–11:30, Networks is Mon/Wed 10–12. <strong>Which combination do you register for?</strong></p>
+    <p>You're doing in your head what a scheduling algorithm does formally.</p>
+  </div>
+
+  <p>
+    This is interval scheduling directly. Each course is an interval <code>[startTime, endTime]</code> on the weekly schedule. You want to maximize the number of courses you can take without overlap.
+  </p>
+
+  <h3>The greedy insight</h3>
+  <p>
+    Among all available courses that don't conflict with what you've already committed to, always pick the one that <strong>ends earliest</strong>. This leaves the maximum remaining time available for future courses.
+  </p>
+
+  <div class="callout amber">
+    <strong>Weighted courses:</strong> If courses have different credit values and you want to maximize total credits, the problem becomes weighted interval scheduling and requires dynamic programming combined with binary search.
+  </div>
+
+  <button class="reveal-btn" onclick="toggle(this)">▼ Work it out</button>
+  <div class="reveal-body">
+    <p>Sort by end time: [9,11], [10,12], [11,13], [12,14], [13,15], [14,16].</p>
+    <p>Take [9,11], then [11,13], then [13,15]. <strong>Maximum = 3 courses.</strong></p>
+  </div>
+
+  <div class="viz-wrap">
+    <div class="viz-title">Course registration — greedy selection</div>
+    <canvas id="course-canvas" height="170"></canvas>
+    <div id="course-msg" style="font-family:var(--mono);font-size:12px;color:var(--ink3);margin-top:8px;">Click Run to watch greedy selection pick the maximum non-overlapping set.</div>
+    <div class="viz-controls">
+      <button class="btn primary" onclick="courseRun()">Run EDF selection</button>
+      <button class="btn" onclick="courseReset()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="reality">
+    <div class="reality-label">How registration systems typically approach this</div>
+    <p>University registration systems usually do reactive conflict checking when a student tries to add a course. The optimization problem is typically left to the student or to planner tools.</p>
+    <p><strong>The greedy algorithm is what an optimal human strategy looks like, formalized.</strong></p>
+  </div>
+</section>
+
+<hr>
+
+<section id="rideshare">
+  <div class="section-tag">04 — Ride-Share Dispatch</div>
+  <h2>Driver assignment as a <em>resource scheduling problem</em></h2>
+
+  <div class="scene">
+    <div class="scene-label">Ride-share app · 9:03 AM · You request a ride</div>
+    <p>You open the app. A driver is assigned in seconds. <strong>Why that driver and not another one three blocks away?</strong></p>
+    <p>Distance is one factor — but so is availability.</p>
+  </div>
+
+  <p>
+    Thinking about it algorithmically: each driver is a resource, and each trip is an interval of time during which that resource is occupied. The dispatch question has real structural similarity to resource scheduling.
+  </p>
+
+  <div class="callout teal">
+    <strong>The EDF intuition in dispatch:</strong> Among all resources currently occupied, the one whose end time is soonest becomes available first. Tracking that is the scheduling insight. Whether any given system implements it this way is a separate question.
+  </div>
+
+  <div class="reality">
+    <div class="reality-label">What production systems actually do</div>
+    <p>Real dispatch systems combine spatial indexing, ML models for trip duration prediction, supply-demand balancing, and pricing signals. The min-heap model is a useful conceptual frame, not a description of a production implementation.</p>
+  </div>
+
+  <p>
+    The LeetCode problem that captures the resource-assignment structure most cleanly is <strong>LC 2402 — Meeting Rooms III</strong>. The structure is a good analogy for dispatch, even if the real-world system is more complex.
+  </p>
+</section>
+
+<hr>
+
+<section id="closing">
+  <div class="section-tag">05 — Pattern Summary</div>
+  <h2>Four scenarios, <em>one underlying question</em></h2>
+
+  <p>
+    Strip away the hotel lobby, the exam cubicle, the registration portal, and the driver app and you find the same skeleton every time: items claim segments of a shared resource, and you need to decide which claims to honor, how many resources to provision, or who gets the next free slot.
+  </p>
+
+  <table class="sum-table">
+    <thead>
+      <tr>
+        <th>The question</th>
+        <th>Where you've seen it</th>
+        <th>Algorithm</th>
+        <th>LeetCode</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Does this new interval conflict with any existing one?</strong></td>
+        <td>Hotel availability, seat hold, calendar booking</td>
+        <td>Sorted set + overlap condition <code>a&lt;d AND c&lt;b</code></td>
+        <td><a href="https://leetcode.com/problems/my-calendar-i/" target="_blank" rel="noopener noreferrer">LC 729, 731</a></td>
+      </tr>
+      <tr>
+        <td><strong>What is the minimum number of resources to serve all intervals?</strong></td>
+        <td>Testing cubicles, meeting rooms, rental fleet, cloud servers</td>
+        <td>Sort by start ↑, min-heap of end times</td>
+        <td><a href="https://leetcode.com/problems/meeting-rooms-ii/" target="_blank" rel="noopener noreferrer">LC 253, 2402</a></td>
+      </tr>
+      <tr>
+        <td><strong>What is the maximum number of non-overlapping intervals I can select?</strong></td>
+        <td>University courses, job interviews, non-conflicting bookings</td>
+        <td>Sort by end time ↑, greedy pointer</td>
+        <td><a href="https://leetcode.com/problems/non-overlapping-intervals/" target="_blank" rel="noopener noreferrer">LC 435, 646, 452</a></td>
+      </tr>
+      <tr>
+        <td><strong>Which waiting request should get the next freed resource?</strong></td>
+        <td>Exam cubicle assignment, driver dispatch, CPU scheduling</td>
+        <td>Sort waiting by deadline ↑, assign earliest-deadline first (EDF)</td>
+        <td><a href="https://leetcode.com/problems/course-schedule-iii/" target="_blank" rel="noopener noreferrer">LC 630, 1353</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Interview sentence that signals understanding:</strong> "Each item is an interval on a shared resource. Since we need to [minimize resources / maximize selected / assign earliest-deadline first], I'll sort by [start time / end time / deadline]."
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Deadline Scheduling in the Wild &nbsp;·&nbsp; Companion to the <a href="deadline_scheduling_blog.html">Deadline Scheduling track</a>
+</footer>
+
+<script>
+function toggle(btn) {
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+  btn.textContent = body.classList.contains('open')
+    ? btn.textContent.replace('▼','▲')
+    : btn.textContent.replace('▲','▼');
+}
+
+const C = {
+  teal:'#1a6b5a', tealL:'#c8e8e0',
+  blue:'#1e4b8c', blueL:'#ccd8ee',
+  amber:'#b5740a',amberL:'#f5dfa0',
+  red:'#a02020',  redL:'#f0c0c0',
+  ink:'#1a1814',  ink2:'#3d3a34', ink3:'#7a7670',
+  paper:'#f5f2ec',paper2:'#ede9e0',paper3:'#e2ddd3',
+  rule:'#ccc8be', accent:'#c94f1e'
+};
+
+function dpr() { return window.devicePixelRatio || 1; }
+function setupCanvas(id, h) {
+  const c = document.getElementById(id);
+  const W = c.parentElement.clientWidth;
+  c.width = W * dpr(); c.height = h * dpr();
+  c.style.width = W + 'px'; c.style.height = h + 'px';
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr(), 0, 0, dpr(), 0, 0);
+  ctx.clearRect(0, 0, W, h);
+  return { ctx, W, H: h };
+}
+
+function drawAxis(ctx, PAD, W, H, maxT, yAxis) {
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(PAD, yAxis); ctx.lineTo(W - PAD, yAxis); ctx.stroke();
+  ctx.fillStyle = C.ink3;
+  ctx.font = `11px 'DM Mono', monospace`; ctx.textAlign = 'center';
+  const uW = (W - PAD * 2) / maxT;
+  for (let t = 0; t <= maxT; t += (maxT <= 15 ? 1 : 2)) {
+    const x = PAD + t * uW;
+    ctx.fillText(t, x, yAxis + 14);
+    ctx.strokeStyle = C.paper3; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, 16); ctx.lineTo(x, yAxis); ctx.stroke();
+  }
+  return uW;
+}
+
+const HOTEL_BKS = [[1,4],[6,10],[12,16],[19,23],[26,29]];
+let hotelReq = 17, hotelDrag = false;
+
+function hotelDraw() {
+  const { ctx, W, H } = setupCanvas('hotel-canvas', 120);
+  const PAD = 24, maxT = 30;
+  const uW = drawAxis(ctx, PAD, W, H, maxT, 88);
+
+  HOTEL_BKS.forEach(bk => {
+    const x1 = PAD + bk[0] * uW, x2 = PAD + bk[1] * uW;
+    ctx.fillStyle = C.blueL; ctx.strokeStyle = C.blue; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x1 + 1, 24, x2 - x1 - 2, 28, 3); ctx.fill(); ctx.stroke();
+    if (x2 - x1 > 24) {
+      ctx.fillStyle = C.blue; ctx.font = `11px 'DM Mono',monospace`; ctx.textAlign = 'center';
+      ctx.fillText(`${bk[0]}–${bk[1]}`, (x1 + x2) / 2, 41);
+    }
+  });
+
+  const reqEnd = hotelReq + 4;
+  const clash = HOTEL_BKS.some(bk => hotelReq < bk[1] && reqEnd > bk[0]);
+  const rx1 = PAD + hotelReq * uW, rx2 = PAD + reqEnd * uW;
+  ctx.fillStyle = clash ? C.redL : C.tealL;
+  ctx.strokeStyle = clash ? C.red : C.teal;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(rx1 + 1, 58, rx2 - rx1 - 2, 24, 3); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = clash ? C.red : C.teal;
+  ctx.font = `500 11px 'DM Mono',monospace`; ctx.textAlign = 'center';
+  ctx.fillText(`Your request: ${hotelReq}–${reqEnd}`, (rx1 + rx2) / 2, 73);
+
+  const msg = document.getElementById('hotel-msg');
+  msg.style.color = clash ? C.red : C.teal;
+  msg.textContent = clash
+    ? `Conflict — [${hotelReq}, ${reqEnd}] overlaps an existing booking.`
+    : `Available — [${hotelReq}, ${reqEnd}] has no conflicts.`;
+}
+
+const hc = document.getElementById('hotel-canvas');
+hc.style.cursor = 'ew-resize';
+function hotelFromEvent(e) {
+  const r = hc.getBoundingClientRect();
+  const W = hc.clientWidth, PAD = 24, uW = (W - PAD * 2) / 30;
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+  hotelReq = Math.max(0, Math.min(26, Math.round((cx - PAD) / uW)));
+  hotelDraw();
+}
+hc.addEventListener('mousedown', e => { hotelDrag = true; hotelFromEvent(e); });
+hc.addEventListener('mousemove', e => { if (hotelDrag) hotelFromEvent(e); });
+hc.addEventListener('touchstart', e => { e.preventDefault(); hotelFromEvent(e); }, { passive: false });
+hc.addEventListener('touchmove', e => { e.preventDefault(); hotelFromEvent(e); }, { passive: false });
+document.addEventListener('mouseup', () => hotelDrag = false);
+
+const EDF_DATA = [
+  { name: 'A', dur: 3, dl: 5 },
+  { name: 'B', dur: 4, dl: 9 },
+  { name: 'C', dur: 2, dl: 7 },
+  { name: 'D', dur: 5, dl: 14 },
+  { name: 'E', dur: 1, dl: 6 },
+];
+const EDF_SORTED = [...EDF_DATA].sort((a, b) => a.dl - b.dl);
+let edfI = 0, edfHeap = [], edfTime = 0;
+
+function edfReset() {
+  edfI = 0; edfHeap = []; edfTime = 0;
+  document.getElementById('edf-state').textContent = 'Candidates sorted by deadline. Press Step to assign one at a time.';
+  edfDraw();
+}
+function edfStep() {
+  if (edfI >= EDF_SORTED.length) {
+    document.getElementById('edf-state').textContent = `Done. ${edfHeap.length} candidates can be served: [${edfHeap.map(x => x.name).join(', ')}]`;
+    return;
+  }
+  const c = EDF_SORTED[edfI];
+  edfHeap.push(c);
+  edfHeap.sort((a, b) => b.dur - a.dur);
+  edfTime += c.dur;
+  let msg = `Candidate ${c.name}: duration ${c.dur}h, window closes at t=${c.dl}. Time used: ${edfTime}.`;
+  if (edfTime > c.dl) {
+    const ev = edfHeap.shift();
+    edfTime -= ev.dur;
+    msg += ` Over window — drop longest (${ev.name}, ${ev.dur}h).`;
+  } else {
+    msg += ` Fits within window.`;
+  }
+  edfI++;
+  document.getElementById('edf-state').textContent = msg;
+  edfDraw();
+}
+
+function edfDraw() {
+  const { ctx, W, H } = setupCanvas('edf-canvas', 150);
+  const n = EDF_SORTED.length;
+  const cw = Math.min(72, (W - 24) / n - 8);
+  EDF_SORTED.forEach((ex, i) => {
+    const inH = edfHeap.some(h => h.name === ex.name);
+    const proc = i < edfI;
+    const x = 12 + i * (cw + 8);
+    ctx.fillStyle = inH ? C.tealL : (proc ? C.paper3 : C.paper2);
+    ctx.strokeStyle = inH ? C.teal : (proc ? C.rule : C.ink3);
+    ctx.lineWidth = inH ? 2 : 0.5;
+    ctx.beginPath(); ctx.roundRect(x, 10, cw, 76, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = inH ? C.teal : C.ink3;
+    ctx.font = `600 15px 'Instrument Sans',sans-serif`; ctx.textAlign = 'center';
+    ctx.fillText(ex.name, x + cw / 2, 50);
+    ctx.font = `11px 'DM Mono',monospace`;
+    ctx.fillText(`dur:${ex.dur}`, x + cw / 2, 66);
+    ctx.fillText(`dl:${ex.dl}`, x + cw / 2, 80);
+  });
+  ctx.fillStyle = C.ink3; ctx.font = `11px 'DM Mono',monospace`; ctx.textAlign = 'left';
+  ctx.fillText(`Sorted by deadline →   Schedule: [${edfHeap.map(e => e.name + '(' + e.dur + ')').join(', ') || '—'}]   Time: ${edfTime}`, 12, 108);
+}
+
+const COURSES = [
+  { name: 'Algorithms',    s: 9,  e: 11, col: C.teal },
+  { name: 'Networks',      s: 10, e: 12, col: C.blue },
+  { name: 'Linear Algebra',s: 11, e: 13, col: C.amber },
+  { name: 'Film Studies',  s: 12, e: 14, col: C.red },
+  { name: 'Physics',       s: 13, e: 15, col: C.accent },
+  { name: 'Economics',     s: 14, e: 16, col: '#2a6b2a' },
+];
+const COURSE_SORTED = [...COURSES].sort((a, b) => a.e - b.e);
+let courseSelected = [], courseDone = false;
+
+function courseReset() {
+  courseSelected = []; courseDone = false;
+  document.getElementById('course-msg').textContent = 'Click Run to watch greedy selection pick the maximum non-overlapping set.';
+  courseDraw();
+}
+function courseRun() {
+  if (courseDone) { courseReset(); return; }
+  courseSelected = [];
+  let lastEnd = -Infinity;
+  COURSE_SORTED.forEach(c => {
+    if (c.s >= lastEnd) { courseSelected.push(c.name); lastEnd = c.e; }
+  });
+  courseDone = true;
+  document.getElementById('course-msg').textContent =
+    `Greedy selected ${courseSelected.length} courses: [${courseSelected.join(', ')}].`;
+  courseDraw();
+}
+
+function courseDraw() {
+  const { ctx, W, H } = setupCanvas('course-canvas', 170);
+  const PAD = 80, maxT = 17, minT = 8;
+  const TW = W - PAD - 24;
+  const uW = TW / (maxT - minT);
+  const ROW_H = 20, ROW_GAP = 4;
+
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(PAD, H - 20); ctx.lineTo(W - 24, H - 20); ctx.stroke();
+  ctx.fillStyle = C.ink3; ctx.font = `11px 'DM Mono',monospace`; ctx.textAlign = 'center';
+  for (let t = minT; t <= maxT; t++) {
+    const x = PAD + (t - minT) * uW;
+    ctx.fillText(t, x, H - 6);
+    ctx.strokeStyle = C.paper3; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, 8); ctx.lineTo(x, H - 20); ctx.stroke();
+  }
+
+  COURSE_SORTED.forEach((c, i) => {
+    const x1 = PAD + (c.s - minT) * uW;
+    const x2 = PAD + (c.e - minT) * uW;
+    const y = 10 + i * (ROW_H + ROW_GAP);
+    const selected = courseSelected.includes(c.name);
+    const dimmed = courseDone && !selected;
+    ctx.fillStyle = dimmed ? C.paper3 : c.col + '28';
+    ctx.strokeStyle = dimmed ? C.rule : c.col;
+    ctx.lineWidth = selected ? 2 : 0.5;
+    ctx.globalAlpha = dimmed ? 0.5 : 1;
+    ctx.beginPath(); ctx.roundRect(x1 + 1, y, x2 - x1 - 2, ROW_H - 2, 3); ctx.fill(); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = dimmed ? C.ink3 : c.col;
+    ctx.font = `${selected ? '600' : '400'} 12px 'Instrument Sans',sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.fillText(c.name, PAD - 6, y + ROW_H / 2 + 4);
+  });
+}
+
+window.addEventListener('load', () => { hotelDraw(); edfDraw(); courseDraw(); });
+window.addEventListener('resize', () => { hotelDraw(); edfDraw(); courseDraw(); });
+</script>
+</body>
+</html>

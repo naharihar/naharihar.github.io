@@ -196,6 +196,40 @@
   .callout.amber { border-color: var(--amber); background: var(--amber-soft); }
   .callout.blue { border-color: var(--blue); background: var(--blue-soft); }
   .callout.purple { border-color: var(--purple); background: var(--purple-soft); }
+  .companion-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--paper-warm), #f7f3ec);
+    padding: 1.25rem 1.35rem;
+    margin-top: 1.5rem;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .companion-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .companion-kicker {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.45rem;
+  }
+  .companion-card h3 { margin: 0 0 0.45rem; }
+  .companion-card p {
+    margin: 0 0 0.65rem;
+    color: var(--ink-muted);
+    font-size: 0.94rem;
+  }
+  .companion-meta {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+  }
   .pattern-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -592,8 +626,20 @@ for (const iv of intervals) {
     </div>
   </section>
 
+  <section class="section">
+    <div class="section-label">04 — In The Wild</div>
+    <h2>See where these patterns show up in <em>real systems</em></h2>
+    <p>This companion piece grounds the scheduling patterns in hotel bookings, exam centers, university registration, and dispatch systems. It is intentionally careful about where the algorithm is truly the same problem and where the production system is only structurally similar.</p>
+    <a class="companion-card" href="deadline_scheduling_realworld.html">
+      <div class="companion-kicker">Companion Article</div>
+      <h3>Deadline Scheduling In The Wild</h3>
+      <p>Walk through real-world examples with honest boundary lines: what maps directly to interval scheduling, what is only an analogy, and where databases, locks, and scale change the implementation.</p>
+      <div class="companion-meta">Hotel availability · Exam centers · University registration · Ride-share dispatch</div>
+    </a>
+  </section>
+
   <section class="section" id="problems">
-    <div class="section-label">04 — Reference</div>
+    <div class="section-label">05 — Reference</div>
     <h2>The pattern map — <em>15 problems, 4 patterns</em></h2>
     <p>The local solve pages below cover the six-problem learning path. The rest stay as external references for now so the track remains navigable without waiting on every write-up.</p>
 
@@ -702,7 +748,7 @@ for (const iv of intervals) {
   </section>
 
   <section class="section" id="path">
-    <div class="section-label">05 — The Learning Path</div>
+    <div class="section-label">06 — The Learning Path</div>
     <h2>Six problems to build <em>real fluency</em></h2>
     <p>Do these in order. Each one adds exactly one new idea to your toolkit.</p>
     <div class="learning-path">
@@ -752,7 +798,7 @@ for (const iv of intervals) {
   </section>
 
   <section class="section">
-    <div class="section-label">06 — The Mental Model</div>
+    <div class="section-label">07 — The Mental Model</div>
     <h2>One sentence that ties the whole track together</h2>
     <div class="pullquote">
       <p>Scheduling problems become easy when you identify what the timeline capacity is, what “conflict” means, and what objective you are optimizing against that capacity.</p>
