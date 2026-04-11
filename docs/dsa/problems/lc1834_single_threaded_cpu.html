@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 1834 — Single-Threaded CPU · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_page_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <a class="back-link" href="../deadline_scheduling_blog.html">Back to main article</a>
+</header>
+<section class="problem-hero">
+  <div class="hero-meta-row">
+    <span class="badge badge-lc">LC 1834</span>
+    <span class="badge badge-pattern">Pattern 4 / heap</span>
+    <span class="badge badge-diff">Medium</span>
+  </div>
+  <h1>Single-Threaded CPU</h1>
+  <p class="tagline">This is scheduling with release times: tasks arrive over time, and whenever the CPU is free it picks the shortest available task, breaking ties by index.</p>
+  <div class="meta-links">
+    <a class="official-link" href="https://leetcode.com/problems/single-threaded-cpu/" target="_blank" rel="noopener noreferrer">Official LeetCode problem ↗</a>
+    <a class="intuition-link" href="lc1834_single_threaded_cpu_intuition.html">Build this from first principles ↗</a>
+  </div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Problem</div>
+    <h2>Return the order in which the CPU processes tasks</h2>
+    <div class="problem-box">
+      <div class="pb-label">Plain-English Statement</div>
+      <p>Each task has an enqueue time and a processing time. The CPU can process only one task at a time. Whenever it becomes free, it chooses the available task with the smallest processing time, breaking ties by smaller original index.</p>
+      <p>Return the order of task indices processed by the CPU.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Intuition</div>
+    <h2>Sort by arrival, then use a heap for currently available tasks</h2>
+    <p>Tasks that have not arrived yet should not even be candidates. So we sort by enqueue time to know when each task becomes eligible. Among the eligible tasks, a min-heap gives the shortest processing time instantly.</p>
+    <div class="callout blue">
+      <strong>Simulation pattern</strong>
+      Keep a clock. Push every task whose enqueue time is <= current time into the heap. If the heap is empty, jump the clock to the next arrival. Otherwise, pop the shortest job and advance time by its processing length.
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Solution</div>
+    <h2>Arrival-order scan + min-heap by processing time and index</h2>
+    <div class="code-tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'lc1834-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'lc1834-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="lc1834-java">
+<pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">class</span> <span class="ty">Solution</span> {
+    <span class="kw">public int</span>[] <span class="ty">getOrder</span>(<span class="kw">int</span>[][] tasks) {
+        <span class="kw">int</span> n = tasks.length;
+        <span class="kw">int</span>[][] jobs = <span class="kw">new int</span>[n][<span class="nm">3</span>];
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            jobs[i] = <span class="kw">new int</span>[] {tasks[i][<span class="nm">0</span>], tasks[i][<span class="nm">1</span>], i};
+        }
+        Arrays.sort(jobs, (a, b) -&gt; Integer.compare(a[<span class="nm">0</span>], b[<span class="nm">0</span>]));
+
+        PriorityQueue&lt;<span class="kw">int</span>[]&gt; heap = <span class="kw">new</span> PriorityQueue&lt;&gt;((a, b) -&gt;
+            a[<span class="nm">1</span>] == b[<span class="nm">1</span>] ? Integer.compare(a[<span class="nm">2</span>], b[<span class="nm">2</span>]) : Integer.compare(a[<span class="nm">1</span>], b[<span class="nm">1</span>]));
+
+        <span class="kw">long</span> time = <span class="nm">0</span>;
+        <span class="kw">int</span> i = <span class="nm">0</span>, idx = <span class="nm">0</span>;
+        <span class="kw">int</span>[] order = <span class="kw">new int</span>[n];
+
+        <span class="kw">while</span> (i &lt; n || !heap.isEmpty()) {
+            <span class="kw">if</span> (heap.isEmpty() &amp;&amp; time &lt; jobs[i][<span class="nm">0</span>]) {
+                time = jobs[i][<span class="nm">0</span>];
+            }
+            <span class="kw">while</span> (i &lt; n &amp;&amp; jobs[i][<span class="nm">0</span>] &lt;= time) {
+                heap.offer(jobs[i++]);
+            }
+            <span class="kw">int</span>[] job = heap.poll();
+            order[idx++] = job[<span class="nm">2</span>];
+            time += job[<span class="nm">1</span>];
+        }
+        <span class="kw">return</span> order;
+    }
+}</pre>
+      </div>
+      <div class="tab-panel" id="lc1834-python">
+<pre><span class="kw">import</span> heapq
+
+<span class="kw">class</span> <span class="ty">Solution</span>:
+    <span class="kw">def</span> <span class="ty">getOrder</span>(self, tasks):
+        jobs = sorted((enqueue, process, i) <span class="kw">for</span> i, (enqueue, process) <span class="kw">in</span> enumerate(tasks))
+        heap = []
+        time = <span class="nm">0</span>
+        i = <span class="nm">0</span>
+        order = []
+
+        <span class="kw">while</span> i &lt; len(jobs) <span class="kw">or</span> heap:
+            <span class="kw">if</span> <span class="kw">not</span> heap <span class="kw">and</span> time &lt; jobs[i][<span class="nm">0</span>]:
+                time = jobs[i][<span class="nm">0</span>]
+
+            <span class="kw">while</span> i &lt; len(jobs) <span class="kw">and</span> jobs[i][<span class="nm">0</span>] &lt;= time:
+                enqueue, process, index = jobs[i]
+                heapq.heappush(heap, (process, index, enqueue))
+                i += <span class="nm">1</span>
+
+            process, index, enqueue = heapq.heappop(heap)
+            order.append(index)
+            time += process
+
+        <span class="kw">return</span> order</pre>
+      </div>
+    </div>
+    <div class="complexity-grid">
+      <div class="complexity-card"><div class="complexity-label">Time</div><div class="complexity-val">O(n log n)</div><p>Sort once, then each task enters and leaves the heap once.</p></div>
+      <div class="complexity-card"><div class="complexity-label">Space</div><div class="complexity-val">O(n)</div><p>The heap may store all not-yet-processed available tasks.</p></div>
+    </div>
+  </section>
+  <div class="problem-nav">
+    <a class="nav-btn prev" href="lc2136_earliest_full_bloom.html"><span class="nb-dir">Previous</span><span class="nb-title">LC 2136 — Earliest Full Bloom</span></a>
+    <a class="nav-center" href="../deadline_scheduling_blog.html">↑ Pattern map</a>
+    <a class="nav-btn next" href="lc2008_max_earnings_taxi.html"><span class="nb-dir">Next problem</span><span class="nb-title">LC 2008 — Max Earnings From Taxi</span></a>
+  </div>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="../deadline_scheduling_blog.html">Main article</a></footer>
+<script src="deadline_tabs.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 56 — Merge Intervals Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc56_merge_intervals.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to build Merge Intervals from the ground up</h1>
+  <p class="hero-sub">This one stops feeling like a bag of cases once you realize you only ever need to track one active merged block.</p>
+  <div class="hero-meta"><span>LC 56</span><span>Pattern 2</span><span>Active merge block</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>We are compressing overlapping claims into blocks</h2>
+    <div class="box">
+      <div class="box-label">Interpretation</div>
+      <p>If several intervals touch the same stretch of the timeline, the final answer should report that stretch only once.</p>
+      <p>The output is therefore a set of disjoint blocks covering the same total area as the input.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>A direct approach keeps scanning for any overlapping pair</h2>
+    <p>You could repeatedly find two intervals that overlap, merge them, replace them with one larger interval, and keep going until no overlap remains. That works, but it spends a lot of time rediscovering the same relationships.</p>
+    <div class="step-list">
+      <div class="step"><strong>Find an overlapping pair</strong>Search across the list.</div>
+      <div class="step"><strong>Merge them</strong>Replace them with one interval.</div>
+      <div class="step"><strong>Repeat</strong>Keep rescanning until stable.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Sorting by start time makes overlap local</h2>
+    <div class="callout teal">
+      <strong>Key simplification</strong>
+      After sorting by start, if interval <code>i</code> does not overlap the current merged block, then no later interval can magically overlap that old block without first overlapping the current interval in front of it.
+    </div>
+    <p>So instead of repeatedly merging arbitrary pairs, you keep one active interval and either extend it or flush it to the answer.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Use this when the output wants disjoint ranges</h2>
+    <p>If a problem says “merge,” “collapse,” “compress,” or “coalesce” overlapping ranges, sort by start and ask whether overlap becomes a local scan problem.</p>
+    <div class="footer-links">
+      <a href="lc56_merge_intervals.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc56_merge_intervals.html">Main solution</a></footer>
+</body>
+</html>

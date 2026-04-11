@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 1235 — Maximum Profit in Job Scheduling Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc1235_job_scheduling.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to recognize weighted interval scheduling when profits appear</h1>
+  <p class="hero-sub">The moment a problem asks for maximum value instead of maximum count, pure greedy should make you suspicious. That is the pivot point into DP.</p>
+  <div class="hero-meta"><span>LC 1235</span><span>Pattern 4</span><span>DP + binary search</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Each job creates a take-or-skip fork</h2>
+    <div class="box">
+      <div class="box-label">Core question</div>
+      <p>If you stand at one job, there are only two meaningful choices: take it and then jump to the last compatible profit, or skip it and keep the best answer from earlier jobs.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The direct recursion is “take or skip” at every job</h2>
+    <p>That gives the right mental model immediately. But many branches keep asking the same compatibility question and the same suffix-profit question again and again.</p>
+    <div class="step-list">
+      <div class="step"><strong>Skip branch</strong>Best answer stays whatever was possible before this job.</div>
+      <div class="step"><strong>Take branch</strong>Add current profit and move to the latest job ending before this one starts.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Sort by end time so both the DP and the compatibility lookup become structured</h2>
+    <div class="callout purple">
+      <strong>Optimization insight</strong>
+      Once jobs are sorted by end time, the best answer up to index <code>i</code> becomes a natural DP state, and the last compatible job can be found with binary search instead of a backward scan.
+    </div>
+    <p>This is the standard weighted interval scheduling recipe: value objective means DP, sorted ends make compatibility searchable.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Intervals plus rewards almost always means weighted scheduling</h2>
+    <p>If intervals carry profits, earnings, tips, or scores, and you must avoid overlap, think “weighted interval scheduling” before trying to force a greedy argument.</p>
+    <div class="footer-links">
+      <a href="lc1235_job_scheduling.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc1235_job_scheduling.html">Main solution</a></footer>
+</body>
+</html>

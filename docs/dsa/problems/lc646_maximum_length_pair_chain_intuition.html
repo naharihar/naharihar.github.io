@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 646 — Maximum Length of Pair Chain Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc646_maximum_length_pair_chain.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to <em>recognize</em> Pair Chain as interval scheduling</h1>
+  <p class="hero-sub">This problem becomes much easier the moment you notice that each pair is really just an interval with a different name.</p>
+  <div class="hero-meta"><span>LC 646</span><span>Pattern 1</span><span>Strict chain rule</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>The input says “pairs,” but the structure says “intervals”</h2>
+    <div class="box">
+      <div class="box-label">Translation</div>
+      <p><code>[a, b]</code> is just an interval starting at <code>a</code> and ending at <code>b</code>.</p>
+      <p>The chain condition <code>b &lt; c</code> simply means the next interval must start after the current one ends.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive plan is to recursively try every compatible continuation</h2>
+    <p>You could sort the pairs and, from each current pair, try every later pair that can legally follow it. That is enough to understand the structure, but it repeatedly recomputes “best chain starting after this ending value.”</p>
+    <div class="step-list">
+      <div class="step"><strong>Choose a pair</strong>Treat it as the current end boundary.</div>
+      <div class="step"><strong>Try every valid next pair</strong>Any pair with start greater than that boundary is a candidate.</div>
+      <div class="step"><strong>Take the best branch</strong>The branching factor becomes expensive quickly.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Once translated, the same earliest-finish greedy rule applies</h2>
+    <div class="callout teal">
+      <strong>Optimization insight</strong>
+      Among candidate pairs that could be chosen next, the one that ends earliest can never be worse for the future than one that ends later.
+    </div>
+    <p>That is exactly the same exchange argument as non-overlapping intervals. The only wrinkle is the strict inequality: touching endpoints do not count as a valid chain extension.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Watch for disguised intervals</h2>
+    <p>If the input is written as pairs, segments, jobs, or even “before/after” constraints, but the real rule is still “can this finish before the next one starts?”, try translating it into interval scheduling first.</p>
+    <div class="footer-links">
+      <a href="lc646_maximum_length_pair_chain.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc646_maximum_length_pair_chain.html">Main solution</a></footer>
+</body>
+</html>

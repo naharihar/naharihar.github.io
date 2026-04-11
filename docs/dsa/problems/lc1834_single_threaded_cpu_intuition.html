@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 1834 — Single-Threaded CPU Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc1834_single_threaded_cpu.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to see Single-Threaded CPU as “arrivals plus best available job”</h1>
+  <p class="hero-sub">This problem gets much simpler when you separate tasks that have already arrived from tasks that are still in the future.</p>
+  <div class="hero-meta"><span>LC 1834</span><span>Pattern 4 / Heap</span><span>Arrival sweep</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>The CPU only chooses from tasks that already exist at current time</h2>
+    <div class="box">
+      <div class="box-label">Key split</div>
+      <p>Future tasks are not eligible yet. Among the tasks that have already arrived, the CPU chooses the one with shortest processing time, breaking ties by index.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>A naive simulation rescans all tasks at every choice point</h2>
+    <p>You could repeatedly scan the entire input to find which tasks have arrived and which eligible task should run next. That works, but it wastes time rechecking tasks that were already known to be future tasks.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Sort future arrivals once, then use a heap for current candidates</h2>
+    <div class="callout blue">
+      <strong>Two buckets</strong>
+      Future tasks want ordering by enqueue time. Available tasks want ordering by processing time and index. A sorted list plus heap matches those two jobs exactly.
+    </div>
+    <p>Whenever the heap is empty, time jumps to the next arrival instead of inching forward one unit at a time.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Think “arrival stream + best current candidate”</h2>
+    <p>If items become eligible over time and every decision must choose the best current item by a different rule, expect a sorted arrival list plus a heap of active choices.</p>
+    <div class="footer-links">
+      <a href="lc1834_single_threaded_cpu.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc1834_single_threaded_cpu.html">Main solution</a></footer>
+</body>
+</html>

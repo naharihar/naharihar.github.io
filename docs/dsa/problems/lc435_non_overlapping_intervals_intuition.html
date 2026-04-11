@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 435 — Non-overlapping Intervals Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc435_non_overlapping_intervals.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to <em>discover</em> the idea behind Non-overlapping Intervals</h1>
+  <p class="hero-sub">The clean entry point into interval scheduling is to stop focusing on deletions. The real job is choosing the largest set of intervals that can peacefully coexist.</p>
+  <div class="hero-meta"><span>LC 435</span><span>Pattern 1 / 2</span><span>Greedy by end time</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>What are we really optimizing?</h2>
+    <div class="box">
+      <div class="box-label">Reframe</div>
+      <p>You are not truly “removing intervals.” You are selecting a set of intervals that do not overlap.</p>
+      <p>Once that set is as large as possible, everything else is exactly what must be removed.</p>
+      <div class="io-row"><span>Key identity</span><span><code>removed = total - kept</code></span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The direct idea is to try all keep-or-skip choices</h2>
+    <p>A first-principles recursive solution would stand at each interval and ask:</p>
+    <div class="step-list">
+      <div class="step"><strong>Option 1</strong>Skip this interval and move on.</div>
+      <div class="step"><strong>Option 2</strong>Keep this interval if it does not overlap the last one you kept.</div>
+      <div class="step"><strong>Goal</strong>Maximize how many intervals survive.</div>
+    </div>
+    <p>That works conceptually, but it explodes because many branches are repeating the same “what is the best I can do after this time boundary?” question.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>The only decision that matters is which interval frees the timeline earliest</h2>
+    <div class="callout teal">
+      <strong>Greedy insight</strong>
+      When two intervals compete, the one ending earlier is always safer to keep because it leaves at least as much room for everything that follows.
+    </div>
+    <p>That means we do not need to explore all subsets. We can sort by end time and make one local choice repeatedly: keep the next interval only if it starts after the current boundary.</p>
+    <div class="comparison">
+      <div class="comparison-grid">
+        <div class="comparison-card"><div class="comparison-title">Brute force</div><div class="comparison-val">Try combinations</div><p>Repeatedly reconsider future choices after every keep/skip branch.</p></div>
+        <div class="comparison-card"><div class="comparison-title">Optimized</div><div class="comparison-val">Sort by end</div><p>One linear scan after sorting because the greedy rule is trustworthy.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>When should this pattern jump out at you?</h2>
+    <p>If the problem says “remove minimum intervals,” “keep maximum compatible intervals,” or “select the largest non-overlapping subset,” you are usually looking at earliest-finish greedy scheduling.</p>
+    <div class="footer-links">
+      <a href="lc435_non_overlapping_intervals.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc435_non_overlapping_intervals.html">Main solution</a></footer>
+</body>
+</html>

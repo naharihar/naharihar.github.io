@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 630 — Course Schedule III Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc630_course_schedule_iii.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to arrive at the max-heap idea in Course Schedule III</h1>
+  <p class="hero-sub">The hidden question is not “which course should I take next?” It is “if I am over time, which accepted course hurts me the most to keep?”</p>
+  <div class="hero-meta"><span>LC 630</span><span>Pattern 4</span><span>Deadline order + repair step</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>This is a packing problem with deadlines</h2>
+    <div class="box">
+      <div class="box-label">What is fixed?</div>
+      <p>Each course has a duration and a latest finishing day.</p>
+      <p>What you control is which subset to keep and in what effective order to reason about them.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive plan tries subsets or reorderings</h2>
+    <p>You could imagine trying every subset of courses and checking if it can be scheduled before the deadlines. That is correct in principle but far too expensive.</p>
+    <p>The first simplification is to sort by deadline, because if a course has an earlier deadline, delaying attention to it is rarely helpful.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Whenever you are over budget, drop the longest accepted course</h2>
+    <div class="callout purple">
+      <strong>Why this repair works</strong>
+      If your current chosen set cannot meet the latest deadline, removing the longest course buys back the most time. Any shorter removal would leave you with less remaining flexibility.
+    </div>
+    <p>That turns the problem into a running process: add courses by deadline, and if the total time becomes too large, eject the largest duration from the chosen set.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Look for “maximize count under cumulative budget”</h2>
+    <p>When items each consume time, have deadlines, and the goal is to maximize how many survive, sorting by deadline plus a max-heap repair step is a very reusable pattern.</p>
+    <div class="footer-links">
+      <a href="lc630_course_schedule_iii.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc630_course_schedule_iii.html">Main solution</a></footer>
+</body>
+</html>

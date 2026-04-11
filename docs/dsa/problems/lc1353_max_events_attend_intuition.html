@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 1353 — Maximum Events That Can Be Attended Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc1353_max_events_attend.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to discover the day-sweep idea in Maximum Events</h1>
+  <p class="hero-sub">The key move is to stop picking events globally and instead think day by day: among everything available today, which event becomes impossible the soonest?</p>
+  <div class="hero-meta"><span>LC 1353</span><span>Pattern 1</span><span>Day sweep + earliest deadline</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Each event gives you a window, not a fixed appointment</h2>
+    <div class="box">
+      <div class="box-label">What is special here?</div>
+      <p>You are free to choose any single day inside an event’s start/end window.</p>
+      <p>That means the real challenge is choosing which currently available event deserves today’s slot.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive version branches on which event to attend each day</h2>
+    <p>That quickly becomes combinatorial because today’s choice changes tomorrow’s leftovers. Even a less explosive version that rescans all available events every day wastes a lot of work.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Among available events, attend the one ending earliest</h2>
+    <div class="callout teal">
+      <strong>Why earliest deadline wins</strong>
+      If two events are both available today, using the day on the earlier-ending one is safest because the later-ending event still has more future options.
+    </div>
+    <p>That naturally leads to a day sweep with a min-heap of current end days.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Watch for “one action per day from active windows”</h2>
+    <p>When choices are available over time windows and you can consume only one per time unit, earliest-deadline-first among the currently active items is a strong candidate pattern.</p>
+    <div class="footer-links">
+      <a href="lc1353_max_events_attend.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc1353_max_events_attend.html">Main solution</a></footer>
+</body>
+</html>

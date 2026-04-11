@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 253 — Meeting Rooms II Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc253_meeting_rooms_ii.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to see Meeting Rooms II as a peak-overlap problem</h1>
+  <p class="hero-sub">The answer is not about choosing meetings. It is about measuring the largest number of meetings alive at the same time.</p>
+  <div class="hero-meta"><span>LC 253</span><span>Pattern 3</span><span>Min-heap of active ends</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Every overlapping meeting adds pressure to room capacity</h2>
+    <div class="box">
+      <div class="box-label">Core view</div>
+      <p>If three meetings are happening at the same time, you need three rooms right then, no matter what happens elsewhere in the schedule.</p>
+      <p>So the final answer is simply the maximum number of concurrent meetings.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive version checks overlaps over and over</h2>
+    <p>You could, for each meeting, count how many other meetings overlap it, or simulate room assignment by scanning every current room every time a new meeting arrives. Both approaches keep redoing the same “which room frees first?” work.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>The earliest ending active meeting is the only one you need to inspect</h2>
+    <div class="callout blue">
+      <strong>Why the heap is enough</strong>
+      When a new meeting starts, only the room whose meeting ends earliest has any chance of being reusable. All later-ending rooms are even less helpful.
+    </div>
+    <p>That is why a min-heap of active end times solves the whole problem: it tells you the first room that becomes available.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Look for “minimum resources for overlapping intervals”</h2>
+    <p>Meeting rooms, hotel rooms, machines, exam halls, and servers often reduce to this same question: how many intervals overlap at peak load?</p>
+    <div class="footer-links">
+      <a href="lc253_meeting_rooms_ii.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc253_meeting_rooms_ii.html">Main solution</a></footer>
+</body>
+</html>

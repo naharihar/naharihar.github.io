@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 2136 — Earliest Possible Day of Full Bloom Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc2136_earliest_full_bloom.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to reason about Earliest Full Bloom as “serial work plus parallel waiting”</h1>
+  <p class="hero-sub">The hard part is noticing that planting is sequential, but growing runs in parallel afterward. That changes what “best order” really means.</p>
+  <div class="hero-meta"><span>LC 2136</span><span>Pattern Variant</span><span>Longest tail first</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Each seed has two phases</h2>
+    <div class="box">
+      <div class="box-label">Two-phase thinking</div>
+      <p>Planting consumes your time directly. Growing does not; it happens in the background after planting finishes for that seed.</p>
+      <p>So the total answer is the latest finishing “plant prefix + grow tail” over all seeds.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The direct solution is to try planting orders</h2>
+    <p>You could permute the seeds, simulate planting days, then compute when each bloom happens. That is enough to reveal the structure but far too slow.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Long growers should start waiting as early as possible</h2>
+    <div class="callout teal">
+      <strong>Exchange insight</strong>
+      If one seed needs a much longer grow time than another, delaying it is costly because that long wait happens after your sequential planting work. Starting long growers earlier lets their waiting overlap more of the remaining planting.
+    </div>
+    <p>That is why sorting by grow time descending produces the earliest final bloom day.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Watch for one serial phase followed by a parallel tail</h2>
+    <p>When tasks have a “do now” phase and then an independent waiting/processing tail, ordering by the longest tail first is often the right instinct.</p>
+    <div class="footer-links">
+      <a href="lc2136_earliest_full_bloom.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc2136_earliest_full_bloom.html">Main solution</a></footer>
+</body>
+</html>

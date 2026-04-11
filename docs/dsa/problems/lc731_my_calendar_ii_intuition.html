@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 731 — My Calendar II Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc731_my_calendar_ii.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to think about “allow double, reject triple” bookings</h1>
+  <p class="hero-sub">The trick is not about counting every overlap from scratch. It is about remembering where overlap depth is already two, because those regions are now off-limits.</p>
+  <div class="hero-meta"><span>LC 731</span><span>Pattern 3</span><span>Track dangerous overlap zones</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Some timeline segments are still safe, some are already saturated</h2>
+    <div class="box">
+      <div class="box-label">Mental model</div>
+      <p>A single-booked region can still accept one more meeting. A double-booked region cannot accept anything else.</p>
+      <p>So the important data is not just the bookings. It is the overlap regions that have already become double booked.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive method recomputes overlap depth every time</h2>
+    <p>For each new booking, you could compare it against every old booking and try to count how many events cover each part of the interval. That gets messy fast because the same overlap regions are rediscovered again and again.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Store the already-double-booked segments explicitly</h2>
+    <div class="callout purple">
+      <strong>Optimization insight</strong>
+      A new booking should be rejected immediately if it intersects any segment that is already double booked. Otherwise, every intersection with existing single bookings creates new double-booked segments for the future.
+    </div>
+    <p>That is why the standard solution keeps two lists: all bookings, and the overlap fragments created by pairs of bookings.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Watch for bounded overlap depth</h2>
+    <p>Whenever a problem says “allow up to k overlaps but not more,” try to explicitly represent the regions that have already reached the dangerous depth.</p>
+    <div class="footer-links">
+      <a href="lc731_my_calendar_ii.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc731_my_calendar_ii.html">Main solution</a></footer>
+</body>
+</html>

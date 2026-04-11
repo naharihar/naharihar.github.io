@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 2008 — Maximum Earnings From Taxi · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_page_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <a class="back-link" href="../deadline_scheduling_blog.html">Back to main article</a>
+</header>
+<section class="problem-hero">
+  <div class="hero-meta-row">
+    <span class="badge badge-lc">LC 2008</span>
+    <span class="badge badge-pattern">Pattern 4</span>
+    <span class="badge badge-diff">Medium</span>
+  </div>
+  <h1>Maximum Earnings From Taxi</h1>
+  <p class="tagline">This is weighted interval scheduling with a story wrapper. Each ride has a time interval and a value, so the question is whether taking this ride plus the best compatible history beats skipping it.</p>
+  <div class="meta-links">
+    <a class="official-link" href="https://leetcode.com/problems/maximum-earnings-from-taxi/" target="_blank" rel="noopener noreferrer">Official LeetCode problem ↗</a>
+    <a class="intuition-link" href="lc2008_max_earnings_taxi_intuition.html">Build this from first principles ↗</a>
+  </div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Problem</div>
+    <h2>Pick a set of non-overlapping rides with maximum total money</h2>
+    <div class="problem-box">
+      <div class="pb-label">Plain-English Statement</div>
+      <p>Each ride gives a start point, an end point, and a tip. If you take it, you earn the ride distance plus the tip. You can only take one ride at a time.</p>
+      <p>Return the maximum total earnings you can collect from non-overlapping rides.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Intuition</div>
+    <h2>It is the same pattern as weighted job scheduling</h2>
+    <p>Each ride has:</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Ride field</th><th>Weighted-interval meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>start</code></td><td>interval start</td></tr>
+          <tr><td><code>end</code></td><td>interval end</td></tr>
+          <tr><td><code>end - start + tip</code></td><td>interval value</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>So the decision is exactly the same as LC 1235: for each ride, either skip it or take it and add the best earnings from the latest compatible ride before it.</p>
+    <div class="callout purple">
+      <strong>Compatibility lookup</strong>
+      Sort rides by end position. Then binary search to find the last ride whose end is <= the current start.
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Solution</div>
+    <h2>Sort by end, then DP + binary search on compatible rides</h2>
+    <div class="code-tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'lc2008-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'lc2008-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="lc2008-java">
+<pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">class</span> <span class="ty">Solution</span> {
+    <span class="kw">public long</span> <span class="ty">maxTaxiEarnings</span>(<span class="kw">int</span> n, <span class="kw">int</span>[][] rides) {
+        Arrays.sort(rides, (a, b) -&gt; Integer.compare(a[<span class="nm">1</span>], b[<span class="nm">1</span>]));
+        <span class="kw">int</span> m = rides.length;
+        <span class="kw">int</span>[] ends = <span class="kw">new int</span>[m];
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; m; i++) ends[i] = rides[i][<span class="nm">1</span>];
+
+        <span class="kw">long</span>[] dp = <span class="kw">new long</span>[m];
+        dp[<span class="nm">0</span>] = rides[<span class="nm">0</span>][<span class="nm">1</span>] - rides[<span class="nm">0</span>][<span class="nm">0</span>] + rides[<span class="nm">0</span>][<span class="nm">2</span>];
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt; m; i++) {
+            <span class="kw">long</span> earn = rides[i][<span class="nm">1</span>] - rides[i][<span class="nm">0</span>] + rides[i][<span class="nm">2</span>];
+            <span class="kw">int</span> j = upperBound(ends, rides[i][<span class="nm">0</span>]) - <span class="nm">1</span>;
+            <span class="kw">if</span> (j &gt;= <span class="nm">0</span>) earn += dp[j];
+            dp[i] = Math.max(dp[i - <span class="nm">1</span>], earn);
+        }
+        <span class="kw">return</span> dp[m - <span class="nm">1</span>];
+    }
+
+    <span class="kw">private int</span> <span class="ty">upperBound</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> target) {
+        <span class="kw">int</span> lo = <span class="nm">0</span>, hi = arr.length;
+        <span class="kw">while</span> (lo &lt; hi) {
+            <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+            <span class="kw">if</span> (arr[mid] &lt;= target) lo = mid + <span class="nm">1</span>;
+            <span class="kw">else</span> hi = mid;
+        }
+        <span class="kw">return</span> lo;
+    }
+}</pre>
+      </div>
+      <div class="tab-panel" id="lc2008-python">
+<pre><span class="kw">from</span> bisect <span class="kw">import</span> bisect_right
+
+<span class="kw">class</span> <span class="ty">Solution</span>:
+    <span class="kw">def</span> <span class="ty">maxTaxiEarnings</span>(self, n, rides):
+        rides.sort(key=<span class="kw">lambda</span> ride: ride[<span class="nm">1</span>])
+        ends = [ride[<span class="nm">1</span>] <span class="kw">for</span> ride <span class="kw">in</span> rides]
+        dp = [<span class="nm">0</span>] * len(rides)
+        dp[<span class="nm">0</span>] = rides[<span class="nm">0</span>][<span class="nm">1</span>] - rides[<span class="nm">0</span>][<span class="nm">0</span>] + rides[<span class="nm">0</span>][<span class="nm">2</span>]
+
+        <span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, len(rides)):
+            start, end, tip = rides[i]
+            earn = end - start + tip
+            j = bisect_right(ends, start) - <span class="nm">1</span>
+            <span class="kw">if</span> j &gt;= <span class="nm">0</span>:
+                earn += dp[j]
+            dp[i] = max(dp[i - <span class="nm">1</span>], earn)
+
+        <span class="kw">return</span> dp[-<span class="nm">1</span>]</pre>
+      </div>
+    </div>
+    <div class="complexity-grid">
+      <div class="complexity-card"><div class="complexity-label">Time</div><div class="complexity-val">O(m log m)</div><p>Sort rides, then do one binary search per ride.</p></div>
+      <div class="complexity-card"><div class="complexity-label">Space</div><div class="complexity-val">O(m)</div><p>For the DP array and sorted ride metadata.</p></div>
+    </div>
+  </section>
+  <div class="problem-nav">
+    <a class="nav-btn prev" href="lc1834_single_threaded_cpu.html"><span class="nb-dir">Previous</span><span class="nb-title">LC 1834 — Single-Threaded CPU</span></a>
+    <a class="nav-center" href="../deadline_scheduling_blog.html">↑ Pattern map</a>
+    <a class="nav-btn next" href="../deadline_scheduling_blog.html"><span class="nb-dir">Back to track</span><span class="nb-title">Deadline Scheduling</span></a>
+  </div>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="../deadline_scheduling_blog.html">Main article</a></footer>
+<script src="deadline_tabs.js"></script>
+</body>
+</html>

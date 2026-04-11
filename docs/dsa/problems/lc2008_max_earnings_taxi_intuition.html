@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 2008 — Maximum Earnings From Taxi Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc2008_max_earnings_taxi.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to recognize Taxi Earnings as weighted interval scheduling again</h1>
+  <p class="hero-sub">This problem feels new because the intervals are rides and the reward formula includes distance plus tip, but structurally it is the same take-or-skip DP as job scheduling.</p>
+  <div class="hero-meta"><span>LC 2008</span><span>Pattern 4</span><span>Weighted rides</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Every ride is just an interval with a reward</h2>
+    <div class="box">
+      <div class="box-label">Translation</div>
+      <p>A ride occupies the interval from pickup to drop-off.</p>
+      <p>The money earned is fixed once the ride is chosen, so the whole problem is “pick non-overlapping intervals with maximum total reward.”</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The direct recursion is identical to job scheduling</h2>
+    <p>For each ride, either skip it or take it and then continue only with rides starting after its end. That reveals the structure immediately, but the repeated subproblems are the same ones we saw in LC 1235.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Sort by end point and reuse the weighted scheduling template</h2>
+    <div class="callout purple">
+      <strong>Optimization insight</strong>
+      The profit formula changes, but the scheduling structure does not. Once rides are sorted by end point, the DP state and binary-search compatibility lookup are exactly the same as weighted job scheduling.
+    </div>
+    <p>This is a great example of why recognizing the pattern matters more than memorizing the story wrapped around it.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>When intervals carry money, think weighted scheduling first</h2>
+    <p>Taxi rides, consulting gigs, ad slots, and jobs all reduce to the same shape once each interval has a reward and overlap is forbidden.</p>
+    <div class="footer-links">
+      <a href="lc2008_max_earnings_taxi.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc2008_max_earnings_taxi.html">Main solution</a></footer>
+</body>
+</html>

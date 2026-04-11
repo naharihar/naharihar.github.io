@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 729 — My Calendar I Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc729_my_calendar_i.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to reason about calendar insertion like a sorted shelf</h1>
+  <p class="hero-sub">This problem becomes gentle once you stop thinking about “all previous bookings” and start thinking about where the new booking would sit in sorted order.</p>
+  <div class="hero-meta"><span>LC 729</span><span>Pattern 3</span><span>Neighbor-only overlap check</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>Every new booking is an online decision</h2>
+    <div class="box">
+      <div class="box-label">What is fixed?</div>
+      <p>You cannot reorder old bookings or revisit past answers. Each new interval must be accepted or rejected immediately.</p>
+      <p>That makes this an online version of interval conflict detection.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The straightforward solution checks against every accepted booking</h2>
+    <p>That is actually a reasonable first version: for each new request, compare it against all earlier bookings and reject it if any overlap appears.</p>
+    <p>The optimization question is: can we avoid scanning the whole list every time?</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Sorted order collapses the overlap search to two neighbors</h2>
+    <div class="callout blue">
+      <strong>Why only two intervals matter</strong>
+      After inserting by start time, only the predecessor and successor can possibly overlap the new interval. Anything farther away is blocked by one of those neighbors already being in between.
+    </div>
+    <p>That is the entire optimization: use ordered storage so the problem shrinks from “scan everything” to “check adjacent bookings.”</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Think ordered map when inserts arrive one by one</h2>
+    <p>If the problem is online, interval-based, and only asks whether a new interval conflicts with what is already stored, ordered neighbors are often the right abstraction.</p>
+    <div class="footer-links">
+      <a href="lc729_my_calendar_i.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc729_my_calendar_i.html">Main solution</a></footer>
+</body>
+</html>

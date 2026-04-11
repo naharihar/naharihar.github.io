@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 452 — Minimum Arrows Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc452_min_arrows.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to think about balloon arrows <em>without</em> memorizing the trick</h1>
+  <p class="hero-sub">The leap here is to realize the arrow itself is just a point representing an entire overlap cluster of intervals.</p>
+  <div class="hero-meta"><span>LC 452</span><span>Pattern 2</span><span>Point covering intervals</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>One arrow can service one overlapping group</h2>
+    <div class="box">
+      <div class="box-label">Real picture</div>
+      <p>Each balloon occupies a horizontal range. If several ranges overlap, one carefully placed arrow can burst all of them at once.</p>
+      <p>So the true problem is: how many overlap groups do these intervals form if you place each arrow optimally?</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive approach is to reason about arrow positions directly</h2>
+    <p>You might try guessing where to shoot, checking which balloons that arrow hits, removing them, and then repeating. The issue is that the arrow position feels continuous and overly flexible.</p>
+    <div class="callout blue">
+      <strong>Simplifying observation</strong>
+      You never need to shoot at a random point. The only meaningful candidates are boundary points created by balloon ends.
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>The earliest finishing balloon gives the safest arrow position</h2>
+    <p>Sort by end coordinate. The first balloon to finish forces your hand: any arrow that wants to burst it must land on or before its right edge, so placing the arrow exactly there is the safest choice for also hitting later balloons.</p>
+    <div class="comparison">
+      <div class="comparison-grid">
+        <div class="comparison-card"><div class="comparison-title">Brute force</div><div class="comparison-val">Guess points</div><p>Hard to reason about because the search space looks continuous.</p></div>
+        <div class="comparison-card"><div class="comparison-title">Optimized</div><div class="comparison-val">Sort by ends</div><p>Each new arrow is forced only when the next balloon starts after the current arrow point.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Look for “minimum points to cover intervals”</h2>
+    <p>Whenever a problem asks for the fewest checkpoints, sensors, arrows, or cuts that cover interval ranges, it is often this same greedy idea in different clothing.</p>
+    <div class="footer-links">
+      <a href="lc452_min_arrows.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc452_min_arrows.html">Main solution</a></footer>
+</body>
+</html>

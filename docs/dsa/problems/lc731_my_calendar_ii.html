@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 731 — My Calendar II · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_page_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <a class="back-link" href="../deadline_scheduling_blog.html">Back to main article</a>
+</header>
+<section class="problem-hero">
+  <div class="hero-meta-row">
+    <span class="badge badge-lc">LC 731</span>
+    <span class="badge badge-pattern">Pattern 3</span>
+    <span class="badge badge-diff">Medium</span>
+  </div>
+  <h1>My Calendar II</h1>
+  <p class="tagline">This is dynamic interval booking with one extra layer: single overlaps are allowed, but the moment a new event would create a triple overlap, it must be rejected.</p>
+  <div class="meta-links">
+    <a class="official-link" href="https://leetcode.com/problems/my-calendar-ii/" target="_blank" rel="noopener noreferrer">Official LeetCode problem ↗</a>
+    <a class="intuition-link" href="lc731_my_calendar_ii_intuition.html">Build this from first principles ↗</a>
+  </div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Problem</div>
+    <h2>Allow double bookings, reject triple bookings</h2>
+    <div class="problem-box">
+      <div class="pb-label">Plain-English Statement</div>
+      <p>Design a calendar that accepts a new event if adding it still keeps every time point booked at most twice. If any time point would become booked three times, reject the event.</p>
+      <div class="example">
+        <div class="example-label">Original Example</div>
+        <div class="io-row"><span class="io-label">Sequence</span><span><code>book(10,20)</code>, <code>book(50,60)</code>, <code>book(10,40)</code>, <code>book(5,15)</code></span></div>
+        <div class="io-row"><span class="io-label">Result</span><span><code>true, true, true, false</code></span></div>
+        <div class="io-row"><span class="io-label">Why</span><span>The fourth booking would create a triple overlap on <code>[10,15)</code>.</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Intuition</div>
+    <h2>Track both single bookings and double-booked ranges</h2>
+    <p>The clean way to think about this problem is to maintain two collections:</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Collection</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>booked</td><td>All accepted events</td></tr>
+          <tr><td>overlaps</td><td>Ranges that are already booked twice</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>When a new event arrives, check it against <code>overlaps</code> first. If it intersects any double-booked range, then accepting it would create a triple booking, so reject immediately.</p>
+    <div class="callout blue">
+      <strong>Why this works</strong>
+      The overlap list is a compact memory of every place where the calendar is already “full enough.” If the new event touches one of those ranges, you already know it would become the third layer.
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Solution</div>
+    <h2>Reject on overlap with any double-booked segment</h2>
+    <div class="code-tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'lc731-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'lc731-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="lc731-java">
+<pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">class</span> <span class="ty">MyCalendarTwo</span> {
+    <span class="kw">private</span> List&lt;<span class="kw">int</span>[]&gt; booked = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">private</span> List&lt;<span class="kw">int</span>[]&gt; overlaps = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+    <span class="kw">public boolean</span> <span class="ty">book</span>(<span class="kw">int</span> start, <span class="kw">int</span> end) {
+        <span class="kw">for</span> (<span class="kw">int</span>[] range : overlaps) {
+            <span class="kw">if</span> (start &lt; range[<span class="nm">1</span>] &amp;&amp; end &gt; range[<span class="nm">0</span>]) {
+                <span class="kw">return</span> <span class="kw">false</span>;
+            }
+        }
+
+        <span class="kw">for</span> (<span class="kw">int</span>[] event : booked) {
+            <span class="kw">if</span> (start &lt; event[<span class="nm">1</span>] &amp;&amp; end &gt; event[<span class="nm">0</span>]) {
+                overlaps.add(<span class="kw">new int</span>[] {Math.max(start, event[<span class="nm">0</span>]), Math.min(end, event[<span class="nm">1</span>])});
+            }
+        }
+
+        booked.add(<span class="kw">new int</span>[] {start, end});
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+}</pre>
+      </div>
+      <div class="tab-panel" id="lc731-python">
+<pre><span class="kw">class</span> <span class="ty">MyCalendarTwo</span>:
+    <span class="kw">def</span> <span class="ty">__init__</span>(self):
+        self.booked = []
+        self.overlaps = []
+
+    <span class="kw">def</span> <span class="ty">book</span>(self, start, end):
+        <span class="kw">for</span> left, right <span class="kw">in</span> self.overlaps:
+            <span class="kw">if</span> start &lt; right <span class="kw">and</span> end &gt; left:
+                <span class="kw">return</span> <span class="kw">False</span>
+
+        <span class="kw">for</span> left, right <span class="kw">in</span> self.booked:
+            <span class="kw">if</span> start &lt; right <span class="kw">and</span> end &gt; left:
+                self.overlaps.append((max(start, left), min(end, right)))
+
+        self.booked.append((start, end))
+        <span class="kw">return</span> <span class="kw">True</span></pre>
+      </div>
+    </div>
+    <div class="complexity-grid">
+      <div class="complexity-card"><div class="complexity-label">Time</div><div class="complexity-val">O(n²)</div><p>Each booking may scan existing events and overlaps.</p></div>
+      <div class="complexity-card"><div class="complexity-label">Space</div><div class="complexity-val">O(n²)</div><p>In the worst case, many pairwise overlap segments can be stored.</p></div>
+    </div>
+  </section>
+  <div class="problem-nav">
+    <a class="nav-btn prev" href="lc729_my_calendar_i.html"><span class="nb-dir">Previous</span><span class="nb-title">LC 729 — My Calendar I</span></a>
+    <a class="nav-center" href="../deadline_scheduling_blog.html">↑ Pattern map</a>
+    <a class="nav-btn next" href="lc621_task_scheduler.html"><span class="nb-dir">Next problem</span><span class="nb-title">LC 621 — Task Scheduler</span></a>
+  </div>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="../deadline_scheduling_blog.html">Main article</a></footer>
+<script src="deadline_tabs.js"></script>
+</body>
+</html>

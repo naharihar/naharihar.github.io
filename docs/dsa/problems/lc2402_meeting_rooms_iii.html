@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 2402 — Meeting Rooms III · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_page_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <a class="back-link" href="../deadline_scheduling_blog.html">Back to main article</a>
+</header>
+<section class="problem-hero">
+  <div class="hero-meta-row">
+    <span class="badge badge-lc">LC 2402</span>
+    <span class="badge badge-pattern">Pattern 3</span>
+    <span class="badge badge-diff">Hard</span>
+  </div>
+  <h1>Meeting Rooms III</h1>
+  <p class="tagline">This is resource assignment with two priorities at once: always use the smallest available room id, and when none are free, wait for the room that becomes available first.</p>
+  <div class="meta-links">
+    <a class="official-link" href="https://leetcode.com/problems/meeting-rooms-iii/" target="_blank" rel="noopener noreferrer">Official LeetCode problem ↗</a>
+    <a class="intuition-link" href="lc2402_meeting_rooms_iii_intuition.html">Build this from first principles ↗</a>
+  </div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Problem</div>
+    <h2>Assign every meeting to a room and count which room gets used most</h2>
+    <div class="problem-box">
+      <div class="pb-label">Plain-English Statement</div>
+      <p>You have <code>n</code> meeting rooms, numbered <code>0</code> to <code>n - 1</code>, and a list of meetings.</p>
+      <p>Each meeting wants the earliest possible start. If multiple rooms are free, use the smallest-numbered one. If no room is free, delay the meeting until the earliest room becomes free, while keeping the same duration.</p>
+      <p>Return the room id that hosted the most meetings.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Intuition</div>
+    <h2>You need one heap for free rooms and one for busy rooms</h2>
+    <p>This problem mixes two different priorities, so one heap is not enough.</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Heap</th><th>Sorted by</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>available</td><td>room id</td><td>Pick the smallest-numbered free room</td></tr>
+          <tr><td>busy</td><td>end time, then room id</td><td>Know which room frees up first</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout blue">
+      <strong>Core move</strong>
+      Before processing a meeting, release every busy room whose end time is already <= the meeting start. If no room is free after that, take the earliest-finishing busy room, delay the meeting to that end time, and push it back with its new end.
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Solution</div>
+    <h2>Sort meetings by start time and simulate room state with two heaps</h2>
+    <div class="code-tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'lc2402-java')">Java</button>
+        <button class="tab-btn" onclick="switchTab(this,'lc2402-python')">Python</button>
+      </div>
+      <div class="tab-panel active" id="lc2402-java">
+<pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">class</span> <span class="ty">Solution</span> {
+    <span class="kw">public int</span> <span class="ty">mostBooked</span>(<span class="kw">int</span> n, <span class="kw">int</span>[][] meetings) {
+        Arrays.sort(meetings, (a, b) -&gt; Integer.compare(a[<span class="nm">0</span>], b[<span class="nm">0</span>]));
+        PriorityQueue&lt;Integer&gt; available = <span class="kw">new</span> PriorityQueue&lt;&gt;();
+        PriorityQueue&lt;<span class="kw">long</span>[]&gt; busy = <span class="kw">new</span> PriorityQueue&lt;&gt;((a, b) -&gt;
+            a[<span class="nm">0</span>] == b[<span class="nm">0</span>] ? Long.compare(a[<span class="nm">1</span>], b[<span class="nm">1</span>]) : Long.compare(a[<span class="nm">0</span>], b[<span class="nm">0</span>]));
+        <span class="kw">int</span>[] used = <span class="kw">new int</span>[n];
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) available.offer(i);
+
+        <span class="kw">for</span> (<span class="kw">int</span>[] meeting : meetings) {
+            <span class="kw">long</span> start = meeting[<span class="nm">0</span>], end = meeting[<span class="nm">1</span>];
+            <span class="kw">long</span> duration = end - start;
+
+            <span class="kw">while</span> (!busy.isEmpty() &amp;&amp; busy.peek()[<span class="nm">0</span>] &lt;= start) {
+                available.offer((<span class="kw">int</span>) busy.poll()[<span class="nm">1</span>]);
+            }
+
+            <span class="kw">if</span> (available.isEmpty()) {
+                <span class="kw">long</span>[] room = busy.poll();
+                start = room[<span class="nm">0</span>];
+                available.offer((<span class="kw">int</span>) room[<span class="nm">1</span>]);
+                <span class="kw">while</span> (!busy.isEmpty() &amp;&amp; busy.peek()[<span class="nm">0</span>] == start) {
+                    available.offer((<span class="kw">int</span>) busy.poll()[<span class="nm">1</span>]);
+                }
+            }
+
+            <span class="kw">int</span> roomId = available.poll();
+            used[roomId]++;
+            busy.offer(<span class="kw">new long</span>[] {start + duration, roomId});
+        }
+
+        <span class="kw">int</span> answer = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (used[i] &gt; used[answer]) answer = i;
+        }
+        <span class="kw">return</span> answer;
+    }
+}</pre>
+      </div>
+      <div class="tab-panel" id="lc2402-python">
+<pre><span class="kw">import</span> heapq
+
+<span class="kw">class</span> <span class="ty">Solution</span>:
+    <span class="kw">def</span> <span class="ty">mostBooked</span>(self, n, meetings):
+        meetings.sort()
+        available = list(range(n))
+        busy = []
+        used = [<span class="nm">0</span>] * n
+
+        <span class="kw">for</span> start, end <span class="kw">in</span> meetings:
+            duration = end - start
+
+            <span class="kw">while</span> busy <span class="kw">and</span> busy[<span class="nm">0</span>][<span class="nm">0</span>] &lt;= start:
+                _, room = heapq.heappop(busy)
+                heapq.heappush(available, room)
+
+            <span class="kw">if</span> <span class="kw">not</span> available:
+                free_time, room = heapq.heappop(busy)
+                start = free_time
+                heapq.heappush(available, room)
+                <span class="kw">while</span> busy <span class="kw">and</span> busy[<span class="nm">0</span>][<span class="nm">0</span>] == start:
+                    _, room = heapq.heappop(busy)
+                    heapq.heappush(available, room)
+
+            room = heapq.heappop(available)
+            used[room] += <span class="nm">1</span>
+            heapq.heappush(busy, (start + duration, room))
+
+        <span class="kw">return</span> max(range(n), key=<span class="kw">lambda</span> room: used[room])</pre>
+      </div>
+    </div>
+    <div class="complexity-grid">
+      <div class="complexity-card"><div class="complexity-label">Time</div><div class="complexity-val">O(m log n)</div><p>Each meeting touches the heaps a constant number of times.</p></div>
+      <div class="complexity-card"><div class="complexity-label">Space</div><div class="complexity-val">O(n)</div><p>The room heaps store at most all rooms.</p></div>
+    </div>
+  </section>
+  <div class="problem-nav">
+    <a class="nav-btn prev" href="lc1235_job_scheduling.html"><span class="nb-dir">Previous</span><span class="nb-title">LC 1235 — Max Profit Job Scheduling</span></a>
+    <a class="nav-center" href="../deadline_scheduling_blog.html">↑ Pattern map</a>
+    <a class="nav-btn next" href="lc1353_max_events_attend.html"><span class="nb-dir">Next problem</span><span class="nb-title">LC 1353 — Maximum Number of Events</span></a>
+  </div>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="../deadline_scheduling_blog.html">Main article</a></footer>
+<script src="deadline_tabs.js"></script>
+</body>
+</html>

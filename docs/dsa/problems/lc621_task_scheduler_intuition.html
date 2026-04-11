@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 621 — Task Scheduler Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc621_task_scheduler.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to spot the hidden schedule frame in Task Scheduler</h1>
+  <p class="hero-sub">The main leap is to stop simulating every second and instead ask which task frequency is forcing the schedule to be as long as it is.</p>
+  <div class="hero-meta"><span>LC 621</span><span>Pattern 3</span><span>Frequency frame</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>The most frequent task is the bottleneck</h2>
+    <div class="box">
+      <div class="box-label">Why frequency matters</div>
+      <p>If task <code>A</code> appears five times and cooldown is two, those five copies force large gaps between themselves whether you like it or not.</p>
+      <p>Less frequent tasks mainly help fill the empty slots created by the most frequent tasks.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>The naive idea is to simulate the CPU one time unit at a time</h2>
+    <p>You could keep a set of currently available tasks, pick one, wait through cooldowns, and repeat. That is fine for intuition, but it makes the problem feel more complicated than it really is.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Build the schedule around the task that appears most often</h2>
+    <div class="callout teal">
+      <strong>Optimization insight</strong>
+      The task with maximum frequency creates the minimum possible frame length. Once that frame is known, the answer is either that frame or the total number of tasks if the frame gets fully filled.
+    </div>
+    <p>That is why the formula only depends on <code>maxFreq</code> and how many tasks share that maximum frequency.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Count first when identical tasks and cooldowns are involved</h2>
+    <p>If the items are indistinguishable except for type and the constraints are based on waiting between equal types, frequencies often matter more than exact timeline simulation.</p>
+    <div class="footer-links">
+      <a href="lc621_task_scheduler.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc621_task_scheduler.html">Main solution</a></footer>
+</body>
+</html>

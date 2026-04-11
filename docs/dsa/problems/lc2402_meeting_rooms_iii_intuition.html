@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC 2402 — Meeting Rooms III Intuition · Deadline Scheduling</title>
+<link rel="stylesheet" href="deadline_intuition_shared.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../deadline_scheduling_blog.html">AlgorithmCraft</a>
+  <nav>
+    <a href="lc2402_meeting_rooms_iii.html">Main solution</a>
+    <a href="../deadline_scheduling_blog.html">Pattern map</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-kicker">First Principles</div>
+  <h1>How to know this problem needs <em>two</em> heaps</h1>
+  <p class="hero-sub">One heap answers “which room is free and smallest?” The other answers “if none are free, which busy room releases first?” Both questions matter independently.</p>
+  <div class="hero-meta"><span>LC 2402</span><span>Pattern 3</span><span>Free heap + busy heap</span></div>
+</section>
+<main class="content-wrap">
+  <section class="section">
+    <div class="section-label">Human Version</div>
+    <h2>This is room assignment with delays, not just room counting</h2>
+    <div class="box">
+      <div class="box-label">Extra twist</div>
+      <p>In Meeting Rooms II, you only ask how many rooms are needed. Here, rooms are fixed, meetings may be delayed, and ties must choose the smallest room id.</p>
+      <p>So you need to simulate room state, not merely count overlap.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Brute Force</div>
+    <h2>A naive simulation scans every room for every meeting</h2>
+    <p>For each meeting, you could inspect all rooms to see which are free. If none are free, inspect all rooms again to find the one that becomes free earliest. That repeated scanning is the expensive part.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Optimization</div>
+    <h2>Separate the “free now” question from the “frees earliest” question</h2>
+    <div class="callout blue">
+      <strong>Why two heaps appear naturally</strong>
+      These are two different orderings. Free rooms should be chosen by room id, while busy rooms should be chosen by finishing time and then room id.
+    </div>
+    <p>Once you separate those concerns, the two-heap design becomes almost inevitable.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Spot It</div>
+    <h2>Use twin structures when the same objects need two orderings</h2>
+    <p>If a system needs one ordering for available resources and a different ordering for occupied resources, it is often cleaner to maintain two heaps than to force one structure to do both jobs.</p>
+    <div class="footer-links">
+      <a href="lc2402_meeting_rooms_iii.html">Read the full solution page</a>
+      <a href="../deadline_scheduling_blog.html">Back to the scheduling track</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">Part of the Deadline Scheduling series · <a href="lc2402_meeting_rooms_iii.html">Main solution</a></footer>
+</body>
+</html>
