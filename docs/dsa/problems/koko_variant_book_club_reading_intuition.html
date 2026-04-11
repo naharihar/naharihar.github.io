@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Book Club Reading — build the intuition · Binary Search</title>
+<style>/* naharihar.github.io exact token match */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f6f8fa;--bg3:#eef1f4;
+  --border:#d0d7de;--text:#1f2328;--muted:#656d76;
+  --accent:#0969da;--accent2:#0550ae;
+  --green:#1a7f37;--green-bg:#dafbe1;--green-bd:#aceebb;
+  --yellow:#9a6700;--yellow-bg:#fff8c5;
+  --purple:#6639ba;--purple-bg:#fbefff;--purple-bd:#d8b9f7;
+  --red:#cf222e;--red-bg:#fff0ee;
+  --blue-bg:#ddf4ff;--blue-bd:#80ccff;
+  --orange:#bc4c00;--orange-bg:#fff1e5;--orange-bd:#ffa657;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+nav{border-bottom:1px solid var(--border);padding:13px 0;background:var(--bg);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:860px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:20px}
+.nav-brand{font-weight:700;font-size:15px;color:var(--text);text-decoration:none}
+.nav-sep{color:var(--border)}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none}
+.nav-link:hover{color:var(--accent)}
+main{max-width:860px;margin:0 auto;padding:48px 24px 96px}
+.tag-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;border:1px solid;font-family:var(--mono)}
+.tag-orig{background:var(--bg2);color:var(--muted);border-color:var(--border)}
+.tag-bs{background:var(--blue-bg);color:var(--accent2);border-color:var(--blue-bd)}
+.tag-med{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.tag-hard{background:var(--red-bg);color:var(--red);border-color:#ffb0a0}
+.tag-style{background:var(--bg2);color:var(--muted);border-color:var(--border)}
+h1{font-size:27px;font-weight:700;line-height:1.28;letter-spacing:-.5px;margin-bottom:10px}
+.subtitle{font-size:15px;color:var(--muted);margin-bottom:44px}
+.section{margin-bottom:52px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:22px;display:flex;align-items:center;gap:10px;font-family:var(--mono)}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0;font-family:var(--mono)}
+h2{font-size:21px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
+h2 em{font-style:italic;color:var(--muted);font-weight:500}
+h3{font-size:15px;font-weight:600;margin:26px 0 10px}
+p{margin-bottom:14px}p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);color:var(--red);padding:2px 6px;border-radius:4px;border:1px solid var(--border)}
+strong{font-weight:600}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin-bottom:18px}
+.info-box-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:var(--mono)}
+.example-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:18px}
+.example-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 18px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono)}
+.example-body{padding:14px 18px}
+.example-row{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.example-row:last-child{margin-bottom:0}
+.example-key{color:var(--muted);min-width:80px;font-size:13px;font-weight:500}
+.example-val{font-family:var(--mono);font-size:13.5px;color:var(--accent2);font-weight:500}
+.example-note{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.6;padding-top:12px;border-top:1px solid var(--border)}
+.callout{border-left:3px solid;border-radius:0 6px 6px 0;padding:12px 16px;margin:18px 0;font-size:14px;line-height:1.65}
+.callout strong{display:block;margin-bottom:5px;font-size:13px;font-family:var(--mono);font-weight:600}
+.callout-blue{border-color:var(--accent);background:var(--blue-bg)}.callout-blue strong{color:var(--accent2)}
+.callout-green{border-color:var(--green);background:var(--green-bg)}.callout-green strong{color:var(--green)}
+.callout-yellow{border-color:var(--yellow);background:var(--yellow-bg)}.callout-yellow strong{color:var(--yellow)}
+.callout-purple{border-color:var(--purple);background:var(--purple-bg)}.callout-purple strong{color:var(--purple)}
+.callout-orange{border-color:var(--orange);background:var(--orange-bg)}.callout-orange strong{color:var(--orange)}
+.arrow-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--accent);text-decoration:none;font-weight:500;padding:9px 16px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);margin:18px 0;transition:border-color .12s}
+.arrow-link:hover{border-color:var(--accent)}
+.step-cards{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.step-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start}
+.step-card-n{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;margin-top:2px;font-family:var(--mono)}
+.step-card-body{flex:1}
+.step-card-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.step-card-desc{font-size:13px;color:var(--muted);line-height:1.55;margin:0}
+.search-space{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin:18px 0}
+.ss-caption{font-size:13px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)}
+.ss-row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.ss-cell{display:flex;flex-direction:column;align-items:center;gap:5px}
+.ss-val{width:52px;height:38px;border-radius:6px;border:1px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600}
+.ss-val.F{background:var(--red-bg);border-color:#ffb0a0;color:var(--red)}
+.ss-val.T{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+.ss-val.answer{background:var(--green-bg);border-color:var(--green);color:var(--green);box-shadow:0 0 0 2.5px var(--green)}
+.ss-label{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.ss-note{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+.ss-note strong{color:var(--text)}
+.walkthrough{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:18px 0}
+.wt-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 18px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono)}
+.wt-row{padding:11px 18px;border-bottom:1px solid var(--border);font-size:13.5px;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.wt-row:last-child{border-bottom:none}
+.wt-label{min-width:110px;color:var(--muted);font-weight:600;font-size:12.5px;font-family:var(--mono)}
+.wt-detail{flex:1;font-family:var(--mono);font-size:13px}
+.wt-result{font-size:13px}
+.ok{color:var(--green);font-weight:600}.bad{color:var(--red);font-weight:600}
+.code-block{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:18px 0}
+.tab-bar{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 14px}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:13px;font-family:var(--sans);padding:9px 12px;cursor:pointer;transition:color .12s;font-weight:500}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+pre{background:#f6f8fa;padding:20px 22px;overflow-x:auto;margin:0;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--text)}
+.kw{color:#cf222e}.fn{color:#6639ba}.cm{color:#8a929e;font-style:italic}.st{color:#0a3069}.nm{color:#0550ae}.tp{color:#953800}
+.complexity-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.complexity-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.complexity-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600;font-family:var(--mono)}
+.complexity-val{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--accent2)}
+.complexity-note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13.5px;margin:18px 0}
+.cmp-table th{background:var(--bg2);color:var(--muted);padding:9px 14px;text-align:left;border:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--mono)}
+.cmp-table td{padding:9px 14px;border:1px solid var(--border);vertical-align:top}
+.cmp-table tr:hover td{background:var(--bg2)}
+.cmp-table td:first-child{font-weight:600;color:var(--muted);font-size:12.5px;font-family:var(--mono)}
+.footer-nav{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;border-top:1px solid var(--border);padding-top:32px;margin-top:64px}
+.fn-link{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--bg);transition:border-color .12s}
+.fn-link:hover{border-color:var(--accent)}
+.fn-dir{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-family:var(--mono)}
+.fn-title{font-size:14px;font-weight:600;color:var(--accent)}
+.fn-right{text-align:right}
+.fn-center{display:flex;align-items:center;justify-content:center}
+.fn-center a{font-size:12px;color:var(--muted);text-decoration:none;padding:8px 12px}
+.fn-center a:hover{color:var(--accent)}
+.pattern-box{background:var(--bg2);border:2px solid var(--border);border-radius:8px;padding:20px 24px;margin:20px 0}
+.pattern-box pre{background:var(--bg3);border-radius:6px;padding:14px 16px;margin:12px 0 0;font-size:13px}
+.site-footer{text-align:center;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding:24px;margin-top:48px;font-family:var(--mono)}
+.site-footer a{color:var(--accent);text-decoration:none}
+@media(max-width:600px){h1{font-size:22px}h2{font-size:18px}.complexity-grid{grid-template-columns:1fr}.footer-nav{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav><div class="nav-inner"><a href="../binary_search_blog.html" class="nav-brand">AlgorithmCraft</a><span class="nav-sep">·</span><a href="../binary_search_blog.html" class="nav-link">Pattern Map</a><span class="nav-sep">·</span><a href="koko_variant_book_club_reading.html" class="nav-link">Problem Page</a></div></nav>
+<main>
+
+<div class="tag-row">
+  <span class="tag tag-bs">Search on Answer</span>
+  <span class="tag tag-style">Brute force to optimized</span>
+  <span class="tag tag-style">Same style as main guide</span>
+</div>
+<h1>Book Club Reading — <em>build the intuition before the optimization</em></h1>
+<p class="subtitle">Start from the brute-force thought process, understand exactly what work is repeated, and then earn the binary-search optimization instead of memorizing it.</p>
+
+<!-- 01 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">01</span> Problem</div>
+  <h2>What are we actually minimizing?</h2>
+  <div class="info-box">
+    <div class="info-box-label">Problem Statement</div>
+    <p>A book club member has <code>n</code> books to finish before the next meeting in <code>h</code> days. Book <code>i</code> has <code>pages[i]</code> pages. She reads at most <code>k</code> pages per day, finishing one book before starting the next. Return the <strong>minimum daily reading pace k</strong> such that she finishes all books within <code>h</code> days.</p>
+  </div>
+  <div class="example-box">
+    <div class="example-header">Example</div>
+    <div class="example-body">
+      <div class="example-row"><span class="example-key">Input</span><span class="example-val">pages = [5, 10, 3, 8], h = 10</span></div>
+      <div class="example-row"><span class="example-key">Output</span><span class="example-val">5</span></div>
+    </div>
+  </div>
+  <p>The important subtlety: the answer is <em>not</em> inside the input array. We are looking for the smallest <strong>daily reading pace</strong> that satisfies a constraint on total days.</p>
+</section>
+
+<!-- 02 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">02</span> First Principles</div>
+  <h2>If we knew nothing about binary search, what would we do?</h2>
+  <p>The most natural idea: try every possible daily reading pace, starting from the smallest.</p>
+  <div class="step-cards">
+    <div class="step-card"><div class="step-card-n">1</div><div class="step-card-body">
+      <div class="step-card-title">Pick a candidate daily reading pace.</div>
+      <p class="step-card-desc">Start with k = 1, then 2, then 3, up to max of the input array.</p>
+    </div></div>
+    <div class="step-card"><div class="step-card-n">2</div><div class="step-card-body">
+      <div class="step-card-title">Compute how many days that rate needs.</div>
+      <p class="step-card-desc">For each group of size s at rate k, we need ⌈s / k⌉ days. Sum over all books.</p>
+    </div></div>
+    <div class="step-card"><div class="step-card-n">3</div><div class="step-card-body">
+      <div class="step-card-title">Return the first rate that works.</div>
+      <p class="step-card-desc">Since we try rates in increasing order, the first valid one is the minimum answer.</p>
+    </div></div>
+  </div>
+  <p>The brute-force algorithm: test every k from 1 to max(input), stop at the first one where total days ≤ h.</p>
+</section>
+
+<!-- 03 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">03</span> Brute Force</div>
+  <h2>The naive solution is completely reasonable</h2>
+  <div class="code-block">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(this,'bf-java')">Java</button>
+  <button class="tab-btn"        onclick="switchTab(this,'bf-py'  )">Python</button>
+</div>
+<div class="tab-panel active" id="tab-bf-java"><pre><span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public int</span> <span class="fn">minReadingPace</span>(<span class="kw">int</span>[] pages, <span class="kw">int</span> h) {
+        <span class="kw">int</span> max = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> p : pages) max = Math.<span class="fn">max</span>(max, p);
+        <span class="kw">for</span> (<span class="kw">int</span> k = <span class="nm">1</span>; k &lt;= max; k++) {
+            <span class="kw">int</span> days = <span class="nm">0</span>;
+            <span class="kw">for</span> (<span class="kw">int</span> p : pages) days += (p + k - <span class="nm">1</span>) / k;
+            <span class="kw">if</span> (days &lt;= h) <span class="kw">return</span> k;
+        }
+        <span class="kw">return</span> max;
+    }
+}</pre></div>
+<div class="tab-panel"         id="tab-bf-py"  ><pre><span class="kw">import</span> math
+<span class="kw">class</span> <span class="tp">Solution</span>:
+    <span class="kw">def</span> <span class="fn">min_reading_pace</span>(<span class="kw">self</span>, pages, h):
+        <span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="fn">max</span>(pages) + <span class="nm">1</span>):
+            <span class="kw">if</span> <span class="fn">sum</span>(math.<span class="fn">ceil</span>(p / k) <span class="kw">for</span> p <span class="kw">in</span> pages) &lt;= h:
+                <span class="kw">return</span> k</pre></div>
+</div>
+  <div class="callout callout-blue">
+    <strong>If you are wondering about (size + k - 1) / k</strong>
+    This is integer ceiling division. If a group has 10 items and you process k=3 per day, you need ⌈10/3⌉ = 4 days. Plain division gives 3. The expression (10 + 3 - 1) / 3 = 4 rounds up correctly without floating point.
+  </div>
+  <p>This code reflects the direct reasoning: <em>"what is the smallest daily reading pace that works?"</em></p>
+</section>
+
+<!-- 04 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">04</span> Walkthrough</div>
+  <h2>Run the brute force with real values</h2>
+  <div class="example-box">
+    <div class="example-header">Example</div>
+    <div class="example-body">
+      <div class="example-row"><span class="example-key">Input</span><span class="example-val">pages = [5, 10, 3, 8], h = 10</span></div>
+    </div>
+  </div>
+  <div class="walkthrough">
+    <div class="wt-header">Trying each daily reading pace k</div>
+    <div class="wt-row"><span class="wt-label">k = 1</span><span class="wt-detail">5+10+3+8 = 26 days</span><span class="wt-result bad">26 &gt; 10</span></div><div class="wt-row"><span class="wt-label">k = 2</span><span class="wt-detail">3+5+2+4 = 14 days</span><span class="wt-result bad">14 &gt; 10</span></div><div class="wt-row"><span class="wt-label">k = 3</span><span class="wt-detail">2+4+1+3 = 10 days</span><span class="wt-result ok">10 ≤ 10 ✓ — return 3</span></div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why return on total ≤ h?</strong>
+    The problem asks us to finish <em>within</em> h days. Equal is valid — there's a spare slot. Less is also fine.
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">05</span> Complexity</div>
+  <h2>Why does brute force get expensive?</h2>
+  <div class="complexity-grid">
+    <div class="complexity-card">
+      <div class="complexity-label">Candidate rates tried</div>
+      <div class="complexity-val">1 … max(input)</div>
+      <div class="complexity-note">If the largest group is huge, we try millions of candidates one by one.</div>
+    </div>
+    <div class="complexity-card">
+      <div class="complexity-label">Work per candidate</div>
+      <div class="complexity-val">O(n)</div>
+      <div class="complexity-note">Each candidate scans all books to compute total days.</div>
+    </div>
+  </div>
+  <div class="callout callout-orange">
+    <strong>Total: O(n × max(input))</strong>
+    For max = 10⁹, n = 10⁵ → 10¹⁴ operations. Completely infeasible.
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">06</span> Repetition</div>
+  <h2>What work are we repeating?</h2>
+  <p>For every candidate rate k, we ask the same yes/no question:</p>
+  <div class="info-box">
+    <div class="info-box-label">Repeated check</div>
+    <p><code>canRead(k) = totalDays(k) &lt;= h ?</code></p>
+  </div>
+  <div class="step-cards">
+    <div class="step-card"><div class="step-card-n">1</div><div class="step-card-body">
+      <div class="step-card-title">Choose a candidate rate.</div>
+      <p class="step-card-desc">k = 1, then 2, then 3…</p>
+    </div></div>
+    <div class="step-card"><div class="step-card-n">2</div><div class="step-card-body">
+      <div class="step-card-title">Recompute total days for every group.</div>
+      <p class="step-card-desc">The full scan of all books happens again for each candidate.</p>
+    </div></div>
+    <div class="step-card"><div class="step-card-n">3</div><div class="step-card-body">
+      <div class="step-card-title">Check true or false.</div>
+      <p class="step-card-desc">Does this rate finish within h days or not?</p>
+    </div></div>
+  </div>
+  <p>We are not optimizing the formula. We are optimizing <strong>how many candidate rates we need to test</strong>.</p>
+</section>
+
+<!-- 07 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">07</span> Optimization Insight</div>
+  <h2>The answers form a monotonic map</h2>
+  <p>If rate k works, k+1 also works — a higher rate finishes faster. If k fails, k-1 also fails. The pattern: F F F… T T T. Classic binary-search shape.</p>
+  <div class="search-space">
+    <div class="ss-caption">pages=[5,10,3,8], h=10 · Search space: pages/day 1..10</div>
+    <div class="ss-caption" style="margin-bottom:14px">condition: canRead(k) — total days ≤ h?</div>
+    <div class="ss-row"><div class="ss-cell"><div class="ss-val F">k=1</div><div class="ss-label">F</div></div><div class="ss-cell"><div class="ss-val F">k=2</div><div class="ss-label">F</div></div><div class="ss-cell"><div class="ss-val answer">k=3</div><div class="ss-label">T*</div></div><div class="ss-cell"><div class="ss-val T">k=4</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=5</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=7</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=8</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=10</div><div class="ss-label">T</div></div></div>
+    <p class="ss-note">At k=3: ⌈5/3⌉+⌈10/3⌉+⌈3/3⌉+⌈8/3⌉ = 2+4+1+3 = <strong>10 ≤ 10</strong>. Fits exactly!</p>
+  </div>
+  <div class="callout callout-purple">
+    <strong>This is the key shift</strong>
+    The input array is not sorted — but the <em>answer space</em> (rates 1 … max) is monotonic. That is what binary search needs.
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">08</span> Binary Search</div>
+  <h2>Optimize the search over books</h2>
+  <p>Instead of testing every rate one by one, binary search the range 1 … max(input). Ask the same feasibility question only for midpoint candidates.</p>
+  <div class="code-block">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(this,'opt2-java')">Java</button>
+  <button class="tab-btn"        onclick="switchTab(this,'opt2-py'  )">Python</button>
+</div>
+<div class="tab-panel active" id="tab-opt2-java"><pre><span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public int</span> <span class="fn">minReadingPace</span>(<span class="kw">int</span>[] pages, <span class="kw">int</span> h) {
+        <span class="kw">int</span> lo = <span class="nm">1</span>, hi = <span class="nm">0</span>, ans = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> p : pages) hi = Math.<span class="fn">max</span>(hi, p);
+        ans = hi;
+        <span class="kw">while</span> (lo &lt;= hi) {
+            <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+            <span class="kw">if</span> (<span class="fn">canRead</span>(pages, mid, h)) { ans = mid; hi = mid - <span class="nm">1</span>; }
+            <span class="kw">else</span> lo = mid + <span class="nm">1</span>;
+        }
+        <span class="kw">return</span> ans;
+    }
+    <span class="kw">private boolean</span> <span class="fn">canRead</span>(<span class="kw">int</span>[] pages, <span class="kw">int</span> k, <span class="kw">int</span> h) {
+        <span class="kw">int</span> days = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> p : pages) days += (p + k - <span class="nm">1</span>) / k;
+        <span class="kw">return</span> days &lt;= h;
+    }
+}</pre></div>
+<div class="tab-panel"         id="tab-opt2-py"  ><pre><span class="kw">import</span> math
+<span class="kw">class</span> <span class="tp">Solution</span>:
+    <span class="kw">def</span> <span class="fn">min_reading_pace</span>(<span class="kw">self</span>, pages, h):
+        lo, hi, ans = <span class="nm">1</span>, <span class="fn">max</span>(pages), <span class="fn">max</span>(pages)
+        <span class="kw">while</span> lo &lt;= hi:
+            mid = lo + (hi - lo) // <span class="nm">2</span>
+            <span class="kw">if</span> <span class="fn">sum</span>(math.<span class="fn">ceil</span>(p / mid) <span class="kw">for</span> p <span class="kw">in</span> pages) &lt;= h:
+                ans = mid; hi = mid - <span class="nm">1</span>
+            <span class="kw">else</span>: lo = mid + <span class="nm">1</span>
+        <span class="kw">return</span> ans</pre></div>
+</div>
+  <p>We still compute total days the same way. The optimization is that we test only log(max) candidate rates instead of every rate from 1 to max.</p>
+</section>
+
+<!-- 09 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">09</span> Comparison</div>
+  <h2>What exactly improved?</h2>
+  <table class="cmp-table">
+    <thead><tr><th>Approach</th><th>Candidates tested</th><th>Work per candidate</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr><td>Brute force</td><td>max(input) — every k one by one</td><td>O(n)</td><td>O(n × max)</td></tr>
+      <tr><td>Binary search</td><td>log(max) — halves the range each step</td><td>O(n)</td><td><strong>O(n log max)</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>Concrete numbers</strong>
+    max = 10⁹, n = 10⁵ →
+    Brute force: 10¹⁴ ops (infeasible).
+    Binary search: log₂(10⁹) × 10⁵ ≈ 30 × 10⁵ = 3×10⁶ ops (fast).
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="section">
+  <div class="section-label"><span class="step-num">10</span> Pattern</div>
+  <h2>The reusable lesson</h2>
+  <div class="pattern-box">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-family:var(--mono)">Brute-force shape that signals binary search on answer:</p>
+    <pre><span class="kw">for</span> every possible answer k:
+    <span class="kw">if</span> checkFeasibility(k):
+        <span class="kw">return</span> k</pre>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px">Ask: do the feasibility results form F F F … T T T?<br>If yes → binary search the answer space instead of scanning it.</p>
+  </div>
+  <div class="callout callout-green">
+    <strong>For Book Club Reading</strong>
+    The ceiling-division formula did not change. The feasibility check did not change.
+    Only the way we searched the candidates changed — from O(max) linear scan to O(log max) binary search.
+  </div>
+  <h3>How this maps back to Koko Bananas (LC 875)</h3>
+  <table class="cmp-table">
+    <thead><tr><th>Koko Bananas</th><th>Book Club Reading</th><th>Meaning</th></tr></thead>
+    <tbody><tr><td>piles[i]</td><td>pages[i]</td><td>Pages in book i</td></tr><tr><td>k (speed)</td><td>k (pages/day)</td><td>Rate being binary searched</td></tr><tr><td>⌈pile/k⌉</td><td>⌈pages[i]/k⌉</td><td>Days to finish book i</td></tr><tr><td>h (hours)</td><td>h (days)</td><td>Total day budget</td></tr><tr><td>sum ≤ h</td><td>sum ≤ h</td><td>Feasibility condition</td></tr></tbody>
+  </table>
+  <p style="margin-top:14px">The algorithms are <strong>identical</strong>. Every re-skin of this problem reduces to the same binary search on a rate, with ⌈size/k⌉ as the cost function.</p>
+  <a href="koko_variant_book_club_reading.html" class="arrow-link">← Back to problem page</a>
+</section>
+
+</main>
+<footer class="site-footer">Part of the Binary Search pattern series · <a href="../binary_search_blog.html">Main article</a> · <a href="koko_variant_book_club_reading.html">Problem page</a></footer>
+
+<script>
+function switchTab(btn,lang){
+  var b=btn.closest('.code-block');
+  b.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});
+  b.querySelectorAll('.tab-panel').forEach(function(x){x.classList.remove('active')});
+  btn.classList.add('active');
+  b.querySelector('#tab-'+lang).classList.add('active');
+}
+</script>
+</body>
+</html>

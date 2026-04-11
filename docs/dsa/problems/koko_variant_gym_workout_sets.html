@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Gym Workout Sets · Binary Search on Answer</title>
+<style>/* naharihar.github.io exact token match */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f6f8fa;--bg3:#eef1f4;
+  --border:#d0d7de;--text:#1f2328;--muted:#656d76;
+  --accent:#0969da;--accent2:#0550ae;
+  --green:#1a7f37;--green-bg:#dafbe1;--green-bd:#aceebb;
+  --yellow:#9a6700;--yellow-bg:#fff8c5;
+  --purple:#6639ba;--purple-bg:#fbefff;--purple-bd:#d8b9f7;
+  --red:#cf222e;--red-bg:#fff0ee;
+  --blue-bg:#ddf4ff;--blue-bd:#80ccff;
+  --orange:#bc4c00;--orange-bg:#fff1e5;--orange-bd:#ffa657;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+nav{border-bottom:1px solid var(--border);padding:13px 0;background:var(--bg);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:860px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:20px}
+.nav-brand{font-weight:700;font-size:15px;color:var(--text);text-decoration:none}
+.nav-sep{color:var(--border)}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none}
+.nav-link:hover{color:var(--accent)}
+main{max-width:860px;margin:0 auto;padding:48px 24px 96px}
+.tag-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;border:1px solid;font-family:var(--mono)}
+.tag-orig{background:var(--bg2);color:var(--muted);border-color:var(--border)}
+.tag-bs{background:var(--blue-bg);color:var(--accent2);border-color:var(--blue-bd)}
+.tag-med{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.tag-hard{background:var(--red-bg);color:var(--red);border-color:#ffb0a0}
+.tag-style{background:var(--bg2);color:var(--muted);border-color:var(--border)}
+h1{font-size:27px;font-weight:700;line-height:1.28;letter-spacing:-.5px;margin-bottom:10px}
+.subtitle{font-size:15px;color:var(--muted);margin-bottom:44px}
+.section{margin-bottom:52px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:22px;display:flex;align-items:center;gap:10px;font-family:var(--mono)}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0;font-family:var(--mono)}
+h2{font-size:21px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
+h2 em{font-style:italic;color:var(--muted);font-weight:500}
+h3{font-size:15px;font-weight:600;margin:26px 0 10px}
+p{margin-bottom:14px}p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);color:var(--red);padding:2px 6px;border-radius:4px;border:1px solid var(--border)}
+strong{font-weight:600}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin-bottom:18px}
+.info-box-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:var(--mono)}
+.example-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:18px}
+.example-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 18px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono)}
+.example-body{padding:14px 18px}
+.example-row{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.example-row:last-child{margin-bottom:0}
+.example-key{color:var(--muted);min-width:80px;font-size:13px;font-weight:500}
+.example-val{font-family:var(--mono);font-size:13.5px;color:var(--accent2);font-weight:500}
+.example-note{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.6;padding-top:12px;border-top:1px solid var(--border)}
+.callout{border-left:3px solid;border-radius:0 6px 6px 0;padding:12px 16px;margin:18px 0;font-size:14px;line-height:1.65}
+.callout strong{display:block;margin-bottom:5px;font-size:13px;font-family:var(--mono);font-weight:600}
+.callout-blue{border-color:var(--accent);background:var(--blue-bg)}.callout-blue strong{color:var(--accent2)}
+.callout-green{border-color:var(--green);background:var(--green-bg)}.callout-green strong{color:var(--green)}
+.callout-yellow{border-color:var(--yellow);background:var(--yellow-bg)}.callout-yellow strong{color:var(--yellow)}
+.callout-purple{border-color:var(--purple);background:var(--purple-bg)}.callout-purple strong{color:var(--purple)}
+.callout-orange{border-color:var(--orange);background:var(--orange-bg)}.callout-orange strong{color:var(--orange)}
+.arrow-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--accent);text-decoration:none;font-weight:500;padding:9px 16px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);margin:18px 0;transition:border-color .12s}
+.arrow-link:hover{border-color:var(--accent)}
+.step-cards{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.step-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start}
+.step-card-n{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;margin-top:2px;font-family:var(--mono)}
+.step-card-body{flex:1}
+.step-card-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.step-card-desc{font-size:13px;color:var(--muted);line-height:1.55;margin:0}
+.search-space{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin:18px 0}
+.ss-caption{font-size:13px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)}
+.ss-row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.ss-cell{display:flex;flex-direction:column;align-items:center;gap:5px}
+.ss-val{width:52px;height:38px;border-radius:6px;border:1px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600}
+.ss-val.F{background:var(--red-bg);border-color:#ffb0a0;color:var(--red)}
+.ss-val.T{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+.ss-val.answer{background:var(--green-bg);border-color:var(--green);color:var(--green);box-shadow:0 0 0 2.5px var(--green)}
+.ss-label{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.ss-note{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+.ss-note strong{color:var(--text)}
+.walkthrough{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:18px 0}
+.wt-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 18px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono)}
+.wt-row{padding:11px 18px;border-bottom:1px solid var(--border);font-size:13.5px;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.wt-row:last-child{border-bottom:none}
+.wt-label{min-width:110px;color:var(--muted);font-weight:600;font-size:12.5px;font-family:var(--mono)}
+.wt-detail{flex:1;font-family:var(--mono);font-size:13px}
+.wt-result{font-size:13px}
+.ok{color:var(--green);font-weight:600}.bad{color:var(--red);font-weight:600}
+.code-block{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:18px 0}
+.tab-bar{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 14px}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:13px;font-family:var(--sans);padding:9px 12px;cursor:pointer;transition:color .12s;font-weight:500}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+pre{background:#f6f8fa;padding:20px 22px;overflow-x:auto;margin:0;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--text)}
+.kw{color:#cf222e}.fn{color:#6639ba}.cm{color:#8a929e;font-style:italic}.st{color:#0a3069}.nm{color:#0550ae}.tp{color:#953800}
+.complexity-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.complexity-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.complexity-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600;font-family:var(--mono)}
+.complexity-val{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--accent2)}
+.complexity-note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13.5px;margin:18px 0}
+.cmp-table th{background:var(--bg2);color:var(--muted);padding:9px 14px;text-align:left;border:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--mono)}
+.cmp-table td{padding:9px 14px;border:1px solid var(--border);vertical-align:top}
+.cmp-table tr:hover td{background:var(--bg2)}
+.cmp-table td:first-child{font-weight:600;color:var(--muted);font-size:12.5px;font-family:var(--mono)}
+.footer-nav{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;border-top:1px solid var(--border);padding-top:32px;margin-top:64px}
+.fn-link{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--bg);transition:border-color .12s}
+.fn-link:hover{border-color:var(--accent)}
+.fn-dir{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-family:var(--mono)}
+.fn-title{font-size:14px;font-weight:600;color:var(--accent)}
+.fn-right{text-align:right}
+.fn-center{display:flex;align-items:center;justify-content:center}
+.fn-center a{font-size:12px;color:var(--muted);text-decoration:none;padding:8px 12px}
+.fn-center a:hover{color:var(--accent)}
+.pattern-box{background:var(--bg2);border:2px solid var(--border);border-radius:8px;padding:20px 24px;margin:20px 0}
+.pattern-box pre{background:var(--bg3);border-radius:6px;padding:14px 16px;margin:12px 0 0;font-size:13px}
+.site-footer{text-align:center;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding:24px;margin-top:48px;font-family:var(--mono)}
+.site-footer a{color:var(--accent);text-decoration:none}
+@media(max-width:600px){h1{font-size:22px}h2{font-size:18px}.complexity-grid{grid-template-columns:1fr}.footer-nav{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav><div class="nav-inner"><a href="../binary_search_blog.html" class="nav-brand">AlgorithmCraft</a><span class="nav-sep">·</span><a href="../binary_search_blog.html" class="nav-link">Pattern Map</a><span class="nav-sep">·</span><a href="koko_variant_gym_workout_sets_intuition.html" class="nav-link">Intuition</a></div></nav>
+<main>
+
+<div class="tag-row"><span class="tag tag-orig">Original Problem</span><span class="tag tag-bs">Search on Answer</span><span class="tag tag-med">Medium</span></div>
+<h1>Gym Workout Sets</h1>
+<p class="subtitle">An athlete has n muscle groups, each with a fixed number of reps. She does at most k reps per set. Find the minimum k to finish within h sets.</p>
+
+<!-- PROBLEM -->
+<section class="section">
+  <div class="section-label"><span class="step-num">Problem</span></div>
+  <h2>What are we solving?</h2>
+  <div class="info-box">
+    <div class="info-box-label">Problem Statement</div>
+    <p>An athlete trains <code>n</code> muscle groups. Group <code>i</code> requires <code>reps[i]</code> repetitions. She can do at most <code>k</code> reps per set, completing all reps for one group before moving to the next. Return the <strong>minimum k</strong> such that she finishes the full routine in at most <code>h</code> sets.</p>
+  </div>
+  <div class="example-box">
+    <div class="example-header">Example</div>
+    <div class="example-body">
+      <div class="example-row"><span class="example-key">Input</span><span class="example-val">reps = [6, 3, 10, 4, 8], h = 9</span></div>
+      <div class="example-row"><span class="example-key">Output</span><span class="example-val">5</span></div>
+      <p class="example-note">k=5: ⌈6/5⌉+⌈3/5⌉+⌈10/5⌉+⌈4/5⌉+⌈8/5⌉ = 2+1+2+1+2 = 8 ≤ 9 ✓. k=4 gives 2+1+3+1+2=9 ≤ 9 — binary search finds k=4 is actually the minimum here.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTUITION BRIDGE -->
+<section class="section">
+  <div class="section-label"><span class="step-num">Intuition</span></div>
+  <h2>The answer is a <em>reps per set</em>, not an index</h2>
+  <p>We're binary searching the reps-per-set capacity, not searching the reps array. The feasibility check is: can she finish all groups within h sets at this capacity?</p>
+  <div class="callout callout-blue">
+    <strong>Key insight</strong>
+    If reps per set k works, k+1 also works. If k fails, k-1 also fails. This monotonic F→T shape is exactly what binary search needs.
+  </div>
+  <a href="koko_variant_gym_workout_sets_intuition.html" class="arrow-link">→ Want to build this from first principles? Read the full intuition article</a>
+
+  <div class="search-space">
+    <div class="ss-caption">reps=[6,3,10,4,8], h=9 · Search space: reps/set 1..10</div>
+    <div class="ss-caption" style="margin-bottom:14px">condition: canFinish(k) — total sets ≤ h?</div>
+    <div class="ss-row"><div class="ss-cell"><div class="ss-val F">k=1</div><div class="ss-label">F</div></div><div class="ss-cell"><div class="ss-val F">k=2</div><div class="ss-label">F</div></div><div class="ss-cell"><div class="ss-val F">k=3</div><div class="ss-label">F</div></div><div class="ss-cell"><div class="ss-val answer">k=4</div><div class="ss-label">T*</div></div><div class="ss-cell"><div class="ss-val T">k=5</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=6</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=8</div><div class="ss-label">T</div></div><div class="ss-cell"><div class="ss-val T">k=10</div><div class="ss-label">T</div></div></div>
+    <p class="ss-note">At k=4: ⌈6/4⌉+⌈3/4⌉+⌈10/4⌉+⌈4/4⌉+⌈8/4⌉ = 2+1+3+1+2 = <strong>9 ≤ 9</strong>. Fits exactly!</p>
+  </div>
+
+  <h3>The feasibility check</h3>
+  <p>For each muscle group, we need <code>⌈group_size / k⌉</code> sets. Sum over all muscle groups and check if total ≤ <code>h</code>. In code: <code>(size + k - 1) / k</code> avoids floating point.</p>
+  <div class="callout callout-yellow">
+    <strong>Search bounds</strong>
+    Minimum k = 1. Maximum k = max(muscle groups) — no benefit going higher since even the largest group finishes in one set.
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="section">
+  <div class="section-label"><span class="step-num">Solution</span></div>
+  <h2>Binary search on reps per set</h2>
+  <div class="code-block">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(this,'opt-java')">Java</button>
+  <button class="tab-btn"        onclick="switchTab(this,'opt-py'  )">Python</button>
+</div>
+<div class="tab-panel active" id="tab-opt-java"><pre><span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public int</span> <span class="fn">minRepsPerSet</span>(<span class="kw">int</span>[] reps, <span class="kw">int</span> h) {
+        <span class="kw">int</span> lo = <span class="nm">1</span>, hi = <span class="nm">0</span>, ans = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> r : reps) hi = Math.<span class="fn">max</span>(hi, r);
+        ans = hi;
+        <span class="kw">while</span> (lo &lt;= hi) {
+            <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+            <span class="kw">if</span> (<span class="fn">canFinish</span>(reps, mid, h)) { ans = mid; hi = mid - <span class="nm">1</span>; }
+            <span class="kw">else</span> lo = mid + <span class="nm">1</span>;
+        }
+        <span class="kw">return</span> ans;
+    }
+    <span class="kw">private boolean</span> <span class="fn">canFinish</span>(<span class="kw">int</span>[] reps, <span class="kw">int</span> k, <span class="kw">int</span> h) {
+        <span class="kw">int</span> sets = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> r : reps) sets += (r + k - <span class="nm">1</span>) / k;
+        <span class="kw">return</span> sets &lt;= h;
+    }
+}</pre></div>
+<div class="tab-panel"         id="tab-opt-py"  ><pre><span class="kw">import</span> math
+<span class="kw">class</span> <span class="tp">Solution</span>:
+    <span class="kw">def</span> <span class="fn">min_reps_per_set</span>(<span class="kw">self</span>, reps, h):
+        lo, hi, ans = <span class="nm">1</span>, <span class="fn">max</span>(reps), <span class="fn">max</span>(reps)
+        <span class="kw">while</span> lo &lt;= hi:
+            mid = lo + (hi - lo) // <span class="nm">2</span>
+            <span class="kw">if</span> <span class="fn">sum</span>(math.<span class="fn">ceil</span>(r / mid) <span class="kw">for</span> r <span class="kw">in</span> reps) &lt;= h:
+                ans = mid; hi = mid - <span class="nm">1</span>
+            <span class="kw">else</span>: lo = mid + <span class="nm">1</span>
+        <span class="kw">return</span> ans</pre></div>
+</div>
+  <h3>Complexity</h3>
+  <div class="complexity-grid">
+    <div class="complexity-card">
+      <div class="complexity-label">Time</div>
+      <div class="complexity-val">O(n log m)</div>
+      <div class="complexity-note">m = max reps in any group. Binary search + O(n) feasibility check.</div>
+    </div>
+    <div class="complexity-card">
+      <div class="complexity-label">Space</div>
+      <div class="complexity-val">O(1)</div>
+      <div class="complexity-note">Constant extra space.</div>
+    </div>
+  </div>
+</section>
+
+<div class="footer-nav"><a href="koko_variant_factory_packing_line.html" class="fn-link"><span class="fn-dir">← Previous</span><span class="fn-title">Factory Packing Line</span></a><div class="fn-center"><a href="koko_variant_gym_workout_sets_intuition.html">Full intuition →</a></div><a href="koko_variant_book_club_reading.html" class="fn-link fn-right"><span class="fn-dir">Next →</span><span class="fn-title">Book Club Reading</span></a></div>
+</main>
+<footer class="site-footer">Part of the Binary Search pattern series · <a href="../binary_search_blog.html">Main article</a></footer>
+
+<script>
+function switchTab(btn,lang){
+  var b=btn.closest('.code-block');
+  b.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});
+  b.querySelectorAll('.tab-panel').forEach(function(x){x.classList.remove('active')});
+  btn.classList.add('active');
+  b.querySelector('#tab-'+lang).classList.add('active');
+}
+</script>
+</body>
+</html>
