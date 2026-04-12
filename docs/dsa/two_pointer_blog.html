@@ -634,10 +634,10 @@
 <!-- ────────────────── 02 PATTERNS ────────────────── -->
 <div class="section-header" id="patterns">
   <span class="section-num">02</span>
-  <h2>The Four Patterns</h2>
+  <h2>The Five Patterns</h2>
 </div>
 
-<p>Every two-pointer problem fits into one of four shapes. The pointer mechanics change — the elimination argument stays the same.</p>
+<p>Most two-pointer problems collapse into five teachable shapes. The pointer mechanics change, but the core skill stays the same: move one pointer in a way that provably throws away candidates you no longer need to consider.</p>
 
 <div class="patterns-grid">
   <div class="pattern-card">
@@ -649,8 +649,8 @@
   <div class="pattern-card">
     <div class="pattern-num">Pattern 2</div>
     <div class="pattern-title">Slow &amp; Fast</div>
-    <div class="pattern-desc">One pointer moves one step; the other moves two (or conditionally). Used for cycle detection, finding midpoints, removing duplicates in-place.</div>
-    <div class="pattern-lc">LC 141, 142, 26, 283, 88</div>
+    <div class="pattern-desc">Two pointers move with different roles or speeds. Used for linked-list cycles, midpoint/gap problems, and "fast discovers, slow acts" situations.</div>
+    <div class="pattern-lc">LC 141, 142, 19, 287, 234</div>
   </div>
   <div class="pattern-card">
     <div class="pattern-num">Pattern 3</div>
@@ -664,21 +664,28 @@
     <div class="pattern-desc">Both pointers move in the same direction; the window expands when valid, shrinks when not. Find minimum/maximum subarray satisfying a condition.</div>
     <div class="pattern-lc">LC 3, 76, 209, 424, 567</div>
   </div>
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 5</div>
+    <div class="pattern-title">Two Sequences</div>
+    <div class="pattern-desc">One pointer per array, list, or string. Advance the side that is "behind" and synchronize two ordered streams without extra passes.</div>
+    <div class="pattern-lc">LC 88, 349, 392, 165, 925</div>
+  </div>
 </div>
 
 <div class="callout blue">
   <div class="callout-head">Recognition Shortcut</div>
-  If the problem asks for a pair/triplet summing to a value in a sorted array → <strong>Pattern 1</strong>. If it involves a linked list with cycle or midpoint → <strong>Pattern 2</strong>. If it's "remove/move elements in-place" → <strong>Pattern 3</strong>. If it's "longest/shortest subarray with property X" → <strong>Pattern 4</strong>.
+  If the problem asks for a pair or triplet in a sorted structure → <strong>Pattern 1</strong>. If it involves a linked list cycle, gap, or midpoint → <strong>Pattern 2</strong>. If it's "remove/move/compress in-place" → <strong>Pattern 3</strong>. If it's "longest/shortest/count subarray with property X" → <strong>Pattern 4</strong>. If there are two arrays, two strings, or two sorted streams to compare or merge → <strong>Pattern 5</strong>.
 </div>
 
 <h3>The templates</h3>
-<p>Two templates cover Patterns 1–3. Sliding window has its own expanding/contracting shape. Pick one and be consistent — mixing them is the main source of off-by-one bugs.</p>
+<p>Patterns 1–5 all look different on the surface, but each has a repeatable movement rule. Pick the right shape early and stick to it — mixing them is the main source of off-by-one and missed-case bugs.</p>
 
 <div class="tabs">
   <button class="tab-btn active" onclick="showTab(event,'t-opp')">Opposite ends</button>
   <button class="tab-btn" onclick="showTab(event,'t-slow')">Slow &amp; Fast</button>
   <button class="tab-btn" onclick="showTab(event,'t-rw')">Read &amp; Write</button>
   <button class="tab-btn" onclick="showTab(event,'t-win')">Sliding Window</button>
+  <button class="tab-btn" onclick="showTab(event,'t-two')">Two Sequences</button>
 </div>
 
 <div class="tab-pane active" id="t-opp">
@@ -812,9 +819,42 @@ window_state = {}  <span class="cm"># or collections.Counter()</span>
 </div>
 </div>
 
+<div class="tab-pane" id="t-two">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Two Sequences — Merge / Compare</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> i = <span class="cn">0</span>, j = <span class="cn">0</span>;
+
+<span class="ck">while</span> (i < a.<span class="cs">length</span> &amp;&amp; j < b.<span class="cs">length</span>) {
+    <span class="ck">if</span> (a[i] == b[j]) {
+        processMatch(a[i], b[j]);
+        i++; j++;
+    } <span class="ck">else if</span> (a[i] < b[j]) {
+        i++;   <span class="cm">// a is behind</span>
+    } <span class="ck">else</span> {
+        j++;   <span class="cm">// b is behind</span>
+    }
+}
+
+<span class="cm">// Optional: process leftovers if the problem requires it</span></pre></div>
+  <div class="lang-pane python"><pre>i = j = <span class="cn">0</span>
+
+<span class="ck">while</span> i < len(a) <span class="ck">and</span> j < len(b):
+    <span class="ck">if</span> a[i] == b[j]:
+        process_match(a[i], b[j])
+        i += <span class="cn">1</span>
+        j += <span class="cn">1</span>
+    <span class="ck">elif</span> a[i] < b[j]:
+        i += <span class="cn">1</span>   <span class="cm"># a is behind</span>
+    <span class="ck">else</span>:
+        j += <span class="cn">1</span>   <span class="cm"># b is behind</span>
+
+<span class="cm"># Optional: process leftovers if needed</span></pre></div>
+</div>
+</div>
+
 <div class="callout yellow">
   <div class="callout-head">⚠ Most Common Mistakes</div>
-  <strong>(1) Wrong loop condition</strong> — use <code>while (left &lt; right)</code> for opposite-ends (not <code>&lt;=</code>, since L==R means one element). <strong>(2) Forgetting to skip duplicates</strong> in 3Sum — after finding a valid triplet, advance both pointers past identical values. <strong>(3) Fast pointer null check</strong> — always check <code>fast != null &amp;&amp; fast.next != null</code> before accessing <code>fast.next.next</code>.
+  <strong>(1) Wrong loop condition</strong> — use <code>while (left &lt; right)</code> for opposite-ends (not <code>&lt;=</code>, since L==R means one element). <strong>(2) Forgetting to skip duplicates</strong> in 3Sum — after finding a valid triplet, advance both pointers past identical values. <strong>(3) Fast pointer null check</strong> — always check <code>fast != null &amp;&amp; fast.next != null</code> before accessing <code>fast.next.next</code>. <strong>(4) In two-sequence scans</strong>, don’t advance both sides unless you found a match or explicitly consumed both candidates.
 </div>
 
 <!-- ────────────────── 03 VISUALIZER ────────────────── -->
@@ -991,10 +1031,21 @@ result = []
 <!-- ────────────────── 05 CHEAT SHEET ────────────────── -->
 <div class="section-header" id="cheatsheet">
   <span class="section-num">05</span>
-  <h2>Reference</h2>
+  <h2>Curriculum Map</h2>
 </div>
 
-<p>The pattern map — 24 problems, 4 patterns. Sort by pattern, find the approach.</p>
+<p>The teaching structure is: <strong>5 core patterns</strong> → a few memorable subpatterns under each → then a practice inventory. Learn the movement rule first, then use the problem table as drill material.</p>
+
+<div class="callout green">
+  <div class="callout-head">The Pattern-First Curriculum</div>
+  <strong>Pattern 1 — Opposite Ends</strong>: pair sum, palindrome/reverse, area or water optimization, and "fix one + search the rest" like 3Sum.<br>
+  <strong>Pattern 2 — Slow &amp; Fast</strong>: cycle detection, cycle entry, midpoint/gap problems, and linked-list shape questions.<br>
+  <strong>Pattern 3 — Read &amp; Write</strong>: remove, compact, deduplicate, partition, and in-place overwrite.<br>
+  <strong>Pattern 4 — Sliding Window</strong>: longest valid window, shortest valid window, count valid windows, and constraint-tracking windows.<br>
+  <strong>Pattern 5 — Two Sequences</strong>: merge sorted data, intersections, subsequence checks, string/version comparison.
+</div>
+
+<p>The reference map below is a starter inventory rather than the whole universe. Use it to see how many different problem stories collapse into the same pointer movement.</p>
 
 <table class="prob-table">
   <thead>
@@ -1027,11 +1078,16 @@ result = []
     <tr><td><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/" target="_blank">LC 3 — Longest Substring ↗</a></td><td><span class="badge badge-pattern">Sliding Window</span></td><td><code>shrink when char repeats</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
     <tr><td><a href="https://leetcode.com/problems/minimum-size-subarray-sum/" target="_blank">LC 209 — Min Subarray Sum ↗</a></td><td><span class="badge badge-pattern">Sliding Window</span></td><td><code>shrink when sum ≥ target</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
     <tr><td><a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank">LC 76 — Min Window Substring ↗</a></td><td><span class="badge badge-pattern">Sliding Window</span></td><td><code>shrink while window covers t</code></td><td><span class="badge badge-hard">Hard</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/merge-sorted-array/" target="_blank">LC 88 — Merge Sorted Array ↗</a></td><td><span class="badge badge-pattern">Two Sequences</span></td><td><code>advance the side that is behind</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/intersection-of-two-arrays-ii/" target="_blank">LC 350 — Intersection of Two Arrays II ↗</a></td><td><span class="badge badge-pattern">Two Sequences</span></td><td><code>equal → record; smaller side advances</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/is-subsequence/" target="_blank">LC 392 — Is Subsequence ↗</a></td><td><span class="badge badge-pattern">Two Sequences</span></td><td><code>match char → advance both, else advance source</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/compare-version-numbers/" target="_blank">LC 165 — Compare Version Numbers ↗</a></td><td><span class="badge badge-pattern">Two Sequences</span></td><td><code>consume both streams segment by segment</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/long-pressed-name/" target="_blank">LC 925 — Long Pressed Name ↗</a></td><td><span class="badge badge-pattern">Two Sequences</span></td><td><code>name pointer is stricter than typed pointer</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
   </tbody>
 </table>
 
-<h3>The 6-problem learning path</h3>
-<p>Do these six in order. Each one unlocks the next pattern and builds on the same core insight:</p>
+<h3>The 8-problem learning path</h3>
+<p>Do these in order. Each step adds one new pointer movement shape or a harder proof obligation.</p>
 
 <div class="path-steps">
   <div class="path-step">
@@ -1076,6 +1132,20 @@ result = []
       <div class="path-desc">Your first Sliding Window problem. The expand/shrink logic is different from converging pointers but the same core idea: each pointer move eliminates candidates. Once this clicks, LC 76 and LC 209 feel identical.</div>
     </div>
   </div>
+  <div class="path-step">
+    <div class="path-num">7</div>
+    <div class="path-body">
+      <div class="path-title">LC 392 — Is Subsequence</div>
+      <div class="path-desc">The cleanest two-sequence scan. One string is strict, the other is generous. This introduces the “advance the side that is behind” mindset without the extra noise of merging or deduplication.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">8</div>
+    <div class="path-body">
+      <div class="path-title">LC 88 — Merge Sorted Array</div>
+      <div class="path-desc">The classic merge shape. It looks different from the other patterns, but it is still just pointer coordination. Once this is comfortable, intersections, compare-version, and many string-matching variants become routine.</div>
+    </div>
+  </div>
 </div>
 
 <h3>The three-question test</h3>
@@ -1099,8 +1169,8 @@ result = []
   <div class="three-q-item">
     <div class="three-q-n">3</div>
     <div>
-      <div class="three-q-q">Does the problem involve in-place modification or a subarray window?</div>
-      <div class="three-q-a">"In-place" + "sorted" → Read/Write. "Subarray" + "min/max length satisfying condition" → Sliding Window. "Linked list" + anything → Slow/Fast.</div>
+      <div class="three-q-q">Is this about in-place modification, a window, or two separate sequences?</div>
+      <div class="three-q-a">"In-place" + "sorted/filtered" → Read/Write. "Subarray" + "min/max/count satisfying condition" → Sliding Window. "Two arrays / two strings / merge / compare" → Two Sequences. "Linked list" + anything structural → Slow/Fast.</div>
     </div>
   </div>
 </div>
@@ -1113,8 +1183,8 @@ result = []
 
 <h3>One sentence that covers everything</h3>
 <p>Two pointers work whenever <strong>moving one pointer in a fixed direction provably eliminates candidates that can't be the answer</strong> — and you can make that proof cheaply.</p>
-<p>The sorted-array case is just the most obvious version. The linked list cycle, the in-place array transform, the sliding window — they're all the same insight wearing different clothes. In each case, you're not searching blindly: you're <strong>exploiting a monotonic property</strong> to skip candidates in bulk.</p>
-<p>Engineers who solve these problems fluently in interviews haven't memorized more templates — they've internalized this one principle deeply enough to recognize it in new disguises. Build that recognition by working through the six-problem path above, and the rest follows.</p>
+<p>The sorted-array case is just the most obvious version. The linked list cycle, the in-place array transform, the sliding window, the two-sequence merge — they're all the same insight wearing different clothes. In each case, you're not searching blindly: you're <strong>using pointer movement to skip work in bulk</strong>.</p>
+<p>Engineers who solve these problems fluently in interviews haven't memorized 100 solutions. They've internalized five movement shapes deeply enough to recognize them in new disguises. Build that recognition through the pattern-first path above, and the long problem list starts collapsing into a small number of reusable ideas.</p>
 
 <div class="callout blue">
   <div class="callout-head">Interview Sentence That Signals Expertise</div>
@@ -1124,7 +1194,7 @@ result = []
 </div><!-- /content -->
 
 <footer>
-  Two Pointers deep dive · Covers LeetCode patterns 1–4 · All examples and code are original
+  Two Pointers deep dive · Covers 5 core pointer patterns · All examples and code are original
 </footer>
 
 <script>
