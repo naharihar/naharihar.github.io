@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Pointers: The Collision Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --surface: #ffffff;
+    --ink: #1a1814;
+    --ink2: #4a4740;
+    --ink3: #7a776f;
+    --rule: #e0ddd6;
+    --accent: #c8440a;
+    --accent2: #1e4fa0;
+    --accent3: #1a7a4a;
+    --accent-bg: #fdf0ea;
+    --accent2-bg: #eaf0fb;
+    --accent3-bg: #e8f5ee;
+    --yellow: #f5c842;
+    --yellow-bg: #fffbea;
+    --code-bg: #f0ede6;
+    --mono: 'DM Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 6px;
+    --max: 780px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 48px;
+    font-size: 13px;
+  }
+  .nav-brand { font-family: var(--mono); font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; margin-right: auto; }
+  nav a { color: var(--ink3); text-decoration: none; transition: color .15s; white-space: nowrap; }
+  nav a:hover { color: var(--ink); }
+
+  /* ── HEADER ── */
+  header {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 5rem 2rem 3rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .header-sub {
+    font-size: 17px;
+    color: var(--ink2);
+    max-width: 600px;
+    line-height: 1.65;
+  }
+  .header-meta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 2rem;
+    font-size: 13px;
+    color: var(--ink3);
+    flex-wrap: wrap;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* ── LAYOUT ── */
+  .content {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 4rem 0 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.85rem;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  h3 {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    color: var(--ink);
+    margin: 2rem 0 0.75rem;
+  }
+
+  p { margin-bottom: 1rem; color: var(--ink2); }
+  strong { color: var(--ink); font-weight: 500; }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.5rem 0;
+    font-size: 14.5px;
+    color: var(--ink2);
+  }
+  .callout.blue { border-color: var(--accent2); background: var(--accent2-bg); }
+  .callout.green { border-color: var(--accent3); background: var(--accent3-bg); }
+  .callout.yellow { border-color: var(--yellow); background: var(--yellow-bg); }
+  .callout-head {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout.blue .callout-head { color: var(--accent2); }
+  .callout.green .callout-head { color: var(--accent3); }
+  .callout.yellow .callout-head { color: #8a7000; }
+
+  /* ── CODE ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.65;
+    margin: 1.5rem 0;
+    color: var(--ink);
+  }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  .cm { color: var(--ink3); }
+  .ck { color: var(--accent2); font-weight: 500; }
+  .cs { color: var(--accent3); }
+  .cn { color: var(--accent); }
+
+  /* ── PATTERN CARDS ── */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .pattern-card:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(200,68,10,0.08); }
+  .pattern-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .pattern-title { font-family: var(--serif); font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--ink); }
+  .pattern-desc { font-size: 13px; color: var(--ink3); line-height: 1.5; margin-bottom: 0.6rem; }
+  .pattern-lc { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
+
+  /* ── INTERACTIVE ── */
+  .interactive-box {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .interactive-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 1rem;
+  }
+
+  /* array visualizer */
+  .arr-vis {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    padding-bottom: 28px;
+    position: relative;
+    margin: 1rem 0;
+  }
+  .arr-el {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .arr-el .val {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    border: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--code-bg);
+    color: var(--ink2);
+    transition: background .25s, border-color .25s, color .25s;
+  }
+  .arr-el .idx {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 4px;
+  }
+  .arr-el .ptr-tag {
+    position: absolute;
+    bottom: -24px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 1px 6px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .arr-el.is-L .val { background: #ddeeff; border-color: var(--accent2); color: var(--accent2); }
+  .arr-el.is-L .ptr-tag { opacity: 1; background: var(--accent2); color: #fff; }
+  .arr-el.is-R .val { background: #fdeedd; border-color: var(--accent); color: var(--accent); }
+  .arr-el.is-R .ptr-tag { opacity: 1; background: var(--accent); color: #fff; }
+  .arr-el.is-match .val { background: #d8f5e6; border-color: var(--accent3); color: var(--accent3); }
+  .arr-el.is-match .ptr-tag { opacity: 1; background: var(--accent3); color: #fff; }
+  .arr-el.is-slow .val { background: #ddeeff; border-color: var(--accent2); color: var(--accent2); }
+  .arr-el.is-slow .ptr-tag { opacity: 1; background: var(--accent2); color: #fff; }
+  .arr-el.is-fast .val { background: #ffeedd; border-color: #e07020; color: #e07020; }
+  .arr-el.is-fast .ptr-tag { opacity: 1; background: #e07020; color: #fff; }
+  .arr-el.is-write .val { background: #f5d8f8; border-color: #8a30a0; color: #8a30a0; }
+  .arr-el.is-write .ptr-tag { opacity: 1; background: #8a30a0; color: #fff; }
+
+  .vis-controls { display: flex; gap: 8px; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink2);
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .btn:hover { background: var(--code-bg); border-color: var(--ink3); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .vis-msg {
+    font-size: 13px;
+    font-family: var(--mono);
+    color: var(--ink3);
+    padding: 6px 0;
+    min-height: 24px;
+  }
+  .vis-msg.ok { color: var(--accent3); }
+  .vis-msg.bad { color: var(--accent); }
+
+  /* log box */
+  .log-box {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink3);
+    max-height: 160px;
+    overflow-y: auto;
+    margin-top: 10px;
+    line-height: 1.8;
+  }
+  .log-box .log-ok { color: var(--accent3); }
+  .log-box .log-hi { color: var(--ink); font-weight: 500; }
+
+  /* ── PROBLEM TABLE ── */
+  .prob-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin: 1.5rem 0;
+  }
+  .prob-table th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .prob-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink2);
+    vertical-align: top;
+  }
+  .prob-table tr:last-child td { border-bottom: none; }
+  .prob-table tr:hover td { background: var(--code-bg); }
+  .prob-table a { color: var(--accent2); text-decoration: none; }
+  .prob-table a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .badge-easy { background: #e8f5ee; color: #1a7a4a; }
+  .badge-medium { background: #fff3e0; color: #8a5000; }
+  .badge-hard { background: #fdeeed; color: #a02020; }
+  .badge-pattern { background: var(--accent2-bg); color: var(--accent2); font-size: 10px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-bottom: 1.5rem; }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    color: var(--ink3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ── LEARNING PATH ── */
+  .path-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .path-step {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 1rem;
+    position: relative;
+  }
+  .path-step::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .path-step:last-child::before { display: none; }
+  .path-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink3);
+    background: var(--surface);
+    flex-shrink: 0;
+    margin-top: 0px;
+  }
+  .path-body { padding: 10px 0 2rem; }
+  .path-title { font-weight: 500; color: var(--ink); margin-bottom: 0.25rem; }
+  .path-desc { font-size: 13.5px; color: var(--ink3); line-height: 1.55; }
+
+  /* ── PROBLEM DEEP DIVE ── */
+  .problem-block {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+  .problem-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .problem-id { font-family: var(--mono); font-size: 11px; color: var(--ink3); }
+  .problem-title { font-weight: 500; font-size: 15px; color: var(--ink); flex: 1; }
+  .problem-body { padding: 1.25rem; font-size: 14px; color: var(--ink2); line-height: 1.65; }
+
+  /* slider */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 160px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--rule);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--rule);
+  }
+  .slider-label { font-family: var(--mono); font-size: 12px; color: var(--ink3); }
+
+  /* footer */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 2rem;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink3);
+    font-family: var(--mono);
+  }
+
+  /* legend row */
+  .legend { display: flex; gap: 1.25rem; font-size: 12px; color: var(--ink3); margin-top: 0.5rem; flex-wrap: wrap; font-family: var(--mono); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+  /* three-question */
+  .three-q { display: flex; flex-direction: column; gap: 1px; margin: 1.5rem 0; }
+  .three-q-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+  }
+  .three-q-item:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+  .three-q-item:last-child { border-radius: 0 0 var(--radius) var(--radius); }
+  .three-q-n { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); padding-top: 1px; }
+  .three-q-q { font-weight: 500; font-size: 14px; color: var(--ink); margin-bottom: 0.2rem; }
+  .three-q-a { font-size: 13px; color: var(--ink3); line-height: 1.5; }
+
+  /* highlight arrow */
+  .inline-arr { color: var(--accent); font-style: normal; }
+
+  /* ── LANG TOGGLE ── */
+  .lang-toggle {
+    display: inline-flex;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .lang-btn {
+    padding: 4px 12px;
+    background: var(--code-bg);
+    color: var(--ink3);
+    border: none;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    letter-spacing: 0.04em;
+  }
+  .lang-btn + .lang-btn { border-left: 1px solid var(--rule); }
+  .lang-btn.active { background: var(--ink); color: #fff; }
+
+  /* code block wrapper */
+  .code-block { position: relative; margin: 1.5rem 0; }
+  .code-block pre { margin: 0; border-radius: 0 0 var(--radius) var(--radius); }
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 6px 12px;
+  }
+  .code-block-title { font-family: var(--mono); font-size: 10px; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; }
+  .lang-pane { display: none; }
+  .lang-pane.active { display: block; }
+
+  /* tab selector for converter */
+  .conv-tabs { display: flex; gap: 0; margin-bottom: 1.25rem; }
+  .conv-tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 14px;
+    border: 1px solid var(--rule);
+    background: var(--code-bg);
+    color: var(--ink3);
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .conv-tab:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .conv-tab:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+  .conv-tab + .conv-tab { border-left: none; }
+  .conv-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">Harihar Nath · DSA</a>
+  <a href="#core-idea">The Idea</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#converter">Visualizer</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+</nav>
+
+<header>
+  <div class="header-label">Deep Dive · Algorithms</div>
+  <h1>Two Pointers: The <em>Collision</em> Algorithm</h1>
+  <p class="header-sub">Most people use two pointers. Few understand <em>why</em> they work. Once you see the core insight — two independent claims narrowing a search space — the whole family of problems collapses into one pattern.</p>
+  <div class="header-meta">
+    <span>20 min read</span>
+    <span>·</span>
+    <span>Interactive examples</span>
+    <span>·</span>
+    <span>Covers LC 11, 15, 42, 141, 167 &amp; more</span>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ────────────────── 01 CORE IDEA ────────────────── -->
+<div class="section-header" id="core-idea">
+  <span class="section-num">01</span>
+  <h2>The Core Insight</h2>
+</div>
+
+<h3>Two claims, not two indices</h3>
+<p>Every intro course shows two pointers as a technique — "start one at the front, one at the back, move them inward". That's the <em>mechanics</em>. The insight is different.</p>
+<p>Two pointers work whenever you can make <strong>two independent monotonic claims</strong> about a search space, and moving one pointer can only help (or definitively hurt) while leaving the other as-is. The pointers don't move randomly — each move <strong>eliminates a class of candidates</strong> that provably can't be the answer.</p>
+<p>In Two Sum II (sorted array, find a pair summing to target): if the current sum is too small, the left pointer's current value is useless with <em>every</em> right pointer position — so move it right. If the sum is too large, the right pointer's value is useless — move it left. You're not guessing; you're eliminating.</p>
+
+<div class="callout">
+  <div class="callout-head">Core Insight</div>
+  Two pointers work whenever moving one pointer in a fixed direction is guaranteed to eliminate candidates that couldn't have been the answer anyway.
+</div>
+
+<h3>The classic case — interactive</h3>
+<p>Before we generalise: here's <strong>LC 167 Two Sum II</strong> working live. Pick a target and step through. Notice how each step eliminates an entire row or column from the implicit 2D search space:</p>
+
+<div class="interactive-box">
+  <div class="interactive-label">LC 167 — Two Sum II (sorted array)</div>
+
+  <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+    <span class="slider-label">Target:</span>
+    <input type="range" id="target-slider" min="5" max="25" value="14" oninput="tp1_setTarget(this.value)">
+    <span class="slider-label" id="target-val" style="min-width:20px;font-weight:500;color:var(--ink)">14</span>
+    <button class="btn" onclick="tp1_reset()">Reset</button>
+    <button class="btn" id="tp1-step-btn" onclick="tp1_step()">Step →</button>
+  </div>
+
+  <div class="arr-vis" id="tp1-arr"></div>
+  <div class="vis-msg" id="tp1-msg">Press Step to begin.</div>
+  <div class="log-box" id="tp1-log"></div>
+
+  <div class="legend" style="margin-top:1rem">
+    <span><span class="legend-dot" style="background:#ddeeff;border:1px solid var(--accent2)"></span>L pointer</span>
+    <span><span class="legend-dot" style="background:#fdeedd;border:1px solid var(--accent)"></span>R pointer</span>
+    <span><span class="legend-dot" style="background:#d8f5e6;border:1px solid var(--accent3)"></span>Match found</span>
+  </div>
+</div>
+
+<p>The key observation: the search space is an implicit n×n grid of all (L, R) pairs. Each step eliminates an entire row or column. That's why this runs in O(n) — you traverse at most 2n steps to cover the whole grid.</p>
+
+<!-- ────────────────── 02 PATTERNS ────────────────── -->
+<div class="section-header" id="patterns">
+  <span class="section-num">02</span>
+  <h2>The Four Patterns</h2>
+</div>
+
+<p>Every two-pointer problem fits into one of four shapes. The pointer mechanics change — the elimination argument stays the same.</p>
+
+<div class="patterns-grid">
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 1</div>
+    <div class="pattern-title">Opposite Ends</div>
+    <div class="pattern-desc">Start at both ends, converge inward. Works on sorted arrays or symmetric structures. Sum too big → move R. Too small → move L.</div>
+    <div class="pattern-lc">LC 167, 11, 15, 42, 125</div>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 2</div>
+    <div class="pattern-title">Slow &amp; Fast</div>
+    <div class="pattern-desc">One pointer moves one step; the other moves two (or conditionally). Used for cycle detection, finding midpoints, removing duplicates in-place.</div>
+    <div class="pattern-lc">LC 141, 142, 26, 283, 88</div>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 3</div>
+    <div class="pattern-title">Read &amp; Write</div>
+    <div class="pattern-desc">One pointer reads; another writes only valid elements. Classic in-place array transformation. Preserve order, eliminate O(n) space.</div>
+    <div class="pattern-lc">LC 26, 27, 80, 283, 75</div>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 4</div>
+    <div class="pattern-title">Sliding Window</div>
+    <div class="pattern-desc">Both pointers move in the same direction; the window expands when valid, shrinks when not. Find minimum/maximum subarray satisfying a condition.</div>
+    <div class="pattern-lc">LC 3, 76, 209, 424, 567</div>
+  </div>
+</div>
+
+<div class="callout blue">
+  <div class="callout-head">Recognition Shortcut</div>
+  If the problem asks for a pair/triplet summing to a value in a sorted array → <strong>Pattern 1</strong>. If it involves a linked list with cycle or midpoint → <strong>Pattern 2</strong>. If it's "remove/move elements in-place" → <strong>Pattern 3</strong>. If it's "longest/shortest subarray with property X" → <strong>Pattern 4</strong>.
+</div>
+
+<h3>The templates</h3>
+<p>Two templates cover Patterns 1–3. Sliding window has its own expanding/contracting shape. Pick one and be consistent — mixing them is the main source of off-by-one bugs.</p>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab(event,'t-opp')">Opposite ends</button>
+  <button class="tab-btn" onclick="showTab(event,'t-slow')">Slow &amp; Fast</button>
+  <button class="tab-btn" onclick="showTab(event,'t-rw')">Read &amp; Write</button>
+  <button class="tab-btn" onclick="showTab(event,'t-win')">Sliding Window</button>
+</div>
+
+<div class="tab-pane active" id="t-opp">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Opposite Ends</span></div>
+  <div class="lang-pane java active"><pre><span class="cm">// Precondition: sorted array (or symmetric structure)</span>
+<span class="ck">int</span> left = <span class="cn">0</span>, right = nums.<span class="cs">length</span> - <span class="cn">1</span>;
+
+<span class="ck">while</span> (left < right) {
+    <span class="ck">int</span> sum = nums[left] + nums[right];
+
+    <span class="ck">if</span> (sum == target) {
+        <span class="ck">return new int</span>[]{left + <span class="cn">1</span>, right + <span class="cn">1</span>};
+    } <span class="ck">else if</span> (sum < target) {
+        left++;   <span class="cm">// too small — left value useless for all R</span>
+    } <span class="ck">else</span> {
+        right--;  <span class="cm">// too large — right value useless for all L</span>
+    }
+}
+<span class="ck">return new int</span>[]{-<span class="cn">1</span>, -<span class="cn">1</span>}; <span class="cm">// no pair found</span></pre></div>
+  <div class="lang-pane python"><pre><span class="cm"># Precondition: sorted array (or symmetric structure)</span>
+left, right = <span class="cn">0</span>, len(nums) - <span class="cn">1</span>
+
+<span class="ck">while</span> left < right:
+    total = nums[left] + nums[right]
+
+    <span class="ck">if</span> total == target:
+        <span class="ck">return</span> [left + <span class="cn">1</span>, right + <span class="cn">1</span>]
+    <span class="ck">elif</span> total < target:
+        left += <span class="cn">1</span>   <span class="cm"># too small — left value useless for all R</span>
+    <span class="ck">else</span>:
+        right -= <span class="cn">1</span>  <span class="cm"># too large — right value useless for all L</span>
+
+<span class="ck">return</span> [-<span class="cn">1</span>, -<span class="cn">1</span>]  <span class="cm"># no pair found</span></pre></div>
+</div>
+</div>
+
+<div class="tab-pane" id="t-slow">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Slow &amp; Fast — Floyd's Cycle Detection</span></div>
+  <div class="lang-pane java active"><pre><span class="cm">// Use for linked list cycle, finding middle node</span>
+ListNode slow = head, fast = head;
+
+<span class="ck">while</span> (fast != <span class="ck">null</span> &amp;&amp; fast.next != <span class="ck">null</span>) {
+    slow = slow.next;       <span class="cm">// moves 1 step</span>
+    fast = fast.next.next;  <span class="cm">// moves 2 steps</span>
+
+    <span class="ck">if</span> (slow == fast) <span class="ck">return true</span>; <span class="cm">// cycle!</span>
+}
+<span class="ck">return false</span>; <span class="cm">// fast reached end → no cycle</span>
+
+<span class="cm">// For cycle start (LC 142): reset slow to head,</span>
+<span class="cm">// advance both 1 step — they meet at cycle start.</span></pre></div>
+  <div class="lang-pane python"><pre><span class="cm"># Use for linked list cycle, finding middle node</span>
+slow = fast = head
+
+<span class="ck">while</span> fast <span class="ck">and</span> fast.next:
+    slow = slow.next        <span class="cm"># moves 1 step</span>
+    fast = fast.next.next   <span class="cm"># moves 2 steps</span>
+
+    <span class="ck">if</span> slow == fast:
+        <span class="ck">return True</span>         <span class="cm"># cycle!</span>
+
+<span class="ck">return False</span>  <span class="cm"># fast reached end → no cycle</span>
+
+<span class="cm"># For cycle start (LC 142): reset slow to head,</span>
+<span class="cm"># advance both 1 step — they meet at cycle start.</span></pre></div>
+</div>
+</div>
+
+<div class="tab-pane" id="t-rw">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Read &amp; Write — In-place Transformation</span></div>
+  <div class="lang-pane java active"><pre><span class="cm">// write points to next valid slot</span>
+<span class="ck">int</span> write = <span class="cn">0</span>;
+
+<span class="ck">for</span> (<span class="ck">int</span> read = <span class="cn">0</span>; read < nums.<span class="cs">length</span>; read++) {
+    <span class="ck">if</span> (isValid(nums[read])) {   <span class="cm">// e.g. nums[read] != 0</span>
+        nums[write] = nums[read];
+        write++;
+    }
+    <span class="cm">// invalid: read advances, write stays</span>
+}
+<span class="cm">// nums[0..write-1] is result; return write as new length</span></pre></div>
+  <div class="lang-pane python"><pre><span class="cm"># write points to next valid slot</span>
+write = <span class="cn">0</span>
+
+<span class="ck">for</span> read <span class="ck">in</span> range(len(nums)):
+    <span class="ck">if</span> is_valid(nums[read]):   <span class="cm"># e.g. nums[read] != 0</span>
+        nums[write] = nums[read]
+        write += <span class="cn">1</span>
+    <span class="cm"># invalid: read advances, write stays</span>
+
+<span class="cm"># nums[0:write] is result; return write as new length</span>
+<span class="ck">return</span> write</pre></div>
+</div>
+</div>
+
+<div class="tab-pane" id="t-win">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Sliding Window</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> left = <span class="cn">0</span>, best = <span class="cn">0</span>;
+<span class="cm">// windowState tracks what's inside [left, right]</span>
+
+<span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < nums.<span class="cs">length</span>; right++) {
+    windowState.<span class="cs">add</span>(nums[right]);   <span class="cm">// expand</span>
+
+    <span class="ck">while</span> (!isValid(windowState)) {
+        windowState.<span class="cs">remove</span>(nums[left]);
+        left++;                      <span class="cm">// shrink</span>
+    }
+
+    best = Math.<span class="cs">max</span>(best, right - left + <span class="cn">1</span>);
+}
+<span class="ck">return</span> best;</pre></div>
+  <div class="lang-pane python"><pre>left = best = <span class="cn">0</span>
+window_state = {}  <span class="cm"># or collections.Counter()</span>
+
+<span class="ck">for</span> right <span class="ck">in</span> range(len(nums)):
+    window_state[nums[right]] = window_state.get(nums[right], <span class="cn">0</span>) + <span class="cn">1</span>  <span class="cm"># expand</span>
+
+    <span class="ck">while not</span> is_valid(window_state):
+        window_state[nums[left]] -= <span class="cn">1</span>
+        <span class="ck">if</span> window_state[nums[left]] == <span class="cn">0</span>:
+            <span class="ck">del</span> window_state[nums[left]]
+        left += <span class="cn">1</span>                    <span class="cm"># shrink</span>
+
+    best = max(best, right - left + <span class="cn">1</span>)
+
+<span class="ck">return</span> best</pre></div>
+</div>
+</div>
+
+<div class="callout yellow">
+  <div class="callout-head">⚠ Most Common Mistakes</div>
+  <strong>(1) Wrong loop condition</strong> — use <code>while (left &lt; right)</code> for opposite-ends (not <code>&lt;=</code>, since L==R means one element). <strong>(2) Forgetting to skip duplicates</strong> in 3Sum — after finding a valid triplet, advance both pointers past identical values. <strong>(3) Fast pointer null check</strong> — always check <code>fast != null &amp;&amp; fast.next != null</code> before accessing <code>fast.next.next</code>.
+</div>
+
+<!-- ────────────────── 03 VISUALIZER ────────────────── -->
+<div class="section-header" id="converter">
+  <span class="section-num">03</span>
+  <h2>Pattern Visualizer</h2>
+</div>
+
+<p>See each pointer pattern in action on a representative problem. Choose a pattern, then step through the algorithm:</p>
+
+<div class="interactive-box">
+  <div class="conv-tabs">
+    <button class="conv-tab active" onclick="selectVis(0)">Container Water</button>
+    <button class="conv-tab" onclick="selectVis(1)">Slow &amp; Fast</button>
+    <button class="conv-tab" onclick="selectVis(2)">Move Zeroes</button>
+    <button class="conv-tab" onclick="selectVis(3)">Reverse String</button>
+  </div>
+
+  <div id="vis-desc" style="font-size:13.5px;color:var(--ink3);margin-bottom:1rem;line-height:1.55"></div>
+
+  <div class="arr-vis" id="vis-arr"></div>
+  <div class="vis-msg" id="vis-msg">Press Step to begin.</div>
+
+  <div class="vis-controls">
+    <button class="btn" id="vis-reset-btn" onclick="vis_reset()">Reset</button>
+    <button class="btn" id="vis-step-btn" onclick="vis_step()">Step →</button>
+    <div id="vis-extra"></div>
+  </div>
+  <div class="log-box" id="vis-log"></div>
+
+  <div class="legend" style="margin-top:0.75rem">
+    <span><span class="legend-dot" style="background:#ddeeff;border:1px solid var(--accent2)"></span>L / Slow / Write</span>
+    <span><span class="legend-dot" style="background:#fdeedd;border:1px solid var(--accent)"></span>R / Fast / Read</span>
+    <span><span class="legend-dot" style="background:#d8f5e6;border:1px solid var(--accent3)"></span>Answer / Done</span>
+  </div>
+</div>
+
+<!-- ────────────────── 04 DEEP DIVES ────────────────── -->
+<div class="section-header">
+  <span class="section-num">04</span>
+  <h2>Deep Dives</h2>
+</div>
+
+<h3>LC 42 — Trapping Rain Water (the hard one)</h3>
+<p>This is the problem that tests whether you truly understand the opposite-ends insight, not just memorized it. The naive O(n²) solution is obvious. The O(n) two-pointer solution requires a proof.</p>
+
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">LC 42</span>
+    <span class="problem-title">Trapping Rain Water</span>
+    <span class="badge badge-hard">Hard</span>
+    <span style="font-size:12px;color:var(--ink3);margin-left:auto">51.6% acceptance</span>
+  </div>
+  <div class="problem-body">
+    <p>Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is <code>1</code>, compute how much water it can trap after raining.</p>
+    <p><strong>Example:</strong> <code>height = [0,1,0,2,1,0,1,3,2,1,2,1]</code> → Output: <code>6</code></p>
+    <p>The water trapped at index <code>i</code> = <code>min(maxLeft[i], maxRight[i]) - height[i]</code>. Precomputing these arrays takes O(n) space. The two-pointer approach eliminates that extra space.</p>
+  </div>
+</div>
+
+<p>The key invariant: if <code>maxLeft &lt; maxRight</code>, the water at position <code>L</code> is determined solely by <code>maxLeft</code> — we don't need to know the exact right maximum, just that it's taller. So we can safely process <code>L</code> and advance it inward.</p>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">LC 42 — Trapping Rain Water</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> left = <span class="cn">0</span>, right = height.<span class="cs">length</span> - <span class="cn">1</span>;
+<span class="ck">int</span> maxLeft = <span class="cn">0</span>, maxRight = <span class="cn">0</span>, water = <span class="cn">0</span>;
+
+<span class="ck">while</span> (left <= right) {
+    <span class="ck">if</span> (height[left] <= height[right]) {
+        <span class="cm">// right wall is taller — water[left] bounded by maxLeft</span>
+        maxLeft = Math.<span class="cs">max</span>(maxLeft, height[left]);
+        water += maxLeft - height[left];
+        left++;
+    } <span class="ck">else</span> {
+        maxRight = Math.<span class="cs">max</span>(maxRight, height[right]);
+        water += maxRight - height[right];
+        right--;
+    }
+}
+<span class="ck">return</span> water;</pre></div>
+  <div class="lang-pane python"><pre>left, right = <span class="cn">0</span>, len(height) - <span class="cn">1</span>
+max_left = max_right = water = <span class="cn">0</span>
+
+<span class="ck">while</span> left <= right:
+    <span class="ck">if</span> height[left] <= height[right]:
+        <span class="cm"># right wall is taller — water[left] bounded by max_left</span>
+        max_left = max(max_left, height[left])
+        water += max_left - height[left]
+        left += <span class="cn">1</span>
+    <span class="ck">else</span>:
+        max_right = max(max_right, height[right])
+        water += max_right - height[right]
+        right -= <span class="cn">1</span>
+
+<span class="ck">return</span> water</pre></div>
+</div>
+
+<div class="callout green">
+  <div class="callout-head">The Elimination Argument</div>
+  When <code>height[L] ≤ height[R]</code>, the right side is a taller wall. Water at <code>L</code> is bounded by <code>maxLeft</code>, not by anything on the right (it's already taller). There's no value in keeping <code>L</code> here — process it and move on. This is the same "we can eliminate this candidate" logic from Two Sum II, just with a different condition.
+</div>
+
+<h3>LC 15 — 3Sum (the extension)</h3>
+<p>3Sum extends Pattern 1 to three numbers. The insight: fix one number with an outer loop, then use two pointers on the remainder. The tricky part is duplicate handling — you must skip over equal elements after finding a valid triplet, or after the outer loop advances.</p>
+
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">LC 15</span>
+    <span class="problem-title">3Sum</span>
+    <span class="badge badge-medium">Medium</span>
+    <span style="font-size:12px;color:var(--ink3);margin-left:auto">28.3% acceptance</span>
+  </div>
+  <div class="problem-body">
+    <p>Given an integer array <code>nums</code>, return all triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i ≠ j ≠ k</code> and <code>nums[i] + nums[j] + nums[k] == 0</code>. The solution set must not contain duplicate triplets.</p>
+    <p><strong>Example:</strong> <code>nums = [-1,0,1,2,-1,-4]</code> → Output: <code>[[-1,-1,2],[-1,0,1]]</code></p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">LC 15 — 3Sum</span></div>
+  <div class="lang-pane java active"><pre><span class="cs">Arrays</span>.sort(nums); <span class="cm">// sort first — enables two pointers</span>
+<span class="ck">List</span>&lt;<span class="ck">List</span>&lt;<span class="ck">Integer</span>&gt;&gt; result = <span class="ck">new</span> <span class="cs">ArrayList</span>&lt;&gt;();
+
+<span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i < nums.<span class="cs">length</span> - <span class="cn">2</span>; i++) {
+    <span class="ck">if</span> (i > <span class="cn">0</span> &amp;&amp; nums[i] == nums[i-<span class="cn">1</span>]) <span class="ck">continue</span>; <span class="cm">// skip dup outer</span>
+    <span class="ck">if</span> (nums[i] > <span class="cn">0</span>) <span class="ck">break</span>;               <span class="cm">// sorted — can't sum to 0</span>
+
+    <span class="ck">int</span> left = i + <span class="cn">1</span>, right = nums.<span class="cs">length</span> - <span class="cn">1</span>;
+    <span class="ck">while</span> (left < right) {
+        <span class="ck">int</span> sum = nums[i] + nums[left] + nums[right];
+        <span class="ck">if</span> (sum == <span class="cn">0</span>) {
+            result.<span class="cs">add</span>(<span class="cs">Arrays</span>.asList(nums[i], nums[left], nums[right]));
+            <span class="ck">while</span> (left < right &amp;&amp; nums[left] == nums[left+<span class="cn">1</span>]) left++;
+            <span class="ck">while</span> (left < right &amp;&amp; nums[right] == nums[right-<span class="cn">1</span>]) right--;
+            left++; right--;
+        } <span class="ck">else if</span> (sum < <span class="cn">0</span>) left++;
+        <span class="ck">else</span> right--;
+    }
+}
+<span class="ck">return</span> result;</pre></div>
+  <div class="lang-pane python"><pre>nums.sort()  <span class="cm"># sort first — enables two pointers</span>
+result = []
+
+<span class="ck">for</span> i <span class="ck">in</span> range(len(nums) - <span class="cn">2</span>):
+    <span class="ck">if</span> i > <span class="cn">0</span> <span class="ck">and</span> nums[i] == nums[i - <span class="cn">1</span>]:
+        <span class="ck">continue</span>          <span class="cm"># skip duplicate outer</span>
+    <span class="ck">if</span> nums[i] > <span class="cn">0</span>:
+        <span class="ck">break</span>             <span class="cm"># sorted — can't sum to 0</span>
+
+    left, right = i + <span class="cn">1</span>, len(nums) - <span class="cn">1</span>
+    <span class="ck">while</span> left < right:
+        total = nums[i] + nums[left] + nums[right]
+        <span class="ck">if</span> total == <span class="cn">0</span>:
+            result.append([nums[i], nums[left], nums[right]])
+            <span class="ck">while</span> left < right <span class="ck">and</span> nums[left] == nums[left + <span class="cn">1</span>]:
+                left += <span class="cn">1</span>
+            <span class="ck">while</span> left < right <span class="ck">and</span> nums[right] == nums[right - <span class="cn">1</span>]:
+                right -= <span class="cn">1</span>
+            left += <span class="cn">1</span>
+            right -= <span class="cn">1</span>
+        <span class="ck">elif</span> total < <span class="cn">0</span>:
+            left += <span class="cn">1</span>
+        <span class="ck">else</span>:
+            right -= <span class="cn">1</span>
+
+<span class="ck">return</span> result</pre></div>
+</div>
+
+<div class="callout">
+  <div class="callout-head">LC 15 vs LC 16 vs LC 18</div>
+  LC 16 (3Sum Closest) is 3Sum but track minimum diff instead of exact match — same template, different bookkeeping. LC 18 (4Sum) wraps another outer loop around 3Sum — O(n³). The elimination logic is identical; you're just fixing more variables upfront.
+</div>
+
+<!-- ────────────────── 05 CHEAT SHEET ────────────────── -->
+<div class="section-header" id="cheatsheet">
+  <span class="section-num">05</span>
+  <h2>Reference</h2>
+</div>
+
+<p>The pattern map — 24 problems, 4 patterns. Sort by pattern, find the approach.</p>
+
+<table class="prob-table">
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Pattern</th>
+      <th>Key Condition</th>
+      <th>Difficulty</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" target="_blank">LC 167 — Two Sum II ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>L+R vs target</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/valid-palindrome/" target="_blank">LC 125 — Valid Palindrome ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>s[L] == s[R], skip non-alnum</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/valid-palindrome-ii/" target="_blank">LC 680 — Valid Palindrome II ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>mismatch → try skip L or R</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/reverse-string/" target="_blank">LC 344 — Reverse String ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>swap s[L] and s[R]</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/squares-of-a-sorted-array/" target="_blank">LC 977 — Squares of Sorted Array ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>larger square from L or R edge</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/container-with-most-water/" target="_blank">LC 11 — Container With Most Water ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>move shorter wall inward</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/3sum/" target="_blank">LC 15 — 3Sum ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>fix i, two-pointer on rest</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/3sum-closest/" target="_blank">LC 16 — 3Sum Closest ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>track min |sum - target|</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/trapping-rain-water/" target="_blank">LC 42 — Trapping Rain Water ↗</a></td><td><span class="badge badge-pattern">Opposite Ends</span></td><td><code>process shorter side first</code></td><td><span class="badge badge-hard">Hard</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/linked-list-cycle/" target="_blank">LC 141 — Linked List Cycle ↗</a></td><td><span class="badge badge-pattern">Slow & Fast</span></td><td><code>slow==fast → cycle</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/linked-list-cycle-ii/" target="_blank">LC 142 — Linked List Cycle II ↗</a></td><td><span class="badge badge-pattern">Slow & Fast</span></td><td><code>reset slow → meet at start</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list/" target="_blank">LC 19 — Remove Nth From End ↗</a></td><td><span class="badge badge-pattern">Slow & Fast</span></td><td><code>fast n-ahead of slow</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/remove-duplicates-from-sorted-array/" target="_blank">LC 26 — Remove Duplicates ↗</a></td><td><span class="badge badge-pattern">Read & Write</span></td><td><code>write if nums[r]!=nums[r-1]</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/remove-element/" target="_blank">LC 27 — Remove Element ↗</a></td><td><span class="badge badge-pattern">Read & Write</span></td><td><code>write if nums[r] != val</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/move-zeroes/" target="_blank">LC 283 — Move Zeroes ↗</a></td><td><span class="badge badge-pattern">Read & Write</span></td><td><code>write if nums[r] != 0</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/" target="_blank">LC 80 — Remove Duplicates II ↗</a></td><td><span class="badge badge-pattern">Read & Write</span></td><td><code>write if count[val] ≤ 2</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/sort-colors/" target="_blank">LC 75 — Sort Colors ↗</a></td><td><span class="badge badge-pattern">Read & Write</span></td><td><code>3-way partition (Dutch flag)</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/merge-sorted-array/" target="_blank">LC 88 — Merge Sorted Array ↗</a></td><td><span class="badge badge-pattern">Read & Write</span></td><td><code>write from back, merge in-place</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/" target="_blank">LC 3 — Longest Substring ↗</a></td><td><span class="badge badge-pattern">Sliding Window</span></td><td><code>shrink when char repeats</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/minimum-size-subarray-sum/" target="_blank">LC 209 — Min Subarray Sum ↗</a></td><td><span class="badge badge-pattern">Sliding Window</span></td><td><code>shrink when sum ≥ target</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank">LC 76 — Min Window Substring ↗</a></td><td><span class="badge badge-pattern">Sliding Window</span></td><td><code>shrink while window covers t</code></td><td><span class="badge badge-hard">Hard</span></td></tr>
+  </tbody>
+</table>
+
+<h3>The 6-problem learning path</h3>
+<p>Do these six in order. Each one unlocks the next pattern and builds on the same core insight:</p>
+
+<div class="path-steps">
+  <div class="path-step">
+    <div class="path-num">1</div>
+    <div class="path-body">
+      <div class="path-title">LC 167 — Two Sum II</div>
+      <div class="path-desc">The purest Opposite Ends problem. The elimination argument is crystal clear: too big → R useless, too small → L useless. Do this before any other two-pointer problem even if it feels too easy.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">2</div>
+    <div class="path-body">
+      <div class="path-title">LC 283 — Move Zeroes</div>
+      <div class="path-desc">Your first Read/Write problem. The read pointer scans everything; write only advances for non-zero. The pattern clicks immediately because the validity condition is obvious.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">3</div>
+    <div class="path-body">
+      <div class="path-title">LC 141 — Linked List Cycle</div>
+      <div class="path-desc">Slow/fast pointer on a linked list. This one feels completely different from the array problems, which is exactly the point — the same two-pointer principle works in a completely different data structure.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">4</div>
+    <div class="path-body">
+      <div class="path-title">LC 11 — Container With Most Water</div>
+      <div class="path-desc">Opposite Ends with a non-obvious condition. The elimination argument requires a proof: moving the taller wall can only decrease width without helping height, so it's never optimal. Forces you to think, not just apply the template.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">5</div>
+    <div class="path-body">
+      <div class="path-title">LC 15 — 3Sum</div>
+      <div class="path-desc">Opposite Ends nested inside an outer loop. Tests duplicate handling — the subtle part most solutions miss. If you can do this cleanly, you can do 4Sum, kSum, and all their variants.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">6</div>
+    <div class="path-body">
+      <div class="path-title">LC 3 — Longest Substring Without Repeating Characters</div>
+      <div class="path-desc">Your first Sliding Window problem. The expand/shrink logic is different from converging pointers but the same core idea: each pointer move eliminates candidates. Once this clicks, LC 76 and LC 209 feel identical.</div>
+    </div>
+  </div>
+</div>
+
+<h3>The three-question test</h3>
+<p>When you see a new problem, run through this mentally:</p>
+
+<div class="three-q">
+  <div class="three-q-item">
+    <div class="three-q-n">1</div>
+    <div>
+      <div class="three-q-q">Is the input sorted, or can I sort it?</div>
+      <div class="three-q-a">Sorting unlocks Opposite Ends (Pattern 1). If the problem says "sorted" or doesn't care about index preservation, you can sort first. O(n log n) sort is often fine when it enables O(n) two-pointer pass.</div>
+    </div>
+  </div>
+  <div class="three-q-item">
+    <div class="three-q-n">2</div>
+    <div>
+      <div class="three-q-q">Can I eliminate a candidate by looking at boundary values?</div>
+      <div class="three-q-a">If current sum/product/comparison too big → something can be dropped from the right. Too small → drop from the left. If yes, Pattern 1 or 2 likely applies.</div>
+    </div>
+  </div>
+  <div class="three-q-item">
+    <div class="three-q-n">3</div>
+    <div>
+      <div class="three-q-q">Does the problem involve in-place modification or a subarray window?</div>
+      <div class="three-q-a">"In-place" + "sorted" → Read/Write. "Subarray" + "min/max length satisfying condition" → Sliding Window. "Linked list" + anything → Slow/Fast.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── 06 MENTAL MODEL ────────────────── -->
+<div class="section-header">
+  <span class="section-num">06</span>
+  <h2>The Mental Model</h2>
+</div>
+
+<h3>One sentence that covers everything</h3>
+<p>Two pointers work whenever <strong>moving one pointer in a fixed direction provably eliminates candidates that can't be the answer</strong> — and you can make that proof cheaply.</p>
+<p>The sorted-array case is just the most obvious version. The linked list cycle, the in-place array transform, the sliding window — they're all the same insight wearing different clothes. In each case, you're not searching blindly: you're <strong>exploiting a monotonic property</strong> to skip candidates in bulk.</p>
+<p>Engineers who solve these problems fluently in interviews haven't memorized more templates — they've internalized this one principle deeply enough to recognize it in new disguises. Build that recognition by working through the six-problem path above, and the rest follows.</p>
+
+<div class="callout blue">
+  <div class="callout-head">Interview Sentence That Signals Expertise</div>
+  <em>"Moving the [left/right/slow/fast] pointer here provably eliminates candidates that couldn't be the answer — because [reason]. So the two-pointer approach runs in O(n) without missing a valid solution."</em>
+</div>
+
+</div><!-- /content -->
+
+<footer>
+  Two Pointers deep dive · Covers LeetCode patterns 1–4 · All examples and code are original
+</footer>
+
+<script>
+// ─── LANGUAGE TOGGLE ───
+let currentLang = 'java';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ─── TAB SWITCHER ───
+function showTab(e, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── TP1: Two Sum II visualizer ───
+const TP1_ARR = [2, 3, 5, 7, 9, 11, 14, 18];
+let tp1_L, tp1_R, tp1_target, tp1_done, tp1_logs;
+
+function tp1_setTarget(v) {
+  document.getElementById('target-val').textContent = v;
+  tp1_target = parseInt(v);
+  tp1_reset();
+}
+
+function tp1_buildArr() {
+  const con = document.getElementById('tp1-arr');
+  con.innerHTML = '';
+  TP1_ARR.forEach((v, i) => {
+    const el = document.createElement('div');
+    el.className = 'arr-el' + (i === tp1_L && i === tp1_R ? ' is-match' : i === tp1_L ? ' is-L' : i === tp1_R ? ' is-R' : '');
+    if (tp1_done && (i === tp1_L || i === tp1_R)) el.className = 'arr-el is-match';
+    const val = document.createElement('div'); val.className = 'val'; val.textContent = v;
+    const idx = document.createElement('div'); idx.className = 'idx'; idx.textContent = i;
+    const ptr = document.createElement('div'); ptr.className = 'ptr-tag';
+    if (i === tp1_L && i === tp1_R) ptr.textContent = 'L=R';
+    else if (i === tp1_L) ptr.textContent = 'L';
+    else if (i === tp1_R) ptr.textContent = 'R';
+    el.appendChild(ptr); el.appendChild(val); el.appendChild(idx);
+    con.appendChild(el);
+  });
+}
+
+function tp1_log(msg, cls) {
+  tp1_logs.push({msg, cls});
+  const box = document.getElementById('tp1-log');
+  box.innerHTML = tp1_logs.map(l => `<div class="${l.cls||''}">${l.msg}</div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function tp1_reset() {
+  tp1_L = 0; tp1_R = TP1_ARR.length - 1;
+  tp1_target = parseInt(document.getElementById('target-slider').value);
+  tp1_done = false; tp1_logs = [];
+  document.getElementById('tp1-step-btn').disabled = false;
+  document.getElementById('tp1-msg').textContent = 'Press Step to begin.';
+  document.getElementById('tp1-msg').className = 'vis-msg';
+  document.getElementById('tp1-log').innerHTML = '';
+  tp1_log(`Start: L=0 (${TP1_ARR[0]}), R=${TP1_ARR.length-1} (${TP1_ARR[TP1_ARR.length-1]}), target=${tp1_target}`);
+  tp1_buildArr();
+}
+
+function tp1_step() {
+  if (tp1_done || tp1_L >= tp1_R) return;
+  const sum = TP1_ARR[tp1_L] + TP1_ARR[tp1_R];
+  const msg = document.getElementById('tp1-msg');
+  if (sum === tp1_target) {
+    tp1_done = true;
+    tp1_log(`✓ arr[${tp1_L}]=${TP1_ARR[tp1_L]} + arr[${tp1_R}]=${TP1_ARR[tp1_R]} = ${tp1_target}. Found!`, 'log-ok');
+    msg.textContent = `Found! arr[${tp1_L}] + arr[${tp1_R}] = ${tp1_target}`;
+    msg.className = 'vis-msg ok';
+    document.getElementById('tp1-step-btn').disabled = true;
+  } else if (sum < tp1_target) {
+    tp1_log(`arr[${tp1_L}]=${TP1_ARR[tp1_L]} + arr[${tp1_R}]=${TP1_ARR[tp1_R]} = ${sum} < ${tp1_target} → L++ (${tp1_L}→${tp1_L+1})`);
+    msg.textContent = `Sum ${sum} < ${tp1_target}: move L right`;
+    msg.className = 'vis-msg';
+    tp1_L++;
+  } else {
+    tp1_log(`arr[${tp1_L}]=${TP1_ARR[tp1_L]} + arr[${tp1_R}]=${TP1_ARR[tp1_R]} = ${sum} > ${tp1_target} → R-- (${tp1_R}→${tp1_R-1})`);
+    msg.textContent = `Sum ${sum} > ${tp1_target}: move R left`;
+    msg.className = 'vis-msg';
+    tp1_R--;
+  }
+  if (tp1_L >= tp1_R && !tp1_done) {
+    tp1_log('L ≥ R — no pair found for this target.');
+    msg.textContent = 'No pair found.'; msg.className = 'vis-msg bad';
+    document.getElementById('tp1-step-btn').disabled = true;
+  }
+  tp1_buildArr();
+}
+
+// ─── MULTI-VIS ───
+const VIS_CONFIGS = [
+  {
+    name: 'Container With Most Water',
+    desc: 'LC 11 — Array of heights. Find two lines that form the container with maximum water. Move the shorter wall inward — keeping the taller wall can only help.',
+    arr: [1, 8, 6, 2, 5, 4, 8, 3, 7],
+    mode: 'container'
+  },
+  {
+    name: 'Slow & Fast (cycle array)',
+    desc: 'Floyd\'s tortoise & hare — simulated on an array of "next" pointers: [1,2,0,4,2] (cycle at index 2). Slow moves 1 step, fast moves 2. When they meet, a cycle exists.',
+    arr: [1,2,0,4,2],
+    mode: 'slowfast'
+  },
+  {
+    name: 'Move Zeroes',
+    desc: 'LC 283 — Write pointer advances only for non-zero values. Read pointer scans everything. After one pass, all non-zeros are at the front in original order.',
+    arr: [0, 1, 0, 3, 12],
+    mode: 'movezero'
+  },
+  {
+    name: 'Reverse String',
+    desc: 'LC 344 — Opposite ends converging to center, swapping values at L and R each step. Terminates when L ≥ R.',
+    arr: ['h','e','l','l','o'],
+    mode: 'reverse'
+  }
+];
+
+let vis_idx = 0, vis_L, vis_R, vis_done, vis_logs, vis_state;
+
+function selectVis(i) {
+  vis_idx = i;
+  document.querySelectorAll('.conv-tab').forEach((t,j) => t.classList.toggle('active', j===i));
+  vis_reset();
+}
+
+function vis_log(msg, cls) {
+  vis_logs.push({msg, cls});
+  const box = document.getElementById('vis-log');
+  box.innerHTML = vis_logs.map(l => `<div class="${l.cls||''}">${l.msg}</div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function vis_buildArr() {
+  const cfg = VIS_CONFIGS[vis_idx];
+  const con = document.getElementById('vis-arr');
+  con.innerHTML = '';
+  cfg.arr.forEach((v, i) => {
+    const el = document.createElement('div');
+    el.className = 'arr-el';
+    const mode = cfg.mode;
+    if (vis_done) {
+      if (mode === 'reverse' && (i === vis_L || i === vis_R)) el.className = 'arr-el is-match';
+      else if (mode === 'movezero' && i < vis_L) el.className = 'arr-el is-match';
+    } else {
+      if (mode === 'container' || mode === 'reverse') {
+        if (i === vis_L) el.className = 'arr-el is-L';
+        else if (i === vis_R) el.className = 'arr-el is-R';
+      } else if (mode === 'movezero') {
+        if (i === vis_L) el.className = 'arr-el is-write';
+        else if (i === vis_R) el.className = 'arr-el is-fast';
+      } else if (mode === 'slowfast') {
+        if (i === vis_L) el.className = 'arr-el is-slow';
+        if (i === vis_R) el.className = (vis_R === vis_L && !vis_done) ? 'arr-el is-match' : 'arr-el is-fast';
+        if (vis_done && i === vis_L) el.className = 'arr-el is-match';
+      }
+    }
+    const val = document.createElement('div'); val.className = 'val'; val.textContent = cfg.arr[i];
+    const idx = document.createElement('div'); idx.className = 'idx'; idx.textContent = i;
+    const ptr = document.createElement('div'); ptr.className = 'ptr-tag';
+    if (mode === 'container' || mode === 'reverse') {
+      if (i === vis_L) ptr.textContent = 'L';
+      if (i === vis_R) ptr.textContent = 'R';
+    } else if (mode === 'movezero') {
+      if (i === vis_L) ptr.textContent = 'write';
+      if (i === vis_R) ptr.textContent = 'read';
+    } else if (mode === 'slowfast') {
+      if (i === vis_L && i === vis_R) ptr.textContent = 'slow=fast';
+      else if (i === vis_L) ptr.textContent = 'slow';
+      else if (i === vis_R) ptr.textContent = 'fast';
+    }
+    el.appendChild(ptr); el.appendChild(val); el.appendChild(idx);
+    con.appendChild(el);
+  });
+}
+
+function vis_reset() {
+  const cfg = VIS_CONFIGS[vis_idx];
+  // Deep copy original
+  cfg.arr = [
+    [1,8,6,2,5,4,8,3,7],
+    [1,2,0,4,2],
+    [0,1,0,3,12],
+    ['h','e','l','l','o']
+  ][vis_idx].slice();
+  vis_L = 0; vis_R = cfg.arr.length - 1;
+  vis_done = false; vis_logs = []; vis_state = {};
+  document.getElementById('vis-step-btn').disabled = false;
+  document.getElementById('vis-msg').textContent = 'Press Step to begin.';
+  document.getElementById('vis-msg').className = 'vis-msg';
+  document.getElementById('vis-log').innerHTML = '';
+  document.getElementById('vis-desc').textContent = cfg.desc;
+  if (cfg.mode === 'slowfast') { vis_L = 0; vis_R = 0; }
+  if (cfg.mode === 'movezero') { vis_L = 0; vis_R = 0; }
+  vis_log(`Array: [${cfg.arr.join(', ')}]`);
+  vis_buildArr();
+}
+
+function vis_step() {
+  if (vis_done) return;
+  const cfg = VIS_CONFIGS[vis_idx];
+  const msg = document.getElementById('vis-msg');
+  const mode = cfg.mode;
+
+  if (mode === 'container') {
+    if (vis_L >= vis_R) { vis_done = true; document.getElementById('vis-step-btn').disabled = true; return; }
+    const area = Math.min(cfg.arr[vis_L], cfg.arr[vis_R]) * (vis_R - vis_L);
+    if (!vis_state.maxArea) vis_state.maxArea = 0;
+    vis_state.maxArea = Math.max(vis_state.maxArea, area);
+    vis_log(`L=${vis_L}(h=${cfg.arr[vis_L]}) R=${vis_R}(h=${cfg.arr[vis_R]}) → area=${area}, best=${vis_state.maxArea}`);
+    msg.textContent = `Area = min(${cfg.arr[vis_L]},${cfg.arr[vis_R]}) × ${vis_R-vis_L} = ${area}. Best so far: ${vis_state.maxArea}`;
+    if (cfg.arr[vis_L] <= cfg.arr[vis_R]) { vis_log(`  h[L] ≤ h[R] → L++ (move shorter wall)`); vis_L++; }
+    else { vis_log(`  h[L] > h[R] → R-- (move shorter wall)`); vis_R--; }
+    if (vis_L >= vis_R) {
+      vis_done = true;
+      msg.textContent = `Done! Maximum area = ${vis_state.maxArea}`;
+      msg.className = 'vis-msg ok';
+      document.getElementById('vis-step-btn').disabled = true;
+    }
+  } else if (mode === 'slowfast') {
+    const next = cfg.arr;
+    // slow moves 1, fast moves 1 then 1 more if no null
+    const prevSlow = vis_L, prevFast = vis_R;
+    const newSlow = next[vis_L];
+    let newFast = next[vis_R];
+    if (newFast !== undefined && next[newFast] !== undefined) newFast = next[newFast];
+    vis_L = newSlow; vis_R = newFast;
+    vis_log(`slow: ${prevSlow}→${vis_L}, fast: ${prevFast}→${vis_R}`);
+    msg.textContent = `slow=${vis_L}, fast=${vis_R}`;
+    if (vis_L === vis_R) {
+      vis_done = true;
+      msg.textContent = `Cycle detected! slow=fast=${vis_L}`;
+      msg.className = 'vis-msg ok';
+      vis_log(`✓ slow == fast == ${vis_L} → cycle exists!`, 'log-ok');
+      document.getElementById('vis-step-btn').disabled = true;
+    }
+    if (vis_R >= cfg.arr.length) {
+      vis_done = true;
+      msg.textContent = 'Fast reached end — no cycle';
+      msg.className = 'vis-msg bad';
+      document.getElementById('vis-step-btn').disabled = true;
+    }
+  } else if (mode === 'movezero') {
+    if (vis_R >= cfg.arr.length) {
+      vis_done = true;
+      // fill rest with zeros
+      while (vis_L < cfg.arr.length) { cfg.arr[vis_L] = 0; vis_L++; }
+      msg.textContent = `Done! Result: [${cfg.arr.join(', ')}]`;
+      msg.className = 'vis-msg ok';
+      document.getElementById('vis-step-btn').disabled = true;
+      vis_buildArr(); return;
+    }
+    const val = cfg.arr[vis_R];
+    if (val !== 0) {
+      vis_log(`read[${vis_R}]=${val} (non-zero) → write[${vis_L}]=${val}, write++`);
+      cfg.arr[vis_L] = val;
+      msg.textContent = `arr[${vis_R}]=${val} ≠ 0 → write to pos ${vis_L}`;
+      vis_L++;
+    } else {
+      vis_log(`read[${vis_R}]=0 → skip (write stays at ${vis_L})`);
+      msg.textContent = `arr[${vis_R}]=0 → skip`;
+    }
+    vis_R++;
+    if (vis_R >= cfg.arr.length) {
+      vis_done = true;
+      while (vis_L < cfg.arr.length) { cfg.arr[vis_L] = 0; vis_L++; }
+      msg.textContent = `Done! Result: [${cfg.arr.join(', ')}]`;
+      msg.className = 'vis-msg ok';
+      document.getElementById('vis-step-btn').disabled = true;
+    }
+  } else if (mode === 'reverse') {
+    if (vis_L >= vis_R) {
+      vis_done = true;
+      msg.textContent = `Done! Reversed: [${cfg.arr.join(', ')}]`;
+      msg.className = 'vis-msg ok';
+      document.getElementById('vis-step-btn').disabled = true;
+      vis_buildArr(); return;
+    }
+    const tmp = cfg.arr[vis_L];
+    cfg.arr[vis_L] = cfg.arr[vis_R];
+    cfg.arr[vis_R] = tmp;
+    vis_log(`Swap arr[${vis_L}]='${cfg.arr[vis_L]}' ↔ arr[${vis_R}]='${cfg.arr[vis_R]}'`);
+    msg.textContent = `Swapped positions ${vis_L} and ${vis_R}`;
+    vis_L++; vis_R--;
+    if (vis_L >= vis_R) {
+      vis_done = true;
+      msg.textContent = `Done! Reversed: [${cfg.arr.join(', ')}]`;
+      msg.className = 'vis-msg ok';
+      document.getElementById('vis-step-btn').disabled = true;
+    }
+  }
+  vis_buildArr();
+}
+
+// Init
+tp1_reset();
+vis_reset();
+</script>
+</body>
+</html>
