@@ -150,11 +150,14 @@ main {
 }
 
 .resume-name {
-  font-size: 2rem;
-  font-weight: 400;
+  font-family: "Geist", system-ui, sans-serif;
+  font-size: 2.1rem;
+  font-weight: 600;
   margin: 0 0 0.5rem 0;
   color: #fffaf3;
   line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .resume-title {
@@ -162,7 +165,7 @@ main {
   color: var(--sidebar-muted);
   margin: 0 0 1.5rem 0;
   font-family: "DM Mono", monospace;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .resume-contact {
@@ -302,9 +305,12 @@ main {
 }
 
 .resume-item-header h3 {
+  font-family: "Geist", system-ui, sans-serif;
   font-size: 1.1rem;
+  font-weight: 600;
   color: var(--text);
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .resume-date {
