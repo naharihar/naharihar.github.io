@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sliding Window: The Breathing Algorithm</title>
+<script>
+  (() => {
+    try {
+      if (localStorage.getItem('dsa-theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -29,16 +38,37 @@
   --sans: 'DM Sans', sans-serif;
   --radius: 6px;
   --max: 780px;
+  --nav-bg: var(--bg);
+}
+
+html.dark {
+  --bg: #0f0f13;
+  --surface: #16161d;
+  --ink: #e8e8f0;
+  --ink2: #cbc7d5;
+  --ink3: #8888a8;
+  --rule: #2e2e3e;
+  --accent: #f7974a;
+  --accent2: #8fb3ff;
+  --accent3: #58d3af;
+  --accent-bg: rgba(247,151,74,0.12);
+  --accent2-bg: rgba(143,179,255,0.14);
+  --accent3-bg: rgba(88,211,175,0.12);
+  --yellow: #f0c05a;
+  --yellow-bg: rgba(240,192,90,0.12);
+  --code-bg: #1e1e28;
+  --nav-bg: rgba(15,15,19,0.92);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--sans); background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.7; }
 
-nav { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--rule); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 48px; font-size: 13px; }
+nav { position: sticky; top: 0; z-index: 100; background: var(--nav-bg); border-bottom: 1px solid var(--rule); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 48px; font-size: 13px; }
 .nav-brand { font-family: var(--mono); font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; margin-right: auto; }
 nav a { color: var(--ink3); text-decoration: none; transition: color .15s; white-space: nowrap; }
 nav a:hover { color: var(--ink); }
+.theme-toggle { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink3); cursor: pointer; font-size: 1rem; }
 
 header { max-width: var(--max); margin: 0 auto; padding: 5rem 2rem 3rem; border-bottom: 1px solid var(--rule); }
 .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem; }
@@ -195,6 +225,7 @@ footer { border-top: 1px solid var(--rule); padding: 2rem; text-align: center; f
     <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
     <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
   </div>
+  <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light and dark mode">🌙</button>
 </nav>
 
 <header>
@@ -874,6 +905,16 @@ window_sum = <span class="cn">0</span>  <span class="cm"># or whatever state tra
 </footer>
 
 <script>
+function syncThemeIcon() {
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const nextDark = !document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', nextDark);
+  try { localStorage.setItem('dsa-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
+  syncThemeIcon();
+}
 // ── LANGUAGE TOGGLE ──
 let currentLang = 'java';
 function setLang(lang) {
@@ -1126,6 +1167,7 @@ function vis_step() {
 
 sw1_reset();
 vis_reset();
+syncThemeIcon();
 </script>
 </body>
 </html>

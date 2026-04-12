@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monotonic Queue — AlgorithmCraft</title>
+<script>
+  (() => {
+    try {
+      if (localStorage.getItem('dsa-theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ─── CSS VARIABLES — LIGHT (default) ─── */
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --surface2: #f1efe9;
+    --surface3: #e8e5dc;
+    --border: #ddd9cf;
+    --text: #1a1814;
+    --muted: #6b6758;
+    --accent: #d4631a;
+    --accent2: #5c48d4;
+    --accent3: #1a7fa8;
+    --green: #1a7a4a;
+    --yellow: #9a7a00;
+    --red: #c4203a;
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --radius: 10px;
+    --shadow: 0 4px 32px rgba(0,0,0,0.1);
+    --nav-bg: rgba(248,247,244,0.92);
+    --code-bg: #1e1e2a;
+    --code-text: #e8e8f0;
+  }
+
+  /* ─── DARK MODE ─── */
+  html.dark {
+    --bg: #0f0f13;
+    --surface: #16161d;
+    --surface2: #1e1e28;
+    --surface3: #25252f;
+    --border: #2e2e3e;
+    --text: #e8e8f0;
+    --muted: #8888a8;
+    --accent: #f7974a;
+    --accent2: #7c6af0;
+    --accent3: #4ac9f7;
+    --green: #4af7a0;
+    --yellow: #f7e24a;
+    --red: #f74a6a;
+    --shadow: 0 4px 32px rgba(0,0,0,0.5);
+    --nav-bg: rgba(15,15,19,0.92);
+    --code-bg: #16161d;
+  }
+
+  /* ─── RESET & BASE ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent3); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 2rem;
+    height: 56px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  nav a:not(.nav-brand) {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.2s;
+    text-decoration: none;
+  }
+  nav a:not(.nav-brand):hover { color: var(--text); }
+  .lang-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px;
+  }
+  .lang-btn {
+    padding: 3px 12px;
+    border: none;
+    background: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .lang-btn.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+  }
+
+  /* ─── THEME TOGGLE ─── */
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 5rem 2rem 3.5rem;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.12;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 1.08rem;
+    color: var(--muted);
+    max-width: 620px;
+    margin-bottom: 2rem;
+  }
+  .hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pill {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+  }
+  .pill.orange { border-color: var(--accent); color: var(--accent); }
+  .pill.purple { border-color: var(--accent2); color: var(--accent2); }
+  .pill.blue   { border-color: var(--accent3); color: var(--accent3); }
+
+  /* ─── LAYOUT ─── */
+  .content {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 4rem 0 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-family: var(--font-serif);
+    font-size: 1.9rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  /* ─── PROSE ─── */
+  p { margin-bottom: 1rem; color: var(--muted); }
+  p strong { color: var(--text); font-weight: 600; }
+
+  /* ─── CALLOUTS ─── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(247,151,74,0.06);
+    padding: 1rem 1.2rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.5rem 0;
+  }
+  .callout.blue {
+    border-color: var(--accent3);
+    background: rgba(74,201,247,0.06);
+  }
+  .callout.green {
+    border-color: var(--green);
+    background: rgba(74,247,160,0.06);
+  }
+  .callout.yellow {
+    border-color: var(--yellow);
+    background: rgba(247,226,74,0.06);
+  }
+  .callout-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .callout.blue .callout-label   { color: var(--accent3); }
+  .callout.green .callout-label  { color: var(--green); }
+  .callout.yellow .callout-label { color: var(--yellow); }
+  .callout p { color: var(--text); margin: 0; font-size: 0.95rem; }
+
+  /* ─── PATTERN CARDS ─── */
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+  }
+  .pattern-card:hover { border-color: var(--accent2); }
+  .pattern-card-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .pattern-card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .pattern-card p {
+    font-size: 0.88rem;
+    margin: 0 0 0.75rem;
+    color: var(--muted);
+  }
+  .lc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .lc-chip {
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .lc-chip.hard   { border-color: var(--red);    color: var(--red); }
+  .lc-chip.medium { border-color: var(--yellow);  color: var(--yellow); }
+  .lc-chip.easy   { border-color: var(--green);   color: var(--green); }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: var(--code-bg);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 0.5rem;
+  }
+  .code-title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: #8888a8;
+    flex: 1;
+  }
+  .lang-pane { display: none; }
+  .lang-pane.active { display: block; }
+  pre {
+    margin: 0;
+    padding: 1.2rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: var(--code-text);
+    background: var(--code-bg);
+  }
+  .kw  { color: var(--accent2); }
+  .cm  { color: #555577; font-style: italic; }
+  .st  { color: var(--green); }
+  .nm  { color: var(--accent3); }
+  .fn  { color: var(--accent); }
+
+  /* ─── TABS ─── */
+  .tabs { margin: 1.5rem 0; }
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    gap: 0;
+  }
+  .tab-btn {
+    padding: 0.5rem 1.2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; padding: 1.2rem 0; }
+  .tab-pane.active { display: block; }
+
+  /* ─── VISUALIZER ─── */
+  .visualizer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .viz-title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+  .viz-array {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    align-items: flex-end;
+  }
+  .arr-cell {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    position: relative;
+    transition: all 0.2s;
+  }
+  .arr-cell.in-window   { border-color: var(--accent2); background: rgba(124,106,240,0.12); color: var(--text); }
+  .arr-cell.in-deque    { border-color: var(--accent);  background: rgba(247,151,74,0.15); color: var(--accent); font-weight: 700; }
+  .arr-cell.is-max      { border-color: var(--green);   background: rgba(74,247,160,0.15); color: var(--green); }
+  .arr-cell.is-current  { border-color: var(--accent3); background: rgba(74,201,247,0.15); color: var(--accent3); }
+  .arr-cell .idx-label {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .deque-area {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .deque-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .deque-cells {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-height: 36px;
+    align-items: center;
+  }
+  .deque-cell {
+    padding: 4px 10px;
+    background: rgba(247,151,74,0.12);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+  .result-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0.5rem 0;
+    align-items: center;
+  }
+  .result-cell {
+    padding: 4px 10px;
+    background: rgba(74,247,160,0.1);
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--green);
+  }
+  .viz-log {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    min-height: 48px;
+    margin: 0.75rem 0;
+    line-height: 1.6;
+  }
+  .viz-log .log-line { margin-bottom: 2px; }
+  .viz-log .log-line span { color: var(--accent3); }
+  .viz-controls {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .viz-btn {
+    padding: 0.45rem 1.1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .viz-btn:hover  { border-color: var(--accent); color: var(--accent); }
+  .viz-btn.primary { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+  .viz-btn.primary:hover { background: #f9ab6b; }
+
+  /* ─── CHEAT SHEET TABLE ─── */
+  .table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--surface2);
+    padding: 0.65rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-align: left;
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: top;
+  }
+  td:first-child { color: var(--text); font-weight: 500; }
+  tr:hover td { background: var(--surface2); }
+  td code, th code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    background: var(--surface3);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ─── DEEP DIVE ─── */
+  .deep-dive {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .deep-dive-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .deep-dive h3 {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .difficulty-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 0.5rem;
+  }
+  .difficulty-badge.hard   { background: rgba(247,74,106,0.15); color: var(--red);    border: 1px solid var(--red); }
+  .difficulty-badge.medium { background: rgba(247,226,74,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+
+  /* ─── LEARNING PATH ─── */
+  .path-steps { margin: 1.5rem 0; }
+  .path-step {
+    display: flex;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .path-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content h4 {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .step-content p { font-size: 0.85rem; margin: 0; }
+
+  /* ─── REAL WORLD SECTION ─── */
+  .rw-problem {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-left: 4px solid var(--accent2);
+  }
+  .rw-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .rw-problem h3 {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .example-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+  .example-block .ex-label {
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+  .example-block code { color: var(--text); display: block; line-height: 1.7; }
+  .constraints-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.75rem 0;
+  }
+  .constraints-list li {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── MISC ─── */
+  h3 { font-family: var(--font-serif); font-size: 1.25rem; color: var(--text); margin: 1.25rem 0 0.5rem; }
+  h4 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  ul, ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+  li { color: var(--muted); font-size: 0.95rem; margin-bottom: 0.3rem; }
+  li strong { color: var(--text); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  .inline-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <a class="nav-brand" href="index.html">Harihar Nath · DSA</a>
+  <a href="#core-idea">The Idea</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#visualizer">Visualizer</a>
+  <a href="#deepdive">Deep Dives</a>
+  <a href="#realworld">Real World</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <a href="#mental-model">Mental Model</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+</nav>
+
+<!-- ─── HERO ─── -->
+<header class="hero">
+  <div class="hero-eyebrow">AlgorithmCraft · Data Structures</div>
+  <h1>The <em>Monotonic Queue</em> — Window Extremes in O(1)</h1>
+  <p class="hero-sub">A deque maintained in monotone order so that every sliding-window maximum or minimum query returns in constant time. One of the sharpest tricks in competitive programming.</p>
+  <div class="hero-pills">
+    <span class="pill orange">O(n) total</span>
+    <span class="pill purple">Amortized O(1) per query</span>
+    <span class="pill blue">Deque + Monotone Invariant</span>
+    <span class="pill">Sliding Window</span>
+    <span class="pill">Stack Variant</span>
+    <span class="pill">Queue Variant</span>
+  </div>
+</header>
+
+<!-- ─── CONTENT ─── -->
+<main class="content">
+
+  <!-- ═══════════════════════════════
+       01 · CORE INSIGHT
+  ═══════════════════════════════ -->
+  <div class="section-header" id="core-idea">
+    <span class="section-num">01</span>
+    <h2>The Core Insight</h2>
+  </div>
+
+  <p>Imagine you're tracking the max of every 3-element window in a million-element array. A naïve scan through each window is O(n·k) — too slow. A heap costs O(n log k) with messy deletion. The monotonic deque gives you O(n) total, and the insight is beautiful:</p>
+
+  <div class="callout">
+    <div class="callout-label">Core Insight</div>
+    <p>If element <strong>A</strong> enters the window <em>before</em> element <strong>B</strong>, and <strong>A ≤ B</strong>, then <strong>A</strong> can never be the window maximum while <strong>B</strong> is alive. A is <em>useless</em> — remove it forever.</p>
+  </div>
+
+  <p>This "uselessness" is the elimination argument. By purging dominated elements on every insert, you maintain a deque in <strong>strictly decreasing order</strong> (for max queries). The front is always the window maximum. No element is pushed or popped more than once across all windows — total work is O(n).</p>
+
+  <div class="callout green">
+    <div class="callout-label">Why the Elimination is Safe</div>
+    <p>Suppose we pop index <em>i</em> because a larger value arrived at index <em>j > i</em>. For any future window that includes index <em>j</em>, it must have entered after <em>j</em> entered — so <em>j</em> is present and dominates <em>i</em>. For any window that <em>doesn't</em> include <em>j</em>, it also can't include <em>i</em> (since <em>i &lt; j</em> and both are within the same window range). So popping <em>i</em> is always safe.</p>
+  </div>
+
+  <p>The same idea works for <strong>minimum queries</strong> (maintain an increasing deque), for <strong>monotonic stacks</strong> (no expiry logic needed), and for <strong>constrained window problems</strong> where the invariant is more complex than simple max/min.</p>
+
+  <div class="callout blue">
+    <div class="callout-label">Recognition Pattern</div>
+    <p>If you see <em>"maximum/minimum of every window of size k"</em> or <em>"longest subarray where max − min ≤ limit"</em>, think monotonic deque first. The tell is that you need extremes of a sliding window efficiently.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════
+       02 · PATTERNS
+  ═══════════════════════════════ -->
+  <div class="section-header" id="patterns">
+    <span class="section-num">02</span>
+    <h2>The Four Patterns</h2>
+  </div>
+
+  <p>Monotonic deques and stacks appear in four distinct configurations. Recognizing which pattern applies is the skill — the implementation then follows mechanically.</p>
+
+  <div class="pattern-grid">
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 1</div>
+      <h3>Fixed-Window Maximum</h3>
+      <p>Classic sliding max/min across a fixed-size window. Deque stores indices; pop front when stale, pop back when dominated.</p>
+      <div class="lc-chips">
+        <span class="lc-chip hard">239 · Sliding Window Maximum</span>
+        <span class="lc-chip medium">643 · Max Avg Subarray I</span>
+        <span class="lc-chip medium">1343 · K-size Sub-arrays Avg ≥ threshold</span>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 2</div>
+      <h3>Variable-Window with Monotone Constraint</h3>
+      <p>Window shrinks from the left when a constraint (e.g., max − min ≤ limit) is violated. Maintain <em>two</em> deques simultaneously — one for max, one for min.</p>
+      <div class="lc-chips">
+        <span class="lc-chip hard">480 · Sliding Window Median</span>
+        <span class="lc-chip hard">1438 · Longest Subarray |max−min| ≤ limit</span>
+        <span class="lc-chip hard">2762 · Continuous Subarrays</span>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 3</div>
+      <h3>Monotonic Stack (Next Greater / Smaller)</h3>
+      <p>No window to expire — just maintain a decreasing or increasing stack. Pop when the invariant breaks to find the <em>previous/next greater element</em>.</p>
+      <div class="lc-chips">
+        <span class="lc-chip medium">496 · Next Greater Element I</span>
+        <span class="lc-chip medium">739 · Daily Temperatures</span>
+        <span class="lc-chip hard">84 · Largest Rectangle in Histogram</span>
+        <span class="lc-chip hard">85 · Maximal Rectangle</span>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 4</div>
+      <h3>Prefix-Sum + Monotone Deque (DP Optimization)</h3>
+      <p>Deque accelerates a DP recurrence where you need the optimal prior state inside a window. The deque replaces an O(k) inner loop with O(1) amortized.</p>
+      <div class="lc-chips">
+        <span class="lc-chip hard">862 · Shortest Subarray with Sum ≥ K</span>
+        <span class="lc-chip hard">1425 · Constrained Subsequence Sum</span>
+        <span class="lc-chip hard">918 · Max Circular Subarray Sum</span>
+      </div>
+    </div>
+
+  </div>
+
+  <h3>The Deque Skeleton</h3>
+  <p>All four patterns share the same core structure. The only variation is <em>what you pop on the back</em> (≥ for max, ≤ for min) and <em>whether you expire the front</em>.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">monotonic_deque_skeleton</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="kw">import</span> java.util.ArrayDeque;
+<span class="kw">import</span> java.util.Deque;
+
+<span class="cm">// Pattern 1: Sliding window maximum (fixed k)</span>
+<span class="kw">public int</span>[] <span class="fn">slidingWindowMax</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> k) {
+    Deque&lt;Integer&gt; dq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// stores INDICES</span>
+    <span class="kw">int</span>[] result = <span class="kw">new int</span>[nums.length - k + <span class="nm">1</span>];
+    <span class="kw">int</span> ri = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; nums.length; i++) {
+        <span class="cm">// 1. Expire front if outside window</span>
+        <span class="kw">if</span> (!dq.isEmpty() && dq.peekFirst() &lt; i - k + <span class="nm">1</span>)
+            dq.pollFirst();
+
+        <span class="cm">// 2. Maintain decreasing order: pop dominated elements</span>
+        <span class="kw">while</span> (!dq.isEmpty() && nums[dq.peekLast()] &lt;= nums[i])
+            dq.pollLast();
+
+        dq.addLast(i);
+
+        <span class="cm">// 3. Front of deque = window max (once window is full)</span>
+        <span class="kw">if</span> (i >= k - <span class="nm">1</span>)
+            result[ri++] = nums[dq.peekFirst()];
+    }
+    <span class="kw">return</span> result;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="cm"># Pattern 1: Sliding window maximum (fixed k)</span>
+<span class="kw">def</span> <span class="fn">sliding_window_max</span>(nums: list[int], k: int) -> list[int]:
+    dq = deque()  <span class="cm"># stores INDICES</span>
+    result = []
+
+    <span class="kw">for</span> i, val <span class="kw">in</span> enumerate(nums):
+        <span class="cm"># 1. Expire front if outside window</span>
+        <span class="kw">if</span> dq <span class="kw">and</span> dq[<span class="nm">0</span>] < i - k + <span class="nm">1</span>:
+            dq.popleft()
+
+        <span class="cm"># 2. Maintain decreasing order: pop dominated elements</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> nums[dq[<span class="nm">-1</span>]] <= val:
+            dq.pop()
+
+        dq.append(i)
+
+        <span class="cm"># 3. Front = window max (once window is full)</span>
+        <span class="kw">if</span> i >= k - <span class="nm">1</span>:
+            result.append(nums[dq[<span class="nm">0</span>]])
+
+    <span class="kw">return</span> result</pre>
+    </div>
+  </div>
+
+  <div class="callout yellow">
+    <div class="callout-label">Common Gotcha</div>
+    <p>Always store <strong>indices</strong> in the deque, not values. You need indices both to expire stale elements (front &lt; i−k+1) and to retrieve the answer (nums[dq.peekFirst()]). Storing values directly makes expiry impossible.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════
+       03 · VISUALIZER
+  ═══════════════════════════════ -->
+  <div class="section-header" id="visualizer">
+    <span class="section-num">03</span>
+    <h2>Interactive Visualizer</h2>
+  </div>
+
+  <p>Step through LeetCode 239 — <strong>Sliding Window Maximum</strong> — on the array <code>[1, 3, −1, −3, 5, 3, 6, 7]</code> with <code>k = 3</code>. Watch the deque maintain its decreasing invariant and the front deliver the window max at each step.</p>
+
+  <div class="visualizer">
+    <div class="viz-title">⚙ Sliding Window Maximum · k=3 · Step-through</div>
+
+    <div style="margin-bottom:6px;font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">Array (index shown above each cell)</div>
+    <div class="viz-array" id="viz-array"></div>
+
+    <div class="deque-area">
+      <div class="deque-label">Monotonic Deque (indices, decreasing by value) — front is window max</div>
+      <div class="deque-cells" id="viz-deque">
+        <span style="color:var(--muted);font-size:0.8rem;font-family:var(--font-mono)">empty</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px">
+        <div class="deque-label">Output so far</div>
+        <div class="result-row" id="viz-result">
+          <span style="color:var(--muted);font-size:0.8rem;font-family:var(--font-mono)">—</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div class="deque-label">Step info</div>
+        <div id="viz-step-info" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--muted)">Press Step → to begin</div>
+      </div>
+    </div>
+
+    <div class="viz-log" id="viz-log">Waiting to start…</div>
+
+    <div class="viz-controls">
+      <button class="viz-btn primary" onclick="vizStep()">Step →</button>
+      <button class="viz-btn" onclick="vizReset()">↺ Reset</button>
+      <button class="viz-btn" onclick="vizRunAll()">Run All ⚡</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">What to Watch For</div>
+    <p>Notice that when index 4 (value 5) enters, it pops indices 2 and 3 (values −1, −3) off the back — they're useless while 5 is alive. The deque never grows beyond k=3 elements. Each index is pushed once and popped at most once: total O(n) work.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════
+       04 · DEEP DIVES
+  ═══════════════════════════════ -->
+  <div class="section-header" id="deepdive">
+    <span class="section-num">04</span>
+    <h2>Deep Dives</h2>
+  </div>
+
+  <p>Two problems that reveal the full power of monotonic deques — one using the classic pattern and one combining prefix sums with the deque to optimize a DP transition.</p>
+
+  <!-- DEEP DIVE 1 -->
+  <div class="deep-dive">
+    <div class="deep-dive-label">Deep Dive 1</div>
+    <h3>1438 · Longest Continuous Subarray with Absolute Diff ≤ Limit <span class="difficulty-badge hard">Hard</span></h3>
+
+    <p>Find the longest subarray where <code>max(subarray) − min(subarray) ≤ limit</code>. This requires both the window maximum and window minimum simultaneously, and the window size is variable.</p>
+
+    <div class="callout">
+      <div class="callout-label">Key Observation</div>
+      <p>Maintain two monotonic deques: one decreasing (tracks max) and one increasing (tracks min). When <code>max_deque.front − min_deque.front &gt; limit</code>, advance the left pointer and expire stale fronts from both deques.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-title">1438_longest_subarray_abs_diff</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">longestSubarray</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> limit) {
+    Deque&lt;Integer&gt; maxDq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// decreasing → front is max</span>
+    Deque&lt;Integer&gt; minDq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// increasing → front is min</span>
+    <span class="kw">int</span> left = <span class="nm">0</span>, ans = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="kw">int</span> right = <span class="nm">0</span>; right &lt; nums.length; right++) {
+        <span class="cm">// Maintain max deque</span>
+        <span class="kw">while</span> (!maxDq.isEmpty() && nums[maxDq.peekLast()] &lt;= nums[right])
+            maxDq.pollLast();
+        maxDq.addLast(right);
+
+        <span class="cm">// Maintain min deque</span>
+        <span class="kw">while</span> (!minDq.isEmpty() && nums[minDq.peekLast()] >= nums[right])
+            minDq.pollLast();
+        minDq.addLast(right);
+
+        <span class="cm">// Shrink window while constraint violated</span>
+        <span class="kw">while</span> (nums[maxDq.peekFirst()] - nums[minDq.peekFirst()] > limit) {
+            <span class="kw">if</span> (maxDq.peekFirst() == left) maxDq.pollFirst();
+            <span class="kw">if</span> (minDq.peekFirst() == left) minDq.pollFirst();
+            left++;
+        }
+
+        ans = Math.<span class="fn">max</span>(ans, right - left + <span class="nm">1</span>);
+    }
+    <span class="kw">return</span> ans;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">longest_subarray</span>(nums: list[int], limit: int) -> int:
+    max_dq = deque()  <span class="cm"># decreasing → front is max</span>
+    min_dq = deque()  <span class="cm"># increasing → front is min</span>
+    left = ans = <span class="nm">0</span>
+
+    <span class="kw">for</span> right, val <span class="kw">in</span> enumerate(nums):
+        <span class="cm"># Maintain max deque</span>
+        <span class="kw">while</span> max_dq <span class="kw">and</span> nums[max_dq[<span class="nm">-1</span>]] <= val:
+            max_dq.pop()
+        max_dq.append(right)
+
+        <span class="cm"># Maintain min deque</span>
+        <span class="kw">while</span> min_dq <span class="kw">and</span> nums[min_dq[<span class="nm">-1</span>]] >= val:
+            min_dq.pop()
+        min_dq.append(right)
+
+        <span class="cm"># Shrink window while constraint violated</span>
+        <span class="kw">while</span> nums[max_dq[<span class="nm">0</span>]] - nums[min_dq[<span class="nm">0</span>]] > limit:
+            <span class="kw">if</span> max_dq[<span class="nm">0</span>] == left: max_dq.popleft()
+            <span class="kw">if</span> min_dq[<span class="nm">0</span>] == left: min_dq.popleft()
+            left += <span class="nm">1</span>
+
+        ans = max(ans, right - left + <span class="nm">1</span>)
+
+    <span class="kw">return</span> ans</pre>
+      </div>
+    </div>
+
+    <p><strong>Complexity:</strong> O(n) time — each index enters and exits each deque at most once. O(k) space where k is the answer window size.</p>
+  </div>
+
+  <!-- DEEP DIVE 2 -->
+  <div class="deep-dive">
+    <div class="deep-dive-label">Deep Dive 2</div>
+    <h3>862 · Shortest Subarray with Sum ≥ K <span class="difficulty-badge hard">Hard</span></h3>
+
+    <p>Find the length of the shortest (contiguous) subarray whose sum is ≥ K. The catch: values can be negative, so simple two-pointer shrinking fails. The insight is to convert to prefix sums, then use a monotone deque to find the optimal left boundary efficiently.</p>
+
+    <div class="callout green">
+      <div class="callout-label">The Elimination Argument</div>
+      <p>If prefix[j] ≥ prefix[i] for i &lt; j, then index i is a better left boundary than j for any future right pointer (same or better sum, but the answer length would be longer from j). So we never need j as a left endpoint if prefix[i] ≤ prefix[j].</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-title">862_shortest_subarray_sum_k</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">shortestSubarray</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> k) {
+    <span class="kw">int</span> n = nums.length;
+    <span class="kw">long</span>[] prefix = <span class="kw">new long</span>[n + <span class="nm">1</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++)
+        prefix[i + <span class="nm">1</span>] = prefix[i] + nums[i];
+
+    Deque&lt;Integer&gt; dq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// stores prefix indices, increasing prefix values</span>
+    <span class="kw">int</span> ans = Integer.MAX_VALUE;
+
+    <span class="kw">for</span> (<span class="kw">int</span> right = <span class="nm">0</span>; right &lt;= n; right++) {
+        <span class="cm">// Pop from front while subarray sum ≥ k: record and shrink</span>
+        <span class="kw">while</span> (!dq.isEmpty() && prefix[right] - prefix[dq.peekFirst()] >= k)
+            ans = Math.<span class="fn">min</span>(ans, right - dq.pollFirst());
+
+        <span class="cm">// Maintain increasing prefix values: pop dominated back</span>
+        <span class="kw">while</span> (!dq.isEmpty() && prefix[dq.peekLast()] >= prefix[right])
+            dq.pollLast();
+
+        dq.addLast(right);
+    }
+    <span class="kw">return</span> ans == Integer.MAX_VALUE ? <span class="nm">-1</span> : ans;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">shortest_subarray</span>(nums: list[int], k: int) -> int:
+    n = len(nums)
+    prefix = [<span class="nm">0</span>] * (n + <span class="nm">1</span>)
+    <span class="kw">for</span> i, v <span class="kw">in</span> enumerate(nums):
+        prefix[i + <span class="nm">1</span>] = prefix[i] + v
+
+    dq = deque()  <span class="cm"># stores prefix indices, increasing by prefix value</span>
+    ans = float(<span class="st">'inf'</span>)
+
+    <span class="kw">for</span> right <span class="kw">in</span> range(n + <span class="nm">1</span>):
+        <span class="cm"># Pop from front while sum ≥ k: record shortest</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> prefix[right] - prefix[dq[<span class="nm">0</span>]] >= k:
+            ans = min(ans, right - dq.popleft())
+
+        <span class="cm"># Maintain increasing prefix values</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> prefix[dq[<span class="nm">-1</span>]] >= prefix[right]:
+            dq.pop()
+
+        dq.append(right)
+
+    <span class="kw">return</span> ans <span class="kw">if</span> ans != float(<span class="st">'inf'</span>) <span class="kw">else</span> <span class="nm">-1</span></pre>
+      </div>
+    </div>
+    <p><strong>Complexity:</strong> O(n) time. The deque-optimized approach avoids the O(n²) brute force and the O(n log n) heap approach. Space is O(n) for the prefix array.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════
+       05 · REAL WORLD
+  ═══════════════════════════════ -->
+  <div class="section-header" id="realworld">
+    <span class="section-num">05</span>
+    <h2>Real World Problems</h2>
+  </div>
+
+  <p>Every pattern mapped to a problem a working engineer actually encounters. Each solution is complete and runnable.</p>
+
+  <!-- RW 1: Fixed Window Max -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 1 · Fixed-Window Maximum · Observability / SRE</div>
+    <h3>Rolling Latency Budget Monitor</h3>
+    <p>Your SRE team needs to alert when <em>any</em> rolling 5-minute window of API requests contains a peak P99 latency above the SLA threshold. Given a time-series array of per-request latency values (milliseconds) and a window size <code>k</code>, return the maximum latency for every consecutive window of size <code>k</code>. An alert fires if any returned value exceeds the threshold.</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>latencies = [120, 340, 85, 910, 200, 150, 670, 430]</code>
+      <code>k = 3</code>
+      <code>Output: [340, 910, 910, 910, 670, 670]</code>
+      <code>  — window [120,340,85] → 340, [340,85,910] → 910, etc.</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ n ≤ 10⁶</li>
+      <li>1 ≤ latency ≤ 10⁵</li>
+      <li>1 ≤ k ≤ n</li>
+      <li>O(n) time required</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>Each window's SLA check only needs the <em>maximum</em> latency in that window. A naïve max-scan is O(n·k) and will lag on a million-event stream. The monotonic deque delivers the max of every window in amortized O(1) — the back is purged of dominated requests, and the front always holds the worst offender in the current window.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-title">rolling_latency_monitor</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> LatencyMonitor {
+    <span class="cm">/**
+     * Returns the max latency in every window of size k.
+     * Fire alert if any value exceeds slaThresholdMs.
+     */</span>
+    <span class="kw">public int</span>[] <span class="fn">rollingMaxLatency</span>(<span class="kw">int</span>[] latencies, <span class="kw">int</span> k, <span class="kw">int</span> slaThresholdMs) {
+        Deque&lt;Integer&gt; dq = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+        <span class="kw">int</span> n = latencies.length;
+        <span class="kw">int</span>[] windowMaxes = <span class="kw">new int</span>[n - k + <span class="nm">1</span>];
+        <span class="kw">int</span> ri = <span class="nm">0</span>;
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="cm">// Expire requests that fell out of the k-request window</span>
+            <span class="kw">if</span> (!dq.isEmpty() && dq.peekFirst() < i - k + <span class="nm">1</span>)
+                dq.pollFirst();
+
+            <span class="cm">// Drop requests dominated by the current (they can never be peak)</span>
+            <span class="kw">while</span> (!dq.isEmpty() && latencies[dq.peekLast()] <= latencies[i])
+                dq.pollLast();
+
+            dq.addLast(i);
+
+            <span class="kw">if</span> (i >= k - <span class="nm">1</span>) {
+                windowMaxes[ri] = latencies[dq.peekFirst()];
+                <span class="kw">if</span> (windowMaxes[ri] > slaThresholdMs)
+                    System.err.<span class="fn">println</span>(<span class="st">"SLA BREACH at window ending index "</span> + i
+                        + <span class="st">": peak="</span> + windowMaxes[ri] + <span class="st">"ms"</span>);
+                ri++;
+            }
+        }
+        <span class="kw">return</span> windowMaxes;
+    }
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">rolling_max_latency</span>(
+    latencies: list[int], k: int, sla_threshold_ms: int
+) -> list[int]:
+    <span class="st">"""Returns the max latency in every window of size k.
+    Logs SLA breach events to stderr."""</span>
+    <span class="kw">import</span> sys
+    dq = deque()
+    window_maxes = []
+
+    <span class="kw">for</span> i, lat <span class="kw">in</span> enumerate(latencies):
+        <span class="cm"># Expire stale requests</span>
+        <span class="kw">if</span> dq <span class="kw">and</span> dq[<span class="nm">0</span>] < i - k + <span class="nm">1</span>:
+            dq.popleft()
+
+        <span class="cm"># Drop dominated requests off the back</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> latencies[dq[<span class="nm">-1</span>]] <= lat:
+            dq.pop()
+
+        dq.append(i)
+
+        <span class="kw">if</span> i >= k - <span class="nm">1</span>:
+            peak = latencies[dq[<span class="nm">0</span>]]
+            window_maxes.append(peak)
+            <span class="kw">if</span> peak > sla_threshold_ms:
+                print(f<span class="st">"SLA BREACH at window ending {i}: peak={peak}ms"</span>,
+                      file=sys.stderr)
+
+    <span class="kw">return</span> window_maxes</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- RW 2: Variable Window -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 2 · Variable-Window Constraint · Trading Systems</div>
+    <h3>Trading Volatility Band Filter</h3>
+    <p>A trading risk system must flag the longest contiguous sequence of price ticks where the spread between the highest and lowest tick stays within a volatility band <code>limit</code>. Given a list of integer price ticks and a band limit, return the length of the longest such run. This drives position-sizing models: wider stable windows mean larger allowed positions.</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>ticks = [10, 12, 9, 11, 14, 8, 13, 12]</code>
+      <code>limit = 4</code>
+      <code>Output: 4  (subarray [10,12,9,11] has spread 12-9=3 ≤ 4)</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ n ≤ 10⁵</li>
+      <li>0 ≤ ticks[i] ≤ 10⁸</li>
+      <li>0 ≤ limit ≤ 10⁸</li>
+      <li>O(n) time required</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>Two deques track the rolling max and rolling min simultaneously. When the spread exceeds <code>limit</code>, we advance the left pointer and retire any front elements that have left the window. This is the dual-deque variable window pattern — neither pointer moves backwards, giving amortized O(1) per step.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-title">trading_volatility_band</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">longestStableRun</span>(<span class="kw">int</span>[] ticks, <span class="kw">int</span> limit) {
+    Deque&lt;Integer&gt; maxDq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// decreasing</span>
+    Deque&lt;Integer&gt; minDq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// increasing</span>
+    <span class="kw">int</span> left = <span class="nm">0</span>, ans = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="kw">int</span> right = <span class="nm">0</span>; right &lt; ticks.length; right++) {
+        <span class="cm">// Update max deque</span>
+        <span class="kw">while</span> (!maxDq.isEmpty() && ticks[maxDq.peekLast()] &lt;= ticks[right])
+            maxDq.pollLast();
+        maxDq.addLast(right);
+
+        <span class="cm">// Update min deque</span>
+        <span class="kw">while</span> (!minDq.isEmpty() && ticks[minDq.peekLast()] >= ticks[right])
+            minDq.pollLast();
+        minDq.addLast(right);
+
+        <span class="cm">// Contract window until spread ≤ limit</span>
+        <span class="kw">while</span> (ticks[maxDq.peekFirst()] - ticks[minDq.peekFirst()] > limit) {
+            <span class="kw">if</span> (maxDq.peekFirst() == left) maxDq.pollFirst();
+            <span class="kw">if</span> (minDq.peekFirst() == left) minDq.pollFirst();
+            left++;
+        }
+        ans = Math.<span class="fn">max</span>(ans, right - left + <span class="nm">1</span>);
+    }
+    <span class="kw">return</span> ans;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">longest_stable_run</span>(ticks: list[int], limit: int) -> int:
+    max_dq = deque()  <span class="cm"># decreasing — front is running max</span>
+    min_dq = deque()  <span class="cm"># increasing — front is running min</span>
+    left = ans = <span class="nm">0</span>
+
+    <span class="kw">for</span> right, price <span class="kw">in</span> enumerate(ticks):
+        <span class="kw">while</span> max_dq <span class="kw">and</span> ticks[max_dq[<span class="nm">-1</span>]] <= price:
+            max_dq.pop()
+        max_dq.append(right)
+
+        <span class="kw">while</span> min_dq <span class="kw">and</span> ticks[min_dq[<span class="nm">-1</span>]] >= price:
+            min_dq.pop()
+        min_dq.append(right)
+
+        <span class="cm"># Shrink until volatility band ≤ limit</span>
+        <span class="kw">while</span> ticks[max_dq[<span class="nm">0</span>]] - ticks[min_dq[<span class="nm">0</span>]] > limit:
+            <span class="kw">if</span> max_dq[<span class="nm">0</span>] == left: max_dq.popleft()
+            <span class="kw">if</span> min_dq[<span class="nm">0</span>] == left: min_dq.popleft()
+            left += <span class="nm">1</span>
+
+        ans = max(ans, right - left + <span class="nm">1</span>)
+
+    <span class="kw">return</span> ans</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- RW 3: Monotonic Stack -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 3 · Monotonic Stack · DevOps / Capacity Planning</div>
+    <h3>Service Wait-Time Attribution</h3>
+    <p>In a distributed trace, each microservice call has a duration. For each call, find the next call that is <em>longer</em> in duration (the "next bottleneck"). This power the "critical path highlighting" feature of your APM tool — every span is annotated with how far ahead the next slower span is. Given an array of call durations, return an array where <code>result[i]</code> = number of steps to the next greater duration (0 if none exists).</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>durations = [73, 74, 75, 71, 69, 72, 76, 73]</code>
+      <code>Output:     [1,  1,  4,  2,  1,  1,  0,  0]</code>
+      <code>  — durations[0]=73, next greater is durations[1]=74, distance=1</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ n ≤ 10⁵</li>
+      <li>30 ≤ durations[i] ≤ 10⁴</li>
+      <li>O(n) time, O(n) space</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>This is LeetCode 739 (Daily Temperatures) in a tracing disguise. We maintain a decreasing monotonic stack of unresolved indices. When a new (larger) value arrives, every smaller element at the top of the stack has found its "next greater" — we pop and record the distance. No element is pushed or popped more than once: O(n) total.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-title">next_bottleneck_attribution</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span>[] <span class="fn">nextBottleneck</span>(<span class="kw">int</span>[] durations) {
+    <span class="kw">int</span> n = durations.length;
+    <span class="kw">int</span>[] result = <span class="kw">new int</span>[n];
+    Deque&lt;Integer&gt; stack = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// indices, decreasing durations</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+        <span class="cm">// Pop all spans for which current is the next bottleneck</span>
+        <span class="kw">while</span> (!stack.isEmpty() && durations[stack.peek()] &lt; durations[i]) {
+            <span class="kw">int</span> prev = stack.pop();
+            result[prev] = i - prev; <span class="cm">// distance to next bottleneck</span>
+        }
+        stack.push(i);
+    }
+    <span class="cm">// Remaining on stack have no next greater → result stays 0</span>
+    <span class="kw">return</span> result;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">next_bottleneck</span>(durations: list[int]) -> list[int]:
+    n = len(durations)
+    result = [<span class="nm">0</span>] * n
+    stack = []  <span class="cm"># indices with decreasing durations</span>
+
+    <span class="kw">for</span> i, dur <span class="kw">in</span> enumerate(durations):
+        <span class="cm"># Pop all spans for which this is the next larger duration</span>
+        <span class="kw">while</span> stack <span class="kw">and</span> durations[stack[<span class="nm">-1</span>]] < dur:
+            prev = stack.pop()
+            result[prev] = i - prev
+
+        stack.append(i)
+
+    <span class="cm"># Remaining have no next greater — result[i] stays 0</span>
+    <span class="kw">return</span> result</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- RW 4: Prefix Sum + Deque -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 4 · Prefix-Sum + Deque DP · Finance</div>
+    <h3>Shortest Compliant Transaction Batch</h3>
+    <p>A compliance system requires that every submitted batch of transactions have a net credit total of at least <code>K</code> to clear the settlement system. Given a signed integer array representing individual transaction values (negative = debit, positive = credit), find the length of the shortest contiguous batch whose sum is ≥ K. Returns −1 if no such batch exists.</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>transactions = [2, -1, 2, 3, -2, 4, -1]</code>
+      <code>K = 5</code>
+      <code>Output: 3  (subarray [3, -2, 4] sums to 5)</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ n ≤ 10⁵</li>
+      <li>-10⁴ ≤ txn[i] ≤ 10⁴</li>
+      <li>1 ≤ K ≤ 10⁹</li>
+      <li>O(n) time required</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>Negative values break the two-pointer approach (shrinking the window can actually increase the sum). Converting to prefix sums and maintaining an <em>increasing prefix-value deque</em> lets us find the optimal left boundary in O(1): we pop the front whenever <code>prefix[right] − prefix[front] ≥ K</code>, recording the shortest batch seen so far.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-title">shortest_compliant_batch</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">shortestBatch</span>(<span class="kw">int</span>[] txns, <span class="kw">int</span> K) {
+    <span class="kw">int</span> n = txns.length;
+    <span class="kw">long</span>[] prefix = <span class="kw">new long</span>[n + <span class="nm">1</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++)
+        prefix[i + <span class="nm">1</span>] = prefix[i] + txns[i];
+
+    Deque&lt;Integer&gt; dq = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// increasing prefix values</span>
+    <span class="kw">int</span> ans = Integer.MAX_VALUE;
+
+    <span class="kw">for</span> (<span class="kw">int</span> right = <span class="nm">0</span>; right &lt;= n; right++) {
+        <span class="cm">// Find shortest batch ending at 'right'</span>
+        <span class="kw">while</span> (!dq.isEmpty() && prefix[right] - prefix[dq.peekFirst()] >= K)
+            ans = Math.<span class="fn">min</span>(ans, right - dq.pollFirst());
+
+        <span class="cm">// Maintain increasing prefix deque</span>
+        <span class="kw">while</span> (!dq.isEmpty() && prefix[dq.peekLast()] >= prefix[right])
+            dq.pollLast();
+
+        dq.addLast(right);
+    }
+    <span class="kw">return</span> ans == Integer.MAX_VALUE ? <span class="nm">-1</span> : ans;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">shortest_batch</span>(txns: list[int], K: int) -> int:
+    n = len(txns)
+    prefix = [<span class="nm">0</span>] * (n + <span class="nm">1</span>)
+    <span class="kw">for</span> i, v <span class="kw">in</span> enumerate(txns):
+        prefix[i + <span class="nm">1</span>] = prefix[i] + v
+
+    dq = deque()  <span class="cm"># indices with increasing prefix values</span>
+    ans = float(<span class="st">'inf'</span>)
+
+    <span class="kw">for</span> right <span class="kw">in</span> range(n + <span class="nm">1</span>):
+        <span class="kw">while</span> dq <span class="kw">and</span> prefix[right] - prefix[dq[<span class="nm">0</span>]] >= K:
+            ans = min(ans, right - dq.popleft())
+
+        <span class="kw">while</span> dq <span class="kw">and</span> prefix[dq[<span class="nm">-1</span>]] >= prefix[right]:
+            dq.pop()
+
+        dq.append(right)
+
+    <span class="kw">return</span> ans <span class="kw">if</span> ans != float(<span class="st">'inf'</span>) <span class="kw">else</span> <span class="nm">-1</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">LeetCode Mapping</div>
+    <p><strong>Rolling Latency Monitor</strong> is LC 239 (Sliding Window Maximum) applied to SRE alerting. <strong>Trading Volatility Band</strong> is LC 1438 (Longest Subarray Abs Diff ≤ Limit) in a finance wrapper. <strong>Service Wait-Time Attribution</strong> is LC 739 (Daily Temperatures) in distributed tracing. <strong>Shortest Compliant Batch</strong> is LC 862 (Shortest Subarray with Sum ≥ K) in a settlement system.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════
+       06 · CHEAT SHEET
+  ═══════════════════════════════ -->
+  <div class="section-header" id="cheatsheet">
+    <span class="section-num">06</span>
+    <h2>Reference Cheat Sheet</h2>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Pattern</th>
+          <th>Deque Order</th>
+          <th>Expiry?</th>
+          <th>Query</th>
+          <th>Time</th>
+          <th>Key LeetCodes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Fixed-Window Max</td>
+          <td>Decreasing</td>
+          <td>Yes (front &lt; i−k+1)</td>
+          <td><code>nums[dq.front()]</code></td>
+          <td>O(n)</td>
+          <td>239, 1343</td>
+        </tr>
+        <tr>
+          <td>Fixed-Window Min</td>
+          <td>Increasing</td>
+          <td>Yes (front &lt; i−k+1)</td>
+          <td><code>nums[dq.front()]</code></td>
+          <td>O(n)</td>
+          <td>Variant of 239</td>
+        </tr>
+        <tr>
+          <td>Variable Window (max−min ≤ L)</td>
+          <td>Two deques</td>
+          <td>Yes (when left advances)</td>
+          <td><code>maxDq.front − minDq.front</code></td>
+          <td>O(n)</td>
+          <td>1438, 2762</td>
+        </tr>
+        <tr>
+          <td>Next Greater Element</td>
+          <td>Decreasing stack</td>
+          <td>No (no window)</td>
+          <td>Pop triggers</td>
+          <td>O(n)</td>
+          <td>496, 739, 503</td>
+        </tr>
+        <tr>
+          <td>Largest Rectangle (histogram)</td>
+          <td>Increasing stack</td>
+          <td>No</td>
+          <td>Pop triggers area calc</td>
+          <td>O(n)</td>
+          <td>84, 85</td>
+        </tr>
+        <tr>
+          <td>Prefix-Sum + Deque (shortest sum ≥ K)</td>
+          <td>Increasing (by prefix)</td>
+          <td>Yes (pop front when sum ≥ K)</td>
+          <td><code>prefix[r]−prefix[front]</code></td>
+          <td>O(n)</td>
+          <td>862, 918</td>
+        </tr>
+        <tr>
+          <td>DP Transition (constrained subseq)</td>
+          <td>Decreasing (by dp value)</td>
+          <td>Yes (front &lt; i−k)</td>
+          <td><code>dp[dq.front()]</code></td>
+          <td>O(n)</td>
+          <td>1425, 1696</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Learning Path</h3>
+  <div class="path-steps">
+    <div class="path-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>LC 239 — Sliding Window Maximum</h4>
+        <p>Master the basic fixed-window decreasing deque. Understand why indices are stored, not values. This is the canonical problem.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>LC 739 — Daily Temperatures</h4>
+        <p>Switch to monotonic stack (no expiry needed). Understand the "pop when resolved" pattern that powers next-greater-element problems.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>LC 1438 — Longest Subarray Abs Diff ≤ Limit</h4>
+        <p>Graduate to dual deques with a variable window. Practice expiring both fronts when advancing the left pointer.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>LC 84 — Largest Rectangle in Histogram</h4>
+        <p>The hardest monotonic stack problem. Uses increasing stack; each pop triggers an area calculation with a sentinel trick.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>LC 862 — Shortest Subarray with Sum ≥ K</h4>
+        <p>Combine prefix sums with an increasing-value deque to handle negatives. This is the DP-acceleration pattern in disguise.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>LC 1425 — Constrained Subsequence Sum</h4>
+        <p>Pure deque-accelerated DP. The recurrence <code>dp[i] = nums[i] + max(0, max(dp[i−k..i−1]))</code> becomes O(n) with a decreasing deque on dp values.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════
+       07 · MENTAL MODEL
+  ═══════════════════════════════ -->
+  <div class="section-header" id="mental-model">
+    <span class="section-num">07</span>
+    <h2>Mental Model</h2>
+  </div>
+
+  <p>Think of the monotonic deque as a <strong>hall of champions</strong>. When a new contender arrives, it challenges everyone weaker at the back — those beaten champions are eliminated permanently, because they can never be champion while the new contender is in the window. The current champion sits at the front, ready to be dethroned only when they age out of the window entirely.</p>
+
+  <p>The stack variant is the same hall, but there's no aging out — champions hold their title until literally beaten. Each "pop" during insertion is both the champion's defeat <em>and</em> the new element's record of who it just beat (next-greater answers).</p>
+
+  <p>The prefix-sum + deque variant flips the lens: instead of tracking current extremes, you're scanning for the best <em>past state</em> to partner with the current index. The deque holds a sorted shortlist of left boundaries — you pop from the front greedily as valid partners are found, and pop from the back to discard useless future partners.</p>
+
+  <div class="callout yellow">
+    <div class="callout-label">The One Mistake Everyone Makes</div>
+    <p>Using <code>&lt;</code> vs <code>&lt;=</code> on the back-pop condition. For <strong>strictly decreasing</strong> (max of window), pop when <code>nums[back] &lt;= nums[i]</code> — equal values are dominated. For <strong>non-strictly decreasing</strong> (last occurrence of max), pop only when <code>nums[back] &lt; nums[i]</code>. Check the problem statement carefully.</p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">The Two-Line Invariant Check</div>
+    <p>Every monotonic deque can be described in two sentences: <em>"The deque stores [indices/values] in [increasing/decreasing] order of [values/prefix-sums]. The front is always the [max/min/optimal] of the current window."</em> If you can fill in those blanks before writing code, the implementation follows directly.</p>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">The Interview Sentence</div>
+    <p>"I'll use a monotonic deque — the key insight is that any element dominated by a newer element <em>can never be the window extremum while that newer element is alive</em>, so we can purge it immediately. This makes each element push and pop at most once, giving amortized O(1) per query and O(n) total — optimal for this class of sliding-window problems."</p>
+  </div>
+
+</main>
+
+<footer>
+  AlgorithmCraft · Monotonic Queue · Built for FAANG prep · O(n) or bust
+</footer>
+
+<script>
+// ─── LANGUAGE TOGGLE ───
+let currentLang = 'java';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ─── THEME TOGGLE ───
+function syncThemeIcon() {
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const nextDark = !document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', nextDark);
+  try { localStorage.setItem('dsa-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
+  syncThemeIcon();
+  // Re-render visualizer for correct cell colors
+  renderViz();
+}
+
+// ─── TAB SWITCHER ───
+function showTab(e, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── VISUALIZER ───
+const VIZ_NUMS = [1, 3, -1, -3, 5, 3, 6, 7];
+const VIZ_K = 3;
+
+let vizState = {
+  i: -1,
+  dq: [],      // stores indices
+  result: [],
+  done: false,
+  logs: []
+};
+
+function vizReset() {
+  vizState = { i: -1, dq: [], result: [], done: false, logs: [] };
+  renderViz();
+  document.getElementById('viz-log').innerHTML = 'Waiting to start…';
+  document.getElementById('viz-step-info').textContent = 'Press Step → to begin';
+}
+
+function renderViz() {
+  const arrEl = document.getElementById('viz-array');
+  arrEl.innerHTML = '';
+
+  const { i, dq, result } = vizState;
+  VIZ_NUMS.forEach((v, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'arr-cell';
+
+    const label = document.createElement('span');
+    label.className = 'idx-label';
+    label.textContent = idx;
+    cell.appendChild(label);
+
+    const windowStart = Math.max(0, i - VIZ_K + 1);
+    const windowEnd = i;
+
+    if (idx === i) cell.classList.add('is-current');
+    else if (idx >= windowStart && idx < i) cell.classList.add('in-window');
+
+    if (dq.includes(idx) && idx !== i) cell.classList.add('in-deque');
+    if (dq.length > 0 && dq[0] === idx && i >= VIZ_K - 1) cell.classList.add('is-max');
+
+    cell.appendChild(document.createTextNode(v));
+    arrEl.appendChild(cell);
+  });
+
+  // Deque display
+  const dequeEl = document.getElementById('viz-deque');
+  if (dq.length === 0) {
+    dequeEl.innerHTML = '<span style="color:var(--muted);font-size:0.8rem;font-family:var(--font-mono)">empty</span>';
+  } else {
+    dequeEl.innerHTML = dq.map(idx =>
+      `<div class="deque-cell">idx=${idx} (val=${VIZ_NUMS[idx]})</div>`
+    ).join('');
+  }
+
+  // Result display
+  const resultEl = document.getElementById('viz-result');
+  if (result.length === 0) {
+    resultEl.innerHTML = '<span style="color:var(--muted);font-size:0.8rem;font-family:var(--font-mono)">—</span>';
+  } else {
+    resultEl.innerHTML = result.map(v =>
+      `<div class="result-cell">${v}</div>`
+    ).join('');
+  }
+}
+
+function vizStep() {
+  if (vizState.done) return;
+
+  vizState.i++;
+  const { i, dq, result } = vizState;
+  const nums = VIZ_NUMS;
+  const k = VIZ_K;
+  const logLines = [];
+
+  if (i >= nums.length) {
+    vizState.done = true;
+    document.getElementById('viz-step-info').textContent = '✓ Complete! All windows processed.';
+    document.getElementById('viz-log').innerHTML = '<div class="log-line">✓ Done. Result: <span>' + result.join(', ') + '</span></div>';
+    return;
+  }
+
+  logLines.push(`▶ Processing index ${i}, value = ${nums[i]}`);
+
+  // Step 1: expire front
+  if (dq.length > 0 && dq[0] < i - k + 1) {
+    const expired = dq.shift();
+    logLines.push(`  ✂ Front idx=${expired} (val=${nums[expired]}) expired — outside window.`);
+  }
+
+  // Step 2: pop dominated from back
+  let popped = [];
+  while (dq.length > 0 && nums[dq[dq.length - 1]] <= nums[i]) {
+    const p = dq.pop();
+    popped.push(`idx=${p}(val=${nums[p]})`);
+  }
+  if (popped.length > 0) {
+    logLines.push(`  🗑 Popped from back (dominated): ${popped.join(', ')}`);
+  } else {
+    logLines.push(`  ✔ No dominated elements to pop.`);
+  }
+
+  dq.push(i);
+  logLines.push(`  ➕ Pushed idx=${i} (val=${nums[i]}) onto deque.`);
+
+  // Step 3: record result
+  if (i >= k - 1) {
+    const max = nums[dq[0]];
+    result.push(max);
+    logLines.push(`  🏆 Window max = nums[${dq[0]}] = <strong>${max}</strong> — added to output.`);
+  } else {
+    logLines.push(`  ⏳ Window not full yet (need ${k - 1 - i} more elements).`);
+  }
+
+  vizState.logs.push(...logLines);
+  renderViz();
+
+  document.getElementById('viz-step-info').textContent =
+    `i=${i}, val=${nums[i]}, deque=[${dq.map(x => x).join(', ')}], output=[${result.join(', ')}]`;
+
+  document.getElementById('viz-log').innerHTML =
+    logLines.map(l => `<div class="log-line">${l}</div>`).join('');
+}
+
+function vizRunAll() {
+  while (!vizState.done && vizState.i < VIZ_NUMS.length) {
+    vizStep();
+  }
+}
+
+// Init
+renderViz();
+syncThemeIcon();
+</script>
+</body>
+</html>

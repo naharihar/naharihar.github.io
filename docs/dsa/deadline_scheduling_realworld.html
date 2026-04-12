@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Deadline Scheduling in the Wild</title>
+<script>
+  (() => {
+    try {
+      if (localStorage.getItem('dsa-theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -27,9 +36,31 @@
     --green: #2a6b2a;
     --green-light: #eaf4ea;
     --rule: #ccc8be;
+    --nav-bg: var(--paper);
     --mono: 'DM Mono', monospace;
     --serif: 'DM Serif Display', serif;
     --sans: 'Instrument Sans', sans-serif;
+  }
+  html.dark {
+    --ink: #e8e8f0;
+    --ink2: #cbc7d5;
+    --ink3: #8c8899;
+    --paper: #0f0f13;
+    --paper2: #16161d;
+    --paper3: #1e1e28;
+    --accent: #f7974a;
+    --teal: #58d3af;
+    --teal-light: rgba(88,211,175,0.12);
+    --amber: #f0c05a;
+    --amber-light: rgba(240,192,90,0.12);
+    --blue: #8fb3ff;
+    --blue-light: rgba(143,179,255,0.14);
+    --red: #f38b87;
+    --red-light: rgba(243,139,135,0.12);
+    --green: #74e3a8;
+    --green-light: rgba(116,227,168,0.12);
+    --rule: #2e2e3e;
+    --nav-bg: rgba(15,15,19,0.92);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -44,7 +75,7 @@
 
   nav {
     position: sticky; top: 0; z-index: 100;
-    background: var(--paper); border-bottom: 1px solid var(--rule);
+    background: var(--nav-bg); border-bottom: 1px solid var(--rule);
     padding: 0 2rem;
     display: flex; align-items: center; gap: 2rem;
     height: 52px;
@@ -53,6 +84,16 @@
   nav .brand { font-family: var(--mono); color: var(--accent); font-size: 13px; margin-right: auto; text-decoration: none; }
   nav a { color: var(--ink3); text-decoration: none; transition: color 0.15s; }
   nav a:hover { color: var(--ink); }
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: var(--paper2);
+    color: var(--ink3);
+    cursor: pointer;
+    font-size: 1rem;
+  }
 
   .hero {
     max-width: 740px; margin: 0 auto;
@@ -264,6 +305,7 @@
   <a href="#university">University</a>
   <a href="#rideshare">Dispatch</a>
   <a href="#closing">Patterns</a>
+  <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light and dark mode">🌙</button>
 </nav>
 
 <div class="hero">
@@ -591,6 +633,16 @@
 </footer>
 
 <script>
+function syncThemeIcon() {
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const nextDark = !document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', nextDark);
+  try { localStorage.setItem('dsa-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
+  syncThemeIcon();
+}
 function toggle(btn) {
   const body = btn.nextElementSibling;
   body.classList.toggle('open');
@@ -812,7 +864,7 @@ function courseDraw() {
   });
 }
 
-window.addEventListener('load', () => { hotelDraw(); edfDraw(); courseDraw(); });
+window.addEventListener('load', () => { syncThemeIcon(); hotelDraw(); edfDraw(); courseDraw(); });
 window.addEventListener('resize', () => { hotelDraw(); edfDraw(); courseDraw(); });
 </script>
 </body>
