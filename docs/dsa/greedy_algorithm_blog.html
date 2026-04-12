@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Greedy Algorithms — AlgorithmCraft</title>
+  <script>
+    (() => {
+      try {
+        if (localStorage.getItem('dsa-theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 17px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.25s, color 0.25s;
+    }
+    a { color: var(--accent3); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── COLOR SYSTEM ─── */
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --surface2: #f1efe9;
+      --surface3: #e8e5dc;
+      --border: #ddd9cf;
+      --text: #1a1814;
+      --muted: #6b6758;
+      --accent: #d4631a;
+      --accent2: #5c48d4;
+      --accent3: #1a7fa8;
+      --green: #1a7a4a;
+      --yellow: #9a7a00;
+      --red: #c4203a;
+      --font-serif: 'DM Serif Display', Georgia, serif;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --radius: 10px;
+      --shadow: 0 4px 32px rgba(0,0,0,0.1);
+      --nav-bg: rgba(248,247,244,0.92);
+      --code-bg: #1e1e2a;
+      --code-text: #e8e8f0;
+    }
+    html.dark {
+      --bg: #0f0f13;
+      --surface: #16161d;
+      --surface2: #1e1e28;
+      --surface3: #25252f;
+      --border: #2e2e3e;
+      --text: #e8e8f0;
+      --muted: #8888a8;
+      --accent: #f7974a;
+      --accent2: #7c6af0;
+      --accent3: #4ac9f7;
+      --green: #4af7a0;
+      --yellow: #f7e24a;
+      --red: #f74a6a;
+      --shadow: 0 4px 32px rgba(0,0,0,0.5);
+      --nav-bg: rgba(15,15,19,0.92);
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 0 2rem; height: 56px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-family: var(--font-serif); font-size: 1.1rem;
+      color: var(--accent); letter-spacing: 0.02em;
+      white-space: nowrap; text-decoration: none;
+    }
+    nav a:not(.nav-brand) {
+      font-size: 0.85rem; font-weight: 500;
+      color: var(--muted); white-space: nowrap;
+      transition: color 0.2s; text-decoration: none;
+    }
+    nav a:not(.nav-brand):hover { color: var(--text); }
+
+    /* ─── LANG TOGGLE ─── */
+    .lang-toggle {
+      display: flex; gap: 4px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px;
+    }
+    .lang-btn {
+      padding: 3px 12px; border: none; background: none;
+      border-radius: 4px; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--muted); transition: all 0.2s;
+    }
+    .lang-btn.active { background: var(--accent); color: #000; font-weight: 600; }
+
+    /* ─── THEME TOGGLE ─── */
+    .theme-toggle {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: all 0.2s; color: var(--muted); flex-shrink: 0;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── HERO ─── */
+    .hero { padding: 5rem 2rem 3.5rem; max-width: 860px; margin: 0 auto; }
+    .hero-eyebrow {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--accent); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1.12; color: var(--text); margin-bottom: 1.2rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero-sub { font-size: 1.08rem; color: var(--muted); max-width: 620px; margin-bottom: 2rem; }
+    .hero-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pill {
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 0.78rem; font-family: var(--font-mono);
+      border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
+    }
+    .pill.orange { border-color: var(--accent); color: var(--accent); }
+    .pill.purple { border-color: var(--accent2); color: var(--accent2); }
+    .pill.blue   { border-color: var(--accent3); color: var(--accent3); }
+
+    /* ─── LAYOUT ─── */
+    .content { max-width: 860px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+    /* ─── SECTION HEADERS ─── */
+    .section-header {
+      display: flex; align-items: baseline; gap: 1rem;
+      margin: 4rem 0 1.5rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--accent); letter-spacing: 0.1em; flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-family: var(--font-serif); font-size: 1.9rem;
+      font-weight: 400; color: var(--text);
+    }
+
+    /* ─── PROSE ─── */
+    p { margin-bottom: 1rem; color: var(--muted); }
+    p strong { color: var(--text); font-weight: 600; }
+    h3 { font-family: var(--font-serif); font-size: 1.25rem; color: var(--text); margin: 1.25rem 0 0.5rem; }
+    h4 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+    ul, ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+    li { color: var(--muted); font-size: 0.95rem; margin-bottom: 0.3rem; }
+    li strong { color: var(--text); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    /* ─── CALLOUTS ─── */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: rgba(247,151,74,0.06);
+      padding: 1rem 1.2rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1.5rem 0;
+    }
+    .callout.blue   { border-color: var(--accent3); background: rgba(74,201,247,0.06); }
+    .callout.green  { border-color: var(--green);   background: rgba(74,247,160,0.06); }
+    .callout.yellow { border-color: var(--yellow);  background: rgba(247,226,74,0.06); }
+    .callout-label {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.4rem;
+    }
+    .callout.blue .callout-label   { color: var(--accent3); }
+    .callout.green .callout-label  { color: var(--green); }
+    .callout.yellow .callout-label { color: var(--yellow); }
+    .callout p { color: var(--text); margin: 0; font-size: 0.95rem; }
+
+    /* ─── PATTERN CARDS ─── */
+    .pattern-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+      gap: 1rem; margin: 1.5rem 0;
+    }
+    .pattern-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem; transition: border-color 0.2s;
+    }
+    .pattern-card:hover { border-color: var(--accent2); }
+    .pattern-card-label {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--accent); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .pattern-card h3 { font-family: var(--font-serif); font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+    .pattern-card p  { font-size: 0.88rem; margin: 0 0 0.75rem; color: var(--muted); }
+    .lc-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .lc-chip {
+      font-size: 0.72rem; font-family: var(--font-mono);
+      padding: 2px 8px; border-radius: 4px;
+      border: 1px solid var(--border); color: var(--muted);
+    }
+    .lc-chip.hard   { border-color: var(--red);    color: var(--red); }
+    .lc-chip.medium { border-color: var(--yellow);  color: var(--yellow); }
+    .lc-chip.easy   { border-color: var(--green);   color: var(--green); }
+
+    /* ─── CODE BLOCKS ─── */
+    .code-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin: 1.5rem 0;
+    }
+    .code-header {
+      display: flex; align-items: center; padding: 0.5rem 1rem;
+      background: var(--code-bg); border-bottom: 1px solid rgba(255,255,255,0.08); gap: 0.5rem;
+    }
+    .code-title { font-family: var(--font-mono); font-size: 0.75rem; color: #8888a8; flex: 1; }
+    .lang-pane { display: none; }
+    .lang-pane.active { display: block; }
+    pre {
+      margin: 0; padding: 1.2rem; overflow-x: auto;
+      font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65;
+      color: var(--code-text); background: var(--code-bg);
+    }
+    .kw  { color: #7c6af0; }
+    .cm  { color: #555577; font-style: italic; }
+    .st  { color: #4af7a0; }
+    .nm  { color: #4ac9f7; }
+    .fn  { color: #f7974a; }
+
+    /* ─── TABS ─── */
+    .tabs { margin: 1.5rem 0; }
+    .tab-bar { display: flex; border-bottom: 1px solid var(--border); gap: 0; }
+    .tab-btn {
+      padding: 0.5rem 1.2rem; background: none; border: none; cursor: pointer;
+      font-family: var(--font-sans); font-size: 0.85rem; color: var(--muted);
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s;
+    }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-pane { display: none; padding: 1.2rem 0; }
+    .tab-pane.active { display: block; }
+
+    /* ─── VISUALIZER ─── */
+    .visualizer {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .viz-title {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;
+    }
+    .viz-array { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: flex-end; }
+    .arr-cell {
+      width: 64px; height: 52px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
+      border: 2px solid var(--border); background: var(--surface2); color: var(--muted);
+      position: relative; transition: all 0.25s; flex-direction: column; text-align: center;
+    }
+    .arr-cell.in-window   { border-color: var(--accent2); background: rgba(124,106,240,0.12); color: var(--text); }
+    .arr-cell.in-deque    { border-color: var(--accent);  background: rgba(247,151,74,0.15);  color: var(--accent); font-weight: 700; }
+    .arr-cell.is-max      { border-color: var(--green);   background: rgba(74,247,160,0.15);  color: var(--green); }
+    .arr-cell.is-current  { border-color: var(--accent3); background: rgba(74,201,247,0.15);  color: var(--accent3); }
+    .arr-cell.is-skip     { border-color: var(--red);     background: rgba(247,74,106,0.10);  color: var(--red); opacity: 0.75; }
+    .arr-cell .idx-label {
+      position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+      font-size: 0.65rem; color: var(--muted); font-family: var(--font-mono);
+    }
+    .deque-area {
+      margin: 1rem 0; padding: 0.75rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    }
+    .deque-label {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .deque-cells { display: flex; gap: 6px; flex-wrap: wrap; min-height: 36px; align-items: center; }
+    .deque-cell {
+      padding: 4px 10px;
+      background: rgba(247,151,74,0.12); border: 1px solid var(--accent);
+      border-radius: 4px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent);
+    }
+    .result-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 0.5rem 0; align-items: center; }
+    .result-cell {
+      padding: 4px 10px;
+      background: rgba(74,247,160,0.1); border: 1px solid var(--green);
+      border-radius: 4px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--green);
+    }
+    .viz-log {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.75rem 1rem;
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--muted); min-height: 48px; margin: 0.75rem 0; line-height: 1.6;
+    }
+    .viz-log .log-line { margin-bottom: 2px; }
+    .viz-log .log-line span { color: var(--accent3); }
+    .viz-controls { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .viz-btn {
+      padding: 0.45rem 1.1rem; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-family: var(--font-sans); font-size: 0.85rem;
+      font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .viz-btn:hover  { border-color: var(--accent); color: var(--accent); }
+    .viz-btn.primary { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+    .viz-btn.primary:hover { filter: brightness(1.1); }
+
+    /* ─── CHEAT SHEET TABLE ─── */
+    .table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: var(--surface2); padding: 0.65rem 1rem;
+      font-family: var(--font-mono); font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); text-align: left; white-space: nowrap;
+    }
+    td {
+      padding: 0.65rem 1rem; font-size: 0.85rem;
+      border-top: 1px solid var(--border); color: var(--muted); vertical-align: top;
+    }
+    td:first-child { color: var(--text); font-weight: 500; }
+    tr:hover td { background: var(--surface2); }
+    td code, th code {
+      font-family: var(--font-mono); font-size: 0.8rem;
+      background: var(--surface3); padding: 1px 5px; border-radius: 3px;
+    }
+
+    /* ─── DEEP DIVE ─── */
+    .deep-dive {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .deep-dive-label {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--accent2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .deep-dive h3 { font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 0.75rem; color: var(--text); }
+    .difficulty-badge {
+      display: inline-block; font-size: 0.7rem; font-family: var(--font-mono);
+      padding: 2px 8px; border-radius: 999px; margin-left: 0.5rem;
+    }
+    .difficulty-badge.hard   { background: rgba(247,74,106,0.15); color: var(--red);    border: 1px solid var(--red); }
+    .difficulty-badge.medium { background: rgba(247,226,74,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+
+    /* ─── LEARNING PATH ─── */
+    .path-steps { margin: 1.5rem 0; }
+    .path-step { display: flex; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .path-step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #000;
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-content h4 { font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
+    .step-content p  { font-size: 0.85rem; margin: 0; }
+
+    /* ─── REAL WORLD PROBLEM ─── */
+    .rw-problem {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0;
+      border-left: 4px solid var(--accent2);
+    }
+    .rw-label {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--accent2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .rw-problem h3 { font-family: var(--font-serif); font-size: 1.2rem; color: var(--text); margin-bottom: 0.75rem; }
+    .example-block {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.75rem 1rem; margin: 0.75rem 0;
+      font-family: var(--font-mono); font-size: 0.8rem;
+    }
+    .example-block .ex-label {
+      color: var(--muted); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.4rem;
+    }
+    .example-block code { color: var(--text); display: block; line-height: 1.7; }
+    .constraints-list {
+      list-style: none; padding: 0;
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0;
+    }
+    .constraints-list li {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      padding: 2px 10px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 4px; color: var(--muted);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center; padding: 2rem; font-size: 0.8rem;
+      color: var(--muted); border-top: 1px solid var(--border);
+    }
+
+    /* ─── VIZ STAT ROW ─── */
+    .viz-stats {
+      display: flex; gap: 1.5rem; margin: 0.75rem 0;
+      font-family: var(--font-mono); font-size: 0.8rem;
+    }
+    .viz-stat { display: flex; gap: 0.5rem; align-items: center; }
+    .viz-stat-label { color: var(--muted); }
+    .viz-stat-val { color: var(--text); font-weight: 600; }
+    .viz-stat-val.green { color: var(--green); }
+    .viz-stat-val.red   { color: var(--red); }
+    .viz-stat-val.cyan  { color: var(--accent3); }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+      <a class="nav-brand" href="index.html">Harihar Nath · DSA</a>
+  <a href="#core-idea">The Idea</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#visualizer">Visualizer</a>
+  <a href="#deepdive">Deep Dives</a>
+  <a href="#realworld">Real World</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <a href="#mental-model">Mental Model</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+</nav>
+
+<!-- ─── HERO ─── -->
+<header class="hero">
+  <div class="hero-eyebrow">AlgorithmCraft · Algorithm Design</div>
+  <h1>The <em>Greedy</em> Commit — Local Optimality at Every Step</h1>
+  <p class="hero-sub">Greedy algorithms make the best available choice at each step without reconsidering earlier decisions. When the problem has the right structure, this local commitment reaches a global optimum — with no dynamic programming or backtracking required.</p>
+  <div class="hero-pills">
+    <span class="pill orange">O(n log n) typical</span>
+    <span class="pill purple">Greedy Choice Property</span>
+    <span class="pill blue">Interval / Heap / Two-Pointer</span>
+    <span class="pill">Interval Scheduling</span>
+    <span class="pill">Two-Pointer Greedy</span>
+    <span class="pill">Priority Queue Greedy</span>
+  </div>
+</header>
+
+<!-- ─── CONTENT ─── -->
+<main class="content">
+
+  <!-- ═══════════════════════════════════════
+       01 — CORE INSIGHT
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="core-idea">
+    <span class="section-num">01</span>
+    <h2>The Core Insight</h2>
+  </div>
+
+  <p>Greedy algorithms solve optimization problems by making a locally optimal choice at each decision point and never revisiting it. The trick is that for certain problem structures, you can <strong>prove</strong> the local choice never forecloses a globally better solution.</p>
+
+  <div class="callout">
+    <div class="callout-label">Core Insight</div>
+    <p>Greedy works when two properties hold: the <strong>Greedy Choice Property</strong> — the optimal solution includes the locally optimal choice — and the <strong>Optimal Substructure</strong> — an optimal solution to the whole contains optimal solutions to its sub-problems. When both hold, the greedy commit is always safe.</p>
+  </div>
+
+  <p>The common pattern is: sort by a key that encodes priority, then sweep through the sorted sequence committing to each item if it satisfies the constraint. The hard intellectual work is identifying what to sort by and proving that the sort order preserves the greedy choice property.</p>
+
+  <p>Consider interval scheduling. Why sort by <em>end time</em> and not start time? Because choosing the interval that finishes earliest leaves the maximum remaining time for future intervals. Any other choice leaves strictly less room. This is the elimination argument — by choosing the earliest-ending interval, we dominate all alternative first choices.</p>
+
+  <div class="callout green">
+    <div class="callout-label">Why Greedy is Safe — The Exchange Argument</div>
+    <p>The standard proof technique is the <strong>exchange argument</strong>: assume some optimal solution OPT makes a different first choice than our greedy choice G. Show you can swap OPT's first choice for G without making the solution worse. By induction, you can transform OPT into the greedy solution — proving greedy is at least as good as any alternative.</p>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">Recognition Shortcuts</div>
+    <p>Reach for greedy when the problem asks for: minimum number of X to cover all Y, maximum number of non-overlapping events, or minimize total cost/time of a sequence of decisions. If you can state the problem as "always pick the most X item first," greedy almost certainly applies. If you find yourself needing to un-pick a past choice, switch to DP.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       02 — THE 3 PATTERNS
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="patterns">
+    <span class="section-num">02</span>
+    <h2>The 3 Patterns</h2>
+  </div>
+
+  <p>Greedy problems cluster into three structural families. Each has a characteristic data structure — sorted array + sweep, two pointers, or a heap — and a characteristic proof that the greedy choice is safe.</p>
+
+  <div class="pattern-grid">
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 1</div>
+      <h3>Interval Scheduling Greedy</h3>
+      <p>Sort intervals by end time. Sweep left to right, greedily selecting each interval whose start time doesn't overlap the last selected end. Provably maximizes the count of non-overlapping selections.</p>
+      <div class="lc-chips">
+        <span class="lc-chip medium">435 · Non-overlapping Intervals</span>
+        <span class="lc-chip medium">452 · Min Arrows to Burst Balloons</span>
+        <span class="lc-chip hard">253 · Meeting Rooms II</span>
+        <span class="lc-chip medium">56 · Merge Intervals</span>
+        <span class="lc-chip medium">1024 · Video Stitching</span>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 2</div>
+      <h3>Converging Two-Pointer Greedy</h3>
+      <p>Sort the array, place one pointer at each end. At each step, greedily decide whether the largest remaining item can pair with the smallest. Eliminates the need to try all pairings.</p>
+      <div class="lc-chips">
+        <span class="lc-chip medium">881 · Boats to Save People</span>
+        <span class="lc-chip easy">455 · Assign Cookies</span>
+        <span class="lc-chip medium">11 · Container With Most Water</span>
+        <span class="lc-chip easy">392 · Is Subsequence</span>
+        <span class="lc-chip medium">2410 · Max Matching of Players</span>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-card-label">Pattern 3</div>
+      <h3>Priority Queue Greedy</h3>
+      <p>Use a max-heap or min-heap to always process the most urgent or most profitable item next. Reduces "which item to pick" from O(n) scan to O(log n) heap extraction.</p>
+      <div class="lc-chips">
+        <span class="lc-chip medium">621 · Task Scheduler</span>
+        <span class="lc-chip medium">1642 · Furthest Building</span>
+        <span class="lc-chip medium">767 · Reorganize String</span>
+        <span class="lc-chip hard">1675 · Minimize Deviation</span>
+        <span class="lc-chip medium">1405 · Longest Happy String</span>
+      </div>
+    </div>
+
+  </div>
+
+  <h3>Greedy Skeleton</h3>
+  <p>Every greedy implementation follows the same shape: sort by a priority key, then sweep and commit.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">greedy_skeleton</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="cm">// Greedy skeleton — adapt the sort key and condition per problem</span>
+<span class="kw">public int</span> <span class="fn">greedy</span>(<span class="kw">int</span>[][] intervals) {
+    <span class="cm">// Step 1: Sort by the greedy priority key</span>
+    <span class="fn">Arrays</span>.<span class="fn">sort</span>(intervals, (a, b) -> a[<span class="nm">1</span>] - b[<span class="nm">1</span>]); <span class="cm">// sort by end time</span>
+
+    <span class="kw">int</span> count = <span class="nm">0</span>;
+    <span class="kw">int</span> lastEnd = <span class="nm">Integer</span>.MIN_VALUE;
+
+    <span class="cm">// Step 2: Sweep — commit greedily, never look back</span>
+    <span class="kw">for</span> (<span class="kw">int</span>[] interval : intervals) {
+        <span class="kw">if</span> (interval[<span class="nm">0</span>] >= lastEnd) {   <span class="cm">// satisfies constraint</span>
+            count++;
+            lastEnd = interval[<span class="nm">1</span>];          <span class="cm">// commit: update state</span>
+        }
+        <span class="cm">// else: skip — this choice was dominated, provably safe to ignore</span>
+    }
+    <span class="kw">return</span> count;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="cm"># Greedy skeleton — adapt the sort key and condition per problem</span>
+<span class="kw">def</span> <span class="fn">greedy</span>(intervals: <span class="fn">list</span>[<span class="fn">list</span>[<span class="kw">int</span>]]) -> <span class="kw">int</span>:
+    <span class="cm"># Step 1: Sort by the greedy priority key</span>
+    intervals.<span class="fn">sort</span>(key=<span class="kw">lambda</span> x: x[<span class="nm">1</span>])  <span class="cm"># sort by end time</span>
+
+    count = <span class="nm">0</span>
+    last_end = <span class="fn">float</span>(<span class="st">'-inf'</span>)
+
+    <span class="cm"># Step 2: Sweep — commit greedily, never look back</span>
+    <span class="kw">for</span> start, end <span class="kw">in</span> intervals:
+        <span class="kw">if</span> start >= last_end:  <span class="cm"># satisfies constraint</span>
+            count += <span class="nm">1</span>
+            last_end = end      <span class="cm"># commit: update state</span>
+        <span class="cm"># else: skip — dominated choice, safe to ignore</span>
+
+    <span class="kw">return</span> count</pre>
+    </div>
+  </div>
+
+  <div class="callout yellow">
+    <div class="callout-label">Most Common Gotcha</div>
+    <p><strong>Sorting by the wrong key invalidates the greedy choice property.</strong> For interval scheduling the sort must be by <em>end time</em>, not start time or duration. Sorting by start time might seem natural but it fails: a short interval starting slightly later can dominate a long one that starts first. Always derive the sort key from the exchange argument, not intuition.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       03 — VISUALIZER
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="visualizer">
+    <span class="section-num">03</span>
+    <h2>Interactive Visualizer</h2>
+  </div>
+
+  <p>This visualizer demonstrates <strong>Pattern 1: Interval Scheduling</strong>. Six intervals are pre-sorted by end time. Step through the algorithm to see how the greedy commit works — and why each skipped interval was safely dominated.</p>
+
+  <div class="visualizer">
+    <div class="viz-title">▶ Activity Selection — Sorted by End Time</div>
+
+    <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">
+      Input: <span style="color:var(--text)">[[1,3],[3,4],[2,5],[4,6],[5,7],[6,8]]</span> — sorted by end time
+    </div>
+
+    <div class="viz-array" id="vizArray"></div>
+
+    <div class="viz-stats">
+      <div class="viz-stat">
+        <span class="viz-stat-label">lastEnd:</span>
+        <span class="viz-stat-val cyan" id="vizLastEnd">—</span>
+      </div>
+      <div class="viz-stat">
+        <span class="viz-stat-label">selected:</span>
+        <span class="viz-stat-val green" id="vizSelectedCount">0</span>
+      </div>
+      <div class="viz-stat">
+        <span class="viz-stat-label">skipped:</span>
+        <span class="viz-stat-val red" id="vizSkippedCount">0</span>
+      </div>
+    </div>
+
+    <div class="deque-area">
+      <div class="deque-label">Selected Intervals</div>
+      <div class="deque-cells" id="vizSelected">
+        <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted)">none yet</span>
+      </div>
+    </div>
+
+    <div class="viz-log" id="vizLog">
+      <div class="log-line">Press <span>Step →</span> to begin.</div>
+    </div>
+
+    <div class="viz-controls">
+      <button class="viz-btn primary" onclick="vizStep()">Step →</button>
+      <button class="viz-btn" onclick="vizRunAll()">Run All ⚡</button>
+      <button class="viz-btn" onclick="vizReset()">Reset ↺</button>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">Why Each Skip is Safe</div>
+    <p>When an interval is skipped because its start time falls inside the current window, <strong>every future interval that could co-exist with it can also co-exist with our greedy choice</strong> (since our choice ends no later than the skipped interval ends). We lose nothing by committing to the earlier-finishing option.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       04 — DEEP DIVES
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="deepdive">
+    <span class="section-num">04</span>
+    <h2>Deep Dives</h2>
+  </div>
+
+  <p>These two problems reveal non-obvious structure. Neither is the "textbook" greedy example — both require you to discover the right ordering or decomposition before the greedy move becomes obvious.</p>
+
+  <!-- Deep Dive 1: Candy -->
+  <div class="deep-dive">
+    <div class="deep-dive-label">Deep Dive 1</div>
+    <h3>135 · Candy <span class="difficulty-badge hard">Hard</span></h3>
+
+    <p>There are <code>n</code> children standing in a line. Each child is assigned a rating value. You must distribute candies to these children such that: each child must have at least one candy, and children with a higher rating than their neighbor must get more candies than that neighbor. Return the minimum number of candies required.</p>
+
+    <p>The naive approach — try to satisfy both neighbors simultaneously — leads to circular dependencies. The key is that left-neighbor and right-neighbor constraints are independent and can be solved in separate passes.</p>
+
+    <div class="callout">
+      <div class="callout-label">Key Insight</div>
+      <p><strong>Two-pass greedy:</strong> Left pass satisfies "must beat left neighbor" in isolation. Right pass (right-to-left) satisfies "must beat right neighbor" in isolation. Take the maximum of both arrays at each index — this simultaneously satisfies both constraints with the minimum candy count.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-title">lc135_candy</span>
+      </div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">candy</span>(<span class="kw">int</span>[] ratings) {
+    <span class="kw">int</span> n = ratings.length;
+    <span class="kw">int</span>[] left  = <span class="kw">new int</span>[n];
+    <span class="kw">int</span>[] right = <span class="kw">new int</span>[n];
+    <span class="fn">Arrays</span>.<span class="fn">fill</span>(left, <span class="nm">1</span>);
+    <span class="fn">Arrays</span>.<span class="fn">fill</span>(right, <span class="nm">1</span>);
+
+    <span class="cm">// Left pass: satisfy left-neighbor constraint</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i < n; i++) {
+        <span class="kw">if</span> (ratings[i] > ratings[i - <span class="nm">1</span>])
+            left[i] = left[i - <span class="nm">1</span>] + <span class="nm">1</span>; <span class="cm">// must beat left neighbor</span>
+    }
+
+    <span class="cm">// Right pass: satisfy right-neighbor constraint</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = n - <span class="nm">2</span>; i >= <span class="nm">0</span>; i--) {
+        <span class="kw">if</span> (ratings[i] > ratings[i + <span class="nm">1</span>])
+            right[i] = right[i + <span class="nm">1</span>] + <span class="nm">1</span>; <span class="cm">// must beat right neighbor</span>
+    }
+
+    <span class="cm">// Merge: take the max — satisfies both constraints minimally</span>
+    <span class="kw">int</span> total = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < n; i++)
+        total += <span class="fn">Math</span>.<span class="fn">max</span>(left[i], right[i]);
+
+    <span class="kw">return</span> total;
+}
+<span class="cm">// Time: O(n) — three linear passes
+// Space: O(n) — two auxiliary arrays</span></pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">candy</span>(self, ratings: <span class="fn">list</span>[<span class="kw">int</span>]) -> <span class="kw">int</span>:
+    n = <span class="fn">len</span>(ratings)
+    left  = [<span class="nm">1</span>] * n
+    right = [<span class="nm">1</span>] * n
+
+    <span class="cm"># Left pass: satisfy left-neighbor constraint</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, n):
+        <span class="kw">if</span> ratings[i] > ratings[i - <span class="nm">1</span>]:
+            left[i] = left[i - <span class="nm">1</span>] + <span class="nm">1</span>  <span class="cm"># must beat left neighbor</span>
+
+    <span class="cm"># Right pass: satisfy right-neighbor constraint</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n - <span class="nm">2</span>, -<span class="nm">1</span>, -<span class="nm">1</span>):
+        <span class="kw">if</span> ratings[i] > ratings[i + <span class="nm">1</span>]:
+            right[i] = right[i + <span class="nm">1</span>] + <span class="nm">1</span>  <span class="cm"># must beat right neighbor</span>
+
+    <span class="cm"># Merge: take the max — satisfies both constraints minimally</span>
+    <span class="kw">return</span> <span class="fn">sum</span>(<span class="fn">max</span>(l, r) <span class="kw">for</span> l, r <span class="kw">in</span> <span class="fn">zip</span>(left, right))
+
+<span class="cm"># Time: O(n) — three linear passes
+# Space: O(n) — two auxiliary arrays</span></pre>
+      </div>
+    </div>
+
+    <p>The elegance here is the decomposition: two constraints that seem entangled are actually independent when viewed directionally. The left array is a one-way greedy sweep; the right array is a one-way greedy sweep in the opposite direction. The max-merge is then a trivial O(n) operation that satisfies both simultaneously.</p>
+  </div>
+
+  <!-- Deep Dive 2: Queue Reconstruction -->
+  <div class="deep-dive">
+    <div class="deep-dive-label">Deep Dive 2</div>
+    <h3>406 · Queue Reconstruction by Height <span class="difficulty-badge medium">Medium</span></h3>
+
+    <p>You are given an array <code>people</code> where <code>people[i] = [hi, ki]</code> means the <code>i-th</code> person has height <code>hi</code> and exactly <code>ki</code> people in front of them who are taller or of equal height. Reconstruct the queue in valid order.</p>
+
+    <p>This problem looks like it needs backtracking, but has an elegant greedy structure. The trick is noticing that taller people are "invisible" to shorter ones — a shorter person only cares about the positions of people at least as tall.</p>
+
+    <div class="callout">
+      <div class="callout-label">Key Insight</div>
+      <p><strong>Sort descending by height, break ties by k ascending.</strong> Then insert each person at index <code>k</code> in the result list. Because we process tallest first, inserting at position <code>k</code> is always correct — shorter people inserted later don't affect the k-count of taller people already placed, since shorter people are invisible to taller ones' k constraint.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-title">lc406_queue_reconstruction</span>
+      </div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span>[][] <span class="fn">reconstructQueue</span>(<span class="kw">int</span>[][] people) {
+    <span class="cm">// Sort: tallest first; ties broken by k ascending</span>
+    <span class="fn">Arrays</span>.<span class="fn">sort</span>(people, (a, b) ->
+        a[<span class="nm">0</span>] != b[<span class="nm">0</span>] ? b[<span class="nm">0</span>] - a[<span class="nm">0</span>] : a[<span class="nm">1</span>] - b[<span class="nm">1</span>]
+    );
+
+    <span class="fn">List</span><<span class="kw">int</span>[]> result = <span class="kw">new</span> <span class="fn">LinkedList</span><>();
+
+    <span class="cm">// Greedy insert: position k is always correct for the current person</span>
+    <span class="kw">for</span> (<span class="kw">int</span>[] p : people) {
+        result.<span class="fn">add</span>(p[<span class="nm">1</span>], p); <span class="cm">// insert at index = k</span>
+        <span class="cm">// Shorter people inserted later won't affect this k-count</span>
+    }
+
+    <span class="kw">return</span> result.<span class="fn">toArray</span>(<span class="kw">new int</span>[people.length][]);
+}
+<span class="cm">// Time: O(n^2) — each LinkedList insertion is O(n)
+// Space: O(n) — result list (sorting is in-place)</span></pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">reconstructQueue</span>(self, people: <span class="fn">list</span>[<span class="fn">list</span>[<span class="kw">int</span>]]) -> <span class="fn">list</span>[<span class="fn">list</span>[<span class="kw">int</span>]]:
+    <span class="cm"># Sort: tallest first; ties broken by k ascending</span>
+    people.<span class="fn">sort</span>(key=<span class="kw">lambda</span> x: (-x[<span class="nm">0</span>], x[<span class="nm">1</span>]))
+
+    result = []
+
+    <span class="cm"># Greedy insert: position k is always correct for the current person</span>
+    <span class="kw">for</span> h, k <span class="kw">in</span> people:
+        result.<span class="fn">insert</span>(k, [h, k])  <span class="cm"># insert at index = k</span>
+        <span class="cm"># Shorter people inserted later won't affect this k-count</span>
+
+    <span class="kw">return</span> result
+
+<span class="cm"># Time: O(n^2) — each list insert is O(n)
+# Space: O(n) — result list</span></pre>
+      </div>
+    </div>
+
+    <p>The proof is an exchange argument: if we tried inserting in any other order (e.g., ascending height), inserting a tall person later would shift the k-indices of already-placed shorter people — invalidating their correctness. Processing tallest first makes each insertion independent and idempotent with respect to previous placements.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       05 — REAL WORLD PROBLEMS
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="realworld">
+    <span class="section-num">05</span>
+    <h2>Real World Problems</h2>
+  </div>
+
+  <p>Every greedy pattern appears in production engineering problems. These examples use the same interval scheduling, two-pointer, and heap mechanics — but grounded in infrastructure, e-commerce, and SRE contexts you'd actually encounter.</p>
+
+  <!-- Real World 1: Interval Scheduling -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 1 · Interval Scheduling · Infrastructure / CI-CD</div>
+    <h3>CI/CD Build Agent Slot Optimizer</h3>
+
+    <p>Your company's CI pipeline has exactly one shared build agent available at a time. You receive <code>n</code> build jobs each with a scheduled <code>[startMinute, endMinute]</code> window. Each job must run without interruption within its window. Find the maximum number of build jobs you can run on this single agent without overlap.</p>
+
+    <p>Each job that runs generates revenue (it unblocks a deploy). You want to maximize throughput — the number of jobs completed — not execution time.</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>jobs = [[0,30],[5,10],[15,20],[10,25],[20,35],[30,40]]
+→ Sort by end: [[5,10],[15,20],[10,25],[0,30],[20,35],[30,40]]
+→ Greedy picks: [5,10], [15,20], [20,35], [30,40]
+→ Output: 4 jobs completed</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ n ≤ 10⁵</li>
+      <li>0 ≤ start &lt; end ≤ 10⁶</li>
+      <li>Time: O(n log n)</li>
+      <li>Space: O(1)</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>Sorting by end time and greedily selecting each non-overlapping job is optimal by the exchange argument. Any alternative first choice either ends later (reducing available future time) or starts later (impossible, since we're already choosing the earliest-ending non-conflicting job). The greedy choice dominates all alternatives — each commit is provably safe.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-title">ci_build_slot_optimizer</span>
+      </div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxJobsScheduled</span>(<span class="kw">int</span>[][] jobs) {
+    <span class="cm">// Sort by end time — greedy choice property requires this order</span>
+    <span class="fn">Arrays</span>.<span class="fn">sort</span>(jobs, (a, b) -> a[<span class="nm">1</span>] - b[<span class="nm">1</span>]);
+
+    <span class="kw">int</span> count = <span class="nm">0</span>;
+    <span class="kw">int</span> agentFreeAt = <span class="nm">0</span>; <span class="cm">// agent is available from time 0</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span>[] job : jobs) {
+        <span class="kw">int</span> start = job[<span class="nm">0</span>], end = job[<span class="nm">1</span>];
+
+        <span class="kw">if</span> (start >= agentFreeAt) {
+            <span class="cm">// Agent is free — commit to this job</span>
+            count++;
+            agentFreeAt = end; <span class="cm">// agent busy until this job ends</span>
+        }
+        <span class="cm">// else: job overlaps current run — skip, it was dominated</span>
+    }
+    <span class="kw">return</span> count;
+}
+<span class="cm">// Time: O(n log n) for sort; O(n) sweep — total O(n log n)
+// Space: O(1) — only two state variables</span></pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">max_jobs_scheduled</span>(jobs: <span class="fn">list</span>[<span class="fn">list</span>[<span class="kw">int</span>]]) -> <span class="kw">int</span>:
+    <span class="cm"># Sort by end time — greedy choice property requires this order</span>
+    jobs.<span class="fn">sort</span>(key=<span class="kw">lambda</span> j: j[<span class="nm">1</span>])
+
+    count = <span class="nm">0</span>
+    agent_free_at = <span class="nm">0</span>  <span class="cm"># agent is available from time 0</span>
+
+    <span class="kw">for</span> start, end <span class="kw">in</span> jobs:
+        <span class="kw">if</span> start >= agent_free_at:
+            <span class="cm"># Agent is free — commit to this job</span>
+            count += <span class="nm">1</span>
+            agent_free_at = end  <span class="cm"># agent busy until this job ends</span>
+        <span class="cm"># else: job overlaps current run — skip, dominated</span>
+
+    <span class="kw">return</span> count
+
+<span class="cm"># Time: O(n log n) for sort; O(n) sweep — total O(n log n)
+# Space: O(1) — only two state variables</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real World 2: Two-Pointer Greedy -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 2 · Converging Two-Pointer Greedy · E-commerce / Fulfillment</div>
+    <h3>Bundle Shipping Container Optimizer</h3>
+
+    <p>Your fulfillment center ships items paired together to reduce per-shipment fees. Each container holds at most two items and can carry a combined weight of at most <code>W</code> kg. Given <code>n</code> item weights, find the minimum number of containers needed to ship all items.</p>
+
+    <p>Shipping containers cost $15 each regardless of how full they are. You want to maximize pairing to minimize total cost.</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>weights = [1, 2, 3, 4, 5], W = 5
+→ Sorted: [1, 2, 3, 4, 5]
+→ Pairs:  [1,4] → fits (sum=5), [2,3] → fits (sum=5), [5] → alone
+→ Output: 3 containers (minimum)</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ n ≤ 5×10⁴</li>
+      <li>1 ≤ weights[i] ≤ W ≤ 3×10⁴</li>
+      <li>Time: O(n log n)</li>
+      <li>Space: O(1)</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>Sort the weights. Use two pointers: <code>lo</code> at the lightest item and <code>hi</code> at the heaviest. If the heaviest item can pair with the lightest (their sum ≤ W), pair them and move both pointers inward — this is the greedily optimal pairing for the heaviest item. If not, the heaviest must ship alone because it can't pair with anyone (every other item is at least as heavy as the lightest, making the sum strictly larger). The elimination is safe: no future pairing could be better for the heaviest item.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-title">bundle_shipping_optimizer</span>
+      </div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">minContainers</span>(<span class="kw">int</span>[] weights, <span class="kw">int</span> W) {
+    <span class="fn">Arrays</span>.<span class="fn">sort</span>(weights);
+    <span class="kw">int</span> lo = <span class="nm">0</span>, hi = weights.length - <span class="nm">1</span>;
+    <span class="kw">int</span> containers = <span class="nm">0</span>;
+
+    <span class="kw">while</span> (lo <= hi) {
+        <span class="kw">if</span> (weights[lo] + weights[hi] <= W) {
+            <span class="cm">// Heaviest item pairs with lightest — optimal pairing for hi</span>
+            lo++;
+        }
+        <span class="cm">// Heaviest ships alone if no pairing possible</span>
+        hi--;
+        containers++;
+    }
+    <span class="kw">return</span> containers;
+}
+<span class="cm">// Time: O(n log n) sort + O(n) sweep
+// Space: O(1)</span></pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">min_containers</span>(weights: <span class="fn">list</span>[<span class="kw">int</span>], W: <span class="kw">int</span>) -> <span class="kw">int</span>:
+    weights.<span class="fn">sort</span>()
+    lo, hi = <span class="nm">0</span>, <span class="fn">len</span>(weights) - <span class="nm">1</span>
+    containers = <span class="nm">0</span>
+
+    <span class="kw">while</span> lo <= hi:
+        <span class="kw">if</span> weights[lo] + weights[hi] <= W:
+            <span class="cm"># Heaviest item pairs with lightest — optimal pairing for hi</span>
+            lo += <span class="nm">1</span>
+        <span class="cm"># Heaviest ships alone if no pairing possible</span>
+        hi -= <span class="nm">1</span>
+        containers += <span class="nm">1</span>
+
+    <span class="kw">return</span> containers
+
+<span class="cm"># Time: O(n log n) sort + O(n) sweep
+# Space: O(1)</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real World 3: Priority Queue Greedy -->
+  <div class="rw-problem">
+    <div class="rw-label">Pattern 3 · Priority Queue Greedy · SRE / Observability</div>
+    <h3>Alert Deduplication Scheduler</h3>
+
+    <p>Your SRE alerting system receives alerts from <code>n</code> alert types, each with a frequency — the number of times it must fire within the scheduling window. To prevent alert fatigue, the same alert type cannot fire in two consecutive time slots; it needs at least <code>cooldown</code> idle slots between firings. Find the minimum total time slots needed to fire all alerts.</p>
+
+    <p>Each idle slot wastes 1 unit of on-call time and must be minimized.</p>
+
+    <div class="example-block">
+      <div class="ex-label">Example</div>
+      <code>alerts = ['DISK','DISK','DISK','CPU','CPU','MEM'], cooldown = 2
+→ Frequencies: {DISK:3, CPU:2, MEM:1}
+→ Schedule: DISK CPU MEM DISK CPU _ DISK
+→ Output: 7 time slots (1 idle slot required)</code>
+    </div>
+
+    <ul class="constraints-list">
+      <li>1 ≤ alerts.length ≤ 10⁴</li>
+      <li>alerts[i] is uppercase letter</li>
+      <li>0 ≤ cooldown ≤ 100</li>
+      <li>Time: O(n)</li>
+      <li>Space: O(1)</li>
+    </ul>
+
+    <h4>Why this pattern?</h4>
+    <p>We need to schedule the most frequent alert as early and as often as possible to prevent it from blocking progress. The math insight: the dominant constraint comes from the most frequent alert type. If its count is <code>f_max</code>, it needs at least <code>(f_max - 1) * (cooldown + 1)</code> slots to fire all its instances. Every other alert type fills in the gaps; any that don't fit create idle slots. We can compute the answer analytically using frequencies — no explicit scheduling needed.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-title">alert_dedup_scheduler</span>
+      </div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">leastInterval</span>(<span class="kw">char</span>[] alerts, <span class="kw">int</span> cooldown) {
+    <span class="kw">int</span>[] freq = <span class="kw">new int</span>[<span class="nm">26</span>];
+    <span class="kw">for</span> (<span class="kw">char</span> a : alerts) freq[a - <span class="st">'A'</span>]++;
+
+    <span class="fn">Arrays</span>.<span class="fn">sort</span>(freq);
+    <span class="kw">int</span> maxFreq = freq[<span class="nm">25</span>];
+
+    <span class="cm">// Count how many alert types share the maximum frequency</span>
+    <span class="kw">int</span> maxCount = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> f : freq) <span class="kw">if</span> (f == maxFreq) maxCount++;
+
+    <span class="cm">// Frame formula: (maxFreq-1) full frames + last partial frame</span>
+    <span class="kw">int</span> frames = (maxFreq - <span class="nm">1</span>) * (cooldown + <span class="nm">1</span>) + maxCount;
+
+    <span class="cm">// Can always pack all alerts if total count exceeds frames</span>
+    <span class="kw">return</span> <span class="fn">Math</span>.<span class="fn">max</span>(alerts.length, frames);
+}
+<span class="cm">// Time: O(n) to count + O(26 log 26) sort ≈ O(n)
+// Space: O(1) — fixed 26-element array</span></pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> Counter
+
+<span class="kw">def</span> <span class="fn">least_interval</span>(alerts: <span class="fn">list</span>[<span class="kw">str</span>], cooldown: <span class="kw">int</span>) -> <span class="kw">int</span>:
+    freq = <span class="fn">sorted</span>(<span class="fn">Counter</span>(alerts).<span class="fn">values</span>())
+    max_freq = freq[-<span class="nm">1</span>]
+
+    <span class="cm"># Count how many alert types share the maximum frequency</span>
+    max_count = freq.<span class="fn">count</span>(max_freq)
+
+    <span class="cm"># Frame formula: (maxFreq-1) full frames + last partial frame</span>
+    frames = (max_freq - <span class="nm">1</span>) * (cooldown + <span class="nm">1</span>) + max_count
+
+    <span class="cm"># Can always pack all alerts if total count exceeds frames</span>
+    <span class="kw">return</span> <span class="fn">max</span>(<span class="fn">len</span>(alerts), frames)
+
+<span class="cm"># Time: O(n) to count + O(26 log 26) sort ≈ O(n)
+# Space: O(1) — fixed 26-element frequency array</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">LeetCode Equivalence Map</div>
+    <p>
+      <strong>CI/CD Build Agent Slot Optimizer</strong> is LC 435 (Non-overlapping Intervals) with a maximize-count framing instead of minimize-removal.<br>
+      <strong>Bundle Shipping Container Optimizer</strong> is LC 881 (Boats to Save People) with containers instead of boats and items instead of people.<br>
+      <strong>Alert Deduplication Scheduler</strong> is LC 621 (Task Scheduler) with alert types instead of CPU tasks and cooldown instead of <code>n</code>.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       06 — REFERENCE CHEAT SHEET
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="cheatsheet">
+    <span class="section-num">06</span>
+    <h2>Reference Cheat Sheet</h2>
+  </div>
+
+  <h3>Pattern Reference Table</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Pattern</th>
+          <th>Sort Key</th>
+          <th>Data Structure</th>
+          <th>Greedy Commit</th>
+          <th>Time</th>
+          <th>Key LCs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Interval Scheduling</td>
+          <td>End time ↑</td>
+          <td>Sorted array + variable</td>
+          <td>Pick if start ≥ lastEnd; update lastEnd</td>
+          <td>O(n log n)</td>
+          <td>435, 452, 56, 253</td>
+        </tr>
+        <tr>
+          <td>Two-Pointer Greedy</td>
+          <td>Value ↑ (sort first)</td>
+          <td>Two pointers lo/hi</td>
+          <td>If lo+hi fits: pair both; else hi ships alone</td>
+          <td>O(n log n)</td>
+          <td>881, 455, 11, 392</td>
+        </tr>
+        <tr>
+          <td>Priority Queue Greedy</td>
+          <td>Frequency ↓ (max-heap)</td>
+          <td>Max-heap or frequency count</td>
+          <td>Always dispatch highest-priority item next</td>
+          <td>O(n log k)</td>
+          <td>621, 767, 1642, 1405</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Quick Decision Guide</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Problem Signal</th>
+          <th>Pattern</th>
+          <th>What to Sort By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>"Maximum non-overlapping events / intervals"</td>
+          <td>Interval Scheduling</td>
+          <td>End time ascending</td>
+        </tr>
+        <tr>
+          <td>"Minimum arrows/intervals to cover all points"</td>
+          <td>Interval Scheduling</td>
+          <td>End time ascending</td>
+        </tr>
+        <tr>
+          <td>"Minimum containers / boats with weight limit"</td>
+          <td>Two-Pointer Greedy</td>
+          <td>Value ascending, then two ends</td>
+        </tr>
+        <tr>
+          <td>"Assign smallest X to satisfy smallest Y"</td>
+          <td>Two-Pointer Greedy</td>
+          <td>Both arrays ascending</td>
+        </tr>
+        <tr>
+          <td>"Minimum time to complete all tasks with cooldown"</td>
+          <td>Priority Queue Greedy</td>
+          <td>Frequency descending</td>
+        </tr>
+        <tr>
+          <td>"Rearrange string so no two adjacent are same"</td>
+          <td>Priority Queue Greedy</td>
+          <td>Character frequency descending</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Learning Path</h3>
+
+  <div class="path-steps">
+    <div class="path-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>LC 455 · Assign Cookies (Easy)</h4>
+        <p>The gentlest entry point. Sort both arrays, match greedily from smallest. Teaches that greedy sort + sweep is safe when assigning to a monotone constraint.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>LC 881 · Boats to Save People (Medium)</h4>
+        <p>Two-pointer greedy with a capacity constraint. Forces you to think about the elimination argument — why pairing heaviest with lightest is always safe.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>LC 435 · Non-overlapping Intervals (Medium)</h4>
+        <p>Classic interval scheduling. Teaches the end-time sort key. The insight that we're minimizing removals (= n - max-schedulable) bridges interval scheduling to the deletion framing.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>LC 621 · Task Scheduler (Medium)</h4>
+        <p>Priority queue greedy with the "frame" formula. Teaches that sometimes greedy reduces to a closed-form calculation rather than a simulation.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>LC 135 · Candy (Hard)</h4>
+        <p>Two-pass directional greedy. Teaches constraint decomposition — when entangled constraints can be solved independently by fixing direction.</p>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>LC 1642 · Furthest Building You Can Reach (Medium)</h4>
+        <p>Min-heap greedy — retroactively replaces a past "ladder use" with a brick use. Shows that greedy doesn't always mean irrevocable; sometimes we defer the commitment to the heap and revisit cheaply.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       07 — MENTAL MODEL
+  ═══════════════════════════════════════ -->
+  <div class="section-header" id="mental-model">
+    <span class="section-num">07</span>
+    <h2>Mental Model</h2>
+  </div>
+
+  <p>Think of a greedy algorithm as a <strong>contract you sign one clause at a time</strong>. Before signing each clause, you ask one question: "Could I ever regret this clause given the remaining options?" If the answer is provably no — because your choice dominates any alternative first step — you sign without hesitation. The exchange argument is the proof that you'll never regret it.</p>
+
+  <p>The sorting step is the <strong>priority declaration</strong>: it arranges all future choices in the order you'll commit to them. Choosing the wrong sort key is like prioritizing the wrong clause — your greedy commits become locally valid but globally wrong. The sort key must match the dominance relation you want to prove. For intervals, end time is dominant because it directly maximizes future flexibility. For pairing by capacity, sorted order makes the two-pointer elimination obvious.</p>
+
+  <p>When greedy breaks down, it's almost always because the problem has a <strong>dependency structure</strong> that makes local choices entangle future ones. If picking item A now changes the cost of item B later, you likely need DP. The signal is that you find yourself wanting to "un-pick" a greedy choice after seeing what comes next.</p>
+
+  <div class="callout yellow">
+    <div class="callout-label">Most Common Mistake</div>
+    <p><strong>Applying greedy to a problem with dependencies.</strong> Greedy is correct only when each local choice is provably safe in isolation. If the value of your current choice depends on future choices (e.g., "should I take this coin if it might prevent me from completing a larger set later?"), you have a dependency and DP is required. Always ask: "Does making this choice now change the value of future choices?" If yes, reach for DP instead.</p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">The Invariant</div>
+    <p>The greedy invariant has two parts. <strong>(1) Greedy Choice Property:</strong> the optimal solution can always be transformed to include the greedy choice without worsening it — proven by exchange argument. <strong>(2) Optimal Substructure:</strong> after making the greedy choice, the remaining sub-problem has the same optimal structure — so greedy applies recursively.</p>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">Interview Sentence — Say This Verbatim</div>
+    <p>"I'll use a greedy approach sorted by end time. The key insight is that choosing the interval with the earliest end time provably leaves the maximum flexibility for all subsequent choices — any alternative first pick ends no sooner, so it can only dominate or equal our choice, never improve upon it. By the exchange argument, the greedy selection is always in some optimal solution, which means we can commit irrevocably at each step and achieve O(n log n) overall with no backtracking."</p>
+  </div>
+
+</main>
+
+<footer>
+  AlgorithmCraft · Greedy Algorithms · Built with the AlgorithmCraft design system
+</footer>
+
+<script>
+// ─── LANGUAGE TOGGLE ───
+let currentLang = 'java';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ─── THEME TOGGLE ───
+function syncThemeIcon() {
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+}
+
+function toggleTheme() {
+  const nextDark = !document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', nextDark);
+  try { localStorage.setItem('dsa-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
+  syncThemeIcon();
+}
+
+// ─── TAB SWITCHER ───
+function showTab(e, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── INTERVAL SCHEDULING VISUALIZER ───
+// Intervals pre-sorted by end time: [[1,3],[3,4],[2,5],[4,6],[5,7],[6,8]]
+const INTERVALS = [[1,3],[3,4],[2,5],[4,6],[5,7],[6,8]];
+
+let vizState = {
+  step: -1,
+  lastEnd: -Infinity,
+  selected: [],    // indices of selected intervals
+  skipped: [],     // indices of skipped intervals
+  done: false,
+  logs: ['Press Step → to begin.']
+};
+
+function vizReset() {
+  vizState = {
+    step: -1,
+    lastEnd: -Infinity,
+    selected: [],
+    skipped: [],
+    done: false,
+    logs: ['Press Step → to begin.']
+  };
+  renderViz();
+}
+
+function vizStep() {
+  if (vizState.done) return;
+
+  vizState.step++;
+  const i = vizState.step;
+
+  if (i >= INTERVALS.length) {
+    vizState.done = true;
+    vizState.logs.push('─── Done! Selected ' + vizState.selected.length + ' non-overlapping intervals ───');
+    renderViz();
+    return;
+  }
+
+  const [start, end] = INTERVALS[i];
+  const logs = vizState.logs.filter(l => l !== 'Press Step → to begin.');
+
+  if (start >= vizState.lastEnd) {
+    // Greedy commit: this interval doesn't overlap
+    vizState.selected.push(i);
+    vizState.lastEnd = end;
+    logs.push(`[${start},${end}]: start=${start} ≥ lastEnd=${vizState.lastEnd === end ? '−∞' : vizState.lastEnd === end ? end : vizState.lastEnd - (end - vizState.lastEnd)}... SELECT ✓ → lastEnd = ${end}`);
+  } else {
+    // Skip: overlaps with last selected
+    vizState.skipped.push(i);
+    logs.push(`[${start},${end}]: start=${start} < lastEnd=${vizState.lastEnd} → SKIP ✗ (overlaps last selected)`);
+  }
+
+  vizState.logs = logs;
+  renderViz();
+}
+
+function vizRunAll() {
+  while (!vizState.done && vizState.step < INTERVALS.length) {
+    vizStep();
+  }
+}
+
+function renderViz() {
+  // Render interval cells
+  const arrayEl = document.getElementById('vizArray');
+  arrayEl.innerHTML = '';
+
+  INTERVALS.forEach((interval, i) => {
+    const [start, end] = interval;
+    const cell = document.createElement('div');
+    cell.className = 'arr-cell';
+    cell.innerHTML = `<span class="idx-label">${i}</span>[${start},${end}]`;
+
+    if (i === vizState.step && !vizState.selected.includes(i) && !vizState.skipped.includes(i)) {
+      cell.className += ' is-current'; // currently being processed
+    } else if (vizState.selected.includes(i)) {
+      cell.className += ' is-max'; // selected (green)
+    } else if (vizState.skipped.includes(i)) {
+      cell.className += ' is-skip'; // skipped (red)
+    } else if (i === vizState.step) {
+      cell.className += ' is-current';
+    }
+
+    arrayEl.appendChild(cell);
+  });
+
+  // Render lastEnd
+  const lastEndEl = document.getElementById('vizLastEnd');
+  lastEndEl.textContent = vizState.lastEnd === -Infinity ? '−∞' : vizState.lastEnd;
+
+  // Render counts
+  document.getElementById('vizSelectedCount').textContent = vizState.selected.length;
+  document.getElementById('vizSkippedCount').textContent = vizState.skipped.length;
+
+  // Render selected intervals
+  const selEl = document.getElementById('vizSelected');
+  if (vizState.selected.length === 0) {
+    selEl.innerHTML = '<span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted)">none yet</span>';
+  } else {
+    selEl.innerHTML = vizState.selected.map(i => {
+      const [s, e] = INTERVALS[i];
+      return `<span class="deque-cell">[${s},${e}]</span>`;
+    }).join('');
+  }
+
+  // Render log
+  const logEl = document.getElementById('vizLog');
+  if (vizState.logs.length === 0) {
+    logEl.innerHTML = '<div class="log-line">Press <span>Step →</span> to begin.</div>';
+  } else {
+    logEl.innerHTML = vizState.logs.map(line => {
+      // Highlight key values in cyan
+      const highlighted = line.replace(/(SELECT ✓|SKIP ✗|Done!)/g, '<span>$1</span>');
+      return `<div class="log-line">${highlighted}</div>`;
+    }).join('');
+  }
+}
+
+// Initialize visualizer on load
+document.addEventListener('DOMContentLoaded', function() {
+  syncThemeIcon();
+  renderViz();
+});
+</script>
+
+</body>
+</html>
