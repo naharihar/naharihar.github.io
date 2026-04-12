@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliding Window: The Breathing Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --ink: #1a1814;
+  --ink2: #4a4740;
+  --ink3: #7a776f;
+  --rule: #e0ddd6;
+  --accent: #c8440a;
+  --accent2: #1e4fa0;
+  --accent3: #1a7a4a;
+  --accent-bg: #fdf0ea;
+  --accent2-bg: #eaf0fb;
+  --accent3-bg: #e8f5ee;
+  --yellow: #f5c842;
+  --yellow-bg: #fffbea;
+  --code-bg: #f0ede6;
+  --mono: 'DM Mono', monospace;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 6px;
+  --max: 780px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.7; }
+
+nav { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--rule); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 48px; font-size: 13px; }
+.nav-brand { font-family: var(--mono); font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; margin-right: auto; }
+nav a { color: var(--ink3); text-decoration: none; transition: color .15s; white-space: nowrap; }
+nav a:hover { color: var(--ink); }
+
+header { max-width: var(--max); margin: 0 auto; padding: 5rem 2rem 3rem; border-bottom: 1px solid var(--rule); }
+.header-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem; }
+h1 { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.1; color: var(--ink); margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+h1 em { font-style: italic; color: var(--accent); }
+.header-sub { font-size: 17px; color: var(--ink2); max-width: 600px; line-height: 1.65; }
+.header-meta { display: flex; gap: 1.5rem; align-items: center; margin-top: 2rem; font-size: 13px; color: var(--ink3); flex-wrap: wrap; }
+
+.content { max-width: var(--max); margin: 0 auto; padding: 0 2rem 6rem; }
+
+.section-header { display: flex; align-items: baseline; gap: 1rem; margin: 4rem 0 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--rule); }
+.section-num { font-family: var(--mono); font-size: 11px; color: var(--ink3); letter-spacing: 0.1em; flex-shrink: 0; }
+h2 { font-family: var(--serif); font-size: 1.85rem; line-height: 1.2; color: var(--ink); }
+h3 { font-family: var(--serif); font-size: 1.3rem; color: var(--ink); margin: 2rem 0 0.75rem; }
+p { margin-bottom: 1rem; color: var(--ink2); }
+strong { color: var(--ink); font-weight: 500; }
+
+.callout { border-left: 3px solid var(--accent); background: var(--accent-bg); padding: 1rem 1.25rem; border-radius: 0 var(--radius) var(--radius) 0; margin: 1.5rem 0; font-size: 14.5px; color: var(--ink2); }
+.callout.blue { border-color: var(--accent2); background: var(--accent2-bg); }
+.callout.green { border-color: var(--accent3); background: var(--accent3-bg); }
+.callout.yellow { border-color: var(--yellow); background: var(--yellow-bg); }
+.callout-head { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; color: var(--accent); font-weight: 500; }
+.callout.blue .callout-head { color: var(--accent2); }
+.callout.green .callout-head { color: var(--accent3); }
+.callout.yellow .callout-head { color: #8a7000; }
+
+pre { background: var(--code-bg); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; line-height: 1.65; margin: 1.5rem 0; color: var(--ink); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+pre code { background: none; padding: 0; font-size: inherit; }
+.cm { color: var(--ink3); }
+.ck { color: var(--accent2); font-weight: 500; }
+.cs { color: var(--accent3); }
+.cn { color: var(--accent); }
+
+.patterns-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.pattern-card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.25rem; transition: border-color .15s, box-shadow .15s; }
+.pattern-card:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(200,68,10,0.08); }
+.pattern-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+.pattern-title { font-family: var(--serif); font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--ink); }
+.pattern-desc { font-size: 13px; color: var(--ink3); line-height: 1.5; margin-bottom: 0.6rem; }
+.pattern-lc { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
+
+.interactive-box { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0; }
+.interactive-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 1rem; }
+
+.arr-vis { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end; padding-bottom: 28px; position: relative; margin: 1rem 0; }
+.arr-el { display: flex; flex-direction: column; align-items: center; position: relative; }
+.arr-el .val { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius); border: 1px solid var(--rule); font-family: var(--mono); font-size: 14px; font-weight: 500; background: var(--code-bg); color: var(--ink2); transition: background .25s, border-color .25s, color .25s; }
+.arr-el .idx { font-family: var(--mono); font-size: 10px; color: var(--ink3); margin-top: 4px; }
+.arr-el .ptr-tag { position: absolute; bottom: -24px; font-family: var(--mono); font-size: 10px; font-weight: 500; white-space: nowrap; padding: 1px 6px; border-radius: 3px; opacity: 0; transition: opacity .2s; }
+.arr-el.is-L .val { background: #ddeeff; border-color: var(--accent2); color: var(--accent2); }
+.arr-el.is-L .ptr-tag { opacity: 1; background: var(--accent2); color: #fff; }
+.arr-el.is-R .val { background: #fdeedd; border-color: var(--accent); color: var(--accent); }
+.arr-el.is-R .ptr-tag { opacity: 1; background: var(--accent); color: #fff; }
+.arr-el.is-match .val { background: #d8f5e6; border-color: var(--accent3); color: var(--accent3); }
+.arr-el.is-match .ptr-tag { opacity: 1; background: var(--accent3); color: #fff; }
+.arr-el.is-win .val { background: #e8f5ee; border-color: var(--accent3); color: var(--accent3); }
+.arr-el.is-win .ptr-tag { opacity: 1; background: var(--accent3); color: #fff; }
+.arr-el.is-hi .val { background: #fff3d0; border-color: #c08000; color: #7a5000; }
+.arr-el.is-hi .ptr-tag { opacity: 1; background: #c08000; color: #fff; }
+
+.vis-controls { display: flex; gap: 8px; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+.btn { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--rule); background: var(--surface); color: var(--ink2); cursor: pointer; transition: background .15s, border-color .15s; }
+.btn:hover { background: var(--code-bg); border-color: var(--ink3); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.vis-msg { font-size: 13px; font-family: var(--mono); color: var(--ink3); padding: 6px 0; min-height: 24px; }
+.vis-msg.ok { color: var(--accent3); }
+.vis-msg.bad { color: var(--accent); }
+.log-box { background: var(--code-bg); border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--ink3); max-height: 160px; overflow-y: auto; margin-top: 10px; line-height: 1.8; }
+.log-box .log-ok { color: var(--accent3); }
+.log-box .log-hi { color: var(--ink); font-weight: 500; }
+.slider-label { font-family: var(--mono); font-size: 12px; color: var(--ink3); }
+input[type=range] { -webkit-appearance: none; width: 160px; height: 4px; border-radius: 2px; background: var(--rule); outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--rule); }
+
+.prob-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 1.5rem 0; }
+.prob-table th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); padding: 8px 12px; border-bottom: 1px solid var(--rule); }
+.prob-table td { padding: 9px 12px; border-bottom: 1px solid var(--rule); color: var(--ink2); vertical-align: top; }
+.prob-table tr:last-child td { border-bottom: none; }
+.prob-table tr:hover td { background: var(--code-bg); }
+.prob-table a { color: var(--accent2); text-decoration: none; }
+.prob-table a:hover { text-decoration: underline; }
+.badge { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 500; }
+.badge-easy { background: #e8f5ee; color: #1a7a4a; }
+.badge-medium { background: #fff3e0; color: #8a5000; }
+.badge-hard { background: #fdeeed; color: #a02020; }
+.badge-pattern { background: var(--accent2-bg); color: var(--accent2); }
+
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-bottom: 1.5rem; }
+.tab-btn { font-family: var(--mono); font-size: 12px; padding: 8px 16px; border: none; background: none; color: var(--ink3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.conv-tabs { display: flex; gap: 0; margin-bottom: 1.25rem; }
+.conv-tab { font-family: var(--mono); font-size: 11px; padding: 6px 14px; border: 1px solid var(--rule); background: var(--code-bg); color: var(--ink3); cursor: pointer; transition: background .15s; }
+.conv-tab:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.conv-tab:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+.conv-tab + .conv-tab { border-left: none; }
+.conv-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.path-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+.path-step { display: grid; grid-template-columns: 40px 1fr; gap: 1rem; position: relative; }
+.path-step::before { content: ''; position: absolute; left: 19px; top: 40px; bottom: 0; width: 1px; background: var(--rule); }
+.path-step:last-child::before { display: none; }
+.path-num { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--ink3); background: var(--surface); flex-shrink: 0; }
+.path-body { padding: 10px 0 2rem; }
+.path-title { font-weight: 500; color: var(--ink); margin-bottom: 0.25rem; }
+.path-desc { font-size: 13.5px; color: var(--ink3); line-height: 1.55; }
+
+.problem-block { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; margin: 2rem 0; }
+.problem-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--rule); display: flex; align-items: center; gap: 0.75rem; }
+.problem-id { font-family: var(--mono); font-size: 11px; color: var(--ink3); }
+.problem-title { font-weight: 500; font-size: 15px; color: var(--ink); flex: 1; }
+.problem-body { padding: 1.25rem; font-size: 14px; color: var(--ink2); line-height: 1.65; }
+
+.three-q { display: flex; flex-direction: column; gap: 1px; margin: 1.5rem 0; }
+.three-q-item { display: grid; grid-template-columns: 36px 1fr; gap: 0.75rem; padding: 0.85rem 1rem; background: var(--surface); border: 1px solid var(--rule); }
+.three-q-item:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.three-q-item:last-child { border-radius: 0 0 var(--radius) var(--radius); }
+.three-q-n { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); padding-top: 1px; }
+.three-q-q { font-weight: 500; font-size: 14px; color: var(--ink); margin-bottom: 0.2rem; }
+.three-q-a { font-size: 13px; color: var(--ink3); line-height: 1.5; }
+
+.lang-toggle { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; font-family: var(--mono); font-size: 11px; }
+.lang-btn { padding: 4px 12px; background: var(--code-bg); color: var(--ink3); border: none; cursor: pointer; transition: background .15s, color .15s; letter-spacing: 0.04em; }
+.lang-btn + .lang-btn { border-left: 1px solid var(--rule); }
+.lang-btn.active { background: var(--ink); color: #fff; }
+
+.code-block { position: relative; margin: 1.5rem 0; }
+.code-block pre { margin: 0; border-radius: 0 0 var(--radius) var(--radius); }
+.code-block-header { display: flex; align-items: center; justify-content: space-between; background: var(--code-bg); border: 1px solid var(--rule); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; padding: 6px 12px; }
+.code-block-title { font-family: var(--mono); font-size: 10px; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; }
+.lang-pane { display: none; }
+.lang-pane.active { display: block; }
+
+.legend { display: flex; gap: 1.25rem; font-size: 12px; color: var(--ink3); margin-top: 0.5rem; flex-wrap: wrap; font-family: var(--mono); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+footer { border-top: 1px solid var(--rule); padding: 2rem; text-align: center; font-size: 13px; color: var(--ink3); font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">Harihar Nath · DSA</a>
+  <a href="#core-idea">The Idea</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#converter">Visualizer</a>
+  <a href="#deepdive">Deep Dives</a>
+  <a href="#realworld">Real World</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+</nav>
+
+<header>
+  <div class="header-label">Deep Dive · Algorithms</div>
+  <h1>Sliding Window: The <em>Breathing</em> Algorithm</h1>
+  <p class="header-sub">The window doesn't slide — it breathes. It expands when the condition is healthy, contracts when it's sick. Once you see that, every substring, subarray, and stream problem becomes the same problem wearing a different mask.</p>
+  <div class="header-meta">
+    <span>18 min read</span>
+    <span>·</span>
+    <span>Interactive examples</span>
+    <span>·</span>
+    <span>Covers LC 3, 76, 209, 424, 567 &amp; more</span>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ── 01 CORE INSIGHT ── -->
+<div class="section-header" id="core-idea">
+  <span class="section-num">01</span>
+  <h2>The Core Insight</h2>
+</div>
+
+<h3>A window that breathes, not slides</h3>
+<p>Every tutorial describes sliding window the same way: "move a fixed-size window across the array." That framing handles exactly one of the three patterns — and the easiest one at that. The other two patterns involve a window with no fixed size, and "sliding" is the wrong mental model for them entirely.</p>
+<p>The correct frame: a sliding window is a <strong>range [L, R] that adjusts itself based on whether its current contents satisfy a condition</strong>. The right pointer expands the window, pulling in new elements. The left pointer contracts it, evicting old ones. The window breathes — it inhales when healthy, exhales when it's overloaded. This is why the technique works on variable-length problems at all: you're not moving a fixed frame, you're <em>negotiating</em> a valid range.</p>
+
+<div class="callout">
+  <div class="callout-head">Core Insight</div>
+  A sliding window is valid as long as its contents satisfy a condition. Expand right to include more. Shrink left until valid again. The optimum is the best valid state you pass through.
+</div>
+
+<h3>The canonical case — interactive</h3>
+<p>Here's <strong>LC 209 Minimum Size Subarray Sum</strong> live. Array of positive integers, target sum. Find the shortest contiguous subarray whose sum ≥ target. Watch how the window expands right until it's valid, then contracts left as far as it can while staying valid — recording the minimum length at each contraction:</p>
+
+<div class="interactive-box">
+  <div class="interactive-label">LC 209 — Minimum Size Subarray Sum</div>
+  <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+    <span class="slider-label">Target:</span>
+    <input type="range" id="target-slider" min="6" max="20" value="11" oninput="sw1_setTarget(this.value)">
+    <span class="slider-label" id="target-val" style="min-width:20px;font-weight:500;color:var(--ink)">11</span>
+    <button class="btn" onclick="sw1_reset()">Reset</button>
+    <button class="btn" id="sw1-step-btn" onclick="sw1_step()">Step →</button>
+  </div>
+  <div class="arr-vis" id="sw1-arr"></div>
+  <div class="vis-msg" id="sw1-msg">Press Step to begin.</div>
+  <div class="log-box" id="sw1-log"></div>
+  <div class="legend" style="margin-top:1rem">
+    <span><span class="legend-dot" style="background:#ddeeff;border:1px solid var(--accent2)"></span>L (left boundary)</span>
+    <span><span class="legend-dot" style="background:#fdeedd;border:1px solid var(--accent)"></span>R (right boundary)</span>
+    <span><span class="legend-dot" style="background:#e8f5ee;border:1px solid var(--accent3)"></span>Current valid window</span>
+    <span><span class="legend-dot" style="background:#d8f5e6;border:1px solid var(--accent3)"></span>Best window found</span>
+  </div>
+</div>
+
+<p>Notice what's happening: the right pointer moves forward unconditionally, one step per call to Step. The left pointer only moves when the window is already valid — it's trying to find the <em>minimum</em> valid window ending at R. Each left-pointer move eliminates a candidate that provably can't be improved by keeping the current left boundary.</p>
+
+<!-- ── 02 PATTERNS ── -->
+<div class="section-header" id="patterns">
+  <span class="section-num">02</span>
+  <h2>The Three Patterns</h2>
+</div>
+
+<p>Every sliding window problem is one of three shapes. The window management logic changes across them — the expand/contract structure doesn't.</p>
+
+<div class="patterns-grid">
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 1</div>
+    <div class="pattern-title">Fixed Size</div>
+    <div class="pattern-desc">Window size k is given. Slide it one step at a time: add the incoming element, remove the outgoing one. The window never changes size — just shifts.</div>
+    <div class="pattern-lc">LC 643, 1343, 1456, 2090, 2461</div>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 2</div>
+    <div class="pattern-title">Shrink When Invalid</div>
+    <div class="pattern-desc">No fixed size. Expand right freely. When the window becomes <em>invalid</em>, shrink left until it's valid again. Optimise for the longest valid window.</div>
+    <div class="pattern-lc">LC 3, 159, 340, 424, 1004</div>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-num">Pattern 3</div>
+    <div class="pattern-title">Shrink When Valid</div>
+    <div class="pattern-desc">No fixed size. Expand right until the window becomes <em>valid</em>. Then shrink left as long as it stays valid, recording the minimum each time.</div>
+    <div class="pattern-lc">LC 76, 209, 567, 632, 727</div>
+  </div>
+</div>
+
+<div class="callout blue">
+  <div class="callout-head">Recognition Shortcut</div>
+  <strong>"Maximum/longest"</strong> + a condition the window must satisfy → Pattern 2 (shrink when invalid). <strong>"Minimum/shortest"</strong> + a condition the window must satisfy → Pattern 3 (shrink when valid). <strong>Fixed k</strong> given explicitly → Pattern 1. The word "subarray" or "substring" almost always signals one of these three.
+</div>
+
+<h3>The templates</h3>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab(event,'t-fixed')">Fixed Size</button>
+  <button class="tab-btn" onclick="showTab(event,'t-shrink-inv')">Shrink When Invalid</button>
+  <button class="tab-btn" onclick="showTab(event,'t-shrink-val')">Shrink When Valid</button>
+</div>
+
+<div class="tab-pane active" id="t-fixed">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Pattern 1 — Fixed Size Window</span></div>
+  <div class="lang-pane java active"><pre><span class="cm">// Window is always exactly k elements: [i-k+1 .. i]</span>
+<span class="ck">int</span> windowVal = <span class="cn">0</span>;
+
+<span class="cm">// Seed the first window</span>
+<span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i < k; i++)
+    windowVal += nums[i];
+
+<span class="ck">double</span> best = windowVal;
+
+<span class="ck">for</span> (<span class="ck">int</span> i = k; i < nums.<span class="cs">length</span>; i++) {
+    windowVal += nums[i];        <span class="cm">// add incoming right element</span>
+    windowVal -= nums[i - k];    <span class="cm">// evict outgoing left element</span>
+    best = Math.<span class="cs">max</span>(best, windowVal);
+}
+<span class="ck">return</span> best;</pre></div>
+  <div class="lang-pane python"><pre><span class="cm"># Window is always exactly k elements: [i-k+1 .. i]</span>
+window_val = sum(nums[:k])  <span class="cm"># seed the first window</span>
+best = window_val
+
+<span class="ck">for</span> i <span class="ck">in</span> range(k, len(nums)):
+    window_val += nums[i]        <span class="cm"># add incoming right element</span>
+    window_val -= nums[i - k]    <span class="cm"># evict outgoing left element</span>
+    best = max(best, window_val)
+
+<span class="ck">return</span> best</pre></div>
+</div>
+</div>
+
+<div class="tab-pane" id="t-shrink-inv">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Pattern 2 — Shrink When Invalid (find longest)</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> left = <span class="cn">0</span>, best = <span class="cn">0</span>;
+<span class="cm">// windowState tracks the contents of [left..right]</span>
+<span class="cs">Map</span>&lt;<span class="cs">Character</span>, <span class="cs">Integer</span>&gt; freq = <span class="ck">new</span> <span class="cs">HashMap</span>&lt;&gt;();
+
+<span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < s.<span class="cs">length</span>(); right++) {
+    freq.<span class="cs">merge</span>(s.<span class="cs">charAt</span>(right), <span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>); <span class="cm">// expand</span>
+
+    <span class="ck">while</span> (!isValid(freq)) {           <span class="cm">// window broke the rule</span>
+        <span class="cs">char</span> out = s.<span class="cs">charAt</span>(left);
+        freq.<span class="cs">merge</span>(out, -<span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>);
+        <span class="ck">if</span> (freq.<span class="cs">get</span>(out) == <span class="cn">0</span>) freq.<span class="cs">remove</span>(out);
+        left++;                        <span class="cm">// shrink until valid again</span>
+    }
+
+    best = Math.<span class="cs">max</span>(best, right - left + <span class="cn">1</span>);
+}
+<span class="ck">return</span> best;</pre></div>
+  <div class="lang-pane python"><pre>left = best = <span class="cn">0</span>
+freq = {}  <span class="cm"># tracks contents of [left..right]</span>
+
+<span class="ck">for</span> right <span class="ck">in</span> range(len(s)):
+    freq[s[right]] = freq.get(s[right], <span class="cn">0</span>) + <span class="cn">1</span>  <span class="cm"># expand</span>
+
+    <span class="ck">while not</span> is_valid(freq):          <span class="cm"># window broke the rule</span>
+        out = s[left]
+        freq[out] -= <span class="cn">1</span>
+        <span class="ck">if</span> freq[out] == <span class="cn">0</span>:
+            <span class="ck">del</span> freq[out]
+        left += <span class="cn">1</span>                      <span class="cm"># shrink until valid again</span>
+
+    best = max(best, right - left + <span class="cn">1</span>)
+
+<span class="ck">return</span> best</pre></div>
+</div>
+</div>
+
+<div class="tab-pane" id="t-shrink-val">
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Pattern 3 — Shrink When Valid (find shortest)</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> left = <span class="cn">0</span>, best = <span class="cs">Integer</span>.<span class="cs">MAX_VALUE</span>;
+<span class="ck">int</span> windowSum = <span class="cn">0</span>; <span class="cm">// or whatever state tracks validity</span>
+
+<span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < nums.<span class="cs">length</span>; right++) {
+    windowSum += nums[right];  <span class="cm">// expand — always include right</span>
+
+    <span class="ck">while</span> (isValid(windowSum)) {   <span class="cm">// window satisfies condition</span>
+        best = Math.<span class="cs">min</span>(best, right - left + <span class="cn">1</span>); <span class="cm">// record length</span>
+        windowSum -= nums[left];
+        left++;                    <span class="cm">// shrink — try to beat the record</span>
+    }
+}
+<span class="ck">return</span> best == <span class="cs">Integer</span>.<span class="cs">MAX_VALUE</span> ? <span class="cn">0</span> : best;</pre></div>
+  <div class="lang-pane python"><pre>left = <span class="cn">0</span>
+best = float(<span class="cn">'inf'</span>)
+window_sum = <span class="cn">0</span>  <span class="cm"># or whatever state tracks validity</span>
+
+<span class="ck">for</span> right <span class="ck">in</span> range(len(nums)):
+    window_sum += nums[right]   <span class="cm"># expand — always include right</span>
+
+    <span class="ck">while</span> is_valid(window_sum):  <span class="cm"># window satisfies condition</span>
+        best = min(best, right - left + <span class="cn">1</span>)  <span class="cm"># record length</span>
+        window_sum -= nums[left]
+        left += <span class="cn">1</span>               <span class="cm"># shrink — try to beat the record</span>
+
+<span class="ck">return</span> <span class="cn">0</span> <span class="ck">if</span> best == float(<span class="cn">'inf'</span>) <span class="ck">else</span> best</pre></div>
+</div>
+</div>
+
+<div class="callout yellow">
+  <div class="callout-head">⚠ Most Common Mistakes</div>
+  <strong>(1) Using Pattern 2 for a minimise problem.</strong> If you're shrinking when invalid, you'll find the longest window — not the shortest. Swap to Pattern 3. <strong>(2) Positive values only.</strong> The shrink-when-valid pattern (Pattern 3) relies on the fact that evicting a left element <em>decreases</em> the window sum. This only holds when all values are positive. Negative values break monotonicity. <strong>(3) Forgetting to evict from window state.</strong> When left advances, you must remove <code>nums[left]</code> from your freq map / sum / counter <em>before</em> incrementing left, not after.
+</div>
+
+<!-- ── 03 VISUALIZER ── -->
+<div class="section-header" id="converter">
+  <span class="section-num">03</span>
+  <h2>Pattern Visualizer</h2>
+</div>
+
+<p>Watch each pattern manage its window on a representative problem. Switch between patterns — notice how the shrink trigger flips between them:</p>
+
+<div class="interactive-box">
+  <div class="conv-tabs">
+    <button class="conv-tab active" onclick="selectVis(0)">Fixed Size (k=3)</button>
+    <button class="conv-tab" onclick="selectVis(1)">Shrink When Invalid</button>
+    <button class="conv-tab" onclick="selectVis(2)">Shrink When Valid</button>
+  </div>
+  <div id="vis-desc" style="font-size:13.5px;color:var(--ink3);margin-bottom:1rem;line-height:1.55"></div>
+  <div class="arr-vis" id="vis-arr"></div>
+  <div class="vis-msg" id="vis-msg">Press Step to begin.</div>
+  <div class="vis-controls">
+    <button class="btn" onclick="vis_reset()">Reset</button>
+    <button class="btn" id="vis-step-btn" onclick="vis_step()">Step →</button>
+  </div>
+  <div class="log-box" id="vis-log"></div>
+  <div class="legend" style="margin-top:0.75rem">
+    <span><span class="legend-dot" style="background:#ddeeff;border:1px solid var(--accent2)"></span>L (left)</span>
+    <span><span class="legend-dot" style="background:#fdeedd;border:1px solid var(--accent)"></span>R (right)</span>
+    <span><span class="legend-dot" style="background:#e8f5ee;border:1px solid var(--accent3)"></span>Window contents</span>
+    <span><span class="legend-dot" style="background:#d8f5e6;border:1px solid var(--accent3)"></span>Best found</span>
+  </div>
+</div>
+
+<!-- ── 04 DEEP DIVES ── -->
+<div class="section-header" id="deepdive">
+  <span class="section-num">04</span>
+  <h2>Deep Dives</h2>
+</div>
+
+<h3>LC 3 — Longest Substring Without Repeating Characters (the one that teaches the pattern)</h3>
+<p>This is the first problem where Pattern 2 stops feeling mechanical and starts feeling inevitable. The condition is simple — no character can appear more than once in the window — but the implementation reveals exactly why the shrink-when-invalid structure is the correct and complete solution.</p>
+
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">LC 3</span>
+    <span class="problem-title">Longest Substring Without Repeating Characters</span>
+    <span class="badge badge-medium">Medium</span>
+    <span style="font-size:12px;color:var(--ink3);margin-left:auto">31.5% acceptance</span>
+  </div>
+  <div class="problem-body">
+    <p>Given a string <code>s</code>, find the length of the longest substring without repeating characters.</p>
+    <p><strong>Example:</strong> <code>s = "abcabcbb"</code> → Output: <code>3</code> (substring <code>"abc"</code>). <code>s = "pwwkew"</code> → Output: <code>3</code> (substring <code>"wke"</code>).</p>
+    <p><strong>Constraints:</strong> <code>0 &lt;= s.length &lt;= 5 × 10⁴</code> · <code>s</code> consists of English letters, digits, symbols and spaces.</p>
+    <p><strong>Why Pattern 2:</strong> The window is valid when it has no duplicate characters. When right pulls in a character already in the window, the window is invalid — shrink left until that character is evicted. The longest valid window seen across all right positions is the answer.</p>
+  </div>
+</div>
+
+<p>The naive approach scans every substring: O(n²) to enumerate, O(n) to check each — O(n³) total, or O(n²) with a set. The waste is re-examining characters you've already processed. When you move L forward by one, you don't need to re-scan the whole window — you already know everything in [L+1, R] was valid up to this point.</p>
+<p>The key invariant: at the start of each right-pointer step, <strong>the window [L, R-1] is always valid</strong>. When R introduces a duplicate, you shrink L forward until the duplicate is gone — the window is valid again in at most O(n) total left-pointer moves across the whole algorithm. That's where the O(n) guarantee comes from: each element enters and exits the window at most once.</p>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">LC 3 — Longest Substring Without Repeating Characters</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> lengthOfLongestSubstring(<span class="cs">String</span> s) {
+    <span class="cs">Map</span>&lt;<span class="cs">Character</span>, <span class="cs">Integer</span>&gt; freq = <span class="ck">new</span> <span class="cs">HashMap</span>&lt;&gt;();
+    <span class="ck">int</span> left = <span class="cn">0</span>, best = <span class="cn">0</span>;
+
+    <span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < s.<span class="cs">length</span>(); right++) {
+        <span class="ck">char</span> c = s.<span class="cs">charAt</span>(right);
+        freq.<span class="cs">merge</span>(c, <span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>); <span class="cm">// expand: add c to window</span>
+
+        <span class="ck">while</span> (freq.<span class="cs">get</span>(c) > <span class="cn">1</span>) {        <span class="cm">// c appears twice — invalid</span>
+            <span class="ck">char</span> out = s.<span class="cs">charAt</span>(left);
+            freq.<span class="cs">merge</span>(out, -<span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>);
+            <span class="ck">if</span> (freq.<span class="cs">get</span>(out) == <span class="cn">0</span>) freq.<span class="cs">remove</span>(out);
+            left++;                    <span class="cm">// shrink until c appears once</span>
+        }
+
+        best = Math.<span class="cs">max</span>(best, right - left + <span class="cn">1</span>);
+    }
+    <span class="ck">return</span> best;
+}</pre></div>
+  <div class="lang-pane python"><pre><span class="ck">def</span> length_of_longest_substring(s: <span class="ck">str</span>) -> <span class="ck">int</span>:
+    freq = {}
+    left = best = <span class="cn">0</span>
+
+    <span class="ck">for</span> right, c <span class="ck">in</span> enumerate(s):
+        freq[c] = freq.get(c, <span class="cn">0</span>) + <span class="cn">1</span>  <span class="cm"># expand: add c to window</span>
+
+        <span class="ck">while</span> freq[c] > <span class="cn">1</span>:            <span class="cm"># c appears twice — invalid</span>
+            out = s[left]
+            freq[out] -= <span class="cn">1</span>
+            <span class="ck">if</span> freq[out] == <span class="cn">0</span>:
+                <span class="ck">del</span> freq[out]
+            left += <span class="cn">1</span>               <span class="cm"># shrink until c appears once</span>
+
+        best = max(best, right - left + <span class="cn">1</span>)
+
+    <span class="ck">return</span> best</pre></div>
+</div>
+
+<div class="callout">
+  <div class="callout-head">LC 3 vs LC 159 vs LC 340</div>
+  LC 159 (at most 2 distinct characters) and LC 340 (at most k distinct characters) are LC 3 with a different validity condition — change <code>freq.get(c) &gt; 1</code> to <code>freq.size() &gt; k</code>. The template is identical. This is the point: once you have the pattern, the condition is just a parameter.
+</div>
+
+<h3>LC 76 — Minimum Window Substring (the hard one that forces Pattern 3)</h3>
+<p>This is the problem where Pattern 3 stops feeling like a trick and reveals itself as a complete algorithm. It's hard not because the window management is different, but because tracking "validity" requires counting characters across two strings simultaneously.</p>
+
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">LC 76</span>
+    <span class="problem-title">Minimum Window Substring</span>
+    <span class="badge badge-hard">Hard</span>
+    <span style="font-size:12px;color:var(--ink3);margin-left:auto">36.2% acceptance</span>
+  </div>
+  <div class="problem-body">
+    <p>Given two strings <code>s</code> and <code>t</code>, return the minimum window in <code>s</code> which contains all characters of <code>t</code>. Return an empty string if no valid window exists.</p>
+    <p><strong>Example:</strong> <code>s = "ADOBECODEBANC"</code>, <code>t = "ABC"</code> → Output: <code>"BANC"</code>. The window <code>"BANC"</code> is shorter than <code>"ADOBEC"</code> and contains A, B, and C.</p>
+    <p><strong>Constraints:</strong> <code>1 &lt;= s.length &lt;= 10⁵</code> · <code>1 &lt;= t.length &lt;= 10⁴</code> · <code>s</code> and <code>t</code> consist of uppercase and lowercase English letters.</p>
+    <p><strong>Why Pattern 3:</strong> Expand right until the window covers all characters in <code>t</code> (window becomes valid). Then shrink left as long as the window stays valid, recording the minimum length. The insight is tracking "how many required characters are currently satisfied" as a single integer — this makes the validity check O(1) per step.</p>
+  </div>
+</div>
+
+<p>The naive O(n²) approach scans every starting position and uses a counter to check coverage — fine conceptually, wasteful because it rebuilds the frequency count from scratch at each start. The window approach maintains a running count: one integer <code>have</code> (characters in window satisfying their required count) vs <code>need</code> (distinct characters required). When <code>have == need</code>, the window is valid.</p>
+<p>The critical implementation detail: only increment <code>have</code> when a character's count in the window <em>exactly reaches</em> its required count in <code>t</code>. Don't increment for surplus occurrences — that would make <code>have</code> exceed <code>need</code> and break the validity check. Similarly, only decrement <code>have</code> when evicting a character drops it <em>below</em> the required count.</p>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">LC 76 — Minimum Window Substring</span></div>
+  <div class="lang-pane java active"><pre><span class="cs">String</span> minWindow(<span class="cs">String</span> s, <span class="cs">String</span> t) {
+    <span class="cs">Map</span>&lt;<span class="cs">Character</span>, <span class="cs">Integer</span>&gt; need = <span class="ck">new</span> <span class="cs">HashMap</span>&lt;&gt;();
+    <span class="ck">for</span> (<span class="ck">char</span> c : t.<span class="cs">toCharArray</span>()) need.<span class="cs">merge</span>(c, <span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>);
+
+    <span class="cs">Map</span>&lt;<span class="cs">Character</span>, <span class="cs">Integer</span>&gt; have = <span class="ck">new</span> <span class="cs">HashMap</span>&lt;&gt;();
+    <span class="ck">int</span> formed = <span class="cn">0</span>, required = need.<span class="cs">size</span>();   <span class="cm">// distinct chars satisfied</span>
+    <span class="ck">int</span> left = <span class="cn">0</span>, minLen = <span class="cs">Integer</span>.<span class="cs">MAX_VALUE</span>, minL = <span class="cn">0</span>;
+
+    <span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < s.<span class="cs">length</span>(); right++) {
+        <span class="ck">char</span> c = s.<span class="cs">charAt</span>(right);
+        have.<span class="cs">merge</span>(c, <span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>);
+        <span class="cm">// only count when we exactly hit the required amount</span>
+        <span class="ck">if</span> (need.<span class="cs">containsKey</span>(c) && have.<span class="cs">get</span>(c).<span class="cs">equals</span>(need.<span class="cs">get</span>(c)))
+            formed++;
+
+        <span class="ck">while</span> (formed == required) {       <span class="cm">// window is valid — shrink</span>
+            <span class="ck">if</span> (right - left + <span class="cn">1</span> < minLen) {
+                minLen = right - left + <span class="cn">1</span>;
+                minL = left;
+            }
+            <span class="ck">char</span> out = s.<span class="cs">charAt</span>(left++);
+            have.<span class="cs">merge</span>(out, -<span class="cn">1</span>, <span class="cs">Integer</span>::<span class="cs">sum</span>);
+            <span class="cm">// only drop formed when we go below the required amount</span>
+            <span class="ck">if</span> (need.<span class="cs">containsKey</span>(out) && have.<span class="cs">get</span>(out) < need.<span class="cs">get</span>(out))
+                formed--;
+        }
+    }
+    <span class="ck">return</span> minLen == <span class="cs">Integer</span>.<span class="cs">MAX_VALUE</span> ? <span class="cs">""</span> : s.<span class="cs">substring</span>(minL, minL + minLen);
+}</pre></div>
+  <div class="lang-pane python"><pre><span class="ck">def</span> min_window(s: <span class="ck">str</span>, t: <span class="ck">str</span>) -> <span class="ck">str</span>:
+    <span class="ck">from</span> collections <span class="ck">import</span> Counter
+    need = Counter(t)
+    have = {}
+    formed = <span class="cn">0</span>
+    required = len(need)            <span class="cm"># distinct chars we must satisfy</span>
+    left = <span class="cn">0</span>
+    min_len, min_l = float(<span class="cn">'inf'</span>), <span class="cn">0</span>
+
+    <span class="ck">for</span> right, c <span class="ck">in</span> enumerate(s):
+        have[c] = have.get(c, <span class="cn">0</span>) + <span class="cn">1</span>
+        <span class="cm"># only count when we exactly hit the required amount</span>
+        <span class="ck">if</span> c <span class="ck">in</span> need <span class="ck">and</span> have[c] == need[c]:
+            formed += <span class="cn">1</span>
+
+        <span class="ck">while</span> formed == required:      <span class="cm"># window is valid — shrink</span>
+            <span class="ck">if</span> right - left + <span class="cn">1</span> < min_len:
+                min_len = right - left + <span class="cn">1</span>
+                min_l = left
+            out = s[left]
+            left += <span class="cn">1</span>
+            have[out] -= <span class="cn">1</span>
+            <span class="cm"># only drop formed when we go below the required amount</span>
+            <span class="ck">if</span> out <span class="ck">in</span> need <span class="ck">and</span> have[out] < need[out]:
+                formed -= <span class="cn">1</span>
+
+    <span class="ck">return</span> <span class="cn">""</span> <span class="ck">if</span> min_len == float(<span class="cn">'inf'</span>) <span class="ck">else</span> s[min_l : min_l + min_len]</pre></div>
+</div>
+
+<div class="callout green">
+  <div class="callout-head">The O(n) Proof</div>
+  Each character is added to the window exactly once (right moves forward only) and removed at most once (left moves forward only). So across the entire algorithm, there are at most 2n pointer moves total, regardless of how many times the inner while loop runs. The while loop's total iterations across the whole outer loop is bounded by n — not n per iteration of the outer loop.
+</div>
+
+<!-- ── 05 REFERENCE ── -->
+<div class="section-header" id="cheatsheet">
+  <span class="section-num">05</span>
+  <h2>Reference</h2>
+</div>
+
+<p>The pattern map — 18 problems, 3 patterns. Every sliding window problem on LeetCode fits one of these shapes.</p>
+
+<table class="prob-table">
+  <thead>
+    <tr><th>Problem</th><th>Pattern</th><th>Key Condition</th><th>Difficulty</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><a href="https://leetcode.com/problems/maximum-average-subarray-i/" target="_blank">LC 643 — Max Average Subarray I ↗</a></td><td><span class="badge badge-pattern">Fixed Size</span></td><td><code>window sum / k</code></td><td><span class="badge badge-easy">Easy</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold/" target="_blank">LC 1343 — Subarrays of Size k ↗</a></td><td><span class="badge badge-pattern">Fixed Size</span></td><td><code>avg >= threshold</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/" target="_blank">LC 1423 — Max Points from Cards ↗</a></td><td><span class="badge badge-pattern">Fixed Size</span></td><td><code>total - min window of size n-k</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/find-all-anagrams-in-a-string/" target="_blank">LC 438 — Find All Anagrams ↗</a></td><td><span class="badge badge-pattern">Fixed Size</span></td><td><code>freq[window] == freq[p]</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/" target="_blank">LC 3 — Longest Substring No Repeat ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>freq[c] &gt; 1</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/fruit-into-baskets/" target="_blank">LC 904 — Fruit Into Baskets ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>distinct types &gt; 2</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/longest-repeating-character-replacement/" target="_blank">LC 424 — Longest Repeating Char Replace ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>len - maxFreq &gt; k</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/max-consecutive-ones-iii/" target="_blank">LC 1004 — Max Consecutive Ones III ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>zeros in window &gt; k</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/longest-subarray-of-1s-after-deleting-one-element/" target="_blank">LC 1493 — Longest Subarray After Delete ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>zeros in window &gt; 1</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/permutation-in-string/" target="_blank">LC 567 — Permutation in String ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>freq mismatch &gt; 0</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/minimum-size-subarray-sum/" target="_blank">LC 209 — Minimum Size Subarray Sum ↗</a></td><td><span class="badge badge-pattern">Shrink Valid</span></td><td><code>sum &gt;= target</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank">LC 76 — Minimum Window Substring ↗</a></td><td><span class="badge badge-pattern">Shrink Valid</span></td><td><code>formed == required</code></td><td><span class="badge badge-hard">Hard</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/subarray-product-less-than-k/" target="_blank">LC 713 — Subarray Product &lt; K ↗</a></td><td><span class="badge badge-pattern">Shrink Valid</span></td><td><code>product &gt;= k</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/" target="_blank">LC 1358 — Substrings with All 3 Chars ↗</a></td><td><span class="badge badge-pattern">Shrink Valid</span></td><td><code>all of a,b,c present</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/count-number-of-nice-subarrays/" target="_blank">LC 1248 — Count Nice Subarrays ↗</a></td><td><span class="badge badge-pattern">Shrink Valid</span></td><td><code>odd count == k</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/binary-subarrays-with-sum/" target="_blank">LC 930 — Binary Subarrays With Sum ↗</a></td><td><span class="badge badge-pattern">Shrink Valid</span></td><td><code>sum == goal</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/" target="_blank">LC 1438 — Subarray Abs Diff ≤ Limit ↗</a></td><td><span class="badge badge-pattern">Shrink Invalid</span></td><td><code>max - min &gt; limit</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+    <tr><td><a href="https://leetcode.com/problems/grumpy-bookstore-owner/" target="_blank">LC 1052 — Grumpy Bookstore Owner ↗</a></td><td><span class="badge badge-pattern">Fixed Size</span></td><td><code>max extra satisfied in window k</code></td><td><span class="badge badge-medium">Medium</span></td></tr>
+  </tbody>
+</table>
+
+<h3>The 6-problem learning path</h3>
+<div class="path-steps">
+  <div class="path-step">
+    <div class="path-num">1</div>
+    <div class="path-body">
+      <div class="path-title">LC 643 — Maximum Average Subarray I</div>
+      <div class="path-desc">The simplest Pattern 1 problem. Seed the first window, then slide one element at a time. No condition to check — just add right, subtract left, track max. Do this first to build the mechanical habit before any complexity enters.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">2</div>
+    <div class="path-body">
+      <div class="path-title">LC 209 — Minimum Size Subarray Sum</div>
+      <div class="path-desc">Your first Pattern 3 problem. The condition is simple (sum ≥ target) and all values are positive, so the monotonicity argument is obvious. This is where the shrink-when-valid structure clicks for the first time.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">3</div>
+    <div class="path-body">
+      <div class="path-title">LC 3 — Longest Substring Without Repeating Characters</div>
+      <div class="path-desc">Your first Pattern 2 problem. The condition flips — now you're finding the longest valid window, not the shortest. Shrink when invalid. The frequency map pattern appears here for the first time — you'll use it in almost every subsequent problem.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">4</div>
+    <div class="path-body">
+      <div class="path-title">LC 424 — Longest Repeating Character Replacement</div>
+      <div class="path-desc">Pattern 2 with a non-obvious validity condition: <code>windowLength - maxFrequency &gt; k</code>. This forces you to maintain a running max of character frequencies — not just a count. The hardest Pattern 2 problem; once it clicks, every variant feels easy.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">5</div>
+    <div class="path-body">
+      <div class="path-title">LC 567 — Permutation in String</div>
+      <div class="path-desc">Fixed-size window with a frequency-match validity condition. Bridges Pattern 1 and Pattern 2 — the window size is fixed (length of pattern), but you track frequency maps instead of a simple sum. Good for cementing the frequency map technique.</div>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="path-num">6</div>
+    <div class="path-body">
+      <div class="path-title">LC 76 — Minimum Window Substring</div>
+      <div class="path-desc">The unlock problem. Pattern 3 with a frequency-map validity condition and the <code>formed/required</code> O(1) check. If you can implement this cleanly from scratch, you can implement every sliding window problem. Everything before this was building to here.</div>
+    </div>
+  </div>
+</div>
+
+<h3>The three-question recognition test</h3>
+<div class="three-q">
+  <div class="three-q-item">
+    <div class="three-q-n">1</div>
+    <div>
+      <div class="three-q-q">Does the problem involve a contiguous subarray or substring?</div>
+      <div class="three-q-a">Sliding window only works on contiguous ranges — if elements can be non-adjacent, it's not a window problem. Keywords: "subarray", "substring", "contiguous", "consecutive", "window of size k".</div>
+    </div>
+  </div>
+  <div class="three-q-item">
+    <div class="three-q-n">2</div>
+    <div>
+      <div class="three-q-q">Are all values positive (or can the window state only worsen as it shrinks)?</div>
+      <div class="three-q-a">Pattern 3 (shrink-when-valid) requires that evicting a left element moves the window away from valid. For sum-based conditions this means positive values only. For frequency-based conditions (char counts), evicting always reduces counts — so it always holds.</div>
+    </div>
+  </div>
+  <div class="three-q-item">
+    <div class="three-q-n">3</div>
+    <div>
+      <div class="three-q-q">Is it "longest" or "shortest / minimum"?</div>
+      <div class="three-q-a">"Longest/maximum" → Pattern 2 (shrink when invalid, find the furthest right you can stretch). "Shortest/minimum" → Pattern 3 (shrink when valid, find the minimum window satisfying the condition). This single distinction determines your template.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 06 REAL WORLD ── -->
+<div class="section-header" id="realworld">
+  <span class="section-num">06</span>
+  <h2>Real World Problems</h2>
+</div>
+
+<p>These problems don't appear on LeetCode — but they come up in actual engineering work. Each maps exactly to one of the three patterns. The window logic is identical; only the domain changes.</p>
+
+<!-- Pattern 1: Fixed Size -->
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">Pattern 1 · Fixed Size</span>
+    <span class="problem-title">CPU Utilisation Rolling Average</span>
+    <span class="badge badge-easy">Easy</span>
+  </div>
+  <div class="problem-body">
+    <p>A server monitoring system records CPU utilisation (0–100) as a percentage for each second. Your alerting system needs to detect sustained high load — not single spikes. Given the utilisation readings and a window size <code>k</code> seconds, return the <strong>maximum rolling average</strong> over any k-second window, rounded to one decimal place. This is the peak sustained load over the observation period.</p>
+    <p><strong>Example:</strong><br>
+    <code>utilisation = [12, 45, 67, 89, 92, 88, 76, 54, 23, 11]</code>, <code>k = 3</code><br>
+    Output: <code>89.7</code> — the window <code>[89, 92, 88]</code> (indices 3–5) averages 89.7, the highest 3-second sustained load.</p>
+    <p><strong>Constraints:</strong> <code>k &lt;= utilisation.length &lt;= 10⁶</code> · <code>0 &lt;= utilisation[i] &lt;= 100</code> · time: O(n) · space: O(1)</p>
+    <p><strong>Why fixed window:</strong> The window size k is given directly — never changes. Seed with the first k readings, then slide: add the new second, drop the second that just left the window. No condition to check; just track the running max. This runs in O(n) regardless of how large k is — no re-summing from scratch at each position.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">CPU Utilisation Rolling Average — Fixed Size</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">double</span> maxRollingAverage(<span class="ck">int</span>[] util, <span class="ck">int</span> k) {
+    <span class="ck">double</span> windowSum = <span class="cn">0</span>;
+    <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i < k; i++) windowSum += util[i]; <span class="cm">// seed first window</span>
+
+    <span class="ck">double</span> best = windowSum / k;
+
+    <span class="ck">for</span> (<span class="ck">int</span> i = k; i < util.<span class="cs">length</span>; i++) {
+        windowSum += util[i];       <span class="cm">// new second enters window</span>
+        windowSum -= util[i - k];   <span class="cm">// oldest second leaves window</span>
+        best = Math.<span class="cs">max</span>(best, windowSum / k);
+    }
+    <span class="cm">// round to 1 decimal place</span>
+    <span class="ck">return</span> Math.<span class="cs">round</span>(best * <span class="cn">10.0</span>) / <span class="cn">10.0</span>;
+}</pre></div>
+  <div class="lang-pane python"><pre><span class="ck">def</span> max_rolling_average(util: list[<span class="ck">int</span>], k: <span class="ck">int</span>) -> <span class="ck">float</span>:
+    window_sum = sum(util[:k])  <span class="cm"># seed first window</span>
+    best = window_sum / k
+
+    <span class="ck">for</span> i <span class="ck">in</span> range(k, len(util)):
+        window_sum += util[i]      <span class="cm"># new second enters window</span>
+        window_sum -= util[i - k]  <span class="cm"># oldest second leaves window</span>
+        best = max(best, window_sum / k)
+
+    <span class="ck">return</span> round(best, <span class="cn">1</span>)</pre></div>
+</div>
+
+<!-- Pattern 2: Shrink When Invalid -->
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">Pattern 2 · Shrink When Invalid</span>
+    <span class="problem-title">Longest Stable Deployment Window</span>
+    <span class="badge badge-medium">Medium</span>
+  </div>
+  <div class="problem-body">
+    <p>A deployment pipeline records the outcome of each build as either a success (<code>1</code>) or failure (<code>0</code>). Your team has a policy: any deployment window used for canary analysis must contain <strong>at most <code>k</code> failures</strong> (you tolerate some flakiness, but not unlimited). Given the build history and threshold <code>k</code>, find the <strong>length of the longest contiguous window</strong> of builds satisfying this policy.</p>
+    <p><strong>Example:</strong><br>
+    <code>builds = [1,1,0,1,0,0,1,1,1,0,1]</code>, <code>k = 2</code><br>
+    Output: <code>7</code> — the window <code>[1,1,1,0,1,1,1]</code> (indices 4… wait, let's trace: [1,0,1,1,1,0,1] indices 3–9) contains 2 failures, length 7.</p>
+    <p><strong>Constraints:</strong> <code>1 &lt;= builds.length &lt;= 10⁵</code> · <code>builds[i]</code> is 0 or 1 · <code>0 &lt;= k &lt;= builds.length</code></p>
+    <p><strong>Why Pattern 2:</strong> The window is valid as long as failure count ≤ k. Expand right freely. When the window accumulates k+1 failures, it's invalid — shrink left until a failure exits and the count drops back to k. The longest window seen while valid is the answer. This is LC 1004 (Max Consecutive Ones III) mapped exactly to a CI/CD scenario.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Longest Stable Deployment Window — Shrink When Invalid</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> longestStableWindow(<span class="ck">int</span>[] builds, <span class="ck">int</span> k) {
+    <span class="ck">int</span> left = <span class="cn">0</span>, failures = <span class="cn">0</span>, best = <span class="cn">0</span>;
+
+    <span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < builds.<span class="cs">length</span>; right++) {
+        <span class="ck">if</span> (builds[right] == <span class="cn">0</span>) failures++; <span class="cm">// expand: count new failure</span>
+
+        <span class="ck">while</span> (failures > k) {              <span class="cm">// too many failures — invalid</span>
+            <span class="ck">if</span> (builds[left] == <span class="cn">0</span>) failures--;
+            left++;                         <span class="cm">// evict until policy satisfied</span>
+        }
+
+        best = Math.<span class="cs">max</span>(best, right - left + <span class="cn">1</span>);
+    }
+    <span class="ck">return</span> best;
+}</pre></div>
+  <div class="lang-pane python"><pre><span class="ck">def</span> longest_stable_window(builds: list[<span class="ck">int</span>], k: <span class="ck">int</span>) -> <span class="ck">int</span>:
+    left = failures = best = <span class="cn">0</span>
+
+    <span class="ck">for</span> right <span class="ck">in</span> range(len(builds)):
+        <span class="ck">if</span> builds[right] == <span class="cn">0</span>:
+            failures += <span class="cn">1</span>              <span class="cm"># expand: count new failure</span>
+
+        <span class="ck">while</span> failures > k:            <span class="cm"># too many failures — invalid</span>
+            <span class="ck">if</span> builds[left] == <span class="cn">0</span>:
+                failures -= <span class="cn">1</span>
+            left += <span class="cn">1</span>                  <span class="cm"># evict until policy satisfied</span>
+
+        best = max(best, right - left + <span class="cn">1</span>)
+
+    <span class="ck">return</span> best</pre></div>
+</div>
+
+<!-- Pattern 3: Shrink When Valid -->
+<div class="problem-block">
+  <div class="problem-header">
+    <span class="problem-id">Pattern 3 · Shrink When Valid</span>
+    <span class="problem-title">Minimum Log Scan for Error Budget Breach</span>
+    <span class="badge badge-medium">Medium</span>
+  </div>
+  <div class="problem-body">
+    <p>An SRE team tracks hourly error counts across a service. The error budget policy is breached when the total errors in any contiguous window of hours reaches or exceeds a threshold <code>budget</code>. Given the hourly error counts and the threshold, find the <strong>minimum number of consecutive hours</strong> that constitutes a budget breach. Return <code>0</code> if no window reaches the threshold.</p>
+    <p><strong>Example:</strong><br>
+    <code>errors = [3, 1, 4, 2, 8, 5, 2]</code>, <code>budget = 11</code><br>
+    Output: <code>2</code> — the window <code>[8, 5]</code> (hours 4–5) totals 13 ≥ 11 errors. No single hour reaches 11, so 2 is the minimum.</p>
+    <p><strong>Constraints:</strong> <code>1 &lt;= errors.length &lt;= 10⁵</code> · <code>1 &lt;= errors[i] &lt;= 10⁴</code> (all positive) · <code>1 &lt;= budget &lt;= 10⁹</code></p>
+    <p><strong>Why Pattern 3:</strong> All error counts are positive — evicting the left hour always decreases the total, so the window has a monotonic property. Expand right until the window total ≥ budget (valid). Then shrink left as long as it stays valid, recording the minimum length. Because all values are positive, this monotonicity guarantee is what makes the shrink-when-valid approach provably correct.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-title">Minimum Log Scan for Error Budget Breach — Shrink When Valid</span></div>
+  <div class="lang-pane java active"><pre><span class="ck">int</span> minBreach(<span class="ck">int</span>[] errors, <span class="ck">int</span> budget) {
+    <span class="ck">int</span> left = <span class="cn">0</span>, total = <span class="cn">0</span>, best = <span class="cs">Integer</span>.<span class="cs">MAX_VALUE</span>;
+
+    <span class="ck">for</span> (<span class="ck">int</span> right = <span class="cn">0</span>; right < errors.<span class="cs">length</span>; right++) {
+        total += errors[right];    <span class="cm">// expand — always include right hour</span>
+
+        <span class="ck">while</span> (total >= budget) {  <span class="cm">// breach threshold reached — valid</span>
+            best = Math.<span class="cs">min</span>(best, right - left + <span class="cn">1</span>);
+            total -= errors[left]; <span class="cm">// evict left — try shorter window</span>
+            left++;
+        }
+    }
+    <span class="ck">return</span> best == <span class="cs">Integer</span>.<span class="cs">MAX_VALUE</span> ? <span class="cn">0</span> : best;
+}</pre></div>
+  <div class="lang-pane python"><pre><span class="ck">def</span> min_breach(errors: list[<span class="ck">int</span>], budget: <span class="ck">int</span>) -> <span class="ck">int</span>:
+    left = total = <span class="cn">0</span>
+    best = float(<span class="cn">'inf'</span>)
+
+    <span class="ck">for</span> right <span class="ck">in</span> range(len(errors)):
+        total += errors[right]      <span class="cm"># expand — always include right hour</span>
+
+        <span class="ck">while</span> total >= budget:      <span class="cm"># breach threshold reached — valid</span>
+            best = min(best, right - left + <span class="cn">1</span>)
+            total -= errors[left]   <span class="cm"># evict left — try shorter window</span>
+            left += <span class="cn">1</span>
+
+    <span class="ck">return</span> <span class="cn">0</span> <span class="ck">if</span> best == float(<span class="cn">'inf'</span>) <span class="ck">else</span> best</pre></div>
+</div>
+
+<div class="callout green">
+  <div class="callout-head">The Pattern Under All Three</div>
+  CPU rolling average is LC 643 (Max Average Subarray) with a monitoring domain wrapper. Longest Stable Deployment Window is LC 1004 (Max Consecutive Ones III) with build outcomes instead of binary values. Min Log Scan for Error Budget Breach is LC 209 (Min Size Subarray Sum) with error counts instead of integers. The window management code is identical in each case — only the domain variable names change.
+</div>
+
+<!-- ── 07 MENTAL MODEL ── -->
+<div class="section-header">
+  <span class="section-num">07</span>
+  <h2>The Mental Model</h2>
+</div>
+
+<h3>One sentence that covers everything</h3>
+<p>A sliding window works whenever <strong>the validity of a contiguous range has a monotonic property</strong> — adding elements to one end can only make it more valid (or less), and removing from the other can only do the opposite. That monotonicity is what allows you to advance each pointer in only one direction and still guarantee you've found the optimal answer.</p>
+<p>The fixed-size pattern is the special case where you never need to test validity at all — the size constraint replaces it. The shrink-when-invalid and shrink-when-valid patterns are mirror images of each other: same two-pointer structure, opposite triggers, opposite optimisation direction (longest vs shortest).</p>
+<p>When you encounter a new problem, the question isn't "is this a sliding window problem?" It's: "does the validity of the range have a monotonic property — does expanding right always move in one direction, and does shrinking left always move in the other?" If yes, the window applies. If not, the window will silently give wrong answers — this is the mistake that's hardest to debug.</p>
+
+<div class="callout blue">
+  <div class="callout-head">Interview Sentence That Signals Expertise</div>
+  <em>"All values here are positive, so adding elements to the right can only increase the sum and removing from the left can only decrease it — the validity condition is monotonic. That's what makes the sliding window approach provably correct rather than just a heuristic, and gives us O(n) without an O(n²) scan over all subarrays."</em>
+</div>
+
+</div><!-- /content -->
+
+<footer>
+  Sliding Window deep dive · Covers LeetCode patterns 1–3 · Real world problems · All examples and code are original
+</footer>
+
+<script>
+// ── LANGUAGE TOGGLE ──
+let currentLang = 'java';
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ── TAB SWITCHER ──
+function showTab(e, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ── SW1: LC 209 Visualizer ──
+const SW1_ARR = [2, 3, 1, 2, 4, 3, 5];
+let sw1_L, sw1_R, sw1_sum, sw1_target, sw1_best, sw1_bestL, sw1_bestR, sw1_done, sw1_logs;
+
+function sw1_setTarget(v) {
+  document.getElementById('target-val').textContent = v;
+  sw1_target = parseInt(v);
+  sw1_reset();
+}
+
+function sw1_buildArr() {
+  const con = document.getElementById('sw1-arr');
+  con.innerHTML = '';
+  SW1_ARR.forEach((v, i) => {
+    const el = document.createElement('div');
+    el.className = 'arr-el';
+    if (sw1_done && sw1_best < Infinity && i >= sw1_bestL && i <= sw1_bestR) el.className = 'arr-el is-match';
+    else if (i === sw1_L && i === sw1_R) { el.className = 'arr-el is-win'; }
+    else if (i > sw1_L && i < sw1_R) el.className = 'arr-el is-win';
+    else if (i === sw1_L) el.className = 'arr-el is-L';
+    else if (i === sw1_R) el.className = 'arr-el is-R';
+
+    const val = document.createElement('div'); val.className = 'val'; val.textContent = v;
+    const idx = document.createElement('div'); idx.className = 'idx'; idx.textContent = i;
+    const ptr = document.createElement('div'); ptr.className = 'ptr-tag';
+    if (i === sw1_L && !sw1_done) ptr.textContent = 'L';
+    if (i === sw1_R && !sw1_done) ptr.textContent = 'R';
+    el.appendChild(ptr); el.appendChild(val); el.appendChild(idx);
+    con.appendChild(el);
+  });
+}
+
+function sw1_log(msg, cls) {
+  sw1_logs.push({msg, cls});
+  const box = document.getElementById('sw1-log');
+  box.innerHTML = sw1_logs.map(l => `<div class="${l.cls||''}">${l.msg}</div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function sw1_reset() {
+  sw1_L = 0; sw1_R = -1; sw1_sum = 0;
+  sw1_target = parseInt(document.getElementById('target-slider').value);
+  sw1_best = Infinity; sw1_bestL = 0; sw1_bestR = 0;
+  sw1_done = false; sw1_logs = [];
+  document.getElementById('sw1-step-btn').disabled = false;
+  document.getElementById('sw1-msg').textContent = 'Press Step to begin.';
+  document.getElementById('sw1-msg').className = 'vis-msg';
+  document.getElementById('sw1-log').innerHTML = '';
+  sw1_log(`Array: [${SW1_ARR.join(', ')}] · target=${sw1_target}`);
+  sw1_buildArr();
+}
+
+function sw1_step() {
+  if (sw1_done) return;
+  const msg = document.getElementById('sw1-msg');
+
+  // Phase: try to shrink if valid
+  if (sw1_sum >= sw1_target) {
+    const len = sw1_R - sw1_L + 1;
+    if (len < sw1_best) { sw1_best = len; sw1_bestL = sw1_L; sw1_bestR = sw1_R; }
+    sw1_log(`sum=${sw1_sum} ≥ ${sw1_target} → record len=${len}, evict arr[${sw1_L}]=${SW1_ARR[sw1_L]}, L++ (${sw1_L}→${sw1_L+1})`);
+    msg.textContent = `Window valid (sum=${sw1_sum}). Length ${len} recorded. Shrinking left.`;
+    sw1_sum -= SW1_ARR[sw1_L];
+    sw1_L++;
+    sw1_buildArr();
+    return;
+  }
+
+  // Phase: expand right
+  sw1_R++;
+  if (sw1_R >= SW1_ARR.length) {
+    sw1_done = true;
+    document.getElementById('sw1-step-btn').disabled = true;
+    if (sw1_best === Infinity) {
+      msg.textContent = 'No valid subarray found.'; msg.className = 'vis-msg bad';
+      sw1_log('No subarray reaches the target sum.');
+    } else {
+      msg.textContent = `Done! Minimum length = ${sw1_best}`;
+      msg.className = 'vis-msg ok';
+      sw1_log(`✓ Minimum window length = ${sw1_best} (indices ${sw1_bestL}–${sw1_bestR})`, 'log-ok');
+    }
+    sw1_buildArr(); return;
+  }
+  sw1_sum += SW1_ARR[sw1_R];
+  sw1_log(`expand: R++ → arr[${sw1_R}]=${SW1_ARR[sw1_R]} added, sum=${sw1_sum}`);
+  msg.textContent = `Expanded: sum=${sw1_sum}${sw1_sum >= sw1_target ? ' ≥ ' + sw1_target + ' (valid!)' : ' < ' + sw1_target}`;
+  sw1_buildArr();
+}
+
+// ── MULTI-VIS ──
+const VIS_DEFS = [
+  {
+    desc: 'Fixed window of size k=3. Slide across summing values — add right element, drop left element. No condition to check, just track the running max sum.',
+    arr: [4, 2, 1, 7, 8, 1, 2, 8, 1, 0],
+    mode: 'fixed', k: 3
+  },
+  {
+    desc: 'Shrink when invalid (Pattern 2). Find longest subarray with at most 1 distinct value repeated >2 times. Window breaks when any char appears >2 times — shrink left until valid.',
+    arr: [1,1,2,3,1,1,2,2,3,1],
+    mode: 'shrink_inv'
+  },
+  {
+    desc: 'Shrink when valid (Pattern 3). Find shortest subarray with sum ≥ 9. Expand right until valid; shrink left while still valid, recording minimum each time.',
+    arr: [1, 4, 2, 3, 5, 1, 3],
+    mode: 'shrink_val', target: 9
+  }
+];
+
+let vis_idx = 0, vis_L, vis_R, vis_done, vis_logs, vis_state;
+
+function selectVis(i) {
+  vis_idx = i;
+  document.querySelectorAll('.conv-tab').forEach((t,j) => t.classList.toggle('active', j===i));
+  vis_reset();
+}
+
+function vis_log(msg, cls) {
+  vis_logs.push({msg, cls});
+  const box = document.getElementById('vis-log');
+  box.innerHTML = vis_logs.map(l => `<div class="${l.cls||''}">${l.msg}</div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function vis_buildArr() {
+  const cfg = VIS_DEFS[vis_idx];
+  const con = document.getElementById('vis-arr');
+  con.innerHTML = '';
+  cfg.arr.forEach((v, i) => {
+    const el = document.createElement('div'); el.className = 'arr-el';
+    if (vis_done && vis_state.bestL !== undefined && i >= vis_state.bestL && i <= vis_state.bestR) { el.className = 'arr-el is-match'; }
+    else if (!vis_done && i >= vis_L && i <= vis_R) {
+      if (i === vis_L) el.className = 'arr-el is-L';
+      else if (i === vis_R) el.className = 'arr-el is-R';
+      else el.className = 'arr-el is-win';
+    }
+    const val = document.createElement('div'); val.className = 'val'; val.textContent = v;
+    const idx = document.createElement('div'); idx.className = 'idx'; idx.textContent = i;
+    const ptr = document.createElement('div'); ptr.className = 'ptr-tag';
+    if (!vis_done) {
+      if (i === vis_L) ptr.textContent = cfg.mode === 'fixed' ? 'L' : 'L';
+      if (i === vis_R) ptr.textContent = 'R';
+    }
+    el.appendChild(ptr); el.appendChild(val); el.appendChild(idx);
+    con.appendChild(el);
+  });
+}
+
+function vis_reset() {
+  const cfg = VIS_DEFS[vis_idx];
+  vis_L = 0; vis_R = cfg.mode === 'fixed' ? cfg.k - 1 : -1;
+  vis_done = false; vis_logs = [];
+  vis_state = { sum: 0, freq: {}, best: cfg.mode === 'shrink_val' ? Infinity : 0, bestL: undefined, bestR: undefined };
+  if (cfg.mode === 'fixed') { for (let i = 0; i < cfg.k; i++) vis_state.sum += cfg.arr[i]; vis_state.best = vis_state.sum; }
+  document.getElementById('vis-step-btn').disabled = false;
+  document.getElementById('vis-msg').textContent = 'Press Step to begin.';
+  document.getElementById('vis-msg').className = 'vis-msg';
+  document.getElementById('vis-log').innerHTML = '';
+  document.getElementById('vis-desc').textContent = cfg.desc;
+  vis_log(`Array: [${cfg.arr.join(', ')}]`);
+  if (cfg.mode === 'fixed') vis_log(`Seeded first window [0..${cfg.k-1}], sum=${vis_state.sum}`);
+  vis_buildArr();
+}
+
+function vis_step() {
+  if (vis_done) return;
+  const cfg = VIS_DEFS[vis_idx];
+  const msg = document.getElementById('vis-msg');
+
+  if (cfg.mode === 'fixed') {
+    const next = vis_R + 1;
+    if (next >= cfg.arr.length) {
+      vis_done = true; document.getElementById('vis-step-btn').disabled = true;
+      msg.textContent = `Done! Max window sum = ${vis_state.best}`; msg.className = 'vis-msg ok';
+      vis_state.bestL = vis_L; vis_state.bestR = vis_R;
+      vis_log(`✓ Max sum = ${vis_state.best}`, 'log-ok');
+      vis_buildArr(); return;
+    }
+    vis_state.sum += cfg.arr[next];
+    vis_state.sum -= cfg.arr[vis_L];
+    vis_L++; vis_R++;
+    if (vis_state.sum > vis_state.best) { vis_state.best = vis_state.sum; vis_state.bestL = vis_L; vis_state.bestR = vis_R; }
+    vis_log(`slide: +arr[${vis_R}]=${cfg.arr[vis_R]} -arr[${vis_L-1}]=${cfg.arr[vis_L-1]} → sum=${vis_state.sum}, best=${vis_state.best}`);
+    msg.textContent = `Window sum = ${vis_state.sum}. Best = ${vis_state.best}`;
+
+  } else if (cfg.mode === 'shrink_inv') {
+    // expand first
+    vis_R++;
+    if (vis_R >= cfg.arr.length) {
+      vis_done = true; document.getElementById('vis-step-btn').disabled = true;
+      msg.textContent = `Done! Longest valid window = ${vis_state.best}`; msg.className = 'vis-msg ok';
+      vis_log(`✓ Best length = ${vis_state.best}`, 'log-ok');
+      vis_buildArr(); return;
+    }
+    const v = cfg.arr[vis_R];
+    vis_state.freq[v] = (vis_state.freq[v] || 0) + 1;
+    // shrink while any element > 2
+    while (Math.max(...Object.values(vis_state.freq)) > 2) {
+      const out = cfg.arr[vis_L];
+      vis_state.freq[out]--;
+      if (vis_state.freq[out] === 0) delete vis_state.freq[out];
+      vis_L++;
+    }
+    const len = vis_R - vis_L + 1;
+    if (len > vis_state.best) { vis_state.best = len; vis_state.bestL = vis_L; vis_state.bestR = vis_R; }
+    vis_log(`R→${vis_R}(${v}), L=${vis_L}, len=${len}, best=${vis_state.best}`);
+    msg.textContent = `Window [${vis_L}..${vis_R}] length=${len}. Best=${vis_state.best}`;
+
+  } else if (cfg.mode === 'shrink_val') {
+    if (vis_state.sum >= cfg.target) {
+      const len = vis_R - vis_L + 1;
+      if (len < vis_state.best) { vis_state.best = len; vis_state.bestL = vis_L; vis_state.bestR = vis_R; }
+      vis_log(`sum=${vis_state.sum}≥${cfg.target} → record len=${len}, shrink: -arr[${vis_L}]=${cfg.arr[vis_L]}`);
+      vis_state.sum -= cfg.arr[vis_L]; vis_L++;
+      msg.textContent = `Valid! Len=${len} recorded. Shrinking.`;
+    } else {
+      vis_R++;
+      if (vis_R >= cfg.arr.length) {
+        vis_done = true; document.getElementById('vis-step-btn').disabled = true;
+        const result = vis_state.best === Infinity ? 0 : vis_state.best;
+        msg.textContent = `Done! Min window = ${result}`; msg.className = 'vis-msg ok';
+        if (vis_state.best < Infinity) vis_log(`✓ Min length = ${vis_state.best}`, 'log-ok');
+        vis_buildArr(); return;
+      }
+      vis_state.sum += cfg.arr[vis_R];
+      vis_log(`expand: R→${vis_R}(${cfg.arr[vis_R]}), sum=${vis_state.sum}`);
+      msg.textContent = `Expanded: sum=${vis_state.sum}`;
+    }
+  }
+  vis_buildArr();
+}
+
+sw1_reset();
+vis_reset();
+</script>
+</body>
+</html>
