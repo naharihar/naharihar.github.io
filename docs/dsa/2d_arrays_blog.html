@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mastering 2D Arrays &amp; Matrix Patterns — AlgorithmCraft</title>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── CSS VARIABLES ── */
+:root {
+  --bg: #f8f7f4;
+  --bg2: #ffffff;
+  --bg3: #f1efe9;
+  --bg4: #e8e5dc;
+  --border: #ddd9cf;
+  --border2: #cfc9bc;
+  --text: #1a1814;
+  --text2: #6b6758;
+  --text3: #918b7b;
+  --accent: #d4631a;
+  --accent2: #b44b14;
+  --blue: #2f6fb3;
+  --green: #1f8a59;
+  --yellow: #a57600;
+  --purple: #7553bf;
+  --red: #c93b4f;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', 'Fira Code', monospace;
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --nav-bg: rgba(248,247,244,0.92);
+}
+
+html.dark {
+  --bg: #0f0f0f;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --bg4: #252525;
+  --border: #2e2e2e;
+  --border2: #3a3a3a;
+  --text: #e8e6e0;
+  --text2: #a09d96;
+  --text3: #6b6860;
+  --accent: #e8845a;
+  --accent2: #d4694a;
+  --blue: #5a9de8;
+  --green: #5abf7e;
+  --yellow: #e8c55a;
+  --purple: #9b7fe8;
+  --red: #e85a5a;
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --nav-bg: rgba(15,15,15,0.92);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+}
+.nav-brand {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--accent);
+  text-decoration: none;
+  margin-right: 2.5rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+nav a:not(.nav-brand) {
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0 0.85rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+nav a:not(.nav-brand):hover { color: var(--text); border-bottom-color: var(--border2); }
+.lang-toggle { display: flex; gap: 4px; align-items: center; }
+.lang-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lang-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── HERO ── */
+.hero {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(232,132,90,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-tag {
+  display: inline-block;
+  background: rgba(232,132,90,0.12);
+  border: 1px solid rgba(232,132,90,0.25);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 100px;
+  margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  line-height: 1.15;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.01em;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero p {
+  color: var(--text2);
+  font-size: 1.05rem;
+  max-width: 580px;
+  margin: 0 auto 2rem;
+}
+.hero-meta {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero-stat { color: var(--text3); font-size: 0.82rem; }
+.hero-stat strong { color: var(--text2); font-weight: 600; }
+
+/* ── LAYOUT ── */
+.container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+.section { padding: 4.5rem 0; border-bottom: 1px solid var(--border); }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* ── CALLOUTS ── */
+.callout {
+  background: rgba(232,132,90,0.07);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.2rem;
+  margin: 1.5rem 0;
+  font-size: 0.92rem;
+}
+.callout strong { color: var(--accent); }
+.callout.blue { background: rgba(90,157,232,0.07); border-left-color: var(--blue); }
+.callout.blue strong { color: var(--blue); }
+.callout.green { background: rgba(90,191,126,0.07); border-left-color: var(--green); }
+.callout.green strong { color: var(--green); }
+.callout.yellow { background: rgba(232,197,90,0.07); border-left-color: var(--yellow); }
+.callout.yellow strong { color: var(--yellow); }
+.callout.purple { background: rgba(155,127,232,0.07); border-left-color: var(--purple); }
+.callout.purple strong { color: var(--purple); }
+
+/* ── CODE BLOCKS ── */
+.code-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.code-block-title { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text3); }
+.code-block-lang { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3); }
+.lang-pane { display: none; }
+.lang-pane.active { display: block; }
+pre {
+  padding: 1.2rem 1.4rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+.kw { color: var(--purple); }
+.fn { color: var(--blue); }
+.cm { color: var(--text3); font-style: italic; }
+.st { color: var(--green); }
+.nm { color: var(--yellow); }
+.op { color: var(--accent); }
+
+/* ── PATTERN CARDS ── */
+.pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+@media(max-width:620px) { .pattern-grid { grid-template-columns: 1fr; } }
+.pattern-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem 1.4rem;
+  transition: border-color 0.15s;
+}
+.pattern-card:hover { border-color: var(--border2); }
+.pattern-card-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.pattern-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.pattern-card p { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.8rem; }
+.lc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.lc-tag {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.lc-tag.easy { border-color: rgba(90,191,126,0.3); color: var(--green); }
+.lc-tag.med { border-color: rgba(232,197,90,0.3); color: var(--yellow); }
+.lc-tag.hard { border-color: rgba(232,90,90,0.3); color: var(--red); }
+
+/* ── VISUALIZER ── */
+.visualizer {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.viz-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+.grid-display {
+  display: inline-grid;
+  gap: 4px;
+  margin: 0.5rem 0 1rem;
+}
+.grid-cell {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: all 0.25s;
+}
+.grid-cell.highlight-current { background: rgba(232,132,90,0.25); border-color: var(--accent); color: var(--accent); }
+.grid-cell.highlight-visited { background: rgba(90,157,232,0.15); border-color: var(--blue); color: var(--blue); }
+.grid-cell.highlight-path { background: rgba(90,191,126,0.2); border-color: var(--green); color: var(--green); }
+.grid-cell.highlight-wall { background: var(--bg4); color: var(--text3); border-color: var(--border); }
+.grid-cell.highlight-start { background: rgba(90,191,126,0.3); border-color: var(--green); color: var(--green); font-weight: 700; }
+.grid-cell.highlight-end { background: rgba(232,90,90,0.25); border-color: var(--red); color: var(--red); font-weight: 700; }
+.grid-cell.highlight-layer { background: rgba(155,127,232,0.2); border-color: var(--purple); color: var(--purple); }
+.viz-log {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text2);
+  min-height: 40px;
+  margin: 0.6rem 0 1rem;
+  line-height: 1.5;
+}
+.viz-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--bg4); border-color: var(--text3); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { background: var(--accent2); }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text2);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── CHEAT SHEET TABLE ── */
+.cheat-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+.cheat-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.cheat-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+.cheat-table tr:last-child td { border-bottom: none; }
+.cheat-table tr:hover td { background: var(--bg2); }
+.diff-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.diff-badge.easy { background: rgba(90,191,126,0.12); color: var(--green); border: 1px solid rgba(90,191,126,0.25); }
+.diff-badge.med { background: rgba(232,197,90,0.12); color: var(--yellow); border: 1px solid rgba(232,197,90,0.25); }
+.diff-badge.hard { background: rgba(232,90,90,0.12); color: var(--red); border: 1px solid rgba(232,90,90,0.25); }
+
+/* ── LEARNING PATH ── */
+.learning-path { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+.lp-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.lp-item:last-child { border-bottom: none; }
+.lp-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-top: 2px;
+}
+.lp-content h4 { font-size: 0.9rem; margin-bottom: 0.2rem; }
+.lp-content p { font-size: 0.82rem; color: var(--text2); }
+
+/* ── DEEP DIVE ── */
+.deep-dive {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.8rem;
+  margin: 2rem 0;
+}
+.deep-dive-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.deep-dive-title { font-family: var(--font-display); font-size: 1.3rem; }
+.deep-dive p { font-size: 0.9rem; color: var(--text2); margin-bottom: 1rem; }
+.deep-dive h4 { font-size: 0.85rem; color: var(--text); margin: 1rem 0 0.4rem; font-weight: 600; }
+
+/* ── RW SECTION ── */
+.rw-problem {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.8rem;
+  margin: 2rem 0;
+}
+.rw-domain {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--blue);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.rw-problem h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+.rw-problem p { font-size: 0.88rem; color: var(--text2); margin-bottom: 0.8rem; }
+.example-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin: 0.8rem 0;
+  line-height: 1.8;
+}
+.constraints { display: flex; flex-wrap: wrap; gap: 8px; margin: 0.8rem 0; }
+.constraint-tag {
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+p { margin-bottom: 0.9rem; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 3rem 2rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text3);
+  font-size: 0.82rem;
+}
+footer strong { color: var(--text2); }
+
+@media(max-width:700px) {
+  nav { padding: 0 1rem; overflow-x: auto; gap: 0; }
+  .container { padding: 0 1rem; }
+  .hero { padding: 3rem 1rem 2.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="index.html">AlgorithmCraft</a>
+  <a href="#core-idea">The Idea</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#visualizer">Visualizer</a>
+  <a href="#deep-dives">Deep Dives</a>
+  <a href="#realworld">Real World</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light and dark mode">🌙</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Pattern Deep Dive</div>
+  <h1>Mastering<br><em>2D Arrays</em></h1>
+  <p>The mental models, traversal patterns, and coordinate transformations that unlock every grid problem from matrix rotation to BFS shortest paths.</p>
+  <div class="hero-meta">
+    <span class="hero-stat"><strong>5</strong> Core Patterns</span>
+    <span class="hero-stat"><strong>20+</strong> LeetCode Problems</span>
+    <span class="hero-stat"><strong>4</strong> Real-World Problems</span>
+    <span class="hero-stat"><strong>2</strong> Interactive Visualizers</span>
+  </div>
+</div>
+
+<!-- SECTION 01: CORE INSIGHT -->
+<div class="section" id="core-idea">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">01 —</span>
+      <h2>The Core Insight</h2>
+    </div>
+
+    <p>A 2D array is a <strong>coordinate system</strong>. Every cell is uniquely identified by <code>(row, col)</code>, and every algorithm is just a policy for choosing which coordinates to visit, in what order, and what state to carry along the way.</p>
+
+    <p>This reframing matters because it reduces a huge class of problems to a single question: <em>"Given the current coordinate, which neighboring coordinates should I explore next, and under what conditions?"</em> The data structure fades into the background; the traversal logic is everything.</p>
+
+    <div class="callout">
+      <strong>The Core Insight:</strong> Grid problems are coordinate-selection problems. Your algorithm defines a neighborhood function (4-directional? 8-directional? diagonal-only?) and a visitation policy (BFS? DFS? layer-by-layer? column-sweep?). Master these two axes and every 2D problem becomes familiar.
+    </div>
+
+    <p>Two properties define the geometry of any grid operation:</p>
+
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <div class="pattern-card-label">Property 1</div>
+        <h3>Neighborhood</h3>
+        <p>Which cells count as "adjacent"? 4-directional (up/down/left/right) covers most flood-fill and path problems. 8-directional adds diagonals. Some problems use knight moves or custom offsets.</p>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card-label">Property 2</div>
+        <h3>Traversal Order</h3>
+        <p>In what sequence do you visit valid neighbors? BFS explores by distance (shortest path). DFS explores by depth (connectivity). Row-major or column sweeps handle transformation problems.</p>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <strong>Bounds check first, always:</strong> Before accessing <code>grid[r][c]</code>, verify <code>0 ≤ r &lt; rows</code> and <code>0 ≤ c &lt; cols</code>. This single check prevents 90% of grid-related runtime errors. Write it once as a helper and call it everywhere.
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-block-title">Grid Boilerplate</span>
+      </div>
+      <div class="lang-pane java active">
+        <pre><span class="kw">int</span>[] dr = {<span class="nm">-1</span>, <span class="nm">1</span>, <span class="nm">0</span>, <span class="nm">0</span>};  <span class="cm">// up, down, left, right</span>
+<span class="kw">int</span>[] dc = {<span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">-1</span>, <span class="nm">1</span>};
+<span class="kw">int</span> rows = grid.length, cols = grid[<span class="nm">0</span>].length;
+
+<span class="kw">boolean</span> <span class="fn">inBounds</span>(<span class="kw">int</span> r, <span class="kw">int</span> c) {
+    <span class="kw">return</span> r >= <span class="nm">0</span> && r < rows && c >= <span class="nm">0</span> && c < cols;
+}
+
+<span class="cm">// Iterate all 4 neighbors</span>
+<span class="kw">for</span> (<span class="kw">int</span> d = <span class="nm">0</span>; d < <span class="nm">4</span>; d++) {
+    <span class="kw">int</span> nr = r + dr[d], nc = c + dc[d];
+    <span class="kw">if</span> (<span class="fn">inBounds</span>(nr, nc)) {
+        <span class="cm">// process neighbor (nr, nc)</span>
+    }
+}</pre>
+      </div>
+      <div class="lang-pane python">
+        <pre>DIRS = [(-<span class="nm">1</span>, <span class="nm">0</span>), (<span class="nm">1</span>, <span class="nm">0</span>), (<span class="nm">0</span>, -<span class="nm">1</span>), (<span class="nm">0</span>, <span class="nm">1</span>)]  <span class="cm"># up, down, left, right</span>
+rows, cols = len(grid), len(grid[<span class="nm">0</span>])
+
+<span class="kw">def</span> <span class="fn">in_bounds</span>(r, c):
+    <span class="kw">return</span> <span class="nm">0</span> <= r < rows <span class="kw">and</span> <span class="nm">0</span> <= c < cols
+
+<span class="cm"># Iterate all 4 neighbors</span>
+<span class="kw">for</span> dr, dc <span class="kw">in</span> DIRS:
+    nr, nc = r + dr, c + dc
+    <span class="kw">if</span> <span class="fn">in_bounds</span>(nr, nc):
+        <span class="cm"># process neighbor (nr, nc)</span>
+        <span class="kw">pass</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 02: PATTERNS -->
+<div class="section" id="patterns">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">02 —</span>
+      <h2>The 5 Core Patterns</h2>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(event,'p-flood')">Flood Fill / DFS</button>
+      <button class="tab-btn" onclick="showTab(event,'p-bfs')">BFS Shortest Path</button>
+      <button class="tab-btn" onclick="showTab(event,'p-spiral')">Spiral / Layer</button>
+      <button class="tab-btn" onclick="showTab(event,'p-rotate')">Rotate / Transform</button>
+      <button class="tab-btn" onclick="showTab(event,'p-dp')">2D DP</button>
+    </div>
+
+    <!-- PATTERN 1 -->
+    <div class="tab-pane active" id="p-flood">
+      <h3 style="font-family:var(--font-display);font-size:1.25rem;margin-bottom:0.8rem;">Pattern 1 · Flood Fill / DFS Connectivity</h3>
+      <p>When you need to discover all cells belonging to the same "region" (connected component), DFS is the natural fit. You plant a flag at a cell, recursively visit all valid same-type neighbors, and every cell touched belongs to the same island, region, or component.</p>
+      <p>The key insight: DFS on a grid is just tree DFS where the "children" of a node are its valid, unvisited neighbors. Mark each cell visited the moment you enter it — not when you finish — to prevent revisiting in cyclic grids.</p>
+      <div class="callout green">
+        <strong>The elimination argument:</strong> Once a cell is marked visited, it can never belong to a different component. This is safe because connectivity is transitive — if cell A and cell B are both reachable from the same start, they're in the same component. Marking early just prevents redundant work.
+      </div>
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-card-label">Use when</div>
+          <h3>Connected regions</h3>
+          <p>Count islands, find region sizes, propagate infection, mark connected territory.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">200. Number of Islands</span>
+            <span class="lc-tag med">695. Max Area of Island</span>
+            <span class="lc-tag med">733. Flood Fill</span>
+            <span class="lc-tag hard">827. Making A Large Island</span>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-card-label">Watch out for</div>
+          <h3>Stack overflow on large grids</h3>
+          <p>Recursive DFS on a 300×300 grid of all 1s will stack-overflow. Use iterative DFS with an explicit stack, or BFS instead.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">130. Surrounded Regions</span>
+            <span class="lc-tag med">417. Pacific Atlantic</span>
+            <span class="lc-tag hard">1020. Number of Enclaves</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">DFS Flood Fill</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">int</span> <span class="fn">dfs</span>(<span class="kw">char</span>[][] grid, <span class="kw">int</span> r, <span class="kw">int</span> c) {
+    <span class="kw">if</span> (r < <span class="nm">0</span> || r >= grid.length || c < <span class="nm">0</span> || c >= grid[<span class="nm">0</span>].length
+            || grid[r][c] != <span class="st">'1'</span>) <span class="kw">return</span> <span class="nm">0</span>;
+    grid[r][c] = <span class="st">'2'</span>;  <span class="cm">// mark visited in-place</span>
+    <span class="kw">return</span> <span class="nm">1</span> + <span class="fn">dfs</span>(grid, r<span class="op">-</span><span class="nm">1</span>, c) + <span class="fn">dfs</span>(grid, r<span class="op">+</span><span class="nm">1</span>, c)
+             + <span class="fn">dfs</span>(grid, r, c<span class="op">-</span><span class="nm">1</span>) + <span class="fn">dfs</span>(grid, r, c<span class="op">+</span><span class="nm">1</span>);
+}
+
+<span class="kw">int</span> <span class="fn">numIslands</span>(<span class="kw">char</span>[][] grid) {
+    <span class="kw">int</span> count = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">0</span>; r < grid.length; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">0</span>; c < grid[<span class="nm">0</span>].length; c++)
+            <span class="kw">if</span> (grid[r][c] == <span class="st">'1'</span>) { <span class="fn">dfs</span>(grid, r, c); count<span class="op">++</span>; }
+    <span class="kw">return</span> count;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">dfs</span>(grid, r, c):
+    <span class="kw">if</span> r < <span class="nm">0</span> <span class="kw">or</span> r >= len(grid) <span class="kw">or</span> c < <span class="nm">0</span> <span class="kw">or</span> c >= len(grid[<span class="nm">0</span>]):
+        <span class="kw">return</span> <span class="nm">0</span>
+    <span class="kw">if</span> grid[r][c] != <span class="st">'1'</span>:
+        <span class="kw">return</span> <span class="nm">0</span>
+    grid[r][c] = <span class="st">'2'</span>  <span class="cm"># mark visited</span>
+    <span class="kw">return</span> <span class="nm">1</span> + <span class="fn">dfs</span>(grid, r<span class="op">-</span><span class="nm">1</span>, c) + <span class="fn">dfs</span>(grid, r<span class="op">+</span><span class="nm">1</span>, c) \
+             + <span class="fn">dfs</span>(grid, r, c<span class="op">-</span><span class="nm">1</span>) + <span class="fn">dfs</span>(grid, r, c<span class="op">+</span><span class="nm">1</span>)
+
+<span class="kw">def</span> <span class="fn">num_islands</span>(grid):
+    count = <span class="nm">0</span>
+    <span class="kw">for</span> r <span class="kw">in</span> range(len(grid)):
+        <span class="kw">for</span> c <span class="kw">in</span> range(len(grid[<span class="nm">0</span>])):
+            <span class="kw">if</span> grid[r][c] == <span class="st">'1'</span>:
+                <span class="fn">dfs</span>(grid, r, c)
+                count <span class="op">+=</span> <span class="nm">1</span>
+    <span class="kw">return</span> count</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATTERN 2 -->
+    <div class="tab-pane" id="p-bfs">
+      <h3 style="font-family:var(--font-display);font-size:1.25rem;margin-bottom:0.8rem;">Pattern 2 · BFS Shortest Path</h3>
+      <p>BFS on a grid guarantees the shortest path between two cells when each step has equal weight. The level structure of BFS maps perfectly to distance: all cells at distance 1 are processed before any at distance 2. This guarantee is what makes BFS the right tool whenever you see "minimum steps", "minimum moves", or "shortest path".</p>
+      <p>Multi-source BFS is the same idea but you initialize the queue with <em>all</em> start positions simultaneously. This answers questions like "what is the minimum distance from any 0 to each cell" without running BFS from every 0 separately.</p>
+      <div class="callout blue">
+        <strong>Recognition signal:</strong> If the problem asks for the <em>minimum number of steps</em> to reach a target in a grid, reach for BFS immediately. If it asks for any path (not shortest), DFS is fine. If it asks to count regions, DFS is fine. Shortest = BFS.
+      </div>
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-card-label">Single-source BFS</div>
+          <h3>Start → End</h3>
+          <p>Find shortest path from one cell to another. Return distance when target is dequeued.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">994. Rotting Oranges</span>
+            <span class="lc-tag med">1091. Shortest Path in Binary Matrix</span>
+            <span class="lc-tag hard">127. Word Ladder (grid variant)</span>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-card-label">Multi-source BFS</div>
+          <h3>All sources → Every cell</h3>
+          <p>Initialize with all source cells, expand outward simultaneously. Distance to each cell = when it's first dequeued.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">542. 01 Matrix</span>
+            <span class="lc-tag med">1162. As Far from Land as Possible</span>
+            <span class="lc-tag hard">317. Shortest Distance from All Buildings</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">BFS Shortest Path Template</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">int</span> <span class="fn">bfs</span>(<span class="kw">int</span>[][] grid, <span class="kw">int</span> sr, <span class="kw">int</span> sc, <span class="kw">int</span> er, <span class="kw">int</span> ec) {
+    <span class="kw">int</span> rows = grid.length, cols = grid[<span class="nm">0</span>].length;
+    <span class="kw">boolean</span>[][] visited = <span class="kw">new boolean</span>[rows][cols];
+    Queue&lt;<span class="kw">int</span>[]&gt; q = <span class="kw">new</span> LinkedList&lt;&gt;();
+    q.add(<span class="kw">new int</span>[]{sr, sc, <span class="nm">0</span>});  <span class="cm">// {row, col, distance}</span>
+    visited[sr][sc] = <span class="kw">true</span>;
+    <span class="kw">while</span> (!q.isEmpty()) {
+        <span class="kw">int</span>[] cur = q.poll();
+        <span class="kw">int</span> r = cur[<span class="nm">0</span>], c = cur[<span class="nm">1</span>], dist = cur[<span class="nm">2</span>];
+        <span class="kw">if</span> (r == er && c == ec) <span class="kw">return</span> dist;
+        <span class="kw">for</span> (<span class="kw">int</span> d = <span class="nm">0</span>; d < <span class="nm">4</span>; d++) {
+            <span class="kw">int</span> nr = r + dr[d], nc = c + dc[d];
+            <span class="kw">if</span> (<span class="fn">inBounds</span>(nr, nc) && !visited[nr][nc] && grid[nr][nc] == <span class="nm">0</span>) {
+                visited[nr][nc] = <span class="kw">true</span>;
+                q.add(<span class="kw">new int</span>[]{nr, nc, dist<span class="op">+</span><span class="nm">1</span>});
+            }
+        }
+    }
+    <span class="kw">return</span> <span class="nm">-1</span>;  <span class="cm">// unreachable</span>
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">bfs</span>(grid, sr, sc, er, ec):
+    rows, cols = len(grid), len(grid[<span class="nm">0</span>])
+    visited = [[<span class="kw">False</span>] * cols <span class="kw">for</span> _ <span class="kw">in</span> range(rows)]
+    q = deque([(sr, sc, <span class="nm">0</span>)])  <span class="cm"># (row, col, distance)</span>
+    visited[sr][sc] = <span class="kw">True</span>
+    <span class="kw">while</span> q:
+        r, c, dist = q.popleft()
+        <span class="kw">if</span> r == er <span class="kw">and</span> c == ec:
+            <span class="kw">return</span> dist
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> [(-<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">0</span>,-<span class="nm">1</span>),(<span class="nm">0</span>,<span class="nm">1</span>)]:
+            nr, nc = r + dr, c + dc
+            <span class="kw">if</span> <span class="nm">0</span> <= nr < rows <span class="kw">and</span> <span class="nm">0</span> <= nc < cols \
+               <span class="kw">and</span> <span class="kw">not</span> visited[nr][nc] <span class="kw">and</span> grid[nr][nc] == <span class="nm">0</span>:
+                visited[nr][nc] = <span class="kw">True</span>
+                q.append((nr, nc, dist<span class="op">+</span><span class="nm">1</span>))
+    <span class="kw">return</span> <span class="nm">-1</span>  <span class="cm"># unreachable</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATTERN 3 -->
+    <div class="tab-pane" id="p-spiral">
+      <h3 style="font-family:var(--font-display);font-size:1.25rem;margin-bottom:0.8rem;">Pattern 3 · Spiral / Layer-by-Layer Traversal</h3>
+      <p>Spiral and onion-layer problems require visiting cells in a specific geometric order. The key is to maintain four boundary pointers (top, bottom, left, right) and shrink them inward after each edge is processed. Think of peeling an onion — each pass removes the outermost ring.</p>
+      <div class="callout yellow">
+        <strong>Common mistake:</strong> After processing the top row and right column, check if top ≤ bottom before processing the bottom row, and left ≤ right before processing the left column. Skipping this causes duplicate visits in single-row or single-column remainders.
+      </div>
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-card-label">Problems</div>
+          <h3>Spiral & Layer patterns</h3>
+          <p>Generate spiral order, rotate matrix in layers, find diagonal traversal, set matrix zeroes by borders.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">54. Spiral Matrix</span>
+            <span class="lc-tag med">59. Spiral Matrix II</span>
+            <span class="lc-tag med">48. Rotate Image</span>
+            <span class="lc-tag med">498. Diagonal Traverse</span>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-card-label">The pointer shrink</div>
+          <h3>4-boundary approach</h3>
+          <p>top++, bottom--, left++, right-- after each edge. Each layer is fully processed before moving inward.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">885. Spiral Matrix III</span>
+            <span class="lc-tag hard">296. Best Meeting Point</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">Spiral Matrix</span></div>
+        <div class="lang-pane java active">
+          <pre>List&lt;Integer&gt; <span class="fn">spiralOrder</span>(<span class="kw">int</span>[][] matrix) {
+    List&lt;Integer&gt; res = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">int</span> top = <span class="nm">0</span>, bottom = matrix.length<span class="op">-</span><span class="nm">1</span>;
+    <span class="kw">int</span> left = <span class="nm">0</span>, right = matrix[<span class="nm">0</span>].length<span class="op">-</span><span class="nm">1</span>;
+    <span class="kw">while</span> (top <= bottom && left <= right) {
+        <span class="kw">for</span> (<span class="kw">int</span> c = left; c <= right; c++) res.add(matrix[top][c]);
+        top<span class="op">++</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> r = top; r <= bottom; r++) res.add(matrix[r][right]);
+        right<span class="op">--</span>;
+        <span class="kw">if</span> (top <= bottom) {
+            <span class="kw">for</span> (<span class="kw">int</span> c = right; c >= left; c<span class="op">--</span>) res.add(matrix[bottom][c]);
+            bottom<span class="op">--</span>;
+        }
+        <span class="kw">if</span> (left <= right) {
+            <span class="kw">for</span> (<span class="kw">int</span> r = bottom; r >= top; r<span class="op">--</span>) res.add(matrix[r][left]);
+            left<span class="op">++</span>;
+        }
+    }
+    <span class="kw">return</span> res;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">spiral_order</span>(matrix):
+    res = []
+    top, bottom = <span class="nm">0</span>, len(matrix) <span class="op">-</span> <span class="nm">1</span>
+    left, right = <span class="nm">0</span>, len(matrix[<span class="nm">0</span>]) <span class="op">-</span> <span class="nm">1</span>
+    <span class="kw">while</span> top <= bottom <span class="kw">and</span> left <= right:
+        <span class="kw">for</span> c <span class="kw">in</span> range(left, right <span class="op">+</span> <span class="nm">1</span>): res.append(matrix[top][c])
+        top <span class="op">+=</span> <span class="nm">1</span>
+        <span class="kw">for</span> r <span class="kw">in</span> range(top, bottom <span class="op">+</span> <span class="nm">1</span>): res.append(matrix[r][right])
+        right <span class="op">-=</span> <span class="nm">1</span>
+        <span class="kw">if</span> top <= bottom:
+            <span class="kw">for</span> c <span class="kw">in</span> range(right, left <span class="op">-</span> <span class="nm">1</span>, <span class="op">-</span><span class="nm">1</span>): res.append(matrix[bottom][c])
+            bottom <span class="op">-=</span> <span class="nm">1</span>
+        <span class="kw">if</span> left <= right:
+            <span class="kw">for</span> r <span class="kw">in</span> range(bottom, top <span class="op">-</span> <span class="nm">1</span>, <span class="op">-</span><span class="nm">1</span>): res.append(matrix[r][left])
+            left <span class="op">+=</span> <span class="nm">1</span>
+    <span class="kw">return</span> res</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATTERN 4 -->
+    <div class="tab-pane" id="p-rotate">
+      <h3 style="font-family:var(--font-display);font-size:1.25rem;margin-bottom:0.8rem;">Pattern 4 · Matrix Rotation & Transposition</h3>
+      <p>Rotating an n×n matrix 90° clockwise in-place is a classic interview question. The trick is decomposing the rotation into two simpler operations: <strong>transpose</strong> (flip along main diagonal) followed by <strong>reverse each row</strong> (horizontal flip). These two O(n²) passes compose to a 90° clockwise rotation.</p>
+      <div class="callout green">
+        <strong>Why it works:</strong> A 90° clockwise rotation maps cell (r, c) → (c, n-1-r). Transposing maps (r, c) → (c, r). Reversing rows then maps (c, r) → (c, n-1-r). The composition is exact. Counterclockwise rotation = transpose + reverse each column (or: reverse rows first, then transpose).
+      </div>
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-card-label">In-place operations</div>
+          <h3>Transpose + Reverse</h3>
+          <p>90° CW: transpose then reverse rows. 90° CCW: transpose then reverse cols. 180°: reverse rows then reverse cols.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">48. Rotate Image</span>
+            <span class="lc-tag easy">867. Transpose Matrix</span>
+            <span class="lc-tag med">566. Reshape the Matrix</span>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-card-label">Row/Col operations</div>
+          <h3>Zero propagation</h3>
+          <p>Set Matrix Zeroes: scan for zeros first, then zero out rows/cols. Never modify the grid while scanning for original zeros.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">73. Set Matrix Zeroes</span>
+            <span class="lc-tag med">289. Game of Life</span>
+            <span class="lc-tag med">311. Sparse Matrix Multiplication</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">Rotate 90° Clockwise In-Place</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">void</span> <span class="fn">rotate</span>(<span class="kw">int</span>[][] matrix) {
+    <span class="kw">int</span> n = matrix.length;
+    <span class="cm">// Step 1: Transpose (swap matrix[i][j] and matrix[j][i])</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < n; i++)
+        <span class="kw">for</span> (<span class="kw">int</span> j = i<span class="op">+</span><span class="nm">1</span>; j < n; j++) {
+            <span class="kw">int</span> tmp = matrix[i][j];
+            matrix[i][j] = matrix[j][i];
+            matrix[j][i] = tmp;
+        }
+    <span class="cm">// Step 2: Reverse each row</span>
+    <span class="kw">for</span> (<span class="kw">int</span>[] row : matrix) {
+        <span class="kw">int</span> l = <span class="nm">0</span>, r = n<span class="op">-</span><span class="nm">1</span>;
+        <span class="kw">while</span> (l < r) {
+            <span class="kw">int</span> tmp = row[l]; row[l<span class="op">++</span>] = row[r]; row[r<span class="op">--</span>] = tmp;
+        }
+    }
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">rotate</span>(matrix):
+    n = len(matrix)
+    <span class="cm"># Step 1: Transpose</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(n):
+        <span class="kw">for</span> j <span class="kw">in</span> range(i<span class="op">+</span><span class="nm">1</span>, n):
+            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+    <span class="cm"># Step 2: Reverse each row</span>
+    <span class="kw">for</span> row <span class="kw">in</span> matrix:
+        row.reverse()
+    <span class="cm"># Non in-place alternative: [list(row) for row in zip(*matrix[::-1])]</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATTERN 5 -->
+    <div class="tab-pane" id="p-dp">
+      <h3 style="font-family:var(--font-display);font-size:1.25rem;margin-bottom:0.8rem;">Pattern 5 · 2D Dynamic Programming</h3>
+      <p>2D DP applies when the answer for cell (r, c) depends on a fixed set of previously computed cells — typically cells directly above, to the left, or diagonally up-left. This enables an O(rows × cols) solution for problems that would otherwise require exponential exploration.</p>
+      <p>The two key questions: (1) What does <code>dp[r][c]</code> represent? (2) What is the recurrence — which previous cells does (r, c) depend on? Get these right and the code writes itself.</p>
+      <div class="callout">
+        <strong>DP setup ritual:</strong> Initialize the base cases (first row, first column, or boundary cells) before filling the rest. A missing base case will silently propagate wrong values through the entire table.
+      </div>
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-card-label">Path DP</div>
+          <h3>Unique paths / Min cost</h3>
+          <p>dp[r][c] = number of ways or min cost to reach (r,c) from top-left, using only right/down moves.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">62. Unique Paths</span>
+            <span class="lc-tag med">64. Minimum Path Sum</span>
+            <span class="lc-tag hard">174. Dungeon Game</span>
+            <span class="lc-tag hard">741. Cherry Pickup</span>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-card-label">Region DP</div>
+          <h3>Maximal substructure</h3>
+          <p>Find largest all-1 square, maximal rectangle, or count specific submatrices. Often uses histogram-based intermediates.</p>
+          <div class="lc-tags">
+            <span class="lc-tag med">221. Maximal Square</span>
+            <span class="lc-tag hard">85. Maximal Rectangle</span>
+            <span class="lc-tag hard">363. Max Sum of Rectangle</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">Maximal Square (2D DP)</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="cm">// dp[r][c] = side length of largest all-1 square with bottom-right at (r,c)</span>
+<span class="kw">int</span> <span class="fn">maximalSquare</span>(<span class="kw">char</span>[][] matrix) {
+    <span class="kw">int</span> rows = matrix.length, cols = matrix[<span class="nm">0</span>].length, best = <span class="nm">0</span>;
+    <span class="kw">int</span>[][] dp = <span class="kw">new int</span>[rows<span class="op">+</span><span class="nm">1</span>][cols<span class="op">+</span><span class="nm">1</span>];  <span class="cm">// +1 for 0-padding</span>
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">1</span>; r <= rows; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">1</span>; c <= cols; c++)
+            <span class="kw">if</span> (matrix[r<span class="op">-</span><span class="nm">1</span>][c<span class="op">-</span><span class="nm">1</span>] == <span class="st">'1'</span>) {
+                dp[r][c] = Math.min(dp[r<span class="op">-</span><span class="nm">1</span>][c],
+                           Math.min(dp[r][c<span class="op">-</span><span class="nm">1</span>], dp[r<span class="op">-</span><span class="nm">1</span>][c<span class="op">-</span><span class="nm">1</span>])) <span class="op">+</span> <span class="nm">1</span>;
+                best = Math.max(best, dp[r][c]);
+            }
+    <span class="kw">return</span> best <span class="op">*</span> best;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">maximal_square</span>(matrix):
+    rows, cols = len(matrix), len(matrix[<span class="nm">0</span>])
+    <span class="cm"># +1 padding to avoid bounds checks on first row/col</span>
+    dp = [[<span class="nm">0</span>] <span class="op">*</span> (cols <span class="op">+</span> <span class="nm">1</span>) <span class="kw">for</span> _ <span class="kw">in</span> range(rows <span class="op">+</span> <span class="nm">1</span>)]
+    best = <span class="nm">0</span>
+    <span class="kw">for</span> r <span class="kw">in</span> range(<span class="nm">1</span>, rows <span class="op">+</span> <span class="nm">1</span>):
+        <span class="kw">for</span> c <span class="kw">in</span> range(<span class="nm">1</span>, cols <span class="op">+</span> <span class="nm">1</span>):
+            <span class="kw">if</span> matrix[r<span class="op">-</span><span class="nm">1</span>][c<span class="op">-</span><span class="nm">1</span>] == <span class="st">'1'</span>:
+                dp[r][c] = min(dp[r<span class="op">-</span><span class="nm">1</span>][c], dp[r][c<span class="op">-</span><span class="nm">1</span>], dp[r<span class="op">-</span><span class="nm">1</span>][c<span class="op">-</span><span class="nm">1</span>]) <span class="op">+</span> <span class="nm">1</span>
+                best = max(best, dp[r][c])
+    <span class="kw">return</span> best <span class="op">**</span> <span class="nm">2</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 03: VISUALIZER -->
+<div class="section" id="visualizer">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">03 —</span>
+      <h2>Pattern Visualizer</h2>
+    </div>
+
+    <p>Step through two algorithms interactively: BFS shortest path finding and spiral traversal. Each step shows exactly which cells are processed and in what order.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(event,'viz-bfs')">BFS Pathfinding</button>
+      <button class="tab-btn" onclick="showTab(event,'viz-spiral')">Spiral Traversal</button>
+    </div>
+
+    <!-- BFS VISUALIZER -->
+    <div class="tab-pane active" id="viz-bfs">
+      <div class="visualizer">
+        <div class="viz-label">BFS Shortest Path — 5×6 Grid</div>
+        <div id="bfs-grid" class="grid-display" style="grid-template-columns: repeat(6, 44px)"></div>
+        <div class="viz-log" id="bfs-log">Press Step → to begin BFS from S to E</div>
+        <div class="viz-controls">
+          <button class="btn primary" onclick="bfsStep()">Step →</button>
+          <button class="btn" onclick="bfsReset()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPIRAL VISUALIZER -->
+    <div class="tab-pane" id="viz-spiral">
+      <div class="visualizer">
+        <div class="viz-label">Spiral Matrix Traversal — 4×5 Grid</div>
+        <div id="spiral-grid" class="grid-display" style="grid-template-columns: repeat(5, 44px)"></div>
+        <div class="viz-log" id="spiral-log">Press Step → to begin spiral traversal</div>
+        <div class="viz-controls">
+          <button class="btn primary" onclick="spiralStep()">Step →</button>
+          <button class="btn" onclick="spiralReset()">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 04: DEEP DIVES -->
+<div class="section" id="deep-dives">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">04 —</span>
+      <h2>Deep Dives</h2>
+    </div>
+    <p>Two problems chosen for maximum insight density — one showing multi-source BFS reasoning, one showing why 2D DP transitions aren't always obvious.</p>
+
+    <!-- DEEP DIVE 1 -->
+    <div class="deep-dive">
+      <div class="deep-dive-header">
+        <div class="deep-dive-title">994. Rotting Oranges</div>
+        <span class="diff-badge med">Medium</span>
+      </div>
+      <p>A grid contains <code>0</code> (empty), <code>1</code> (fresh orange), <code>2</code> (rotten orange). Each minute, any fresh orange adjacent to a rotten one becomes rotten. Return the minimum time for all fresh oranges to rot, or -1 if impossible.</p>
+      <div class="callout blue">
+        <strong>Why multi-source BFS?</strong> Rotting spreads from <em>all</em> rotten oranges simultaneously. If you BFS from only one rotten orange, you'll compute the wrong elapsed time — you'd need to track from the nearest rotten neighbor, which varies per fresh orange. Multi-source BFS seeds the queue with every initial rotten orange at distance 0, then expands in lockstep. The answer is the max distance when the queue empties.
+      </div>
+      <h4>Key Implementation Notes</h4>
+      <p>Count fresh oranges before BFS. After BFS, if any fresh orange remains (unreachable due to isolation), return -1. Track elapsed time as the BFS level (distance from nearest initial rotten cell). The distance of the last cell processed is your answer.</p>
+      <div class="callout yellow">
+        <strong>Common mistake:</strong> Returning the distance when the queue empties doesn't account for the "subtract 1" issue if you're tracking level at dequeue time. Cleanest approach: track a <code>minutes</code> counter that increments only when all cells at the current level are processed (level-order BFS), or store the time as a third field in the queue tuple.
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">994. Rotting Oranges — Multi-Source BFS</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">int</span> <span class="fn">orangesRotting</span>(<span class="kw">int</span>[][] grid) {
+    <span class="kw">int</span> rows = grid.length, cols = grid[<span class="nm">0</span>].length;
+    Queue&lt;<span class="kw">int</span>[]&gt; q = <span class="kw">new</span> LinkedList&lt;&gt;();
+    <span class="kw">int</span> fresh = <span class="nm">0</span>;
+    <span class="cm">// Seed queue with all initially rotten oranges</span>
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">0</span>; r < rows; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">0</span>; c < cols; c++) {
+            <span class="kw">if</span> (grid[r][c] == <span class="nm">2</span>) q.add(<span class="kw">new int</span>[]{r, c, <span class="nm">0</span>});
+            <span class="kw">if</span> (grid[r][c] == <span class="nm">1</span>) fresh<span class="op">++</span>;
+        }
+    <span class="kw">int</span> elapsed = <span class="nm">0</span>;
+    <span class="kw">int</span>[] dr = {<span class="nm">-1</span>,<span class="nm">1</span>,<span class="nm">0</span>,<span class="nm">0</span>}, dc = {<span class="nm">0</span>,<span class="nm">0</span>,<span class="nm">-1</span>,<span class="nm">1</span>};
+    <span class="kw">while</span> (!q.isEmpty()) {
+        <span class="kw">int</span>[] cur = q.poll();
+        <span class="kw">int</span> r = cur[<span class="nm">0</span>], c = cur[<span class="nm">1</span>], time = cur[<span class="nm">2</span>];
+        elapsed = Math.max(elapsed, time);
+        <span class="kw">for</span> (<span class="kw">int</span> d = <span class="nm">0</span>; d < <span class="nm">4</span>; d++) {
+            <span class="kw">int</span> nr = r + dr[d], nc = c + dc[d];
+            <span class="kw">if</span> (nr >= <span class="nm">0</span> && nr < rows && nc >= <span class="nm">0</span> && nc < cols
+                    && grid[nr][nc] == <span class="nm">1</span>) {
+                grid[nr][nc] = <span class="nm">2</span>;
+                fresh<span class="op">--</span>;
+                q.add(<span class="kw">new int</span>[]{nr, nc, time<span class="op">+</span><span class="nm">1</span>});
+            }
+        }
+    }
+    <span class="kw">return</span> fresh == <span class="nm">0</span> ? elapsed : <span class="nm">-1</span>;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">oranges_rotting</span>(grid):
+    rows, cols = len(grid), len(grid[<span class="nm">0</span>])
+    q = deque()
+    fresh = <span class="nm">0</span>
+    <span class="kw">for</span> r <span class="kw">in</span> range(rows):
+        <span class="kw">for</span> c <span class="kw">in</span> range(cols):
+            <span class="kw">if</span> grid[r][c] == <span class="nm">2</span>: q.append((r, c, <span class="nm">0</span>))
+            <span class="kw">if</span> grid[r][c] == <span class="nm">1</span>: fresh <span class="op">+=</span> <span class="nm">1</span>
+    elapsed = <span class="nm">0</span>
+    <span class="kw">while</span> q:
+        r, c, t = q.popleft()
+        elapsed = max(elapsed, t)
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> [(-<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">0</span>,-<span class="nm">1</span>),(<span class="nm">0</span>,<span class="nm">1</span>)]:
+            nr, nc = r <span class="op">+</span> dr, c <span class="op">+</span> dc
+            <span class="kw">if</span> <span class="nm">0</span> <= nr < rows <span class="kw">and</span> <span class="nm">0</span> <= nc < cols <span class="kw">and</span> grid[nr][nc] == <span class="nm">1</span>:
+                grid[nr][nc] = <span class="nm">2</span>
+                fresh <span class="op">-=</span> <span class="nm">1</span>
+                q.append((nr, nc, t <span class="op">+</span> <span class="nm">1</span>))
+    <span class="kw">return</span> elapsed <span class="kw">if</span> fresh == <span class="nm">0</span> <span class="kw">else</span> <span class="nm">-1</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEEP DIVE 2 -->
+    <div class="deep-dive">
+      <div class="deep-dive-header">
+        <div class="deep-dive-title">62. Unique Paths</div>
+        <span class="diff-badge med">Medium</span>
+      </div>
+      <p>A robot starts at the top-left corner of an m×n grid and can only move right or down. Count the number of distinct paths to the bottom-right corner.</p>
+      <div class="callout green">
+        <strong>The recurrence insight:</strong> To reach cell (r, c), the robot must have come from either (r-1, c) [from above] or (r, c-1) [from the left]. So dp[r][c] = dp[r-1][c] + dp[r][c-1]. This is the fundamental 2D DP addition pattern — cell (r,c) accumulates contributions from exactly the cells it's reachable from in one step.
+      </div>
+      <h4>Space Optimization</h4>
+      <p>Each row only depends on the row above and the current row itself. You can reduce from O(m×n) space to O(n) by maintaining only a single row array, updating left-to-right.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">62. Unique Paths — 2D DP + Space Optimization</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="cm">// O(m*n) space — full DP table</span>
+<span class="kw">int</span> <span class="fn">uniquePaths</span>(<span class="kw">int</span> m, <span class="kw">int</span> n) {
+    <span class="kw">int</span>[][] dp = <span class="kw">new int</span>[m][n];
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">0</span>; r < m; r++) dp[r][<span class="nm">0</span>] = <span class="nm">1</span>; <span class="cm">// left column</span>
+    <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">0</span>; c < n; c++) dp[<span class="nm">0</span>][c] = <span class="nm">1</span>; <span class="cm">// top row</span>
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">1</span>; r < m; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">1</span>; c < n; c++)
+            dp[r][c] = dp[r<span class="op">-</span><span class="nm">1</span>][c] + dp[r][c<span class="op">-</span><span class="nm">1</span>];
+    <span class="kw">return</span> dp[m<span class="op">-</span><span class="nm">1</span>][n<span class="op">-</span><span class="nm">1</span>];
+}
+
+<span class="cm">// O(n) space — rolling row</span>
+<span class="kw">int</span> <span class="fn">uniquePathsO1</span>(<span class="kw">int</span> m, <span class="kw">int</span> n) {
+    <span class="kw">int</span>[] dp = <span class="kw">new int</span>[n];
+    Arrays.fill(dp, <span class="nm">1</span>);
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">1</span>; r < m; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">1</span>; c < n; c++)
+            dp[c] += dp[c<span class="op">-</span><span class="nm">1</span>];  <span class="cm">// dp[c] is "above", dp[c-1] is "left"</span>
+    <span class="kw">return</span> dp[n<span class="op">-</span><span class="nm">1</span>];
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="cm"># O(m*n) space</span>
+<span class="kw">def</span> <span class="fn">unique_paths</span>(m, n):
+    dp = [[<span class="nm">1</span>] <span class="op">*</span> n <span class="kw">for</span> _ <span class="kw">in</span> range(m)]
+    <span class="kw">for</span> r <span class="kw">in</span> range(<span class="nm">1</span>, m):
+        <span class="kw">for</span> c <span class="kw">in</span> range(<span class="nm">1</span>, n):
+            dp[r][c] = dp[r<span class="op">-</span><span class="nm">1</span>][c] + dp[r][c<span class="op">-</span><span class="nm">1</span>]
+    <span class="kw">return</span> dp[m<span class="op">-</span><span class="nm">1</span>][n<span class="op">-</span><span class="nm">1</span>]
+
+<span class="cm"># O(n) space — rolling row</span>
+<span class="kw">def</span> <span class="fn">unique_paths_o1</span>(m, n):
+    dp = [<span class="nm">1</span>] <span class="op">*</span> n
+    <span class="kw">for</span> r <span class="kw">in</span> range(<span class="nm">1</span>, m):
+        <span class="kw">for</span> c <span class="kw">in</span> range(<span class="nm">1</span>, n):
+            dp[c] <span class="op">+=</span> dp[c<span class="op">-</span><span class="nm">1</span>]  <span class="cm"># dp[c] = from above, dp[c-1] = from left</span>
+    <span class="kw">return</span> dp[n<span class="op">-</span><span class="nm">1</span>]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 05: REAL WORLD -->
+<div class="section" id="realworld">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">05 —</span>
+      <h2>Real-World Problems</h2>
+    </div>
+
+    <!-- RW 1: FLOOD FILL -->
+    <div class="rw-problem">
+      <div class="rw-domain">Pattern 1 · Flood Fill / DFS — Infrastructure Engineering</div>
+      <h3>Datacenter Zone Isolation Audit</h3>
+      <p>A datacenter floor plan is modeled as a 2D grid. Each cell is either an active server rack (<code>1</code>), empty aisle (<code>0</code>), or offline rack (<code>-1</code>). Two racks are in the same "cooling zone" if they are 4-directionally connected through active racks. Return the size of the largest cooling zone, and whether any zone contains a cell that borders the datacenter edge (an edge cell in a zone might indicate a cooling leak risk).</p>
+      <div class="example-block">Input: grid = [[1,1,0,0],[1,0,0,1],[0,0,1,1],[0,1,1,1]]
+Output: largest_zone = 4, has_edge_zone = True
+Explanation: Bottom-right 2×2 block + (1,3) forms a zone of size 4.
+             It touches the right edge → edge exposure detected.</div>
+      <div class="constraints">
+        <span class="constraint-tag">1 ≤ rows, cols ≤ 1000</span>
+        <span class="constraint-tag">cells ∈ {-1, 0, 1}</span>
+        <span class="constraint-tag">O(rows × cols) time</span>
+        <span class="constraint-tag">O(rows × cols) space (visited)</span>
+      </div>
+      <p><strong>Why flood fill?</strong> A cooling zone is a connected component of <code>1</code>-cells. DFS from any unvisited <code>1</code>-cell expands to every reachable rack in the same zone in one pass. The edge-detection check is free: if any cell visited during the DFS has <code>r == 0 || r == rows-1 || c == 0 || c == cols-1</code>, flag the zone. No second pass needed.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">Datacenter Zone Audit</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">int</span>[] <span class="fn">auditZones</span>(<span class="kw">int</span>[][] grid) {
+    <span class="kw">int</span> rows = grid.length, cols = grid[<span class="nm">0</span>].length;
+    <span class="kw">int</span> maxSize = <span class="nm">0</span>; <span class="kw">boolean</span> edgeExposed = <span class="kw">false</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">0</span>; r < rows; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">0</span>; c < cols; c++)
+            <span class="kw">if</span> (grid[r][c] == <span class="nm">1</span>) {
+                <span class="cm">// [0]=size, [1]=edgeFlag</span>
+                <span class="kw">int</span>[] info = <span class="kw">new int</span>[<span class="nm">2</span>];
+                <span class="fn">dfsZone</span>(grid, r, c, rows, cols, info);
+                <span class="kw">if</span> (info[<span class="nm">0</span>] > maxSize) maxSize = info[<span class="nm">0</span>];
+                <span class="kw">if</span> (info[<span class="nm">1</span>] == <span class="nm">1</span>) edgeExposed = <span class="kw">true</span>;
+            }
+    <span class="kw">return new int</span>[]{maxSize, edgeExposed ? <span class="nm">1</span> : <span class="nm">0</span>};
+}
+
+<span class="kw">void</span> <span class="fn">dfsZone</span>(<span class="kw">int</span>[][] g, <span class="kw">int</span> r, <span class="kw">int</span> c, <span class="kw">int</span> rows, <span class="kw">int</span> cols, <span class="kw">int</span>[] info) {
+    <span class="kw">if</span> (r < <span class="nm">0</span> || r >= rows || c < <span class="nm">0</span> || c >= cols || g[r][c] != <span class="nm">1</span>) <span class="kw">return</span>;
+    g[r][c] = <span class="nm">2</span>;  info[<span class="nm">0</span>]<span class="op">++</span>;
+    <span class="kw">if</span> (r==<span class="nm">0</span>||r==rows<span class="op">-</span><span class="nm">1</span>||c==<span class="nm">0</span>||c==cols<span class="op">-</span><span class="nm">1</span>) info[<span class="nm">1</span>] = <span class="nm">1</span>;
+    <span class="fn">dfsZone</span>(g, r<span class="op">-</span><span class="nm">1</span>,c,rows,cols,info); <span class="fn">dfsZone</span>(g, r<span class="op">+</span><span class="nm">1</span>,c,rows,cols,info);
+    <span class="fn">dfsZone</span>(g, r,c<span class="op">-</span><span class="nm">1</span>,rows,cols,info); <span class="fn">dfsZone</span>(g, r,c<span class="op">+</span><span class="nm">1</span>,rows,cols,info);
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">audit_zones</span>(grid):
+    rows, cols = len(grid), len(grid[<span class="nm">0</span>])
+    max_size, edge_exposed = <span class="nm">0</span>, <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(r, c):
+        <span class="kw">if</span> r < <span class="nm">0</span> <span class="kw">or</span> r >= rows <span class="kw">or</span> c < <span class="nm">0</span> <span class="kw">or</span> c >= cols <span class="kw">or</span> grid[r][c] != <span class="nm">1</span>:
+            <span class="kw">return</span> <span class="nm">0</span>, <span class="kw">False</span>
+        grid[r][c] = <span class="nm">2</span>
+        is_edge = r == <span class="nm">0</span> <span class="kw">or</span> r == rows<span class="op">-</span><span class="nm">1</span> <span class="kw">or</span> c == <span class="nm">0</span> <span class="kw">or</span> c == cols<span class="op">-</span><span class="nm">1</span>
+        size = <span class="nm">1</span>
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> [(-<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">0</span>,-<span class="nm">1</span>),(<span class="nm">0</span>,<span class="nm">1</span>)]:
+            s, e = <span class="fn">dfs</span>(r<span class="op">+</span>dr, c<span class="op">+</span>dc)
+            size <span class="op">+=</span> s; is_edge <span class="op">|=</span> e
+        <span class="kw">return</span> size, is_edge
+
+    <span class="kw">for</span> r <span class="kw">in</span> range(rows):
+        <span class="kw">for</span> c <span class="kw">in</span> range(cols):
+            <span class="kw">if</span> grid[r][c] == <span class="nm">1</span>:
+                sz, edge = <span class="fn">dfs</span>(r, c)
+                max_size = max(max_size, sz)
+                edge_exposed <span class="op">|=</span> edge
+    <span class="kw">return</span> max_size, edge_exposed</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- RW 2: BFS -->
+    <div class="rw-problem">
+      <div class="rw-domain">Pattern 2 · BFS Shortest Path — Game Development</div>
+      <h3>NPC Pathfinding with Obstacle Avoidance</h3>
+      <p>In a tile-based strategy game, an NPC needs to reach a target tile in the minimum number of moves. The game map is an m×n grid where <code>0</code> = passable tile and <code>1</code> = wall. Return the path as a list of coordinates, or an empty list if no path exists. If different tiles had different movement costs, this would stop being a BFS problem and become Dijkstra instead.</p>
+      <div class="example-block">Input: grid = [[0,0,1,0],[0,1,0,0],[0,0,0,1],[1,0,0,0]]
+       start = (0,0), target = (3,3)
+Output: [(0,0),(1,0),(2,0),(2,1),(2,2),(3,2),(3,3)] — length 7
+Note: Several paths exist; BFS guarantees minimum length.</div>
+      <div class="constraints">
+        <span class="constraint-tag">1 ≤ m, n ≤ 500</span>
+        <span class="constraint-tag">4-directional movement</span>
+        <span class="constraint-tag">O(m × n) time</span>
+        <span class="constraint-tag">Return path, not just length</span>
+      </div>
+      <p><strong>Why BFS?</strong> BFS processes all cells at distance k before any at distance k+1. This level-order property guarantees the first time we reach the target, it's via the shortest path. DFS might find a path but cannot guarantee it's shortest without exhaustive search. To reconstruct the path, store a <code>parent</code> map pointing each cell to the cell it was reached from, then backtrack from target to source.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">NPC Pathfinding — BFS with Path Reconstruction</span></div>
+        <div class="lang-pane java active">
+          <pre>List&lt;<span class="kw">int</span>[]&gt; <span class="fn">findPath</span>(<span class="kw">int</span>[][] grid, <span class="kw">int</span>[] start, <span class="kw">int</span>[] target) {
+    <span class="kw">int</span> rows = grid.length, cols = grid[<span class="nm">0</span>].length;
+    Map&lt;String, String&gt; parent = <span class="kw">new</span> HashMap&lt;&gt;();
+    Queue&lt;<span class="kw">int</span>[]&gt; q = <span class="kw">new</span> LinkedList&lt;&gt;();
+    q.add(start);
+    <span class="kw">String</span> startKey = start[<span class="nm">0</span>] + <span class="st">","</span> + start[<span class="nm">1</span>];
+    parent.put(startKey, <span class="kw">null</span>);
+    <span class="kw">int</span>[] dr = {<span class="nm">-1</span>,<span class="nm">1</span>,<span class="nm">0</span>,<span class="nm">0</span>}, dc = {<span class="nm">0</span>,<span class="nm">0</span>,<span class="nm">-1</span>,<span class="nm">1</span>};
+    <span class="kw">while</span> (!q.isEmpty()) {
+        <span class="kw">int</span>[] cur = q.poll();
+        <span class="kw">if</span> (cur[<span class="nm">0</span>]==target[<span class="nm">0</span>] && cur[<span class="nm">1</span>]==target[<span class="nm">1</span>]) <span class="kw">return</span> <span class="fn">reconstruct</span>(parent, target);
+        <span class="kw">for</span> (<span class="kw">int</span> d = <span class="nm">0</span>; d < <span class="nm">4</span>; d++) {
+            <span class="kw">int</span> nr = cur[<span class="nm">0</span>]+dr[d], nc = cur[<span class="nm">1</span>]+dc[d];
+            <span class="kw">String</span> key = nr+<span class="st">","</span>+nc;
+            <span class="kw">if</span> (nr>=<span class="nm">0</span>&&nr<rows&&nc>=<span class="nm">0</span>&&nc<cols&&grid[nr][nc]==<span class="nm">0</span>&&!parent.containsKey(key)) {
+                parent.put(key, cur[<span class="nm">0</span>]+<span class="st">","</span>+cur[<span class="nm">1</span>]);
+                q.add(<span class="kw">new int</span>[]{nr,nc});
+            }
+        }
+    }
+    <span class="kw">return</span> <span class="kw">new</span> ArrayList&lt;&gt;();  <span class="cm">// unreachable</span>
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">find_path</span>(grid, start, target):
+    rows, cols = len(grid), len(grid[<span class="nm">0</span>])
+    parent = {tuple(start): <span class="kw">None</span>}
+    q = deque([start])
+    <span class="kw">while</span> q:
+        r, c = q.popleft()
+        <span class="kw">if</span> [r, c] == target:
+            <span class="kw">return</span> <span class="fn">reconstruct</span>(parent, tuple(target))
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> [(-<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">0</span>,-<span class="nm">1</span>),(<span class="nm">0</span>,<span class="nm">1</span>)]:
+            nr, nc = r<span class="op">+</span>dr, c<span class="op">+</span>dc
+            <span class="kw">if</span> <span class="nm">0</span><=nr<rows <span class="kw">and</span> <span class="nm">0</span><=nc<cols <span class="kw">and</span> grid[nr][nc]==<span class="nm">0</span> \
+               <span class="kw">and</span> (nr,nc) <span class="kw">not in</span> parent:
+                parent[(nr,nc)] = (r,c)
+                q.append((nr,nc))
+    <span class="kw">return</span> []
+
+<span class="kw">def</span> <span class="fn">reconstruct</span>(parent, node):
+    path = []
+    <span class="kw">while</span> node <span class="kw">is not None</span>:
+        path.append(list(node))
+        node = parent[node]
+    <span class="kw">return</span> path[::-<span class="nm">1</span>]</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- RW 3: 2D DP -->
+    <div class="rw-problem">
+      <div class="rw-domain">Pattern 3 · 2D DP — Financial Technology</div>
+      <h3>Trading Strategy Profit Maximization</h3>
+      <p>A quantitative analyst models a strategy execution plan as a 2D grid of expected P&L adjustments. The analyst starts at the top-left cell and can only move right or down at each step (representing sequential time windows and instrument selections). Each cell holds an integer P&L delta (positive = profit, negative = loss). Find the maximum total P&L path from top-left to bottom-right.</p>
+      <div class="example-block">Input: pnl = [[2, -3, 1], [-1, 5, 2], [3, -1, 4]]
+Output: 12
+One valid path: (0,0)→(1,0)→(2,0)→(2,1)→(2,2) = 2 + (-1) + 3 + (-1) + 4 = 7
+Best path: (0,0)→(1,0)→(1,1)→(1,2)→(2,2) = 2 + (-1) + 5 + 2 + 4 = 12</div>
+      <div class="constraints">
+        <span class="constraint-tag">1 ≤ m, n ≤ 200</span>
+        <span class="constraint-tag">-10⁴ ≤ pnl[i][j] ≤ 10⁴</span>
+        <span class="constraint-tag">O(m × n) time and space</span>
+        <span class="constraint-tag">Can optimize to O(n) space</span>
+      </div>
+      <p><strong>Why 2D DP?</strong> The right/down constraint means cell (r,c) is reachable from exactly (r-1,c) or (r,c-1). The maximum P&L to reach (r,c) is the cell's own value plus the best of what we've accumulated from either direction. This optimal substructure property is the signature of DP — the global optimum is built from local optima, and each subproblem is solved exactly once.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">Maximum P&L Path (Max Path Sum)</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">int</span> <span class="fn">maxPnlPath</span>(<span class="kw">int</span>[][] pnl) {
+    <span class="kw">int</span> m = pnl.length, n = pnl[<span class="nm">0</span>].length;
+    <span class="kw">int</span>[][] dp = <span class="kw">new int</span>[m][n];
+    dp[<span class="nm">0</span>][<span class="nm">0</span>] = pnl[<span class="nm">0</span>][<span class="nm">0</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">1</span>; c < n; c++) dp[<span class="nm">0</span>][c] = dp[<span class="nm">0</span>][c<span class="op">-</span><span class="nm">1</span>] + pnl[<span class="nm">0</span>][c]; <span class="cm">// top row</span>
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">1</span>; r < m; r++) dp[r][<span class="nm">0</span>] = dp[r<span class="op">-</span><span class="nm">1</span>][<span class="nm">0</span>] + pnl[r][<span class="nm">0</span>]; <span class="cm">// left col</span>
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">1</span>; r < m; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">1</span>; c < n; c++)
+            dp[r][c] = Math.max(dp[r<span class="op">-</span><span class="nm">1</span>][c], dp[r][c<span class="op">-</span><span class="nm">1</span>]) + pnl[r][c];
+    <span class="kw">return</span> dp[m<span class="op">-</span><span class="nm">1</span>][n<span class="op">-</span><span class="nm">1</span>];
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">max_pnl_path</span>(pnl):
+    m, n = len(pnl), len(pnl[<span class="nm">0</span>])
+    dp = [[<span class="nm">0</span>] <span class="op">*</span> n <span class="kw">for</span> _ <span class="kw">in</span> range(m)]
+    dp[<span class="nm">0</span>][<span class="nm">0</span>] = pnl[<span class="nm">0</span>][<span class="nm">0</span>]
+    <span class="kw">for</span> c <span class="kw">in</span> range(<span class="nm">1</span>, n): dp[<span class="nm">0</span>][c] = dp[<span class="nm">0</span>][c<span class="op">-</span><span class="nm">1</span>] + pnl[<span class="nm">0</span>][c]
+    <span class="kw">for</span> r <span class="kw">in</span> range(<span class="nm">1</span>, m): dp[r][<span class="nm">0</span>] = dp[r<span class="op">-</span><span class="nm">1</span>][<span class="nm">0</span>] + pnl[r][<span class="nm">0</span>]
+    <span class="kw">for</span> r <span class="kw">in</span> range(<span class="nm">1</span>, m):
+        <span class="kw">for</span> c <span class="kw">in</span> range(<span class="nm">1</span>, n):
+            dp[r][c] = max(dp[r<span class="op">-</span><span class="nm">1</span>][c], dp[r][c<span class="op">-</span><span class="nm">1</span>]) + pnl[r][c]
+    <span class="kw">return</span> dp[m<span class="op">-</span><span class="nm">1</span>][n<span class="op">-</span><span class="nm">1</span>]</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- RW 4: ROTATE -->
+    <div class="rw-problem">
+      <div class="rw-domain">Pattern 4 · Matrix Rotation — Computer Graphics / Image Processing</div>
+      <h3>Sprite Rotation Engine</h3>
+      <p>A 2D game engine stores sprites as n×n integer pixel grids (ARGB values). Implement a function to rotate a sprite by 0°, 90°, 180°, or 270° clockwise in-place. The engine calls this function at runtime during rendering, so it must operate without allocating a new grid (O(1) extra space for square sprites).</p>
+      <div class="example-block">Input: sprite = [[1,2,3],[4,5,6],[7,8,9]], degrees = 90
+Output: [[7,4,1],[8,5,2],[9,6,3]]
+Note: Cell (r,c) maps to (c, n-1-r) after 90° CW rotation.
+      For 270°: transpose then reverse columns (or rotate 90° × 3).</div>
+      <div class="constraints">
+        <span class="constraint-tag">1 ≤ n ≤ 1000 (always square)</span>
+        <span class="constraint-tag">degrees ∈ {0, 90, 180, 270}</span>
+        <span class="constraint-tag">O(n²) time, O(1) extra space</span>
+        <span class="constraint-tag">Must modify in-place</span>
+      </div>
+      <p><strong>Why transpose + reverse?</strong> Allocating a new n×n grid works but is O(n²) space — fine for small sprites but prohibitive for 1024×1024 textures. The transpose-then-reverse approach achieves the same mapping using only a single swap variable. It's a mathematical decomposition of a 2D rotation into two 1D mirror operations, each of which can be done in-place trivially.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-block-title">Sprite Rotation Engine</span></div>
+        <div class="lang-pane java active">
+          <pre><span class="kw">void</span> <span class="fn">rotateCW90</span>(<span class="kw">int</span>[][] s) {
+    <span class="kw">int</span> n = s.length;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < n; i++)  <span class="cm">// transpose</span>
+        <span class="kw">for</span> (<span class="kw">int</span> j = i<span class="op">+</span><span class="nm">1</span>; j < n; j++) { <span class="kw">int</span> t=s[i][j]; s[i][j]=s[j][i]; s[j][i]=t; }
+    <span class="kw">for</span> (<span class="kw">int</span>[] row : s) {  <span class="cm">// reverse rows</span>
+        <span class="kw">int</span> l=<span class="nm">0</span>, r=n<span class="op">-</span><span class="nm">1</span>;
+        <span class="kw">while</span>(l<r){<span class="kw">int</span> t=row[l];row[l<span class="op">++</span>]=row[r];row[r<span class="op">--</span>]=t;}
+    }
+}
+
+<span class="kw">void</span> <span class="fn">rotateSpriteBy</span>(<span class="kw">int</span>[][] sprite, <span class="kw">int</span> degrees) {
+    <span class="kw">int</span> times = (degrees / <span class="nm">90</span>) % <span class="nm">4</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < times; i++) <span class="fn">rotateCW90</span>(sprite);
+}</pre>
+        </div>
+        <div class="lang-pane python">
+          <pre><span class="kw">def</span> <span class="fn">rotate_cw90</span>(s):
+    n = len(s)
+    <span class="cm"># Transpose</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(n):
+        <span class="kw">for</span> j <span class="kw">in</span> range(i<span class="op">+</span><span class="nm">1</span>, n):
+            s[i][j], s[j][i] = s[j][i], s[i][j]
+    <span class="cm"># Reverse each row</span>
+    <span class="kw">for</span> row <span class="kw">in</span> s: row.reverse()
+
+<span class="kw">def</span> <span class="fn">rotate_sprite</span>(sprite, degrees):
+    times = (degrees // <span class="nm">90</span>) % <span class="nm">4</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> range(times):
+        <span class="fn">rotate_cw90</span>(sprite)</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <strong>Real-world → LeetCode mappings:</strong>
+      Datacenter Zone Audit ≈ <em>695. Max Area of Island</em> + edge-detection extension.
+      NPC Pathfinding ≈ <em>1091. Shortest Path in Binary Matrix</em> with path reconstruction.
+      Trading P&L Path ≈ <em>64. Minimum Path Sum</em> with max instead of min.
+      Sprite Rotation ≈ <em>48. Rotate Image</em> with parameterized angle.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 06: CHEAT SHEET -->
+<div class="section" id="cheatsheet">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">06 —</span>
+      <h2>Reference Cheat Sheet</h2>
+    </div>
+
+    <table class="cheat-table">
+      <thead>
+        <tr>
+          <th>Problem</th>
+          <th>Pattern</th>
+          <th>Time</th>
+          <th>Space</th>
+          <th>Diff</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>200. Number of Islands</td><td>DFS Flood Fill</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>695. Max Area of Island</td><td>DFS + count</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>130. Surrounded Regions</td><td>DFS from border</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>417. Pacific Atlantic</td><td>Reverse DFS × 2</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>994. Rotting Oranges</td><td>Multi-source BFS</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>542. 01 Matrix</td><td>Multi-source BFS</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>1091. Shortest Path in Binary Matrix</td><td>BFS</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>54. Spiral Matrix</td><td>4-boundary shrink</td><td>O(m·n)</td><td>O(1)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>48. Rotate Image</td><td>Transpose + reverse</td><td>O(n²)</td><td>O(1)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>73. Set Matrix Zeroes</td><td>Mark then zero</td><td>O(m·n)</td><td>O(1)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>62. Unique Paths</td><td>2D DP</td><td>O(m·n)</td><td>O(n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>64. Minimum Path Sum</td><td>2D DP</td><td>O(m·n)</td><td>O(1)*</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>221. Maximal Square</td><td>2D DP (min of 3)</td><td>O(m·n)</td><td>O(n)</td><td><span class="diff-badge med">Med</span></td></tr>
+        <tr><td>85. Maximal Rectangle</td><td>DP + histogram</td><td>O(m·n)</td><td>O(n)</td><td><span class="diff-badge hard">Hard</span></td></tr>
+        <tr><td>827. Making Large Island</td><td>DFS + label + BFS</td><td>O(m·n)</td><td>O(m·n)</td><td><span class="diff-badge hard">Hard</span></td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:2.5rem;">
+      <h3 style="font-family:var(--font-display);font-size:1.3rem;margin-bottom:1.2rem;">Recommended Learning Path</h3>
+      <div class="learning-path">
+        <div class="lp-item">
+          <div class="lp-num">1</div>
+          <div class="lp-content">
+            <h4>Grid Fundamentals</h4>
+            <p>733. Flood Fill → 200. Number of Islands → 695. Max Area of Island. Internalize the bounds check and DFS skeleton.</p>
+          </div>
+        </div>
+        <div class="lp-item">
+          <div class="lp-num">2</div>
+          <div class="lp-content">
+            <h4>BFS on Grids</h4>
+            <p>994. Rotting Oranges (multi-source) → 542. 01 Matrix → 1091. Shortest Path in Binary Matrix. Focus on when to use BFS vs DFS.</p>
+          </div>
+        </div>
+        <div class="lp-item">
+          <div class="lp-num">3</div>
+          <div class="lp-content">
+            <h4>Transformation Problems</h4>
+            <p>54. Spiral Matrix → 48. Rotate Image → 59. Spiral Matrix II. Boundary pointer management is the key skill.</p>
+          </div>
+        </div>
+        <div class="lp-item">
+          <div class="lp-num">4</div>
+          <div class="lp-content">
+            <h4>2D Dynamic Programming</h4>
+            <p>62. Unique Paths → 64. Min Path Sum → 221. Maximal Square. Graduate to 85. Maximal Rectangle (hard).</p>
+          </div>
+        </div>
+        <div class="lp-item">
+          <div class="lp-num">5</div>
+          <div class="lp-content">
+            <h4>Advanced Combinations</h4>
+            <p>130. Surrounded Regions → 417. Pacific Atlantic → 827. Making a Large Island. These combine multiple patterns in one problem.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 07: MENTAL MODEL -->
+<div class="section" id="mental-model" style="border-bottom:none">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">07 —</span>
+      <h2>Mental Model</h2>
+    </div>
+
+    <p>When you see a grid problem in an interview, run through this decision tree in under 30 seconds:</p>
+
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <div class="pattern-card-label">Ask first</div>
+        <h3>"What am I computing?"</h3>
+        <p>Counting/finding connected regions? → DFS/BFS flood fill. Shortest path / min steps? → BFS. Optimal value along a path? → 2D DP. Geometric rearrangement? → In-place transformation.</p>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card-label">Ask second</div>
+        <h3>"What's the neighborhood?"</h3>
+        <p>4-directional (most problems). 8-directional (diagonal movement). Custom offsets (knight moves, etc.). Choose the right direction array before writing any logic.</p>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card-label">Ask third</div>
+        <h3>"How do I mark visited?"</h3>
+        <p>Separate boolean grid (preserves input). In-place mutation (saves space, destructive). For DFS, in-place is fine if the problem says so or if you can restore after backtracking.</p>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card-label">Ask fourth</div>
+        <h3>"What's the base case?"</h3>
+        <p>For DP: first row and first column. For BFS: the source cells seeded into the queue. For DFS: the termination condition (out of bounds, wrong type, already visited).</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>The elimination argument for BFS:</strong> BFS is safe to use for shortest-path because it explores cells in non-decreasing order of distance. Once a cell is dequeued, we've found the shortest way to reach it — any later path to the same cell would have traveled through more levels and arrived later. This is the argument that lets us skip revisiting already-visited cells.
+    </div>
+
+    <div class="callout blue">
+      <strong>Interview sentence:</strong> "I'm treating this as a coordinate-selection problem. The neighborhood is 4-directional, and since we need the minimum number of steps, BFS guarantees optimality by exploring cells in level order — the first time we reach the target is provably the shortest path. I'll seed a visited set at the same time I enqueue, not at dequeue, to prevent duplicate work in the queue."
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <strong>AlgorithmCraft</strong> — 2D arrays &amp; matrix patterns · 5 patterns · 15 problems covered
+  </div>
+</footer>
+
+<script>
+// ─── THEME TOGGLE ───
+function updateThemeButton() {
+  const btn = document.getElementById('theme-btn');
+  if (!btn) return;
+  const dark = document.documentElement.classList.contains('dark');
+  btn.textContent = dark ? '☀️' : '🌙';
+}
+
+function toggleTheme() {
+  const nextDark = !document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', nextDark);
+  updateThemeButton();
+  try { localStorage.setItem('dsa-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
+}
+
+// ─── LANGUAGE TOGGLE ───
+let currentLang = 'java';
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ─── TAB SWITCHER ───
+function showTab(e, id) {
+  const parent = e.target.closest('.tabs') || e.target.parentElement;
+  const container = parent.parentElement || parent;
+  container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── BFS VISUALIZER ───
+const bfsMatrix = [
+  [0,0,1,0,1,0],
+  [0,1,0,0,0,0],
+  [0,0,0,1,0,0],
+  [1,0,0,0,1,0],
+  [0,0,1,0,0,0]
+];
+const BFS_ROWS = 5, BFS_COLS = 6;
+const BFS_START = [0,0], BFS_END = [4,5];
+let bfsQueue = [], bfsVisited, bfsStates = [], bfsStateIdx = 0;
+
+function bfsReset() {
+  bfsQueue = []; bfsStateIdx = 0; bfsStates = [];
+  bfsVisited = Array.from({length:BFS_ROWS},()=>new Array(BFS_COLS).fill(false));
+  bfsVisited[0][0] = true;
+  bfsQueue.push([0,0,0]);
+  bfsStates.push({ queue:[...bfsQueue.map(x=>[...x])], current:null, visited:bfsVisited.map(r=>[...r]), log:'BFS initialized. Start=S(0,0), End=E(4,5). Press Step →' });
+  renderBfsGrid(null, bfsVisited);
+  document.getElementById('bfs-log').textContent = 'BFS initialized. Start=S(0,0), End=E(4,5). Press Step →';
+}
+
+function renderBfsGrid(current, visited) {
+  const el = document.getElementById('bfs-grid');
+  el.innerHTML = '';
+  for(let r=0;r<BFS_ROWS;r++) for(let c=0;c<BFS_COLS;c++) {
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+    let val = '', cls = '';
+    if(r===BFS_START[0]&&c===BFS_START[1]){val='S';cls='highlight-start';}
+    else if(r===BFS_END[0]&&c===BFS_END[1]){val='E';cls='highlight-end';}
+    else if(bfsMatrix[r][c]===1){val='▪';cls='highlight-wall';}
+    else if(current&&current[0]===r&&current[1]===c){val='●';cls='highlight-current';}
+    else if(visited[r][c]){val='·';cls='highlight-visited';}
+    else val='';
+    cell.textContent = val;
+    if(cls) cell.classList.add(cls);
+    el.appendChild(cell);
+  }
+}
+
+function bfsStep() {
+  if(bfsQueue.length===0){document.getElementById('bfs-log').textContent='BFS complete. No more cells to explore. Reset to start again.';return;}
+  const [r,c,dist] = bfsQueue.shift();
+  let log = `Dequeued (${r},${c}) at dist=${dist}. `;
+  if(r===BFS_END[0]&&c===BFS_END[1]){
+    document.getElementById('bfs-log').textContent=`✓ Reached target E(${r},${c}) in ${dist} steps!`;
+    renderBfsGrid([r,c,'end'],bfsVisited);
+    bfsQueue=[];return;
+  }
+  const DIRS=[[-1,0],[1,0],[0,-1],[0,1]];
+  let added=[];
+  for(const[dr,dc]of DIRS){
+    const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<BFS_ROWS&&nc>=0&&nc<BFS_COLS&&!bfsVisited[nr][nc]&&bfsMatrix[nr][nc]===0){
+      bfsVisited[nr][nc]=true;bfsQueue.push([nr,nc,dist+1]);added.push(`(${nr},${nc})`);
+    }
+  }
+  log += added.length?`Enqueued: ${added.join(', ')}. Queue size: ${bfsQueue.length}.`:`No new neighbors. Queue size: ${bfsQueue.length}.`;
+  renderBfsGrid([r,c],bfsVisited);
+  document.getElementById('bfs-log').textContent=log;
+}
+
+// ─── SPIRAL VISUALIZER ───
+const spiralMatrix = [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20]];
+let spiralOrder = [], spiralIdx = 0;
+
+function buildSpiralOrder() {
+  spiralOrder=[];
+  let top=0,bottom=3,left=0,right=4;
+  while(top<=bottom&&left<=right){
+    for(let c=left;c<=right;c++)spiralOrder.push([top,c]);top++;
+    for(let r=top;r<=bottom;r++)spiralOrder.push([r,right]);right--;
+    if(top<=bottom){for(let c=right;c>=left;c--)spiralOrder.push([bottom,c]);bottom--;}
+    if(left<=right){for(let r=bottom;r>=top;r--)spiralOrder.push([r,left]);left++;}
+  }
+}
+
+function spiralReset(){
+  buildSpiralOrder();spiralIdx=0;
+  renderSpiralGrid([]);
+  document.getElementById('spiral-log').textContent='Press Step → to begin spiral traversal';
+}
+
+function renderSpiralGrid(visited){
+  const el=document.getElementById('spiral-grid');el.innerHTML='';
+  for(let r=0;r<4;r++) for(let c=0;c<5;c++){
+    const cell=document.createElement('div');cell.className='grid-cell';
+    cell.textContent=spiralMatrix[r][c];
+    const vIdx=visited.findIndex(([vr,vc])=>vr===r&&vc===c);
+    if(vIdx===visited.length-1&&visited.length>0)cell.classList.add('highlight-current');
+    else if(vIdx>=0)cell.classList.add('highlight-path');
+    el.appendChild(cell);
+  }
+}
+
+function spiralStep(){
+  if(spiralIdx>=spiralOrder.length){document.getElementById('spiral-log').textContent=`✓ Spiral complete! Visited all ${spiralOrder.length} cells. Reset to start again.`;return;}
+  const visited=spiralOrder.slice(0,spiralIdx+1);
+  const [r,c]=spiralOrder[spiralIdx];
+  renderSpiralGrid(visited);
+  document.getElementById('spiral-log').textContent=`Step ${spiralIdx+1}/${spiralOrder.length}: visited (${r},${c}) = ${spiralMatrix[r][c]}. Collected: [${visited.map(([vr,vc])=>spiralMatrix[vr][vc]).join(', ')}]`;
+  spiralIdx++;
+}
+
+// ─── INIT ───
+updateThemeButton();
+bfsReset();spiralReset();
+</script>
+</body>
+</html>
