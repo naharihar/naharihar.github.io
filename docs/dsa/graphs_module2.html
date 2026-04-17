@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 — Storing a Graph in Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1814;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --paper: #f5f2ed;
+  --paper2: #edeae3;
+  --paper3: #e4e0d8;
+  --border: #d4cfc6;
+  --warm: #c8521a;
+  --warm2: #a8421a;
+  --blue: #2563a8;
+  --green: #1a7a4a;
+  --amber: #b07010;
+  --red: #a82020;
+  --purple: #6b35a8;
+  --shadow: rgba(26,24,20,0.1);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.75; }
+
+.progress-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 3px; background: var(--paper3); }
+.progress-fill { height: 100%; background: var(--blue); width: 0%; transition: width 0.4s ease; }
+
+nav {
+  position: sticky; top: 3px; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(245,242,237,0.95); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border); padding: 0 2rem; height: 52px;
+}
+.nav-module { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink3); letter-spacing: 0.08em; }
+.nav-title { font-family: var(--font-display); font-size: 1rem; color: var(--ink2); }
+.nav-prev { font-size: 0.78rem; color: var(--ink3); text-decoration: none; }
+
+.chapter {
+  max-width: 740px; margin: 0 auto; padding: 5rem 2rem 3rem;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.chapter.visible { opacity: 1; transform: none; }
+.chapter-eyebrow { font-family: var(--font-mono); font-size: 0.68rem; color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.chapter h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.2; margin-bottom: 1.4rem; }
+.chapter h2 em { font-style: italic; color: var(--blue); }
+.chapter h3 { font-family: var(--font-display); font-size: 1.3rem; margin: 1.6rem 0 0.6rem; }
+.chapter p { color: var(--ink2); margin-bottom: 1rem; font-size: 0.97rem; }
+.chapter p strong { color: var(--ink); }
+
+.insight { background: var(--paper2); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; font-size: 0.9rem; color: var(--ink2); }
+.insight.warm { border-left-color: var(--warm); }
+.insight.green { border-left-color: var(--green); }
+.insight.amber { border-left-color: var(--amber); }
+.insight.purple { border-left-color: var(--purple); }
+.insight strong { color: var(--ink); }
+
+.chapter-divider { max-width: 740px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; gap: 1rem; }
+.chapter-divider::before, .chapter-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.chapter-divider span { font-family: var(--font-mono); font-size: 0.65rem; color: var(--ink3); letter-spacing: 0.1em; white-space: nowrap; }
+
+/* CODE DISPLAY */
+.code-block {
+  background: #1e1c18; border-radius: 10px; overflow: hidden; margin: 1rem 0;
+  border: 1px solid #3a3630;
+}
+.code-header { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1rem; background: #2a2720; border-bottom: 1px solid #3a3630; }
+.code-filename { font-family: var(--font-mono); font-size: 0.7rem; color: #8a8070; }
+.code-lang { font-family: var(--font-mono); font-size: 0.68rem; color: #5a8a5a; }
+pre { padding: 1.1rem 1.2rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.7; overflow-x: auto; color: #e0dcd0; }
+.kw { color: #cf9060; }
+.fn { color: #7ab8e8; }
+.cm { color: #6a6458; font-style: italic; }
+.st { color: #88c880; }
+.nm { color: #e8c878; }
+.op { color: #c8a868; }
+.ty { color: #c888c8; }
+
+/* REPRESENTATION CARDS */
+.rep-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin: 1.5rem 0 0; }
+.rep-tab {
+  padding: 0.7rem 1.2rem; font-size: 0.83rem; font-weight: 500;
+  color: var(--ink3); cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.15s; white-space: nowrap;
+}
+.rep-tab:hover { color: var(--ink); }
+.rep-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.rep-panel { display: none; padding: 1.5rem 0; }
+.rep-panel.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+/* INTERACTIVE CONVERTER */
+.converter {
+  background: #fff; border: 1.5px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin: 1.5rem 0;
+}
+.converter-header { padding: 0.8rem 1.2rem; background: var(--paper2); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink3); letter-spacing: 0.06em; }
+.converter-body { display: grid; grid-template-columns: 1fr 1fr; }
+@media(max-width:600px) { .converter-body { grid-template-columns: 1fr; } }
+.converter-left { padding: 1.2rem; border-right: 1px solid var(--border); }
+.converter-right { padding: 1.2rem; }
+.converter-section-title { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem; }
+.canvas-graph { display: block; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: var(--paper2); }
+.output-tabs { display: flex; gap: 6px; margin-bottom: 0.8rem; }
+.out-tab { font-family: var(--font-mono); font-size: 0.7rem; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--paper2); color: var(--ink3); cursor: pointer; transition: all .15s; }
+.out-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.output-display { background: #1e1c18; border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.7; color: #e0dcd0; min-height: 160px; overflow-x: auto; }
+
+/* EDGE BUILDER */
+.edge-builder { margin-top: 1rem; }
+.edge-builder-title { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.edge-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.edge-chip {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--paper2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 8px;
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink2);
+}
+.edge-chip button { background: none; border: none; color: var(--ink3); cursor: pointer; font-size: 0.8rem; padding: 0 2px; line-height: 1; }
+.edge-chip button:hover { color: var(--red); }
+.add-edge-row { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+.node-select {
+  background: var(--paper2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 8px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink);
+  cursor: pointer;
+}
+.add-btn {
+  background: var(--blue); border: none; border-radius: 6px; color: #fff;
+  font-size: 0.78rem; font-weight: 500; padding: 5px 12px; cursor: pointer;
+  transition: background .15s;
+}
+.add-btn:hover { background: #1a4e8a; }
+
+/* TRADEOFFS TABLE */
+.tradeoffs { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin: 1.2rem 0; }
+.tradeoffs th { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.07em; padding: 0.5rem 0.8rem; border-bottom: 2px solid var(--border); text-align: left; background: var(--paper2); }
+.tradeoffs td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); color: var(--ink2); vertical-align: top; }
+.tradeoffs tr:last-child td { border-bottom: none; }
+.tradeoffs tr:hover td { background: var(--paper2); }
+.good { color: var(--green); font-weight: 600; }
+.bad { color: var(--red); font-weight: 600; }
+.ok { color: var(--amber); font-weight: 600; }
+
+/* QUIZ */
+.quiz-q { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 1.4rem; margin: 1rem 0; }
+.quiz-q p { font-weight: 500; color: var(--ink); margin-bottom: 0.8rem; font-size: 0.92rem; }
+.quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt { background: var(--paper2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; color: var(--ink2); cursor: pointer; text-align: left; transition: all .15s; }
+.quiz-opt:hover:not(.locked) { border-color: var(--ink3); color: var(--ink); background: #fff; }
+.quiz-opt.correct { background: #e8f5ee; border-color: var(--green); color: var(--green); }
+.quiz-opt.wrong { background: #faeaea; border-color: var(--red); color: var(--red); }
+.quiz-opt.locked { cursor: default; }
+.quiz-feedback { margin-top: 0.6rem; font-size: 0.83rem; font-weight: 500; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok { color: var(--green); }
+.quiz-feedback.no { color: var(--red); }
+
+/* COMPLETION */
+.completion { display: none; background: linear-gradient(135deg, #1a4e8a 0%, #2563a8 100%); border-radius: 12px; padding: 2rem; text-align: center; margin: 2rem 0; color: #fff; }
+.completion.show { display: block; animation: fadeUp 0.5s ease; }
+.completion h3 { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 0.5rem; }
+.completion p { opacity: 0.85; font-size: 0.9rem; margin-bottom: .3rem; }
+.btn-next { display: inline-block; margin-top: 1rem; background: #fff; color: var(--blue); font-weight: 600; font-size: 0.9rem; padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; transition: transform .15s; }
+.btn-next:hover { transform: scale(1.03); }
+
+.hl { color: var(--warm); font-weight: 600; }
+.hl-blue { color: var(--blue); font-weight: 600; }
+.hl-green { color: var(--green); font-weight: 600; }
+.term { display: inline-block; background: var(--paper3); border: 1px solid var(--border); border-radius: 4px; padding: 0 6px; font-family: var(--font-mono); font-size: 0.82em; color: var(--ink2); }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<nav>
+  <span class="nav-module">MODULE 02 / 06</span>
+  <span class="nav-title">Storing a Graph in Code</span>
+  <a class="nav-prev" href="graphs_module1.html">← Module 1</a>
+</nav>
+
+<!-- ══════════════════════════════
+     CH1 — THE PROBLEM
+══════════════════════════════ -->
+<div class="chapter visible" id="ch1">
+  <div class="chapter-eyebrow">Chapter 1 of 5</div>
+  <h2>The question nobody asks<br>but everyone gets stuck on.</h2>
+
+  <p>You understand what a graph is. Nodes. Edges. Great. But now someone says <em>"implement BFS on this graph"</em> and you freeze — because <strong>how do you actually put a graph into a variable?</strong></p>
+
+  <p>With an array, it's obvious: <code class="term">[1, 2, 3, 4]</code>. With a tree, you make a <code class="term">Node</code> class with <code class="term">left</code> and <code class="term">right</code>. But a graph node can connect to <em>any</em> number of other nodes, in any direction. There's no single obvious structure.</p>
+
+  <p>There are three standard ways to store a graph. Each has a different shape in memory, different strengths, and different situations where it shines. By the end of this module, you'll know all three — and more importantly, you'll know <strong>which one to reach for and why.</strong></p>
+
+  <div class="insight warm">
+    <strong>The good news:</strong> 95% of LeetCode graph problems use one representation — the <strong>adjacency list</strong>. But understanding all three will tell you <em>why</em> the adjacency list wins, which means it'll stick.
+  </div>
+
+  <p>Let's use the same graph for all three representations so you can compare apples to apples. Here it is:</p>
+
+  <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.2rem 0">
+    <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.7rem;color:var(--ink3)">THE REFERENCE GRAPH — 5 nodes, 5 edges (undirected)</div>
+    <canvas id="ref-canvas" height="200" style="display:block;width:100%"></canvas>
+    <div style="padding:.6rem 1rem;font-size:.82rem;color:var(--ink3);font-family:var(--font-mono)">Edges: 0–1 · 0–2 · 1–3 · 2–3 · 3–4</div>
+  </div>
+</div>
+
+<div class="chapter-divider"><span>REPRESENTATION 1</span></div>
+
+<!-- ══════════════════════════════
+     CH2 — EDGE LIST
+══════════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="chapter-eyebrow">Chapter 2 of 5</div>
+  <h2>Edge List —<br>the <em>simplest</em> thing possible.</h2>
+
+  <p>An edge list is exactly what it sounds like. You just write down every edge as a pair of nodes. Nothing more.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">edge_list.py</span><span class="code-lang">Python</span></div>
+    <pre><span class="cm"># Each pair [a, b] means "there is an edge between node a and node b"</span>
+edges = [
+    [<span class="nm">0</span>, <span class="nm">1</span>],   <span class="cm"># 0 connects to 1</span>
+    [<span class="nm">0</span>, <span class="nm">2</span>],   <span class="cm"># 0 connects to 2</span>
+    [<span class="nm">1</span>, <span class="nm">3</span>],   <span class="cm"># 1 connects to 3</span>
+    [<span class="nm">2</span>, <span class="nm">3</span>],   <span class="cm"># 2 connects to 3</span>
+    [<span class="nm">3</span>, <span class="nm">4</span>],   <span class="cm"># 3 connects to 4</span>
+]</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">EdgeList.java</span><span class="code-lang">Java</span></div>
+    <pre><span class="cm">// Each int[] {a, b} means "there is an edge between node a and node b"</span>
+<span class="ty">int</span>[][] edges = {
+    {<span class="nm">0</span>, <span class="nm">1</span>},   <span class="cm">// 0 connects to 1</span>
+    {<span class="nm">0</span>, <span class="nm">2</span>},   <span class="cm">// 0 connects to 2</span>
+    {<span class="nm">1</span>, <span class="nm">3</span>},   <span class="cm">// 1 connects to 3</span>
+    {<span class="nm">2</span>, <span class="nm">3</span>},   <span class="cm">// 2 connects to 3</span>
+    {<span class="nm">3</span>, <span class="nm">4</span>},   <span class="cm">// 3 connects to 4</span>
+};</pre>
+  </div>
+
+  <p>That's it. You've stored a graph. Every edge is one row. If it's a weighted graph, add a third number: <code class="term">[0, 1, 5]</code> means "edge from 0 to 1 with weight 5".</p>
+
+  <div class="insight amber">
+    <strong>The problem:</strong> Suppose you want to find all neighbors of node 3. You'd have to scan <em>every single edge</em> in the list and check if 3 appears. For a graph with millions of edges, that's painfully slow. Edge lists are great for <em>storing</em> graphs, but bad for <em>traversing</em> them.
+  </div>
+
+  <p>This is exactly the problem the next two representations solve.</p>
+</div>
+
+<div class="chapter-divider"><span>REPRESENTATION 2</span></div>
+
+<!-- ══════════════════════════════
+     CH3 — ADJACENCY MATRIX
+══════════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="chapter-eyebrow">Chapter 3 of 5</div>
+  <h2>Adjacency Matrix —<br><em>instant</em> edge lookup.</h2>
+
+  <p>What if we made a grid — rows and columns both represent nodes — and put a <code class="term">1</code> wherever an edge exists? Then checking "is there an edge between node 2 and node 3?" is just <code class="term">matrix[2][3]</code>. Instant.</p>
+
+  <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.2rem 0">
+    <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.7rem;color:var(--ink3)">ADJACENCY MATRIX — hover a cell to see what it means</div>
+    <canvas id="matrix-canvas" height="240" style="display:block;width:100%;cursor:crosshair"></canvas>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">adjacency_matrix.py</span><span class="code-lang">Python</span></div>
+    <pre><span class="cm"># matrix[i][j] = 1 means there's an edge from i to j</span>
+<span class="cm"># matrix[i][j] = 0 means no edge</span>
+matrix = [
+<span class="cm">#      0  1  2  3  4  ← column (destination)</span>
+    [  <span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">0</span>, <span class="nm">0</span>],  <span class="cm"># row 0: connects to 1 and 2</span>
+    [  <span class="nm">1</span>, <span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">0</span>],  <span class="cm"># row 1: connects to 0 and 3</span>
+    [  <span class="nm">1</span>, <span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">0</span>],  <span class="cm"># row 2: connects to 0 and 3</span>
+    [  <span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">0</span>, <span class="nm">1</span>],  <span class="cm"># row 3: connects to 1, 2, and 4</span>
+    [  <span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">0</span>],  <span class="cm"># row 4: connects to 3</span>
+]
+
+<span class="cm"># Check edge: O(1) ✓</span>
+<span class="fn">print</span>(matrix[<span class="nm">2</span>][<span class="nm">3</span>])  <span class="cm"># → 1 (edge exists)</span>
+<span class="fn">print</span>(matrix[<span class="nm">0</span>][<span class="nm">4</span>])  <span class="cm"># → 0 (no edge)</span></pre>
+  </div>
+
+  <div class="insight">
+    <strong>Notice the symmetry:</strong> For an undirected graph, the matrix is always symmetric — <code class="term">matrix[i][j]</code> always equals <code class="term">matrix[j][i]</code>. Edge 0–1 appears in both row 0, column 1 AND row 1, column 0. This makes sense: if you can go from 0 to 1, you can go from 1 to 0.
+  </div>
+
+  <div class="insight amber">
+    <strong>The problem:</strong> A graph with 1,000 nodes needs a 1,000 × 1,000 matrix — that's <strong>1,000,000 cells</strong>, even if the graph only has 3,000 edges. Most cells would be 0 (wasted space). Real-world graphs (social networks, road maps) are <em>sparse</em> — most nodes connect to very few others. A matrix wastes enormous memory storing all those zeros.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>REPRESENTATION 3 — THE ONE YOU'LL USE</span></div>
+
+<!-- ══════════════════════════════
+     CH4 — ADJACENCY LIST
+══════════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="chapter-eyebrow">Chapter 4 of 5</div>
+  <h2>Adjacency List —<br>the <em>right tool</em> for almost everything.</h2>
+
+  <p>What if, instead of a big matrix, each node just kept a small list of its own neighbors? Node 0 says "my neighbors are [1, 2]." Node 3 says "my neighbors are [1, 2, 4]." That's an adjacency list.</p>
+
+  <p>No wasted space for non-edges. And to find all neighbors of a node, you just grab that node's list — no scanning required.</p>
+
+  <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.2rem 0">
+    <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.7rem;color:var(--ink3)">ADJACENCY LIST — click a node to highlight its neighbor list</div>
+    <canvas id="adjlist-canvas" height="200" style="display:block;width:100%;cursor:pointer"></canvas>
+    <div style="padding:.6rem 1rem" id="adjlist-output" style="min-height:40px"></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">adjacency_list.py</span><span class="code-lang">Python</span></div>
+    <pre><span class="cm"># Option A: Dictionary (flexible, works for any node labels)</span>
+graph = {
+    <span class="nm">0</span>: [<span class="nm">1</span>, <span class="nm">2</span>],      <span class="cm"># node 0's neighbors</span>
+    <span class="nm">1</span>: [<span class="nm">0</span>, <span class="nm">3</span>],      <span class="cm"># node 1's neighbors</span>
+    <span class="nm">2</span>: [<span class="nm">0</span>, <span class="nm">3</span>],      <span class="cm"># node 2's neighbors</span>
+    <span class="nm">3</span>: [<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">4</span>],  <span class="cm"># node 3's neighbors</span>
+    <span class="nm">4</span>: [<span class="nm">3</span>],         <span class="cm"># node 4's neighbors</span>
+}
+
+<span class="cm"># Option B: defaultdict (auto-creates empty list for missing keys)</span>
+<span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+graph = defaultdict(<span class="fn">list</span>)
+<span class="kw">for</span> u, v <span class="kw">in</span> [[<span class="nm">0</span>,<span class="nm">1</span>],[<span class="nm">0</span>,<span class="nm">2</span>],[<span class="nm">1</span>,<span class="nm">3</span>],[<span class="nm">2</span>,<span class="nm">3</span>],[<span class="nm">3</span>,<span class="nm">4</span>]]:
+    graph[u].append(v)
+    graph[v].append(u)   <span class="cm"># omit this line for directed graph</span>
+
+<span class="cm"># Getting neighbors: O(1) ✓</span>
+neighbors_of_3 = graph[<span class="nm">3</span>]   <span class="cm"># → [1, 2, 4]</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">AdjacencyList.java</span><span class="code-lang">Java</span></div>
+    <pre><span class="cm">// Option A: Array of Lists (when nodes are numbered 0 to n-1)</span>
+<span class="ty">int</span> n = <span class="nm">5</span>;
+List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[n];
+<span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+<span class="ty">int</span>[][] edges = {{<span class="nm">0</span>,<span class="nm">1</span>},{<span class="nm">0</span>,<span class="nm">2</span>},{<span class="nm">1</span>,<span class="nm">3</span>},{<span class="nm">2</span>,<span class="nm">3</span>},{<span class="nm">3</span>,<span class="nm">4</span>}};
+<span class="kw">for</span> (<span class="ty">int</span>[] e : edges) {
+    graph[e[<span class="nm">0</span>]].add(e[<span class="nm">1</span>]);
+    graph[e[<span class="nm">1</span>]].add(e[<span class="nm">0</span>]);  <span class="cm">// omit for directed graph</span>
+}
+
+<span class="cm">// Getting neighbors: O(1) ✓</span>
+List&lt;<span class="ty">Integer</span>&gt; neighbors = graph[<span class="nm">3</span>];  <span class="cm">// → [1, 2, 4]</span>
+
+<span class="cm">// Option B: HashMap (when nodes aren't numbered 0..n-1)</span>
+Map&lt;<span class="ty">Integer</span>, List&lt;<span class="ty">Integer</span>&gt;&gt; g = <span class="kw">new</span> HashMap&lt;&gt;();
+g.computeIfAbsent(<span class="nm">0</span>, k -&gt; <span class="kw">new</span> ArrayList&lt;&gt;()).add(<span class="nm">1</span>);</pre>
+  </div>
+
+  <div class="insight green">
+    <strong>Why adjacency list wins for most problems:</strong> Real graphs are sparse (few edges relative to nodes). An adjacency list only stores actual edges — no wasted space. Finding neighbors is instant. Building it is O(E). Traversing the whole graph is O(V+E). It's the default for a reason.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>INTERACTIVE — BUILD & CONVERT</span></div>
+
+<!-- ══════════════════════════════
+     CH5 — INTERACTIVE CONVERTER
+══════════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="chapter-eyebrow">Chapter 5 of 5</div>
+  <h2>See them all <em>side by side.</em></h2>
+
+  <p>Edit the graph below by adding or removing edges. Watch all three representations update in real time. This is the fastest way to build an intuition for what each representation actually stores.</p>
+
+  <div class="converter">
+    <div class="converter-header">INTERACTIVE GRAPH CONVERTER — ADD/REMOVE EDGES AND WATCH ALL 3 REPRESENTATIONS UPDATE</div>
+    <div class="converter-body">
+      <div class="converter-left">
+        <div class="converter-section-title" style="color:var(--ink3)">Graph (5 nodes: 0–4)</div>
+        <canvas class="canvas-graph" id="conv-canvas" height="220" style="cursor:default"></canvas>
+        <div class="edge-builder">
+          <div class="edge-builder-title">Edges</div>
+          <div class="edge-list" id="edge-list"></div>
+          <div class="add-edge-row">
+            <select class="node-select" id="sel-a">
+              <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+            </select>
+            <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--ink3)">—</span>
+            <select class="node-select" id="sel-b">
+              <option>1</option><option>0</option><option>2</option><option>3</option><option>4</option>
+            </select>
+            <button class="add-btn" onclick="addEdge()">Add edge</button>
+          </div>
+        </div>
+      </div>
+      <div class="converter-right">
+        <div class="converter-section-title" style="color:var(--ink3)">Representation</div>
+        <div class="output-tabs">
+          <button class="out-tab active" onclick="setOutTab('adjlist',this)">Adj List</button>
+          <button class="out-tab" onclick="setOutTab('matrix',this)">Matrix</button>
+          <button class="out-tab" onclick="setOutTab('edgelist',this)">Edge List</button>
+        </div>
+        <div class="output-display" id="conv-output"></div>
+        <div style="margin-top:.8rem;font-size:.78rem;color:var(--ink3);font-family:var(--font-mono)" id="conv-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADEOFFS -->
+  <h3>The tradeoffs at a glance</h3>
+  <p>Use this table as a reference. The important row is "get neighbors" — that's what traversal algorithms do constantly.</p>
+
+  <table class="tradeoffs">
+    <thead>
+      <tr>
+        <th>Operation</th>
+        <th>Edge List</th>
+        <th>Adj Matrix</th>
+        <th>Adj List</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Space</strong></td>
+        <td class="ok">O(E)</td>
+        <td class="bad">O(V²)</td>
+        <td class="good">O(V+E)</td>
+      </tr>
+      <tr>
+        <td><strong>Check if edge exists</strong></td>
+        <td class="bad">O(E) scan</td>
+        <td class="good">O(1)</td>
+        <td class="ok">O(degree)</td>
+      </tr>
+      <tr>
+        <td><strong>Get all neighbors of node</strong></td>
+        <td class="bad">O(E) scan</td>
+        <td class="ok">O(V) scan row</td>
+        <td class="good">O(degree) ✓</td>
+      </tr>
+      <tr>
+        <td><strong>Add an edge</strong></td>
+        <td class="good">O(1)</td>
+        <td class="good">O(1)</td>
+        <td class="good">O(1)</td>
+      </tr>
+      <tr>
+        <td><strong>Best for</strong></td>
+        <td>Input format, Kruskal's MST</td>
+        <td>Dense graphs, quick edge checks</td>
+        <td class="good">Almost everything else ✓</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- QUICK CHECK -->
+  <h3 style="margin-top:2.5rem">Quick check</h3>
+
+  <div class="quiz-q" id="q1">
+    <p>Q1. A social network has 10 million users and each user has an average of 200 friends. Which representation would you use and why?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(1,'a')">Adjacency matrix — fast edge lookup is worth the space</button>
+      <button class="quiz-opt" onclick="answer(1,'b')">Adjacency list — the graph is sparse, matrix would waste billions of cells ✓</button>
+      <button class="quiz-opt" onclick="answer(1,'c')">Edge list — simplest to implement</button>
+    </div>
+    <div class="quiz-feedback" id="qf1"></div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p>Q2. LeetCode gives you edges = [[0,1],[1,2],[2,0]] and asks you to run BFS. What's your first step?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(2,'a')">Start BFS directly on the edge list</button>
+      <button class="quiz-opt" onclick="answer(2,'b')">Convert to adjacency matrix first</button>
+      <button class="quiz-opt" onclick="answer(2,'c')">Convert to adjacency list so BFS can grab neighbors in O(1) ✓</button>
+    </div>
+    <div class="quiz-feedback" id="qf2"></div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p>Q3. You're building an undirected graph with edge [2, 5]. How many lines do you add to your adjacency list?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(3,'a')">One line: graph[2].append(5)</button>
+      <button class="quiz-opt" onclick="answer(3,'b')">Two lines: graph[2].append(5) AND graph[5].append(2) ✓</button>
+      <button class="quiz-opt" onclick="answer(3,'c')">Four lines — you need to add both directions for both nodes</button>
+    </div>
+    <div class="quiz-feedback" id="qf3"></div>
+  </div>
+
+  <div class="completion" id="completion">
+    <h3>Module 2 Complete 🎉</h3>
+    <p>You now know all three graph representations and — critically — <strong>why the adjacency list is the default</strong> for traversal algorithms.</p>
+    <p style="margin-top:.4rem">Here's what you'll carry into every graph problem from now on:</p>
+    <p style="margin-top:.2rem;font-family:'Geist Mono',monospace;font-size:.82rem;background:rgba(255,255,255,0.15);padding:.5rem .8rem;border-radius:6px;text-align:left">
+      Step 0: Build adjacency list from edges.<br>
+      Step 1: Run your algorithm on the adjacency list.
+    </p>
+    <p style="margin-top:.6rem"><strong>Up next:</strong> Module 3 — DFS from first principles. You'll trace through a maze by hand, and the algorithm will emerge naturally from what you did.</p>
+    <a class="btn-next" href="graphs_module3.html">I'm ready for Module 3 →</a>
+  </div>
+</div>
+
+<div style="height:4rem"></div>
+
+<script>
+// ═══════════════════════════════
+// PROGRESS
+// ═══════════════════════════════
+let quizDone = [false,false,false];
+function updateProgress() {
+  const n = quizDone.filter(Boolean).length;
+  document.getElementById('progress').style.width = (n/3*100)+'%';
+  if (n===3) document.getElementById('completion').classList.add('show');
+}
+
+// ═══════════════════════════════
+// SCROLL REVEAL
+// ═══════════════════════════════
+const obs = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.06});
+document.querySelectorAll('.chapter').forEach(c => obs.observe(c));
+
+// ═══════════════════════════════
+// DRAW UTILS
+// ═══════════════════════════════
+function setupCanvas(id) {
+  const c = document.getElementById(id); if(!c) return null;
+  const dpr = window.devicePixelRatio||1;
+  const w = c.clientWidth, h = parseInt(c.getAttribute('height'))||200;
+  c.width=w*dpr; c.height=h*dpr;
+  const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  return {ctx,w,h};
+}
+function drawNode(ctx,x,y,label,opts={}) {
+  const r=opts.r||24, fill=opts.fill||'#fff', stroke=opts.stroke||'#d4cfc6';
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=fill; ctx.fill();
+  ctx.strokeStyle=stroke; ctx.lineWidth=opts.sw||1.5; ctx.stroke();
+  ctx.fillStyle=opts.tc||'#3d3a35';
+  ctx.font=`500 ${opts.fs||13}px Geist, sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(label,x,y);
+}
+function drawEdgeLine(ctx,x1,y1,x2,y2,color,width) {
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+  ctx.strokeStyle=color||'#d4cfc6'; ctx.lineWidth=width||1.5; ctx.stroke();
+}
+
+// ═══════════════════════════════
+// REFERENCE GRAPH
+// ═══════════════════════════════
+function drawRefGraph() {
+  const s=setupCanvas('ref-canvas'); if(!s) return;
+  const {ctx,w,h}=s;
+  const nodes=[{x:w/2,y:40,l:'0'},{x:w*.15,y:140,l:'1'},{x:w*.85,y:140,l:'2'},{x:w*.5,y:180,l:'3'},{x:w*.5,y:h-24,l:'4'}];
+  const edges=[[0,1],[0,2],[1,3],[2,3],[3,4]];
+  edges.forEach(([a,b])=>drawEdgeLine(ctx,nodes[a].x,nodes[a].y,nodes[b].x,nodes[b].y,'#b8b4ac',2));
+  nodes.forEach(n=>drawNode(ctx,n.x,n.y,n.l,{r:22,fill:'#fff',stroke:'#2563a8',sw:2,tc:'#1a1814'}));
+}
+
+// ═══════════════════════════════
+// ADJACENCY MATRIX CANVAS
+// ═══════════════════════════════
+const MAT_DATA = [[0,1,1,0,0],[1,0,0,1,0],[1,0,0,1,0],[0,1,1,0,1],[0,0,0,1,0]];
+let matHover = [-1,-1];
+function drawMatrix() {
+  const s=setupCanvas('matrix-canvas'); if(!s) return;
+  const {ctx,w,h}=s;
+  const SIZE=5, pad=50, cellW=(w-pad-20)/SIZE, cellH=(h-pad-20)/SIZE;
+  const ox=pad, oy=30;
+  // header labels
+  ctx.font='600 12px Geist Mono, monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let i=0;i<SIZE;i++){
+    ctx.fillStyle='#7a7570'; ctx.fillText(i, ox+i*cellW+cellW/2, oy-12);
+    ctx.fillText(i, ox-18, oy+i*cellH+cellH/2);
+  }
+  ctx.fillStyle='#b8b4ac'; ctx.font='10px Geist, sans-serif';
+  ctx.fillText('col →', ox+(SIZE*cellW)/2, oy-24);
+  ctx.save(); ctx.translate(ox-34, oy+(SIZE*cellH)/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('row ↓', 0, 0); ctx.restore();
+  // cells
+  for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+    const x=ox+c*cellW, y=oy+r*cellH;
+    const val=MAT_DATA[r][c];
+    const isHover=matHover[0]===r&&matHover[1]===c;
+    const isRowHover=matHover[0]===r, isColHover=matHover[1]===c;
+    let bg='#fff';
+    if(isHover) bg= val?'#e8f0fe':'#fef3ec';
+    else if(isRowHover||isColHover) bg='#f5f2ed';
+    ctx.fillStyle=bg; ctx.fillRect(x,y,cellW,cellH);
+    ctx.strokeStyle=isHover?'#2563a8':'#d4cfc6'; ctx.lineWidth=isHover?2:0.5;
+    ctx.strokeRect(x,y,cellW,cellH);
+    ctx.font=`${val?'700':'400'} 14px Geist Mono, monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle=val?(isHover?'#2563a8':'#1a1814'):'#c8c4bc';
+    ctx.fillText(val, x+cellW/2, y+cellH/2);
+  }
+  // tooltip
+  if(matHover[0]>=0&&matHover[1]>=0) {
+    const r=matHover[0],c=matHover[1],val=MAT_DATA[r][c];
+    const msg = val ? `matrix[${r}][${c}] = 1  →  edge ${r}–${c} EXISTS` : `matrix[${r}][${c}] = 0  →  NO edge between ${r} and ${c}`;
+    ctx.fillStyle=val?'#1a4e8a':'#a8421a';
+    ctx.font='500 11px Geist, sans-serif'; ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText(msg, ox, h-16);
+  }
+}
+
+const matCanvas = document.getElementById('matrix-canvas');
+matCanvas.addEventListener('mousemove',e=>{
+  const rect=matCanvas.getBoundingClientRect();
+  const SIZE=5,pad=50,cellW=(matCanvas.clientWidth-pad-20)/SIZE,cellH=(parseInt(matCanvas.getAttribute('height'))-pad-20+10)/SIZE;
+  const ox=pad,oy=30;
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const c=Math.floor((mx-ox)/cellW), r=Math.floor((my-oy)/cellH);
+  const prev=matHover.join(',');
+  if(r>=0&&r<SIZE&&c>=0&&c<SIZE) matHover=[r,c]; else matHover=[-1,-1];
+  if(matHover.join(',')!==prev) drawMatrix();
+});
+matCanvas.addEventListener('mouseleave',()=>{matHover=[-1,-1];drawMatrix();});
+
+// ═══════════════════════════════
+// ADJACENCY LIST CANVAS
+// ═══════════════════════════════
+const ADJ = {0:[1,2],1:[0,3],2:[0,3],3:[1,2,4],4:[3]};
+const EDGES_REF=[[0,1],[0,2],[1,3],[2,3],[3,4]];
+let adjHover=-1;
+const adjNodePos=[];
+
+function drawAdjList() {
+  const s=setupCanvas('adjlist-canvas'); if(!s) return;
+  const {ctx,w,h}=s;
+  adjNodePos.length=0;
+  const positions=[{x:w/2,y:36},{x:w*.15,y:130},{x:w*.85,y:130},{x:w*.5,y:165},{x:w*.5,y:h-28}];
+  positions.forEach(p=>adjNodePos.push(p));
+  EDGES_REF.forEach(([a,b])=>{
+    const isHighlighted=adjHover===a||adjHover===b;
+    drawEdgeLine(ctx,positions[a].x,positions[a].y,positions[b].x,positions[b].y,isHighlighted?'#c8521a':'#d4cfc6',isHighlighted?2.5:1.5);
+  });
+  positions.forEach((p,i)=>{
+    const isHover=i===adjHover;
+    const isNeighbor=adjHover>=0&&ADJ[adjHover].includes(i);
+    drawNode(ctx,p.x,p.y,String(i),{r:22,fill:isHover?'#fef3ec':isNeighbor?'#fff8f0':'#fff',stroke:isHover?'#c8521a':isNeighbor?'#e8a878':'#2563a8',sw:isHover?2.5:1.5,tc:isHover?'#c8521a':'#1a1814'});
+  });
+  const out=document.getElementById('adjlist-output');
+  if(adjHover>=0){
+    out.innerHTML=`<span style="font-family:var(--font-mono);font-size:.8rem;color:var(--ink3)">graph[<span style="color:var(--warm);font-weight:600">${adjHover}</span>] → [<span style="color:var(--blue);font-weight:600">${ADJ[adjHover].join(', ')}</span>]&nbsp;&nbsp;&nbsp;<span style="color:var(--green)">← neighbors of node ${adjHover}</span></span>`;
+  } else {
+    out.innerHTML=`<span style="font-family:var(--font-mono);font-size:.78rem;color:var(--ink3)">Click a node to see its neighbor list</span>`;
+  }
+}
+
+const adjC=document.getElementById('adjlist-canvas');
+adjC.addEventListener('click',e=>{
+  const rect=adjC.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  let found=-1;
+  adjNodePos.forEach((p,i)=>{if(Math.hypot(mx-p.x,my-p.y)<26) found=i;});
+  adjHover=adjHover===found?-1:found;
+  drawAdjList();
+});
+
+// ═══════════════════════════════
+// INTERACTIVE CONVERTER
+// ═══════════════════════════════
+let convEdges=[[0,1],[0,2],[1,3],[2,3],[3,4]];
+let outTab='adjlist';
+const CONV_NODES_N=5;
+const convPos=()=>{
+  const c=document.getElementById('conv-canvas');
+  if(!c) return [];
+  const w=c.clientWidth,h=220;
+  return [{x:w/2,y:36},{x:w*.15,y:120},{x:w*.85,y:120},{x:w*.5,y:168},{x:w*.5,y:h-24}];
+};
+
+function drawConvGraph(){
+  const s=setupCanvas('conv-canvas'); if(!s) return;
+  const {ctx,w,h}=s;
+  const pos=convPos();
+  convEdges.forEach(([a,b])=>drawEdgeLine(ctx,pos[a].x,pos[a].y,pos[b].x,pos[b].y,'#b8b4ac',2));
+  pos.forEach((p,i)=>drawNode(ctx,p.x,p.y,String(i),{r:22,fill:'#fff',stroke:'#2563a8',sw:2,tc:'#1a1814'}));
+}
+
+function renderEdgeChips(){
+  const el=document.getElementById('edge-list'); el.innerHTML='';
+  convEdges.forEach(([a,b],i)=>{
+    const chip=document.createElement('div'); chip.className='edge-chip';
+    chip.innerHTML=`<span>${a}—${b}</span><button onclick="removeEdge(${i})" title="Remove">×</button>`;
+    el.appendChild(chip);
+  });
+}
+
+function computeAdjList(){
+  const adj={}; for(let i=0;i<CONV_NODES_N;i++) adj[i]=[];
+  convEdges.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a);});
+  return adj;
+}
+
+function renderOutput(){
+  const el=document.getElementById('conv-output');
+  const note=document.getElementById('conv-note');
+  if(outTab==='adjlist'){
+    const adj=computeAdjList();
+    let s='graph = {\n';
+    for(let i=0;i<CONV_NODES_N;i++) s+=`    ${i}: [${adj[i].join(', ')}],\n`;
+    s+='}';
+    el.innerHTML=`<span style="color:#6a6458"># Adjacency List</span>\n`+escHtml(s).replace(/\b(\d+)/g,'<span style="color:#e8c878">$1</span>');
+    note.textContent=`Space: O(V+E) = O(${CONV_NODES_N}+${convEdges.length}) = O(${CONV_NODES_N+convEdges.length*2}) entries`;
+  } else if(outTab==='matrix'){
+    const mat=Array.from({length:CONV_NODES_N},()=>new Array(CONV_NODES_N).fill(0));
+    convEdges.forEach(([a,b])=>{mat[a][b]=1;mat[b][a]=1;});
+    let s='matrix = [\n';
+    for(let r=0;r<CONV_NODES_N;r++) s+=`  [${mat[r].join(', ')}],   # row ${r}\n`;
+    s+=']';
+    el.innerHTML=`<span style="color:#6a6458"># Adjacency Matrix</span>\n`+escHtml(s).replace(/\b1\b/g,'<span style="color:#88c880">1</span>').replace(/\b0\b/g,'<span style="color:#4a4640">0</span>');
+    note.textContent=`Space: O(V²) = O(${CONV_NODES_N}²) = O(${CONV_NODES_N*CONV_NODES_N}) cells — ${CONV_NODES_N*CONV_NODES_N - convEdges.length*2} of them are wasted zeros`;
+  } else {
+    let s='edges = [\n';
+    convEdges.forEach(([a,b])=>s+=`  [${a}, ${b}],\n`);
+    s+=']';
+    el.innerHTML=`<span style="color:#6a6458"># Edge List</span>\n`+escHtml(s).replace(/\b(\d+)/g,'<span style="color:#e8c878">$1</span>');
+    note.textContent=`Space: O(E) = O(${convEdges.length}) — most compact, but scanning neighbors = O(E)`;
+  }
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addEdge(){
+  const a=parseInt(document.getElementById('sel-a').value);
+  const b=parseInt(document.getElementById('sel-b').value);
+  if(a===b) return;
+  if(convEdges.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a))) return;
+  convEdges.push([a,b]);
+  refresh();
+}
+function removeEdge(i){ convEdges.splice(i,1); refresh(); }
+function refresh(){ drawConvGraph(); renderEdgeChips(); renderOutput(); }
+function setOutTab(tab,btn){
+  outTab=tab;
+  document.querySelectorAll('.out-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOutput();
+}
+
+// ═══════════════════════════════
+// QUIZ
+// ═══════════════════════════════
+const answers={1:'b',2:'c',3:'b'};
+const feedback={
+  1:{b:'✓ Exactly. 10M users × 200 friends = 2B potential matrix cells, but only 2B actual connections. Adjacency list stores only what exists — a huge win for sparse graphs.',a:'✗ The matrix would need 10M × 10M = 100 trillion cells just to store mostly zeros. Memory-wise, catastrophic.',c:'✗ Edge list is fine for storing, but "run BFS" means you need to find neighbors repeatedly. Scanning all edges each time = O(E) per node = too slow.'},
+  2:{c:'✓ Exactly right. This is the most important habit in graph coding: convert first, then traverse. BFS needs fast neighbor access, which edge lists can\'t provide.',a:'✗ BFS needs to say "give me all neighbors of node X" repeatedly. With an edge list you\'d scan all edges every time — O(E) per node. That\'s O(V×E) overall.',b:'✗ Matrix works, but wastes space if the graph is sparse. Adjacency list is the standard choice for traversal.'},
+  3:{b:'✓ Correct. Undirected means both directions. graph[2].append(5) says "5 is a neighbor of 2." graph[5].append(2) says "2 is a neighbor of 5." You need both.',a:'✗ With only graph[2].append(5), if you start at node 5 and try to visit its neighbors, you\'d never find 2. The edge is only half-stored.',c:'✗ Just two lines — one for each direction of the undirected edge. Adding extra lines would create duplicates.'}
+};
+
+function answer(q,choice){
+  if(quizDone[q-1]) return;
+  const qDiv=document.getElementById('q'+q);
+  const opts=qDiv.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('locked'));
+  const letters=['a','b','c'];
+  opts.forEach((o,i)=>{
+    if(letters[i]===answers[q]) o.classList.add('correct');
+    else if(letters[i]===choice&&choice!==answers[q]) o.classList.add('wrong');
+  });
+  const fb=document.getElementById('qf'+q);
+  fb.textContent=feedback[q][choice];
+  fb.className='quiz-feedback show '+(choice===answers[q]?'ok':'no');
+  quizDone[q-1]=true;
+  updateProgress();
+}
+
+// ═══════════════════════════════
+// INIT + RESIZE
+// ═══════════════════════════════
+window.addEventListener('load',()=>{
+  drawRefGraph(); drawMatrix(); drawAdjList();
+  refresh();
+});
+window.addEventListener('resize',()=>{
+  drawRefGraph(); drawMatrix(); drawAdjList(); drawConvGraph();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graphs Deep Dive — Beginner to Mastery</title>
+<script>
+  (() => {
+    try {
+      if (localStorage.getItem('dsa-theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1814;--ink2:#403c36;--ink3:#777168;
+    --paper:#f8f6f1;--paper2:#efeae1;--paper3:#e4ddd2;--rule:#d6cfc3;
+    --warm:#c6521a;--blue:#255fa6;--green:#1d7f4f;--purple:#6b3db2;--amber:#ab6f16;--red:#a62a35;
+    --header-bg:rgba(248,246,241,.92);
+    --font-serif:'Instrument Serif',Georgia,serif;
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',monospace;
+  }
+  html.dark{
+    --ink:#ecebf4;--ink2:#c2bdd3;--ink3:#8f89a4;
+    --paper:#111117;--paper2:#191922;--paper3:#232330;--rule:#313144;
+    --warm:#f59b5a;--blue:#8db5ff;--green:#58d49b;--purple:#b39cff;--amber:#f3c86e;--red:#f27982;
+    --header-bg:rgba(17,17,23,.92);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--font-sans);font-size:17px;line-height:1.75}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .site-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--rule);background:var(--header-bg);backdrop-filter:blur(8px)}
+  .logo{font-family:var(--font-serif);font-size:1.15rem;color:var(--ink);font-style:italic}
+  .site-header nav{display:flex;gap:1.1rem;align-items:center}
+  .site-header nav a{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+  .theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--rule);background:var(--paper2);color:var(--ink3);cursor:pointer;font-size:1rem}
+  .hero{max-width:980px;margin:0 auto;padding:4.5rem 2rem 3rem}
+  .eyebrow{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);margin-bottom:.8rem}
+  h1{font-family:var(--font-serif);font-size:clamp(2.5rem,5vw,4rem);line-height:1.08;margin-bottom:1.1rem}
+  h1 em{font-style:italic;color:var(--warm)}
+  .hero p{max-width:720px;color:var(--ink2);margin-bottom:1.25rem}
+  .hero-pills{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}
+  .pill{padding:5px 12px;border-radius:999px;background:var(--paper2);border:1px solid var(--rule);font-family:var(--font-mono);font-size:.78rem;color:var(--ink3)}
+  .pill.orange{border-color:var(--warm);color:var(--warm)}
+  .pill.green{border-color:var(--green);color:var(--green)}
+  .pill.purple{border-color:var(--purple);color:var(--purple)}
+  .container{max-width:980px;margin:0 auto;padding:0 2rem 5rem}
+  .section{padding:2.6rem 0;border-top:1px solid var(--rule)}
+  .section-head{display:flex;align-items:baseline;gap:.9rem;margin-bottom:1.2rem}
+  .section-num{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.12em;color:var(--warm)}
+  .section-head h2{font-family:var(--font-serif);font-size:2rem;line-height:1.2}
+  .lead{color:var(--ink2);max-width:820px}
+  .callout{margin:1rem 0;background:var(--paper2);border:1px solid var(--rule);border-left:3px solid var(--warm);border-radius:0 10px 10px 0;padding:1rem 1.1rem;color:var(--ink2)}
+  .callout strong{color:var(--ink)}
+  .callout.blue{border-left-color:var(--blue)}
+  .callout.green{border-left-color:var(--green)}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}.site-header{padding:1rem}.hero,.container{padding-left:1rem;padding-right:1rem}}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;padding:1.15rem 1.2rem}
+  .card h3{font-family:var(--font-serif);font-size:1.25rem;margin-bottom:.45rem}
+  .card p{color:var(--ink2);font-size:.93rem}
+  .module-card{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:1.2rem 1.25rem;display:flex;flex-direction:column;gap:.9rem}
+  .module-top{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+  .module-num{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;color:var(--ink3)}
+  .module-card h3{font-family:var(--font-serif);font-size:1.35rem;line-height:1.2}
+  .module-links{display:flex;gap:.75rem;flex-wrap:wrap}
+  .module-link{font-size:.8rem;font-family:var(--font-mono);padding:5px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--paper)}
+  .practice-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+  @media(max-width:760px){.practice-cols{grid-template-columns:1fr}}
+  .practice-box{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:.9rem 1rem}
+  .practice-box h4{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.55rem}
+  .practice-box h4.starter{color:var(--green)}
+  .practice-box h4.core{color:var(--blue)}
+  .practice-box h4.stretch{color:var(--purple)}
+  .practice-box ul{padding-left:1.1rem}
+  .practice-box li{margin:.35rem 0;color:var(--ink2);font-size:.9rem}
+  .template-shell{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;overflow:hidden;margin-top:1rem}
+  .template-head{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--rule);background:var(--paper3)}
+  .template-head h3{font-family:var(--font-serif);font-size:1.2rem}
+  .lang-toggle{display:flex;gap:4px;background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:4px}
+  .lang-btn{border:none;background:none;color:var(--ink3);cursor:pointer;font-family:var(--font-mono);font-size:.76rem;padding:5px 12px;border-radius:6px}
+  .lang-btn.active{background:var(--warm);color:#fff}
+  .template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+  @media(max-width:900px){.template-grid{grid-template-columns:1fr}}
+  .template-card{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:1rem 1rem 1.15rem}
+  .template-card:nth-child(2n){border-right:none}
+  @media(max-width:900px){.template-card{border-right:none}}
+  .template-card h4{font-family:var(--font-serif);font-size:1.15rem;margin-bottom:.35rem}
+  .template-card p{font-size:.9rem;color:var(--ink2);margin-bottom:.7rem}
+  .code-panel{display:none}
+  .code-panel.active{display:block}
+  .code-block{background:#191817;border:1px solid #34312e;border-radius:12px;overflow:hidden}
+  .code-hdr{display:flex;justify-content:space-between;padding:.5rem .9rem;background:#24211e;border-bottom:1px solid #34312e}
+  .code-hdr span{font-family:var(--font-mono);font-size:.7rem;color:#9e9588}
+  pre{padding:1rem 1rem 1.1rem;overflow-x:auto;font-family:var(--font-mono);font-size:.78rem;line-height:1.7;color:#ece6d8}
+  .kw{color:#cf9060}.fn{color:#7ab8e8}.cm{color:#7e7568;font-style:italic}.st{color:#88c880}.nm{color:#e8c878}.ty{color:#c888c8}
+  .roadmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;margin-top:1rem}
+  @media(max-width:900px){.roadmap{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){.roadmap{grid-template-columns:1fr}}
+  .road-step{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;padding:1rem}
+  .road-step .n{font-family:var(--font-mono);font-size:.75rem;color:var(--warm);letter-spacing:.1em;margin-bottom:.4rem}
+  .road-step h4{font-family:var(--font-serif);font-size:1.1rem;margin-bottom:.3rem}
+  .road-step p{font-size:.9rem;color:var(--ink2)}
+  footer{border-top:1px solid var(--rule);padding:1.2rem 2rem;color:var(--ink3);font-size:.9rem}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="index.html" class="logo">AlgorithmCraft</a>
+    <nav>
+      <a href="#modules">Modules</a>
+      <a href="#templates">Templates</a>
+      <a href="#roadmap">Roadmap</a>
+      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light and dark mode">🌙</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Graphs Course</div>
+    <h1>Graphs Deep Dive — <em>from basics to mastery</em></h1>
+    <p>This track is tutorial-first. We start by making graphs feel obvious, then build DFS, BFS, cycle detection, topological sort, Union-Find, and Dijkstra through repetition-heavy modules. The goal is not just understanding the ideas once — it is remembering the right tool fast enough to use it under pressure.</p>
+    <p>You can treat the lesson pages as the lectures and this hub as the repetition map. If a user wants to build confidence by doing many similar reps before moving on, this is the page they keep coming back to.</p>
+    <div class="hero-pills">
+      <span class="pill orange">8 modules</span>
+      <span class="pill green">Beginner → Core → Stretch reps</span>
+      <span class="pill purple">Java / Python template memory cards</span>
+      <span class="pill">Course-style, not pattern-only</span>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">01 —</span>
+        <h2>How This Track Works</h2>
+      </div>
+      <p class="lead">The first six modules teach the fundamentals from first principles. Modules seven and eight extend the course into dynamic connectivity and weighted shortest paths. Each module has a clear practice ladder so learners can repeat the same idea until it becomes automatic.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>Learn</h3>
+          <p>Use the module pages as your lecture notes. They explain why the algorithm works, not just what to type.</p>
+        </div>
+        <div class="card">
+          <h3>Repeat</h3>
+          <p>Use the practice ladders on this page. The starter/core/stretch split is deliberate: the idea should survive multiple story wrappers.</p>
+        </div>
+      </div>
+      <div class="callout blue"><strong>The teaching principle:</strong> graph mastery comes from two habits. First, you recognize the graph shape quickly. Second, you can write the template from memory. This page is designed to train both.</div>
+    </section>
+
+    <section class="section" id="modules">
+      <div class="section-head">
+        <span class="section-num">02 —</span>
+        <h2>The 8-Module Course</h2>
+      </div>
+
+      <div class="grid">
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 01</div>
+              <h3>What Even Is a Graph?</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module1.html">Open lesson</a></div>
+          </div>
+          <p>Remove the abstraction fear. Learn nodes, edges, paths, cycles, connectivity, and how graphs show up in maps, social networks, recommendations, and file systems.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Identify node vs edge from a story</li><li>Spot directed vs undirected examples</li><li>Tell whether a graph has a cycle by inspection</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>Convert real scenarios to graph language</li><li>Recognize connected vs disconnected graphs</li><li>Explain when weights matter</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>Explain trees as acyclic graphs</li><li>Contrast sparse vs dense graphs intuitively</li><li>Predict which graph type fits a system</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 02</div>
+              <h3>Storing a Graph in Code</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module2.html">Open lesson</a></div>
+          </div>
+          <p>Adjacency list becomes second nature. This is the module that removes the “I know BFS, but I freeze when input is edges[][]” problem.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Build an adjacency list from edges</li><li>List all neighbors of a node</li><li>Handle undirected edges both ways</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>Compare edge list vs matrix vs adjacency list</li><li>Choose storage for sparse graphs</li><li>Count node degree from adjacency list</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>Store weighted graphs</li><li>Store directed prerequisites</li><li>Transform raw input before traversal</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 03</div>
+              <h3>DFS From First Principles</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module3.html">Open lesson</a></div>
+          </div>
+          <p>Backtracking, visited sets, recursion, and connected components. This is the module where graph traversal becomes a reusable habit instead of a mystery.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>1971. Find if Path Exists in Graph</li><li>841. Keys and Rooms</li><li>733. Flood Fill</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>200. Number of Islands</li><li>695. Max Area of Island</li><li>547. Number of Provinces</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>130. Surrounded Regions</li><li>417. Pacific Atlantic</li><li>1020. Number of Enclaves</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 04</div>
+              <h3>BFS From First Principles</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module4.html">Open lesson</a></div>
+          </div>
+          <p>Shortest path in unweighted graphs, queue discipline, level order, and multi-source BFS. This is where “minimum steps” stops feeling vague.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>1971. Find if Path Exists in Graph</li><li>994. Rotting Oranges</li><li>1162. As Far from Land as Possible</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>542. 01 Matrix</li><li>1091. Shortest Path in Binary Matrix</li><li>752. Open the Lock</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>127. Word Ladder</li><li>317. Shortest Distance from All Buildings</li><li>1293. Shortest Path in a Grid with Obstacles Elimination</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 05</div>
+              <h3>The 4 Core Graph Patterns</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module5.html">Open lesson</a></div>
+          </div>
+          <p>Recognition practice: components, shortest path, cycle detection, topological sort. This is where the decision tree gets fast.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Components: 1971, 547</li><li>BFS: 994</li><li>Cycle: 207</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>200. Number of Islands</li><li>210. Course Schedule II</li><li>684. Redundant Connection</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>269. Alien Dictionary</li><li>802. Eventual Safe States</li><li>1136. Parallel Courses</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 06</div>
+              <h3>The Problem-Solving Playbook</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module6.html">Open lesson</a></div>
+          </div>
+          <p>Guided problems with hints. This is the repetition checkpoint: say the pattern first, then write the template, then adapt it.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>1971. Path Exists</li><li>200. Number of Islands</li><li>994. Rotting Oranges</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>207. Course Schedule</li><li>210. Course Schedule II</li><li>127. Word Ladder</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>130. Surrounded Regions</li><li>542. 01 Matrix</li><li>269. Alien Dictionary</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 07</div>
+              <h3>Union-Find / Disjoint Set</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module7_union_find.html">Open lesson</a></div>
+          </div>
+          <p>Dynamic connectivity, parent arrays, path compression, and union-by-rank. Use this when repeatedly merging groups is cheaper than rerunning DFS from scratch.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>684. Redundant Connection</li><li>1319. Make Network Connected</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>721. Accounts Merge</li><li>990. Equality Equations</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>305. Number of Islands II</li><li>947. Most Stones Removed</li></ul></div>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-top">
+            <div>
+              <div class="module-num">MODULE 08</div>
+              <h3>Weighted Graphs &amp; Dijkstra</h3>
+            </div>
+            <div class="module-links"><a class="module-link" href="graphs_module8_weighted_graphs.html">Open lesson</a></div>
+          </div>
+          <p>Learn the moment BFS stops working, then replace the queue with a min-heap. This is the weighted shortest path bridge from fundamentals to advanced graph work.</p>
+          <div class="practice-cols">
+            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Local weighted shortest-path warmup</li><li>743. Network Delay Time</li></ul></div>
+            <div class="practice-box"><h4 class="core">Core</h4><ul><li>787. Cheapest Flights Within K Stops</li><li>1631. Path With Minimum Effort</li></ul></div>
+            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>1514. Path with Maximum Probability</li><li>2662. Minimum Cost of a Path With Special Roads</li></ul></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="templates">
+      <div class="section-head">
+        <span class="section-num">03 —</span>
+        <h2>Template Memory Cards</h2>
+      </div>
+      <p class="lead">These are the snippets learners should memorize. The lesson pages teach the intuition. These cards make recall faster. Use the toggle to switch between Java and Python.</p>
+
+      <div class="template-shell">
+        <div class="template-head">
+          <h3>Core Graph Templates</h3>
+          <div class="lang-toggle">
+            <button class="lang-btn active" data-lang="java" onclick="setLang('java', event)">Java</button>
+            <button class="lang-btn" data-lang="python" onclick="setLang('python', event)">Python</button>
+          </div>
+        </div>
+
+        <div class="template-grid">
+          <div class="template-card">
+            <h4>Adjacency List</h4>
+            <p>Step zero for most graph problems. Build it once and traversal becomes easy.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>AdjacencyList.java</span><span>Java</span></div><pre><span class="ty">List</span>&lt;<span class="ty">List</span>&lt;<span class="kw">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) graph.add(<span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;());
+<span class="kw">for</span> (<span class="kw">int</span>[] edge : edges) {
+    <span class="kw">int</span> u = edge[<span class="nm">0</span>], v = edge[<span class="nm">1</span>];
+    graph.get(u).add(v);
+    graph.get(v).add(u); <span class="cm">// remove for directed graphs</span>
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>adjacency_list.py</span><span>Python</span></div><pre>graph = [[] <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n)]
+<span class="kw">for</span> u, v <span class="kw">in</span> edges:
+    graph[u].append(v)
+    graph[v].append(u)  <span class="cm"># remove for directed graphs</span></pre></div>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <h4>DFS</h4>
+            <p>Best for reachability, connectivity, and component discovery.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>DFS.java</span><span>Java</span></div><pre><span class="kw">void</span> <span class="fn">dfs</span>(<span class="kw">int</span> node, <span class="ty">List</span>&lt;<span class="ty">List</span>&lt;<span class="kw">Integer</span>&gt;&gt; graph, <span class="kw">boolean</span>[] seen) {
+    seen[node] = <span class="kw">true</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> nei : graph.get(node)) {
+        <span class="kw">if</span> (!seen[nei]) <span class="fn">dfs</span>(nei, graph, seen);
+    }
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>dfs.py</span><span>Python</span></div><pre><span class="kw">def</span> <span class="fn">dfs</span>(node):
+    visited.add(node)
+    <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+        <span class="kw">if</span> nei <span class="kw">not in</span> visited:
+            <span class="fn">dfs</span>(nei)</pre></div>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <h4>BFS</h4>
+            <p>Best for minimum hops / shortest path in unweighted graphs.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>BFS.java</span><span>Java</span></div><pre><span class="ty">Queue</span>&lt;<span class="kw">Integer</span>&gt; q = <span class="kw">new</span> <span class="ty">ArrayDeque</span>&lt;&gt;();
+q.add(start);
+seen[start] = <span class="kw">true</span>;
+<span class="kw">while</span> (!q.isEmpty()) {
+    <span class="kw">int</span> node = q.poll();
+    <span class="kw">for</span> (<span class="kw">int</span> nei : graph.get(node)) {
+        <span class="kw">if</span> (!seen[nei]) {
+            seen[nei] = <span class="kw">true</span>;
+            q.add(nei);
+        }
+    }
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>bfs.py</span><span>Python</span></div><pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+q = deque([start])
+visited = {start}
+<span class="kw">while</span> q:
+    node = q.popleft()
+    <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+        <span class="kw">if</span> nei <span class="kw">not in</span> visited:
+            visited.add(nei)
+            q.append(nei)</pre></div>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <h4>Cycle Detection (Directed)</h4>
+            <p>Three-color DFS is the cleanest mental model for prerequisites and dependency graphs.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>CycleDirected.java</span><span>Java</span></div><pre><span class="kw">boolean</span> <span class="fn">dfs</span>(<span class="kw">int</span> node) {
+    <span class="kw">if</span> (state[node] == <span class="nm">1</span>) <span class="kw">return true</span>;
+    <span class="kw">if</span> (state[node] == <span class="nm">2</span>) <span class="kw">return false</span>;
+    state[node] = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> nei : graph.get(node)) {
+        <span class="kw">if</span> (<span class="fn">dfs</span>(nei)) <span class="kw">return true</span>;
+    }
+    state[node] = <span class="nm">2</span>;
+    <span class="kw">return false</span>;
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>cycle_directed.py</span><span>Python</span></div><pre><span class="kw">def</span> <span class="fn">dfs</span>(node):
+    <span class="kw">if</span> state[node] == <span class="nm">1</span>: <span class="kw">return True</span>
+    <span class="kw">if</span> state[node] == <span class="nm">2</span>: <span class="kw">return False</span>
+    state[node] = <span class="nm">1</span>
+    <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+        <span class="kw">if</span> <span class="fn">dfs</span>(nei): <span class="kw">return True</span>
+    state[node] = <span class="nm">2</span>
+    <span class="kw">return False</span></pre></div>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <h4>Topological Sort (Kahn)</h4>
+            <p>Use this when the problem asks for a valid order under dependencies.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>Kahn.java</span><span>Java</span></div><pre><span class="ty">Queue</span>&lt;<span class="kw">Integer</span>&gt; q = <span class="kw">new</span> <span class="ty">ArrayDeque</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) <span class="kw">if</span> (indegree[i] == <span class="nm">0</span>) q.add(i);
+<span class="ty">List</span>&lt;<span class="kw">Integer</span>&gt; order = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
+<span class="kw">while</span> (!q.isEmpty()) {
+    <span class="kw">int</span> node = q.poll();
+    order.add(node);
+    <span class="kw">for</span> (<span class="kw">int</span> nei : graph.get(node)) {
+        <span class="kw">if</span> (--indegree[nei] == <span class="nm">0</span>) q.add(nei);
+    }
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>topo_sort.py</span><span>Python</span></div><pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+q = deque([i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n) <span class="kw">if</span> indegree[i] == <span class="nm">0</span>])
+order = []
+<span class="kw">while</span> q:
+    node = q.popleft()
+    order.append(node)
+    <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+        indegree[nei] -= <span class="nm">1</span>
+        <span class="kw">if</span> indegree[nei] == <span class="nm">0</span>:
+            q.append(nei)</pre></div>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <h4>Union-Find</h4>
+            <p>Dynamic connectivity when the graph is being merged over time.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>UnionFind.java</span><span>Java</span></div><pre><span class="kw">int</span>[] parent = <span class="kw">new int</span>[n], rank = <span class="kw">new int</span>[n];
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) parent[i] = i;
+<span class="kw">int</span> <span class="fn">find</span>(<span class="kw">int</span> x) {
+    <span class="kw">if</span> (parent[x] != x) parent[x] = <span class="fn">find</span>(parent[x]);
+    <span class="kw">return</span> parent[x];
+}
+<span class="kw">boolean</span> <span class="fn">union</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">int</span> pa = <span class="fn">find</span>(a), pb = <span class="fn">find</span>(b);
+    <span class="kw">if</span> (pa == pb) <span class="kw">return false</span>;
+    <span class="kw">if</span> (rank[pa] &lt; rank[pb]) parent[pa] = pb;
+    <span class="kw">else if</span> (rank[pb] &lt; rank[pa]) parent[pb] = pa;
+    <span class="kw">else</span> { parent[pb] = pa; rank[pa]++; }
+    <span class="kw">return true</span>;
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>union_find.py</span><span>Python</span></div><pre>parent = <span class="fn">list</span>(<span class="fn">range</span>(n))
+rank = [<span class="nm">0</span>] * n
+<span class="kw">def</span> <span class="fn">find</span>(x):
+    <span class="kw">if</span> parent[x] != x:
+        parent[x] = <span class="fn">find</span>(parent[x])
+    <span class="kw">return</span> parent[x]
+<span class="kw">def</span> <span class="fn">union</span>(a, b):
+    pa, pb = <span class="fn">find</span>(a), <span class="fn">find</span>(b)
+    <span class="kw">if</span> pa == pb: <span class="kw">return False</span>
+    <span class="kw">if</span> rank[pa] &lt; rank[pb]:
+        parent[pa] = pb
+    <span class="kw">elif</span> rank[pb] &lt; rank[pa]:
+        parent[pb] = pa
+    <span class="kw">else</span>:
+        parent[pb] = pa
+        rank[pa] += <span class="nm">1</span>
+    <span class="kw">return True</span></pre></div>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <h4>Dijkstra</h4>
+            <p>Weighted shortest path with a min-heap. Reach for this when BFS is no longer valid.</p>
+            <div class="code-panel active" data-lang="java">
+              <div class="code-block"><div class="code-hdr"><span>Dijkstra.java</span><span>Java</span></div><pre><span class="ty">PriorityQueue</span>&lt;<span class="kw">int</span>[]&gt; pq = <span class="kw">new</span> <span class="ty">PriorityQueue</span>&lt;&gt;((a,b) -&gt; a[<span class="nm">1</span>] - b[<span class="nm">1</span>]);
+pq.add(<span class="kw">new int</span>[]{src, <span class="nm">0</span>});
+dist[src] = <span class="nm">0</span>;
+<span class="kw">while</span> (!pq.isEmpty()) {
+    <span class="kw">int</span>[] cur = pq.poll();
+    <span class="kw">int</span> node = cur[<span class="nm">0</span>], d = cur[<span class="nm">1</span>];
+    <span class="kw">if</span> (d &gt; dist[node]) <span class="kw">continue</span>;
+    <span class="kw">for</span> (<span class="kw">int</span>[] edge : graph.get(node)) {
+        <span class="kw">int</span> nei = edge[<span class="nm">0</span>], w = edge[<span class="nm">1</span>];
+        <span class="kw">if</span> (dist[node] + w &lt; dist[nei]) {
+            dist[nei] = dist[node] + w;
+            pq.add(<span class="kw">new int</span>[]{nei, dist[nei]});
+        }
+    }
+}</pre></div>
+            </div>
+            <div class="code-panel" data-lang="python">
+              <div class="code-block"><div class="code-hdr"><span>dijkstra.py</span><span>Python</span></div><pre><span class="kw">import</span> heapq
+pq = [(<span class="nm">0</span>, src)]
+dist[src] = <span class="nm">0</span>
+<span class="kw">while</span> pq:
+    d, node = heapq.heappop(pq)
+    <span class="kw">if</span> d &gt; dist[node]:
+        <span class="kw">continue</span>
+    <span class="kw">for</span> nei, w <span class="kw">in</span> graph[node]:
+        nd = d + w
+        <span class="kw">if</span> nd &lt; dist[nei]:
+            dist[nei] = nd
+            heapq.heappush(pq, (nd, nei))</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="roadmap">
+      <div class="section-head">
+        <span class="section-num">04 —</span>
+        <h2>Beginner → Mastery Roadmap</h2>
+      </div>
+      <div class="roadmap">
+        <div class="road-step"><div class="n">STEP 1</div><h4>Remove fear</h4><p>Modules 1 and 2 make graphs concrete and implementable. Do not skip them if graph input still freezes you.</p></div>
+        <div class="road-step"><div class="n">STEP 2</div><h4>Own traversal</h4><p>Modules 3 and 4 are the foundation. DFS and BFS should become memory, not improvisation.</p></div>
+        <div class="road-step"><div class="n">STEP 3</div><h4>Recognize patterns</h4><p>Modules 5 and 6 build the habit of saying the pattern before writing the code.</p></div>
+        <div class="road-step"><div class="n">STEP 4</div><h4>Advance carefully</h4><p>Modules 7 and 8 add Union-Find and Dijkstra only after the traversal intuition is stable.</p></div>
+      </div>
+      <div class="callout green"><strong>Recommended study rule:</strong> do at least two starter reps and one core rep from a module before moving on. If a core problem still feels shaky, repeat the module. Repetition is the point.</div>
+    </section>
+  </main>
+
+  <footer>
+    Graphs Deep Dive · 8 modules · beginner-to-mastery practice map
+  </footer>
+
+  <script>
+    function updateThemeButton() {
+      const btn = document.getElementById('theme-btn');
+      if (!btn) return;
+      const dark = document.documentElement.classList.contains('dark');
+      btn.textContent = dark ? '☀️' : '🌙';
+    }
+    function toggleTheme() {
+      const nextDark = !document.documentElement.classList.contains('dark');
+      document.documentElement.classList.toggle('dark', nextDark);
+      updateThemeButton();
+      try { localStorage.setItem('dsa-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
+    }
+    function setLang(lang, e) {
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+      document.querySelectorAll('.code-panel').forEach(panel => panel.classList.toggle('active', panel.dataset.lang === lang));
+    }
+    updateThemeButton();
+  </script>
+</body>
+</html>

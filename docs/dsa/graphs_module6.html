@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 — The Problem-Solving Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1814;--ink2:#3d3a35;--ink3:#7a7570;
+  --paper:#f5f2ed;--paper2:#edeae3;--paper3:#e4e0d8;--border:#d4cfc6;
+  --warm:#c8521a;--blue:#2563a8;--green:#1a7a4a;--amber:#b07010;
+  --red:#a82020;--purple:#6b35a8;--teal:#1a7a6a;
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'Geist',system-ui,sans-serif;
+  --font-mono:'Geist Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;}
+
+.progress-bar{position:fixed;top:0;left:0;right:0;z-index:200;height:3px;background:var(--paper3);}
+.progress-fill{height:100%;background:var(--teal);width:0%;transition:width .4s ease;}
+
+nav{position:sticky;top:3px;z-index:100;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;}
+.nav-module{font-family:var(--font-mono);font-size:.72rem;color:var(--ink3);letter-spacing:.08em;}
+.nav-title{font-family:var(--font-display);font-size:1rem;color:var(--ink2);}
+
+.chapter{max-width:760px;margin:0 auto;padding:5rem 2rem 3rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
+.chapter.visible{opacity:1;transform:none;}
+.eyebrow{font-family:var(--font-mono);font-size:.68rem;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;}
+h2{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.2;margin-bottom:1.4rem;}
+h2 em{font-style:italic;color:var(--teal);}
+h3{font-family:var(--font-display);font-size:1.2rem;margin:1.6rem 0 .6rem;}
+p{color:var(--ink2);margin-bottom:1rem;font-size:.97rem;}
+p strong{color:var(--ink);}
+
+.insight{background:var(--paper2);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1.5rem 0;font-size:.9rem;color:var(--ink2);}
+.insight.warm{border-left-color:var(--warm);}
+.insight.blue{border-left-color:var(--blue);}
+.insight.green{border-left-color:var(--green);}
+.insight.amber{border-left-color:var(--amber);}
+.insight.red{border-left-color:var(--red);}
+.insight.purple{border-left-color:var(--purple);}
+.insight strong{color:var(--ink);}
+
+.divider{max-width:760px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:1rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.divider span{font-family:var(--font-mono);font-size:.65rem;color:var(--ink3);letter-spacing:.1em;white-space:nowrap;}
+
+/* CODE */
+.code-block{background:#1e1c18;border-radius:10px;overflow:hidden;margin:1rem 0;border:1px solid #3a3630;}
+.code-hdr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#2a2720;border-bottom:1px solid #3a3630;}
+.code-fn{font-family:var(--font-mono);font-size:.7rem;color:#8a8070;}
+.code-lg{font-family:var(--font-mono);font-size:.68rem;color:#5a8a5a;}
+pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-height:1.75;overflow-x:auto;color:#e0dcd0;}
+.kw{color:#cf9060;}.fn{color:#7ab8e8;}.cm{color:#6a6458;font-style:italic;}.st{color:#88c880;}.nm{color:#e8c878;}.ty{color:#c888c8;}
+
+/* DECISION TREE */
+.dtree{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin:1.5rem 0;}
+.dtree-title{padding:.7rem 1.2rem;background:var(--paper2);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.7rem;color:var(--ink3);letter-spacing:.06em;}
+.dt-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border);}
+.dt-row:last-child{border-bottom:none;}
+.dt-q-cell{padding:.8rem 1.1rem;flex:1;display:flex;align-items:center;gap:.7rem;}
+.dt-q-icon{font-size:.9rem;flex-shrink:0;}
+.dt-q-text{font-size:.85rem;color:var(--ink2);}
+.dt-q-text strong{color:var(--ink);}
+.dt-a-cell{padding:.8rem 1.1rem;width:200px;flex-shrink:0;border-left:1px solid var(--border);display:flex;align-items:center;}
+@media(max-width:580px){.dt-a-cell{width:130px;}}
+.dt-answer{font-size:.8rem;font-weight:600;font-family:var(--font-mono);}
+
+/* PRACTICE PROBLEMS */
+.prob-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin:1.5rem 0;}
+.prob-header{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
+.prob-title-wrap{flex:1;}
+.prob-num{font-family:var(--font-mono);font-size:.68rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem;}
+.prob-title{font-family:var(--font-display);font-size:1.1rem;line-height:1.3;}
+.prob-tag{display:inline-flex;align-items:center;padding:2px 10px;border-radius:100px;font-size:.72rem;font-weight:600;white-space:nowrap;flex-shrink:0;}
+.tag-easy{background:rgba(26,122,74,.1);border:1px solid rgba(26,122,74,.25);color:var(--green);}
+.tag-med{background:rgba(176,112,16,.1);border:1px solid rgba(176,112,16,.25);color:var(--amber);}
+.tag-hard{background:rgba(168,32,32,.1);border:1px solid rgba(168,32,32,.25);color:var(--red);}
+
+.prob-body{padding:1.1rem 1.4rem;}
+.prob-statement{background:var(--paper2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;margin-bottom:1rem;font-size:.88rem;color:var(--ink2);line-height:1.65;}
+.prob-statement strong{color:var(--ink);}
+.prob-example{background:#1e1c18;border-radius:6px;padding:.7rem .9rem;font-family:var(--font-mono);font-size:.75rem;color:#c8c0b0;margin:.7rem 0;line-height:1.7;}
+
+/* HINT SYSTEM */
+.hint-system{margin:1rem 0;}
+.hint-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+.hint-btn{background:var(--paper2);border:1.5px solid var(--border);border-radius:7px;padding:5px 13px;font-size:.78rem;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.hint-btn:hover:not(.revealed){background:var(--paper3);border-color:var(--ink3);}
+.hint-btn.revealed{background:var(--paper);border-color:var(--border);color:var(--ink3);cursor:default;}
+.hint-text{display:none;background:var(--paper2);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:0 7px 7px 0;padding:.6rem .9rem;font-size:.84rem;color:var(--ink2);animation:slideIn .25s ease;flex:1;}
+.hint-text.show{display:block;}
+.hint-text strong{color:var(--ink);}
+@keyframes slideIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:none;}}
+
+/* SOLUTION REVEAL */
+.solution-reveal{margin-top:1rem;}
+.sol-btn{background:var(--paper2);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:.82rem;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s;width:100%;text-align:left;}
+.sol-btn:hover{background:var(--paper3);}
+.sol-body{display:none;margin-top:.8rem;}
+.sol-body.open{display:block;animation:slideIn .3s ease;}
+
+/* PATTERN BADGE */
+.pat-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:.72rem;font-weight:600;margin-bottom:.8rem;}
+.pat-1{background:rgba(37,99,168,.1);border:1px solid rgba(37,99,168,.2);color:var(--blue);}
+.pat-2{background:rgba(26,122,74,.1);border:1px solid rgba(26,122,74,.2);color:var(--green);}
+.pat-3{background:rgba(200,82,26,.1);border:1px solid rgba(200,82,26,.2);color:var(--warm);}
+.pat-4{background:rgba(107,53,168,.1);border:1px solid rgba(107,53,168,.2);color:var(--purple);}
+
+/* SELF ASSESSMENT */
+.assess-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:1.2rem 0;}
+@media(max-width:540px){.assess-grid{grid-template-columns:1fr;}}
+.assess-item{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:.8rem 1rem;display:flex;align-items:flex-start;gap:.7rem;cursor:pointer;transition:all .2s;}
+.assess-item:hover{border-color:var(--teal);}
+.assess-item.checked{background:#e8f5f0;border-color:var(--teal);}
+.assess-cb{width:18px;height:18px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:all .2s;}
+.assess-item.checked .assess-cb{background:var(--teal);border-color:var(--teal);color:#fff;}
+.assess-text{font-size:.83rem;color:var(--ink2);}
+.assess-text strong{color:var(--ink);display:block;margin-bottom:2px;}
+
+/* GRADUATION */
+.grad-banner{background:linear-gradient(135deg,#1a5a4a 0%,#1a7a6a 60%,#2563a8 100%);border-radius:16px;padding:2.5rem 2rem;text-align:center;margin:2rem 0;color:#fff;position:relative;overflow:hidden;}
+.grad-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(255,255,255,.08) 0%,transparent 70%);pointer-events:none;}
+.grad-banner h3{font-family:var(--font-display);font-size:2rem;margin-bottom:.6rem;}
+.grad-banner p{opacity:.88;font-size:.92rem;max-width:520px;margin:0 auto .4rem;}
+.grad-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0;}
+@media(max-width:500px){.grad-summary{grid-template-columns:1fr;}}
+.grad-stat{background:rgba(255,255,255,.12);border-radius:10px;padding:.9rem;text-align:center;}
+.grad-stat-num{font-family:var(--font-display);font-size:1.8rem;color:#fff;}
+.grad-stat-lbl{font-size:.75rem;opacity:.75;margin-top:2px;}
+
+/* ROADMAP */
+.roadmap{display:flex;flex-direction:column;gap:.5rem;margin:1.5rem 0;}
+.rm-item{display:flex;gap:.9rem;align-items:flex-start;padding:.8rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;transition:border-color .15s;}
+.rm-item:hover{border-color:var(--teal);}
+.rm-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+.rm-body strong{font-size:.9rem;color:var(--ink);display:block;}
+.rm-body span{font-size:.8rem;color:var(--ink3);}
+
+.term{display:inline-block;background:var(--paper3);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-family:var(--font-mono);font-size:.82em;color:var(--ink2);}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+<nav>
+  <span class="nav-module">MODULE 06 / 06</span>
+  <span class="nav-title">The Problem-Solving Playbook</span>
+  <a href="graphs_module5.html" style="font-size:.78rem;color:var(--ink3);text-decoration:none;">← Module 5</a>
+</nav>
+
+<!-- ══════════════════════════════
+     CH1 — INTRO
+══════════════════════════════ -->
+<div class="chapter visible" id="ch1">
+  <div class="eyebrow">Chapter 1 of 5</div>
+  <h2>Six modules later —<br>here's your <em>complete playbook.</em></h2>
+
+  <p>You started from "graphs feel abstract." You now know what graphs are, how to store them, how DFS and BFS work from first principles, and all four patterns that cover the vast majority of problems.</p>
+
+  <p>This final module does three things. First, it gives you a single reference card — the complete decision process distilled onto one page. Second, it puts you through six real practice problems with a hint system that guides your thinking without giving away the answer. Third, it shows you exactly what to study next.</p>
+
+  <p><strong>This module is more work than the others.</strong> Good. That's the point. Recognition only builds through practice.</p>
+</div>
+
+<div class="divider"><span>YOUR REFERENCE CARD</span></div>
+
+<!-- ══════════════════════════════
+     CH2 — DECISION TREE
+══════════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="eyebrow">Chapter 2 of 5</div>
+  <h2>The complete<br><em>decision process.</em></h2>
+
+  <p>Bookmark this. When you see a graph problem, run through these questions top to bottom. Stop at the first match.</p>
+
+  <div class="dtree">
+    <div class="dtree-title">GRAPH PROBLEM DECISION TREE — TOP TO BOTTOM, STOP AT FIRST MATCH</div>
+    <div class="dt-row">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">🔍</span>
+        <div class="dt-q-text"><strong>Step 0 (always):</strong> Build adjacency list from input edges before writing any traversal.</div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--ink3);">Always first.</span></div>
+    </div>
+    <div class="dt-row">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">❓</span>
+        <div class="dt-q-text"><strong>Does the problem ask for "minimum", "shortest", "fewest", "least steps/moves"?</strong></div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--green);">→ BFS (Pattern 2)</span></div>
+    </div>
+    <div class="dt-row">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">❓</span>
+        <div class="dt-q-text"><strong>Does it ask for a valid ordering, "can all tasks complete", or "build order"?</strong></div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--purple);">→ Topo Sort (Pattern 4)</span></div>
+    </div>
+    <div class="dt-row">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">❓</span>
+        <div class="dt-q-text"><strong>Does it ask if a cycle exists, or "is this a valid tree / DAG"?</strong></div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--warm);">→ Cycle Detect (Pattern 3)</span></div>
+    </div>
+    <div class="dt-row" style="background:#f0faf5;">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">✓</span>
+        <div class="dt-q-text"><strong>Default: count groups, check reachability, find region sizes, flood fill.</strong></div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--blue);">→ Components (Pattern 1)</span></div>
+    </div>
+    <div class="dt-row" style="border-top:2px solid var(--border);">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">⚖️</span>
+        <div class="dt-q-text"><strong>Directed or undirected?</strong> Directed = one-way arrows, use for ordering/cycles. Undirected = mutual, use for components/shortest path.</div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--ink3);">Always check.</span></div>
+    </div>
+    <div class="dt-row">
+      <div class="dt-q-cell">
+        <span class="dt-q-icon">⚠️</span>
+        <div class="dt-q-text"><strong>Visited set?</strong> Every traversal needs one. Mark when enqueuing (BFS) or on entry (DFS).</div>
+      </div>
+      <div class="dt-a-cell"><span class="dt-answer" style="color:var(--red);">Never skip.</span></div>
+    </div>
+  </div>
+
+  <div class="insight blue">
+    <strong>The template vs the logic:</strong> The traversal structure (BFS while-loop, DFS recursion, Kahn's loop) never changes — memorise it once. The only thing you write fresh is what you do with each node. That's typically 2–4 lines per problem.
+  </div>
+</div>
+
+<div class="divider"><span>GUIDED PRACTICE</span></div>
+
+<!-- ══════════════════════════════
+     CH3 — 6 PRACTICE PROBLEMS
+══════════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="eyebrow">Chapter 3 of 5</div>
+  <h2>Six problems.<br>Hints on demand — <em>not upfront.</em></h2>
+
+  <p>For each problem: read it, think about the pattern, then use the hints one at a time only if you're stuck. The solution is always available at the end — but try to identify the pattern and sketch the approach before revealing it.</p>
+
+  <!-- ─── PROBLEM 1 ─── -->
+  <div class="prob-card">
+    <div class="prob-header">
+      <div class="prob-title-wrap">
+        <div class="prob-num">Problem 1 · Warmup</div>
+        <div class="prob-title">Find if Path Exists in Graph</div>
+      </div>
+      <span class="prob-tag tag-easy">Easy</span>
+    </div>
+    <div class="prob-body">
+      <div class="prob-statement">
+        There are <strong>n</strong> nodes (labelled 0 to n−1) in an undirected graph. You're given a list of edges and two nodes <strong>source</strong> and <strong>destination</strong>. Return <strong>true</strong> if there is a valid path from source to destination, false otherwise.
+      </div>
+      <div class="prob-example">Input:  n=6, edges=[[0,1],[0,2],[3,5],[5,4],[4,3]], source=0, destination=5
+Output: false
+(0 connects to 1,2 — but 3,4,5 are a separate component)</div>
+
+      <div class="hint-system">
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h1a',this)">Hint 1: Which pattern?</button>
+          <div class="hint-text" id="h1a">The problem asks "does a path exist?" — meaning are source and destination in the same connected component? <strong>Pattern 1: Connected Components.</strong> Or you can think of it as: run DFS/BFS from source, and check if destination is ever reached.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h1b',this)">Hint 2: What's the approach?</button>
+          <div class="hint-text" id="h1b">Build adjacency list. Run DFS or BFS from <strong>source</strong>. Track visited. If you ever visit <strong>destination</strong>, return true. If the traversal finishes without reaching it, return false.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h1c',this)">Hint 3: Edge cases?</button>
+          <div class="hint-text" id="h1c">What if source == destination? Return true immediately — you're already there. What if n=1 and no edges? Same answer.</div>
+        </div>
+      </div>
+
+      <div class="solution-reveal">
+        <button class="sol-btn" onclick="toggleSol('sol1',this)">▾ Show solution</button>
+        <div class="sol-body" id="sol1">
+          <div class="pat-badge pat-1">Pattern 1 — Connected Components / Reachability</div>
+          <div class="code-block">
+            <div class="code-hdr"><span class="code-fn">1971_path_exists.py</span><span class="code-lg">Python</span></div>
+            <pre><span class="kw">from</span> collections <span class="kw">import</span> defaultdict, deque
+
+<span class="kw">def</span> <span class="fn">validPath</span>(n, edges, source, destination):
+    <span class="kw">if</span> source == destination: <span class="kw">return True</span>
+
+    <span class="cm"># Step 0: build adjacency list</span>
+    graph = defaultdict(<span class="fn">list</span>)
+    <span class="kw">for</span> u, v <span class="kw">in</span> edges:
+        graph[u].<span class="fn">append</span>(v)
+        graph[v].<span class="fn">append</span>(u)
+
+    <span class="cm"># BFS from source — stop when destination found</span>
+    visited = {source}
+    queue = deque([source])
+    <span class="kw">while</span> queue:
+        node = queue.<span class="fn">popleft</span>()
+        <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> nei == destination: <span class="kw">return True</span>
+            <span class="kw">if</span> nei <span class="kw">not in</span> visited:
+                visited.<span class="fn">add</span>(nei)
+                queue.<span class="fn">append</span>(nei)
+    <span class="kw">return False</span></pre>
+          </div>
+          <div class="insight green" style="margin-top:.5rem"><strong>Why it works:</strong> BFS explores every node reachable from source. If destination is reachable, we hit it. If the queue empties without finding it, it's in a different component.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROBLEM 2 ─── -->
+  <div class="prob-card">
+    <div class="prob-header">
+      <div class="prob-title-wrap">
+        <div class="prob-num">Problem 2 · Classic</div>
+        <div class="prob-title">Number of Islands</div>
+      </div>
+      <span class="prob-tag tag-med">Medium</span>
+    </div>
+    <div class="prob-body">
+      <div class="prob-statement">
+        Given an m×n grid of <strong>'1'</strong> (land) and <strong>'0'</strong> (water), count the number of islands. An island is surrounded by water and formed by connecting adjacent lands <strong>horizontally or vertically</strong>.
+      </div>
+      <div class="prob-example">Input:  grid = [["1","1","0","0","0"],
+               ["1","1","0","0","0"],
+               ["0","0","1","0","0"],
+               ["0","0","0","1","1"]]
+Output: 3</div>
+
+      <div class="hint-system">
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h2a',this)">Hint 1: Is this a graph?</button>
+          <div class="hint-text" id="h2a">Yes — a grid is always a graph in disguise. Each <strong>'1'</strong> cell is a node. Two adjacent '1' cells share an edge. You don't need to build an explicit adjacency list — you can just use the grid directly with direction arrays <code class="term">[(0,1),(0,-1),(1,0),(-1,0)]</code>.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h2b',this)">Hint 2: Which pattern?</button>
+          <div class="hint-text" id="h2b"><strong>Pattern 1: Connected Components.</strong> Each island is one connected component of '1' cells. Count how many times you launch a fresh DFS/BFS from an unvisited '1' cell.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h2c',this)">Hint 3: How to mark visited?</button>
+          <div class="hint-text" id="h2c">Two options: (1) a separate <code class="term">visited</code> set using (row, col) tuples, or (2) modify the grid in-place by changing '1' to '0' once visited. Option 2 is common in interviews (check if the problem allows grid mutation).</div>
+        </div>
+      </div>
+
+      <div class="solution-reveal">
+        <button class="sol-btn" onclick="toggleSol('sol2',this)">▾ Show solution</button>
+        <div class="sol-body" id="sol2">
+          <div class="pat-badge pat-1">Pattern 1 — Connected Components on a Grid</div>
+          <div class="code-block">
+            <div class="code-hdr"><span class="code-fn">200_num_islands.py</span><span class="code-lg">Python</span></div>
+            <pre><span class="kw">def</span> <span class="fn">numIslands</span>(grid):
+    <span class="kw">if not</span> grid: <span class="kw">return</span> <span class="nm">0</span>
+    rows, cols = <span class="fn">len</span>(grid), <span class="fn">len</span>(grid[<span class="nm">0</span>])
+    count = <span class="nm">0</span>
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(r, c):
+        <span class="cm"># out of bounds, water, or already visited → stop</span>
+        <span class="kw">if</span> r &lt; <span class="nm">0</span> <span class="kw">or</span> r &gt;= rows <span class="kw">or</span> c &lt; <span class="nm">0</span> <span class="kw">or</span> c &gt;= cols: <span class="kw">return</span>
+        <span class="kw">if</span> grid[r][c] != <span class="st">'1'</span>: <span class="kw">return</span>
+        grid[r][c] = <span class="st">'#'</span>  <span class="cm"># mark visited (in-place)</span>
+        <span class="fn">dfs</span>(r+<span class="nm">1</span>, c); <span class="fn">dfs</span>(r-<span class="nm">1</span>, c)
+        <span class="fn">dfs</span>(r, c+<span class="nm">1</span>); <span class="fn">dfs</span>(r, c-<span class="nm">1</span>)
+
+    <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(rows):
+        <span class="kw">for</span> c <span class="kw">in</span> <span class="fn">range</span>(cols):
+            <span class="kw">if</span> grid[r][c] == <span class="st">'1'</span>:
+                <span class="fn">dfs</span>(r, c)   <span class="cm"># explore entire island</span>
+                count += <span class="nm">1</span>  <span class="cm"># each DFS launch = one island</span>
+    <span class="kw">return</span> count</pre>
+          </div>
+          <div class="insight warm" style="margin-top:.5rem"><strong>The grid trick:</strong> No explicit adjacency list needed on grids. The four direction moves <em>are</em> the neighbor lookup. Bounds checking replaces the "is this a valid node?" check.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROBLEM 3 ─── -->
+  <div class="prob-card">
+    <div class="prob-header">
+      <div class="prob-title-wrap">
+        <div class="prob-num">Problem 3 · BFS in Action</div>
+        <div class="prob-title">Rotting Oranges</div>
+      </div>
+      <span class="prob-tag tag-med">Medium</span>
+    </div>
+    <div class="prob-body">
+      <div class="prob-statement">
+        A grid contains <strong>0</strong> (empty), <strong>1</strong> (fresh orange), <strong>2</strong> (rotten orange). Each minute, every fresh orange adjacent (4-directionally) to a rotten orange becomes rotten. Return the minimum number of minutes until no fresh orange remains, or <strong>-1</strong> if impossible.
+      </div>
+      <div class="prob-example">Input:  [[2,1,1],[1,1,0],[0,1,1]]
+Output: 4
+Input:  [[2,1,1],[0,1,1],[1,0,1]]
+Output: -1  (bottom-left orange is isolated)</div>
+
+      <div class="hint-system">
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h3a',this)">Hint 1: Which pattern?</button>
+          <div class="hint-text" id="h3a">"Minimum minutes" = shortest path problem = <strong>Pattern 2: BFS.</strong> The BFS level = the number of minutes elapsed. Each level of BFS expansion = one minute passing.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h3b',this)">Hint 2: Multi-source or single source?</button>
+          <div class="hint-text" id="h3b">There can be <strong>multiple</strong> initially rotten oranges — they all spread simultaneously. This is <strong>multi-source BFS</strong>: seed all rotten oranges into the queue at distance=0 at the start. BFS then handles simultaneous spread automatically.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h3c',this)">Hint 3: How to detect -1?</button>
+          <div class="hint-text" id="h3c">Count fresh oranges before BFS. Decrement each time a fresh orange rots. After BFS finishes, if <code class="term">fresh &gt; 0</code>, some oranges were unreachable — return -1.</div>
+        </div>
+      </div>
+
+      <div class="solution-reveal">
+        <button class="sol-btn" onclick="toggleSol('sol3',this)">▾ Show solution</button>
+        <div class="sol-body" id="sol3">
+          <div class="pat-badge pat-2">Pattern 2 — Multi-Source BFS</div>
+          <div class="code-block">
+            <div class="code-hdr"><span class="code-fn">994_rotting_oranges.py</span><span class="code-lg">Python</span></div>
+            <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">orangesRotting</span>(grid):
+    rows, cols = <span class="fn">len</span>(grid), <span class="fn">len</span>(grid[<span class="nm">0</span>])
+    queue = deque()
+    fresh = <span class="nm">0</span>
+
+    <span class="cm"># Seed ALL initial rotten oranges + count fresh</span>
+    <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(rows):
+        <span class="kw">for</span> c <span class="kw">in</span> <span class="fn">range</span>(cols):
+            <span class="kw">if</span> grid[r][c] == <span class="nm">2</span>: queue.<span class="fn">append</span>((r, c, <span class="nm">0</span>))  <span class="cm"># (row,col,time)</span>
+            <span class="kw">if</span> grid[r][c] == <span class="nm">1</span>: fresh += <span class="nm">1</span>
+
+    time = <span class="nm">0</span>
+    <span class="kw">while</span> queue:
+        r, c, t = queue.<span class="fn">popleft</span>()
+        time = <span class="fn">max</span>(time, t)
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> [(-<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">1</span>,<span class="nm">0</span>),(<span class="nm">0</span>,-<span class="nm">1</span>),(<span class="nm">0</span>,<span class="nm">1</span>)]:
+            nr, nc = r+dr, c+dc
+            <span class="kw">if</span> <span class="nm">0</span>&lt;=nr&lt;rows <span class="kw">and</span> <span class="nm">0</span>&lt;=nc&lt;cols <span class="kw">and</span> grid[nr][nc]==<span class="nm">1</span>:
+                grid[nr][nc] = <span class="nm">2</span>   <span class="cm"># rot it</span>
+                fresh -= <span class="nm">1</span>
+                queue.<span class="fn">append</span>((nr, nc, t+<span class="nm">1</span>))
+
+    <span class="kw">return</span> time <span class="kw">if</span> fresh == <span class="nm">0</span> <span class="kw">else</span> <span class="nm">-1</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROBLEM 4 ─── -->
+  <div class="prob-card">
+    <div class="prob-header">
+      <div class="prob-title-wrap">
+        <div class="prob-num">Problem 4 · Cycle Detection</div>
+        <div class="prob-title">Course Schedule</div>
+      </div>
+      <span class="prob-tag tag-med">Medium</span>
+    </div>
+    <div class="prob-body">
+      <div class="prob-statement">
+        There are <strong>numCourses</strong> courses (0 to numCourses−1). You are given an array <strong>prerequisites</strong> where <strong>[a, b]</strong> means you must take course b before course a. Return <strong>true</strong> if you can finish all courses, false otherwise.
+      </div>
+      <div class="prob-example">Input:  numCourses=2, prerequisites=[[1,0]]
+Output: true   (take 0, then 1)
+
+Input:  numCourses=2, prerequisites=[[1,0],[0,1]]
+Output: false  (0 needs 1, but 1 needs 0 — impossible cycle)</div>
+
+      <div class="hint-system">
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h4a',this)">Hint 1: Reframe the question</button>
+          <div class="hint-text" id="h4a">"Can you finish all courses?" = "Does a valid ordering exist?" = "Is there a cycle in the prerequisite graph?" If there's a cycle (A needs B needs A), it's impossible. <strong>Pattern 3: Cycle Detection</strong> on a directed graph.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h4b',this)">Hint 2: Build the graph correctly</button>
+          <div class="hint-text" id="h4b">Edge direction: <code class="term">[a, b]</code> means b → a (b must come before a). So add <code class="term">graph[b].append(a)</code>. This is a <strong>directed graph</strong> — do not add the reverse edge.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h4c',this)">Hint 3: Three states</button>
+          <div class="hint-text" id="h4c">Use the 3-color DFS: <strong>0=unvisited, 1=in current path, 2=fully done</strong>. If you reach a node with state=1 during DFS, a cycle exists. State=2 means "safe — no cycle through this node."</div>
+        </div>
+      </div>
+
+      <div class="solution-reveal">
+        <button class="sol-btn" onclick="toggleSol('sol4',this)">▾ Show solution</button>
+        <div class="sol-body" id="sol4">
+          <div class="pat-badge pat-3">Pattern 3 — Cycle Detection (Directed Graph)</div>
+          <div class="code-block">
+            <div class="code-hdr"><span class="code-fn">207_course_schedule.py</span><span class="code-lg">Python</span></div>
+            <pre><span class="kw">def</span> <span class="fn">canFinish</span>(numCourses, prerequisites):
+    graph = [[] <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(numCourses)]
+    <span class="kw">for</span> a, b <span class="kw">in</span> prerequisites:
+        graph[b].<span class="fn">append</span>(a)   <span class="cm"># b must come before a → b → a</span>
+
+    state = [<span class="nm">0</span>] * numCourses  <span class="cm"># 0=unvisited, 1=in-path, 2=done</span>
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(node):
+        state[node] = <span class="nm">1</span>  <span class="cm"># mark: currently in path</span>
+        <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> state[nei] == <span class="nm">1</span>: <span class="kw">return False</span>  <span class="cm"># cycle!</span>
+            <span class="kw">if</span> state[nei] == <span class="nm">0</span> <span class="kw">and not</span> <span class="fn">dfs</span>(nei): <span class="kw">return False</span>
+        state[node] = <span class="nm">2</span>  <span class="cm"># mark: safe</span>
+        <span class="kw">return True</span>
+
+    <span class="kw">return all</span>(<span class="fn">dfs</span>(i) <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(numCourses) <span class="kw">if</span> state[i] == <span class="nm">0</span>)</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROBLEM 5 ─── -->
+  <div class="prob-card">
+    <div class="prob-header">
+      <div class="prob-title-wrap">
+        <div class="prob-num">Problem 5 · Topological Sort</div>
+        <div class="prob-title">Course Schedule II</div>
+      </div>
+      <span class="prob-tag tag-med">Medium</span>
+    </div>
+    <div class="prob-body">
+      <div class="prob-statement">
+        Same setup as Course Schedule. But now: return <strong>a valid order</strong> in which to take the courses. Return an empty array if it's impossible.
+      </div>
+      <div class="prob-example">Input:  numCourses=4, prerequisites=[[1,0],[2,0],[3,1],[3,2]]
+Output: [0,2,1,3]  or  [0,1,2,3]  (multiple valid answers)
+Input:  numCourses=2, prerequisites=[[1,0],[0,1]]
+Output: []  (cycle — impossible)</div>
+
+      <div class="hint-system">
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h5a',this)">Hint 1: What changed from Problem 4?</button>
+          <div class="hint-text" id="h5a">Problem 4 asked "can it be done?" — that's cycle detection. Problem 5 asks "in what order?" — that's <strong>Pattern 4: Topological Sort.</strong> Use Kahn's algorithm (BFS-based) which naturally gives the order and detects cycles at the same time.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h5b',this)">Hint 2: Kahn's algorithm setup</button>
+          <div class="hint-text" id="h5b">Build the graph (same as before). Compute <code class="term">indegree[i]</code> = number of prerequisites for course i. Seed all courses with indegree=0 into the queue. These are safe to take right now.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h5c',this)">Hint 3: Detecting impossible</button>
+          <div class="hint-text" id="h5c">At the end, if <code class="term">len(order) == numCourses</code>, all courses were processed — return order. If it's less, a cycle exists — return empty list.</div>
+        </div>
+      </div>
+
+      <div class="solution-reveal">
+        <button class="sol-btn" onclick="toggleSol('sol5',this)">▾ Show solution</button>
+        <div class="sol-body" id="sol5">
+          <div class="pat-badge pat-4">Pattern 4 — Topological Sort (Kahn's Algorithm)</div>
+          <div class="code-block">
+            <div class="code-hdr"><span class="code-fn">210_course_schedule_ii.py</span><span class="code-lg">Python</span></div>
+            <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">findOrder</span>(numCourses, prerequisites):
+    graph = [[] <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(numCourses)]
+    indegree = [<span class="nm">0</span>] * numCourses
+    <span class="kw">for</span> a, b <span class="kw">in</span> prerequisites:
+        graph[b].<span class="fn">append</span>(a)   <span class="cm"># b before a</span>
+        indegree[a] += <span class="nm">1</span>
+
+    <span class="cm"># Start with courses that have no prerequisites</span>
+    queue = deque(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(numCourses) <span class="kw">if</span> indegree[i] == <span class="nm">0</span>)
+    order = []
+
+    <span class="kw">while</span> queue:
+        course = queue.<span class="fn">popleft</span>()
+        order.<span class="fn">append</span>(course)
+        <span class="kw">for</span> next_course <span class="kw">in</span> graph[course]:
+            indegree[next_course] -= <span class="nm">1</span>
+            <span class="kw">if</span> indegree[next_course] == <span class="nm">0</span>:
+                queue.<span class="fn">append</span>(next_course)
+
+    <span class="kw">return</span> order <span class="kw">if</span> <span class="fn">len</span>(order) == numCourses <span class="kw">else</span> []</pre>
+          </div>
+          <div class="insight purple" style="margin-top:.5rem"><strong>Notice:</strong> Courses 4 and 5 are essentially the same problem. The only difference is what you return. This is very common — learning one template solves a whole family of problems.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROBLEM 6 ─── -->
+  <div class="prob-card">
+    <div class="prob-header">
+      <div class="prob-title-wrap">
+        <div class="prob-num">Problem 6 · The Stretch</div>
+        <div class="prob-title">Word Ladder</div>
+      </div>
+      <span class="prob-tag tag-hard">Hard</span>
+    </div>
+    <div class="prob-body">
+      <div class="prob-statement">
+        A <strong>word transformation sequence</strong> from beginWord to endWord using a wordList: each step, change exactly one letter, and the result must be in the wordList. Return the <strong>length of the shortest such sequence</strong>, or 0 if none exists.
+      </div>
+      <div class="prob-example">Input:  beginWord="hit", endWord="cog",
+        wordList=["hot","dot","dog","lot","log","cog"]
+Output: 5
+Path:   hit → hot → dot → dog → cog (5 words = 4 transformations)</div>
+
+      <div class="hint-system">
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h6a',this)">Hint 1: Is this a graph? Which pattern?</button>
+          <div class="hint-text" id="h6a">Yes — words are nodes. Two words share an edge if they differ by exactly one letter. "Shortest sequence" = shortest path = <strong>Pattern 2: BFS.</strong> This is an <em>implicit graph</em> — you don't build the full adjacency list upfront, you generate neighbors on the fly.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h6b',this)">Hint 2: How to find neighbors?</button>
+          <div class="hint-text" id="h6b">For each word in the queue, try replacing each character position with all 26 letters. If the resulting word is in the wordList (and not visited), it's a neighbor. Use a <strong>set</strong> for wordList — O(1) lookup.</div>
+        </div>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="showHint('h6c',this)">Hint 3: What to return?</button>
+          <div class="hint-text" id="h6c">BFS distance from beginWord to endWord, but the answer is the <em>number of words</em> in the sequence, not the number of edges. So it's <code class="term">distance + 1</code>. If endWord is never reached, return 0.</div>
+        </div>
+      </div>
+
+      <div class="solution-reveal">
+        <button class="sol-btn" onclick="toggleSol('sol6',this)">▾ Show solution</button>
+        <div class="sol-body" id="sol6">
+          <div class="pat-badge pat-2">Pattern 2 — BFS on an Implicit Graph</div>
+          <div class="code-block">
+            <div class="code-hdr"><span class="code-fn">127_word_ladder.py</span><span class="code-lg">Python</span></div>
+            <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">ladderLength</span>(beginWord, endWord, wordList):
+    word_set = <span class="fn">set</span>(wordList)   <span class="cm"># O(1) lookup</span>
+    <span class="kw">if</span> endWord <span class="kw">not in</span> word_set: <span class="kw">return</span> <span class="nm">0</span>
+
+    queue = deque([(beginWord, <span class="nm">1</span>)])  <span class="cm"># (word, sequence_length)</span>
+    visited = {beginWord}
+
+    <span class="kw">while</span> queue:
+        word, length = queue.<span class="fn">popleft</span>()
+        <span class="cm"># Try changing each position to each letter</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(word)):
+            <span class="kw">for</span> c <span class="kw">in</span> <span class="st">'abcdefghijklmnopqrstuvwxyz'</span>:
+                neighbor = word[:i] + c + word[i+<span class="nm">1</span>:]
+                <span class="kw">if</span> neighbor == endWord: <span class="kw">return</span> length + <span class="nm">1</span>
+                <span class="kw">if</span> neighbor <span class="kw">in</span> word_set <span class="kw">and</span> neighbor <span class="kw">not in</span> visited:
+                    visited.<span class="fn">add</span>(neighbor)
+                    queue.<span class="fn">append</span>((neighbor, length + <span class="nm">1</span>))
+    <span class="kw">return</span> <span class="nm">0</span>  <span class="cm"># unreachable</span></pre>
+          </div>
+          <div class="insight amber" style="margin-top:.5rem"><strong>The key insight:</strong> You never need to explicitly build the graph. BFS generates neighbors on-the-fly by trying all 26-letter substitutions. If the result is in the wordList, it's a valid edge. This pattern — BFS on implicit graphs — appears in many "transform X to Y in minimum steps" problems.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><span>SELF-ASSESSMENT</span></div>
+
+<!-- ══════════════════════════════
+     CH4 — SELF CHECK
+══════════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="eyebrow">Chapter 4 of 5</div>
+  <h2>Honest self-check<br>before you call it <em>done.</em></h2>
+
+  <p>Check every box you can genuinely claim. Not "I saw the answer" — "I could write this from memory right now."</p>
+
+  <div class="assess-grid">
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>Adjacency list in Python and Java</strong>I can build it from an edge list, including both directions for undirected.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>DFS template from memory</strong>3 rules: mark visited, recurse into unvisited, implicit return = backtrack.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>BFS template from memory</strong>deque, mark on enqueue not dequeue, popleft = FIFO = level-order.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>Why BFS guarantees shortest path</strong>I can explain it in one sentence without looking it up.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>Connected components pattern</strong>Outer for-loop + DFS from every unvisited node. Count launches.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>Cycle detection (directed)</strong>3-color DFS: 0=unvisited, 1=in-path, 2=done. State 1 → cycle.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>Kahn's topological sort</strong>In-degrees + queue + decrement on process. len(order)==n means no cycle.</div>
+    </div>
+    <div class="assess-item" onclick="toggleCheck(this)">
+      <div class="assess-cb">✓</div>
+      <div class="assess-text"><strong>The decision tree</strong>Minimum → BFS. Order → Topo. Cycle? → Detect. Default → Components.</div>
+    </div>
+  </div>
+
+  <p style="margin-top:1rem">Any unchecked boxes are your study targets before moving on. Be honest — the ones you can't do from memory are the ones that will trip you up in an interview.</p>
+</div>
+
+<div class="divider"><span>WHAT COMES NEXT</span></div>
+
+<!-- ══════════════════════════════
+     CH5 — GRADUATION + ROADMAP
+══════════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="eyebrow">Chapter 5 of 5</div>
+
+  <div class="grad-banner">
+    <h3>You finished the course. 🎓</h3>
+    <p>Six modules. From "what even is a graph?" to writing BFS, DFS, cycle detection, and topological sort from first principles — with the intuition to know which one to reach for.</p>
+    <div class="grad-summary">
+      <div class="grad-stat">
+        <div class="grad-stat-num">6</div>
+        <div class="grad-stat-lbl">Modules completed</div>
+      </div>
+      <div class="grad-stat">
+        <div class="grad-stat-num">4</div>
+        <div class="grad-stat-lbl">Core patterns mastered</div>
+      </div>
+      <div class="grad-stat">
+        <div class="grad-stat-num">~20</div>
+        <div class="grad-stat-lbl">LeetCode problems unlocked</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>What to do right now</h3>
+  <p>The fastest way to solidify this is to solve problems immediately after finishing this module — before you sleep on it.</p>
+
+  <div class="roadmap">
+    <div class="rm-item">
+      <span class="rm-icon">1️⃣</span>
+      <div class="rm-body">
+        <strong>Solve these 5 problems this week, in this order</strong>
+        <span>547 (Provinces) → 200 (Islands) → 994 (Rotting Oranges) → 207 (Course Schedule) → 210 (Course Schedule II). Each one is a clean pattern match.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <span class="rm-icon">2️⃣</span>
+      <div class="rm-body">
+        <strong>Before each problem: say the pattern out loud</strong>
+        <span>Before writing code, say: "This is Pattern X because Y." Then write the template. Then adapt it. This builds the recognition habit.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <span class="rm-icon">3️⃣</span>
+      <div class="rm-body">
+        <strong>Next tier: harder versions of the same patterns</strong>
+        <span>695 (Max Area of Island) → 130 (Surrounded Regions) → 542 (01 Matrix) → 269 (Alien Dictionary) → 127 (Word Ladder). Same patterns, trickier setup.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <span class="rm-icon">4️⃣</span>
+      <div class="rm-body">
+        <strong>When you're ready: Union-Find and Dijkstra</strong>
+        <span>Two more tools that solve specific problem types. Union-Find for dynamic connectivity. Dijkstra for weighted shortest paths. Both build on what you already know, and both now have dedicated follow-up modules in this track.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <span class="rm-icon">📌</span>
+      <div class="rm-body">
+        <strong>Keep the reference card</strong>
+        <span>Module 5's decision tree and the templates in Module 6 are your permanent reference. Come back to them whenever you see a graph problem and aren't sure which pattern to use.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight green" style="margin-top:2rem;">
+    <strong>The thing that separates good graph solvers from great ones:</strong> They don't memorise solutions — they memorise the 30-second recognition process. When you read a problem and the pattern clicks in under 10 seconds, you stop "doing graph problems" and start solving them like any other coding problem. That's the goal. You're most of the way there.
+  </div>
+
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin:2rem 0;text-align:center;">
+    <p style="font-family:var(--font-display);font-size:1.1rem;color:var(--ink);margin-bottom:.3rem">One last thing to remember.</p>
+    <p style="font-size:.9rem;color:var(--ink3);margin:0">Every graph algorithm you'll ever write is some variation of:<br>
+    <span style="font-family:var(--font-mono);font-size:.85rem;color:var(--ink2);">visit node → mark seen → explore neighbors → repeat</span><br>
+    The rest is just details.</p>
+  </div>
+
+  <div class="insight blue" style="margin-top:1rem;">
+    <strong>Continue the mastery path:</strong> Ready for dynamic connectivity? Go to <a href="graphs_module7_union_find.html">Module 7 — Union-Find</a>. Ready for weighted shortest paths? Finish Module 7, then continue to <a href="graphs_module8_weighted_graphs.html">Module 8 — Weighted Graphs &amp; Dijkstra</a>.
+  </div>
+</div>
+
+<div style="height:5rem"></div>
+
+<script>
+// SCROLL REVEAL
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.05});
+document.querySelectorAll('.chapter').forEach(c=>obs.observe(c));
+
+// PROGRESS — track hints + solutions revealed
+let progressItems=0;
+const totalItems=20; // hints + solutions
+function bumpProgress(){
+  progressItems=Math.min(progressItems+1,totalItems);
+  document.getElementById('progress').style.width=(progressItems/totalItems*100)+'%';
+}
+
+// HINTS
+function showHint(id,btn){
+  if(btn.classList.contains('revealed'))return;
+  document.getElementById(id).classList.add('show');
+  btn.textContent='✓ '+btn.textContent.replace(/^Hint \d+: /,'');
+  btn.classList.add('revealed');
+  bumpProgress();
+}
+
+// SOLUTION TOGGLE
+function toggleSol(id,btn){
+  const body=document.getElementById(id);
+  const open=body.classList.toggle('open');
+  btn.textContent=open?'▴ Hide solution':'▾ Show solution';
+  if(open)bumpProgress();
+}
+
+// SELF CHECK
+function toggleCheck(el){
+  el.classList.toggle('checked');
+}
+
+// PATTERN CARDS (from module5 — not needed here but keeping consistent)
+function togglePattern(n){
+  const b=document.getElementById('pb'+n);
+  if(b)b.classList.toggle('open');
+}
+</script>
+</body>
+</html>

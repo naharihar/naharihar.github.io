@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 — What Even Is a Graph?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1814;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --paper: #f5f2ed;
+  --paper2: #edeae3;
+  --paper3: #e4e0d8;
+  --warm: #c8521a;
+  --warm2: #a8421a;
+  --blue: #2563a8;
+  --green: #1a7a4a;
+  --amber: #b07010;
+  --red: #a82020;
+  --border: #d4cfc6;
+  --shadow: rgba(26,24,20,0.1);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+/* PROGRESS BAR */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 3px; background: var(--paper3);
+}
+.progress-fill {
+  height: 100%; background: var(--warm);
+  width: 0%; transition: width 0.3s ease;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 3px; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(245,242,237,0.95); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem; height: 52px;
+}
+.nav-module { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink3); letter-spacing: 0.08em; }
+.nav-title { font-family: var(--font-display); font-size: 1rem; color: var(--ink2); }
+.nav-next {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.78rem; font-weight: 500; color: var(--warm);
+  text-decoration: none; opacity: 0.5; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.nav-next.unlocked { opacity: 1; pointer-events: auto; }
+
+/* SECTIONS */
+.chapter {
+  max-width: 720px; margin: 0 auto;
+  padding: 5rem 2rem 3rem;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.chapter.visible { opacity: 1; transform: translateY(0); }
+
+.chapter-eyebrow {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--warm); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.chapter h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.2; margin-bottom: 1.4rem;
+  color: var(--ink);
+}
+.chapter h2 em { font-style: italic; color: var(--warm); }
+.chapter p { color: var(--ink2); margin-bottom: 1rem; font-size: 0.97rem; }
+.chapter p strong { color: var(--ink); font-weight: 600; }
+
+/* INSIGHT BOXES */
+.insight {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warm);
+  border-radius: 0 8px 8px 0;
+  padding: 1rem 1.2rem;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  color: var(--ink2);
+}
+.insight.blue { border-left-color: var(--blue); }
+.insight.green { border-left-color: var(--green); }
+.insight strong { color: var(--ink); }
+
+/* CANVAS AREAS */
+.canvas-wrap {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  position: relative;
+}
+.canvas-label {
+  padding: 0.6rem 1rem;
+  background: var(--paper3);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 0.7rem;
+  color: var(--ink3); letter-spacing: 0.06em;
+}
+canvas { display: block; width: 100%; }
+
+/* REAL WORLD EXAMPLES */
+.examples-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin: 1.5rem 0;
+}
+@media(max-width:580px) { .examples-grid { grid-template-columns: 1fr 1fr; } }
+.example-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.example-card:hover, .example-card.active {
+  border-color: var(--warm);
+  background: #fff;
+  box-shadow: 0 4px 16px var(--shadow);
+}
+.example-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.example-name { font-size: 0.8rem; font-weight: 600; color: var(--ink2); }
+.example-desc { font-size: 0.72rem; color: var(--ink3); margin-top: 0.2rem; }
+
+/* CONCEPT TOGGLES */
+.concept-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 1.2rem 0;
+}
+.concept-btn {
+  background: var(--paper2);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-family: var(--font-body);
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--ink2); cursor: pointer;
+  transition: all 0.2s;
+}
+.concept-btn:hover { border-color: var(--ink3); color: var(--ink); }
+.concept-btn.active { background: var(--warm); border-color: var(--warm); color: #fff; }
+
+.concept-panel {
+  display: none; margin-top: 0.5rem;
+  animation: fadeSlide 0.3s ease;
+}
+.concept-panel.active { display: block; }
+@keyframes fadeSlide { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* QUIZ SECTION */
+.quiz-q {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  margin: 1rem 0;
+}
+.quiz-q p { font-weight: 500; color: var(--ink); margin-bottom: 0.8rem; font-size: 0.92rem; }
+.quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  background: var(--paper2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem; color: var(--ink2);
+  cursor: pointer; text-align: left;
+  transition: all 0.15s;
+}
+.quiz-opt:hover:not(.locked) { border-color: var(--ink3); color: var(--ink); background: #fff; }
+.quiz-opt.correct { background: #e8f5ee; border-color: var(--green); color: var(--green); }
+.quiz-opt.wrong { background: #faeaea; border-color: var(--red); color: var(--red); }
+.quiz-opt.locked { cursor: default; }
+.quiz-feedback {
+  margin-top: 0.6rem; font-size: 0.83rem; font-weight: 500;
+  display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok { color: var(--green); }
+.quiz-feedback.no { color: var(--red); }
+
+/* COMPLETION BANNER */
+.completion {
+  display: none;
+  background: linear-gradient(135deg, #1a7a4a 0%, #2563a8 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin: 2rem 0;
+  color: #fff;
+}
+.completion.show { display: block; animation: fadeSlide 0.5s ease; }
+.completion h3 { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 0.5rem; }
+.completion p { opacity: 0.85; font-size: 0.9rem; }
+.btn-next {
+  display: inline-block;
+  margin-top: 1rem;
+  background: #fff; color: var(--green);
+  font-weight: 600; font-size: 0.9rem;
+  padding: 10px 24px; border-radius: 8px;
+  text-decoration: none; cursor: pointer; border: none;
+  transition: transform 0.15s;
+}
+.btn-next:hover { transform: scale(1.03); }
+
+/* DIVIDER */
+.chapter-divider {
+  max-width: 720px; margin: 0 auto;
+  padding: 0 2rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.chapter-divider::before, .chapter-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.chapter-divider span {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: var(--ink3); letter-spacing: 0.1em; white-space: nowrap;
+}
+
+/* HIGHLIGHT SPAN */
+.hl { color: var(--warm); font-weight: 600; }
+.hl-blue { color: var(--blue); font-weight: 600; }
+.hl-green { color: var(--green); font-weight: 600; }
+
+/* TERM */
+.term {
+  display: inline-block;
+  background: var(--paper3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 6px;
+  font-family: var(--font-mono); font-size: 0.82em;
+  color: var(--ink2);
+}
+
+/* SIDE-BY-SIDE COMPARE */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1rem; margin: 1.5rem 0;
+}
+@media(max-width:500px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.compare-card-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.compare-card-header.directed { background: #fef3ec; color: var(--warm); border-bottom: 1px solid #f5d5be; }
+.compare-card-header.undirected { background: #eef4fe; color: var(--blue); border-bottom: 1px solid #bdd5f5; }
+.compare-card-body { padding: 0.8rem 1rem; font-size: 0.83rem; color: var(--ink2); }
+.compare-card-body li { margin-left: 1rem; margin-bottom: 3px; }
+
+/* BUILD PLAYGROUND */
+.playground {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+.playground-toolbar {
+  padding: 0.7rem 1rem;
+  background: var(--paper2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.tool-btn {
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: 6px; padding: 5px 12px;
+  font-size: 0.78rem; font-weight: 500; color: var(--ink2);
+  cursor: pointer; transition: all 0.15s;
+}
+.tool-btn:hover { border-color: var(--ink3); color: var(--ink); }
+.tool-btn.active { background: var(--warm); border-color: var(--warm); color: #fff; }
+.playground-hint {
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono); font-size: 0.7rem;
+  color: var(--ink3); background: var(--paper2);
+  border-bottom: 1px solid var(--border);
+}
+#pg-canvas { display: block; width: 100%; cursor: crosshair; }
+
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<nav>
+  <span class="nav-module">MODULE 01 / 06</span>
+  <span class="nav-title">What Even Is a Graph?</span>
+  <a class="nav-next unlocked" id="nav-next" href="graphs_module2.html">Module 2 →</a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     CHAPTER 1 — THE BIG IDEA
+══════════════════════════════════════════ -->
+<div class="chapter visible" id="ch1">
+  <div class="chapter-eyebrow">Chapter 1 of 5</div>
+  <h2>You already know <em>graphs.</em><br>You just didn't have a name for them.</h2>
+
+  <p>Before we write a single line of code, let's make graphs feel <strong>completely obvious</strong>. Because they are. You interact with graphs every single day — they're just usually called by other names.</p>
+
+  <p>Click on each real-world example below and see the graph hiding inside it.</p>
+
+  <div class="examples-grid" id="rw-grid">
+    <div class="example-card" onclick="showExample('friends')">
+      <div class="example-icon">👥</div>
+      <div class="example-name">Friend Network</div>
+      <div class="example-desc">Instagram, LinkedIn</div>
+    </div>
+    <div class="example-card" onclick="showExample('map')">
+      <div class="example-icon">🗺️</div>
+      <div class="example-name">City Map</div>
+      <div class="example-desc">Google Maps routing</div>
+    </div>
+    <div class="example-card" onclick="showExample('web')">
+      <div class="example-icon">🌐</div>
+      <div class="example-name">The Web</div>
+      <div class="example-desc">Pages & hyperlinks</div>
+    </div>
+    <div class="example-card" onclick="showExample('courses')">
+      <div class="example-icon">📚</div>
+      <div class="example-name">Course Prereqs</div>
+      <div class="example-desc">College curriculum</div>
+    </div>
+    <div class="example-card" onclick="showExample('filesystem')">
+      <div class="example-icon">📁</div>
+      <div class="example-name">File System</div>
+      <div class="example-desc">Your computer's folders</div>
+    </div>
+    <div class="example-card" onclick="showExample('tasks')">
+      <div class="example-icon">✅</div>
+      <div class="example-name">Task Dependencies</div>
+      <div class="example-desc">Build systems, CI/CD</div>
+    </div>
+  </div>
+
+  <div class="canvas-wrap" id="example-canvas-wrap" style="display:none">
+    <div class="canvas-label" id="example-canvas-label">SELECT AN EXAMPLE ABOVE</div>
+    <canvas id="example-canvas" height="200"></canvas>
+    <div style="padding:0.8rem 1rem; font-size:0.83rem; color:var(--ink2)" id="example-desc-text"></div>
+  </div>
+
+  <div class="insight">
+    <strong>The pattern you're seeing:</strong> In every example above, there are <strong>things</strong> (people, cities, pages, courses) and <strong>connections between them</strong>. That's literally all a graph is. Things + connections.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>THE FORMAL DEFINITION</span></div>
+
+<!-- ══════════════════════════════════════════
+     CHAPTER 2 — NODES & EDGES
+══════════════════════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="chapter-eyebrow">Chapter 2 of 5</div>
+  <h2>Two ingredients.<br><em>Nodes</em> and <em>edges.</em></h2>
+
+  <p>Computer scientists gave the "things" a name: <span class="term">nodes</span> (also called <span class="term">vertices</span>). They gave the "connections" a name: <span class="term">edges</span>. That's the entire vocabulary you need to start.</p>
+
+  <p>Let's make this concrete. Look at this tiny graph:</p>
+
+  <div class="canvas-wrap">
+    <div class="canvas-label">A GRAPH WITH 5 NODES AND 5 EDGES</div>
+    <canvas id="basic-canvas" height="220"></canvas>
+  </div>
+
+  <p>In the graph above: <strong>Alice, Bob, Carol, Dave, Eve</strong> are the <span class="hl">nodes</span>. The lines connecting them are the <span class="hl-blue">edges</span>. Alice–Bob is one edge. Alice–Carol is another. And so on.</p>
+
+  <div class="insight blue">
+    <strong>Tree vs Graph:</strong> You said trees feel shaky — here's the key insight. A tree <em>is</em> a graph. Specifically, it's a graph with exactly one path between any two nodes (no cycles, no disconnected parts). Graphs are more general — they can have cycles, multiple paths, or disconnected sections.
+  </div>
+
+  <p>Now, the two most important questions you can ask about any graph. Click each to learn:</p>
+
+  <div class="concept-row">
+    <button class="concept-btn" onclick="toggleConcept('directed')">Directed vs Undirected?</button>
+    <button class="concept-btn" onclick="toggleConcept('weighted')">Weighted vs Unweighted?</button>
+    <button class="concept-btn" onclick="toggleConcept('cycle')">What's a Cycle?</button>
+    <button class="concept-btn" onclick="toggleConcept('connected')">Connected vs Disconnected?</button>
+  </div>
+
+  <div class="concept-panel" id="concept-directed">
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-card-header directed">↔ UNDIRECTED</div>
+        <div class="compare-card-body">
+          <p style="margin-bottom:.5rem">The edge goes <strong>both ways</strong>. If A connects to B, then B connects to A.</p>
+          <ul>
+            <li>Friendships (mutual)</li>
+            <li>Roads (usually 2-way)</li>
+            <li>Undirected = symmetric</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-header directed">→ DIRECTED</div>
+        <div class="compare-card-body">
+          <p style="margin-bottom:.5rem">The edge has an <strong>arrow</strong>. A → B means you can go A to B, but NOT B to A.</p>
+          <ul>
+            <li>Instagram follows (one-way)</li>
+            <li>Course prerequisites</li>
+            <li>Directed = asymmetric</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <div class="canvas-label">UNDIRECTED (LEFT) vs DIRECTED (RIGHT)</div>
+      <canvas id="dir-canvas" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="concept-panel" id="concept-weighted">
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-card-header undirected">UNWEIGHTED</div>
+        <div class="compare-card-body">
+          <p style="margin-bottom:.5rem">Every edge is the same. Connection either exists or it doesn't.</p>
+          <ul>
+            <li>Friend networks</li>
+            <li>"Are these connected?"</li>
+            <li>Hop count = distance</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-header directed">WEIGHTED</div>
+        <div class="compare-card-body">
+          <p style="margin-bottom:.5rem">Each edge has a <strong>cost / distance / time</strong>. Not all connections are equal.</p>
+          <ul>
+            <li>Road maps (km)</li>
+            <li>Flight prices ($)</li>
+            <li>Network latency (ms)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <div class="canvas-label">WEIGHTED GRAPH — NUMBERS ON EDGES ARE DISTANCES</div>
+      <canvas id="weighted-canvas" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="concept-panel" id="concept-cycle">
+    <p style="font-size:.9rem;color:var(--ink2);margin-bottom:1rem">A <strong>cycle</strong> is a path that starts and ends at the same node. Think of it as a loop. Graphs can have them — trees cannot.</p>
+    <div class="canvas-wrap">
+      <div class="canvas-label">GRAPH WITH A CYCLE — FOLLOW THE HIGHLIGHTED PATH</div>
+      <canvas id="cycle-canvas" height="200"></canvas>
+    </div>
+    <div class="insight" style="margin-top:0">This matters enormously in algorithms. An algorithm exploring a cyclic graph without tracking visited nodes will <strong>loop forever</strong>. This is why "have I already been here?" is the first thing every graph algorithm asks.</div>
+  </div>
+
+  <div class="concept-panel" id="concept-connected">
+    <p style="font-size:.9rem;color:var(--ink2);margin-bottom:1rem">A graph is <strong>connected</strong> if you can reach any node from any other node. If some nodes are isolated islands with no path between them, the graph is <strong>disconnected</strong> — it has multiple <strong>connected components</strong>.</p>
+    <div class="canvas-wrap">
+      <div class="canvas-label">TWO SEPARATE COMPONENTS — THERE'S NO PATH FROM LEFT TO RIGHT</div>
+      <canvas id="components-canvas" height="180"></canvas>
+    </div>
+    <div class="insight green">In problems like "number of islands" or "number of provinces," you're being asked: <strong>how many connected components does this graph have?</strong></div>
+  </div>
+</div>
+
+<div class="chapter-divider"><span>BUILD YOUR OWN</span></div>
+
+<!-- ══════════════════════════════════════════
+     CHAPTER 3 — PLAYGROUND
+══════════════════════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="chapter-eyebrow">Chapter 3 of 5</div>
+  <h2>Now you <em>build</em> one.</h2>
+
+  <p>The fastest way to understand graphs is to make one yourself. Use the playground below — <strong>click to add nodes, then click two nodes to connect them</strong>. Try to recreate the friend network from Chapter 1.</p>
+
+  <div class="playground">
+    <div class="playground-toolbar">
+      <button class="tool-btn active" id="tool-node" onclick="setTool('node')">＋ Add Node</button>
+      <button class="tool-btn" id="tool-edge" onclick="setTool('edge')">― Add Edge</button>
+      <button class="tool-btn" id="tool-delete" onclick="setTool('delete')">✕ Delete</button>
+      <button class="tool-btn" style="margin-left:auto" onclick="clearPlayground()">Clear All</button>
+      <button class="tool-btn" onclick="loadExample()">Load Example</button>
+    </div>
+    <div class="playground-hint" id="pg-hint">Click anywhere on the canvas to add a node</div>
+    <canvas id="pg-canvas" height="300"></canvas>
+  </div>
+
+  <div class="insight">
+    <strong>Notice:</strong> When you add edges, you're creating an <em>undirected</em> graph — the connection goes both ways. If you wanted a directed graph, the arrows would only go one way. This distinction shapes every algorithm you'll write.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>GRAPH VOCABULARY</span></div>
+
+<!-- ══════════════════════════════════════════
+     CHAPTER 4 — KEY TERMS
+══════════════════════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="chapter-eyebrow">Chapter 4 of 5</div>
+  <h2>The five words you'll see <em>everywhere.</em></h2>
+
+  <p>Graph problems use a small, specific vocabulary. Learn these five terms and you'll understand what every problem is actually asking.</p>
+
+  <div class="canvas-wrap">
+    <div class="canvas-label">HOVER OVER A NODE TO SEE ITS DEGREE</div>
+    <canvas id="vocab-canvas" height="260"></canvas>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0">
+    <div class="insight" style="margin:0">
+      <strong>Degree</strong> — how many edges connect to a node. In the graph above, hover to see each node's degree. High degree = well-connected node.
+    </div>
+    <div class="insight blue" style="margin:0">
+      <strong>Path</strong> — a sequence of nodes where each consecutive pair is connected by an edge. Alice → Bob → Dave is a path of length 2.
+    </div>
+    <div class="insight green" style="margin:0">
+      <strong>Neighbor</strong> — a node directly connected by one edge. Alice's neighbors are Bob and Carol (if they share edges).
+    </div>
+    <div class="insight" style="border-left-color:var(--amber);margin:0">
+      <strong>Connected Component</strong> — a group of nodes where every node can reach every other node. A graph can have multiple components.
+    </div>
+    <div class="insight" style="border-left-color:var(--red);margin:0">
+      <strong>Cycle</strong> — a path that starts and ends at the same node. A → B → C → A is a cycle of length 3.
+    </div>
+  </div>
+</div>
+
+<div class="chapter-divider"><span>CHECK YOUR UNDERSTANDING</span></div>
+
+<!-- ══════════════════════════════════════════
+     CHAPTER 5 — QUICK CHECK
+══════════════════════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="chapter-eyebrow">Chapter 5 of 5</div>
+  <h2>Quick check — <em>3 questions.</em></h2>
+  <p>No tricks. Just making sure the concepts clicked before we move to Module 2.</p>
+
+  <div class="quiz-q" id="q1">
+    <p>Q1. Instagram "following" (you follow someone but they don't have to follow back) is what type of graph?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(1,'a')">Undirected graph</button>
+      <button class="quiz-opt" onclick="answer(1,'b')">Directed graph ✓</button>
+      <button class="quiz-opt" onclick="answer(1,'c')">Weighted graph</button>
+    </div>
+    <div class="quiz-feedback" id="qf1"></div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p>Q2. You're writing an algorithm to find all nodes in a graph. Without tracking visited nodes, what goes wrong?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(2,'a')">The algorithm runs too slow</button>
+      <button class="quiz-opt" onclick="answer(2,'b')">The algorithm misses some nodes</button>
+      <button class="quiz-opt" onclick="answer(2,'c')">The algorithm loops forever on any cycle ✓</button>
+    </div>
+    <div class="quiz-feedback" id="qf2"></div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p>Q3. A graph has 4 nodes: A, B, C, D. Edges: A–B, B–C. How many connected components does this graph have?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(3,'a')">1 component</button>
+      <button class="quiz-opt" onclick="answer(3,'b')">2 components ✓</button>
+      <button class="quiz-opt" onclick="answer(3,'c')">4 components</button>
+    </div>
+    <div class="quiz-feedback" id="qf3"></div>
+  </div>
+
+  <div class="completion" id="completion">
+    <h3>Module 1 Complete 🎉</h3>
+    <p>You now know what graphs are, the vocabulary to describe them, and why cycles matter. That's the foundation everything else builds on.</p>
+    <p style="margin-top:.5rem"><strong>Up next:</strong> Module 2 — How do you actually store a graph in code? (Spoiler: it's much simpler than you think.)</p>
+    <a class="btn-next" href="graphs_module2.html">I'm ready for Module 2 →</a>
+  </div>
+</div>
+
+<div style="height:4rem"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════
+let quizAnswered = [false, false, false];
+
+function updateProgress() {
+  const done = quizAnswered.filter(Boolean).length;
+  document.getElementById('progress').style.width = (done / 3 * 100) + '%';
+  if (done === 3) {
+    document.getElementById('completion').classList.add('show');
+    document.getElementById('nav-next').classList.add('unlocked');
+  }
+}
+
+// ═══════════════════════════════════════════
+// SCROLL-REVEAL
+// ═══════════════════════════════════════════
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.chapter').forEach(c => observer.observe(c));
+
+// ═══════════════════════════════════════════
+// CONCEPT TOGGLE
+// ═══════════════════════════════════════════
+function toggleConcept(id) {
+  const panel = document.getElementById('concept-' + id);
+  const btn = [...document.querySelectorAll('.concept-btn')].find(b => b.textContent.toLowerCase().includes(id.slice(0,5)));
+  const isOpen = panel.classList.contains('active');
+  document.querySelectorAll('.concept-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.concept-btn').forEach(b => b.classList.remove('active'));
+  if (!isOpen) {
+    panel.classList.add('active');
+    if (btn) btn.classList.add('active');
+    setTimeout(() => drawConceptCanvas(id), 50);
+  }
+}
+
+// ═══════════════════════════════════════════
+// DRAWING UTILITIES
+// ═══════════════════════════════════════════
+function setupCanvas(id) {
+  const c = document.getElementById(id);
+  if (!c) return null;
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight || 200;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+
+function drawNode(ctx, x, y, label, opts = {}) {
+  const r = opts.r || 24;
+  const fill = opts.fill || '#fff';
+  const stroke = opts.stroke || '#d4cfc6';
+  const textColor = opts.textColor || '#3d3a35';
+  const sw = opts.strokeWidth || 1.5;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = fill; ctx.fill();
+  ctx.strokeStyle = stroke; ctx.lineWidth = sw; ctx.stroke();
+  ctx.fillStyle = textColor;
+  ctx.font = `500 ${opts.fontSize || 13}px Geist, sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, x, y);
+}
+
+function drawEdge(ctx, x1, y1, x2, y2, opts = {}) {
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+  ctx.strokeStyle = opts.color || '#d4cfc6';
+  ctx.lineWidth = opts.width || 1.5;
+  if (opts.dash) ctx.setLineDash(opts.dash); else ctx.setLineDash([]);
+  ctx.stroke(); ctx.setLineDash([]);
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, nodeR, color) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const ux = dx/len, uy = dy/len;
+  const sx = x1 + ux * nodeR, sy = y1 + uy * nodeR;
+  const ex = x2 - ux * (nodeR + 2), ey = y2 - uy * (nodeR + 2);
+  ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey);
+  ctx.strokeStyle = color || '#d4cfc6'; ctx.lineWidth = 1.5; ctx.stroke();
+  const angle = Math.atan2(ey - sy, ex - sx);
+  ctx.beginPath();
+  ctx.moveTo(ex, ey);
+  ctx.lineTo(ex - 10 * Math.cos(angle - 0.4), ey - 10 * Math.sin(angle - 0.4));
+  ctx.lineTo(ex - 10 * Math.cos(angle + 0.4), ey - 10 * Math.sin(angle + 0.4));
+  ctx.closePath(); ctx.fillStyle = color || '#d4cfc6'; ctx.fill();
+}
+
+function drawEdgeLabel(ctx, x1, y1, x2, y2, label) {
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(mx, my, 12, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#c8521a';
+  ctx.font = '600 11px Geist, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, mx, my);
+}
+
+// ═══════════════════════════════════════════
+// REAL WORLD EXAMPLES
+// ═══════════════════════════════════════════
+const exampleData = {
+  friends: {
+    label: 'FRIEND NETWORK — Each person is a node, each friendship is an edge',
+    desc: 'Every social network is a graph. Nodes = users. Edges = connections. Questions like "do Alice and Dave know each other?" or "how many degrees of separation?" are graph traversal problems.',
+    nodes: [{x:180,y:60,l:'Alice'},{x:80,y:150,l:'Bob'},{x:290,y:130,l:'Carol'},{x:140,y:230,l:'Dave'},{x:260,y:230,l:'Eve'}],
+    edges: [[0,1],[0,2],[1,3],[2,4],[3,4]],
+    directed: false, weighted: false, weights: []
+  },
+  map: {
+    label: 'CITY MAP — Intersections are nodes, roads are edges with distances',
+    desc: 'Google Maps works by finding the shortest path in a weighted graph. Nodes = intersections. Edges = roads. Weights = distance or travel time. Dijkstra\'s algorithm does the rest.',
+    nodes: [{x:80,y:100,l:'A'},{x:200,y:60,l:'B'},{x:320,y:100,l:'C'},{x:140,y:200,l:'D'},{x:280,y:200,l:'E'}],
+    edges: [[0,1],[1,2],[0,3],[1,3],[1,4],[2,4],[3,4]],
+    directed: false, weighted: true, weights: [4,3,6,2,5,4,3]
+  },
+  web: {
+    label: 'THE WEB — Web pages are nodes, hyperlinks are directed edges',
+    desc: 'Google\'s original PageRank algorithm ranked pages by graph importance. If many pages link to you, you\'re important. Nodes = pages. Directed edges = hyperlinks (page A links TO page B).',
+    nodes: [{x:190,y:50,l:'Home'},{x:80,y:150,l:'Blog'},{x:310,y:150,l:'Shop'},{x:140,y:250,l:'Post1'},{x:260,y:250,l:'Cart'}],
+    edges: [[0,1],[0,2],[1,3],[2,4],[3,1],[4,2]],
+    directed: true, weighted: false, weights: []
+  },
+  courses: {
+    label: 'COURSE PREREQUISITES — Courses are nodes, "must take first" arrows are edges',
+    desc: 'Can you graduate without a scheduling conflict? That\'s a topological sort problem. Nodes = courses. Directed edges = prerequisites. A cycle means an impossible schedule.',
+    nodes: [{x:80,y:100,l:'CS101'},{x:200,y:50,l:'Math'},{x:320,y:100,l:'CS201'},{x:200,y:190,l:'CS301'}],
+    edges: [[0,2],[1,2],[2,3]],
+    directed: true, weighted: false, weights: []
+  },
+  filesystem: {
+    label: 'FILE SYSTEM — Folders and files are nodes, containment is a directed edge',
+    desc: 'Your file system is a tree — a special type of graph with no cycles. Nodes = folders/files. Edges = "contains." DFS on a file system is how "find" commands work.',
+    nodes: [{x:190,y:40,l:'/'},{x:100,y:120,l:'home'},{x:280,y:120,l:'usr'},{x:60,y:210,l:'alice'},{x:160,y:210,l:'bob'},{x:280,y:210,l:'bin'}],
+    edges: [[0,1],[0,2],[1,3],[1,4],[2,5]],
+    directed: true, weighted: false, weights: []
+  },
+  tasks: {
+    label: 'BUILD SYSTEM — Tasks are nodes, "depends on" arrows are directed edges',
+    desc: 'Before running tests, you must compile. Before compiling, you must download dependencies. This ordering constraint is a directed graph. A topological sort gives you the valid build order.',
+    nodes: [{x:190,y:40,l:'Test'},{x:80,y:130,l:'Compile'},{x:320,y:130,l:'Lint'},{x:80,y:220,l:'Deps'},{x:320,y:220,l:'Format'}],
+    edges: [[1,0],[2,0],[3,1],[4,2]],
+    directed: true, weighted: false, weights: []
+  }
+};
+
+let currentExample = null;
+
+function showExample(key) {
+  currentExample = key;
+  document.querySelectorAll('.example-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.example-card').forEach((c, i) => {
+    const keys = ['friends','map','web','courses','filesystem','tasks'];
+    if (keys[i] === key) c.classList.add('active');
+  });
+  const wrap = document.getElementById('example-canvas-wrap');
+  wrap.style.display = 'block';
+  const data = exampleData[key];
+  document.getElementById('example-canvas-label').textContent = data.label;
+  document.getElementById('example-desc-text').textContent = data.desc;
+  setTimeout(() => drawExampleGraph(key), 30);
+}
+
+function drawExampleGraph(key) {
+  const s = setupCanvas('example-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  const data = exampleData[key];
+  const scaleX = w / 400, scaleY = h / 280;
+  const nodes = data.nodes.map(n => ({...n, x: n.x * scaleX, y: n.y * scaleY}));
+  // edges
+  data.edges.forEach(([a, b], i) => {
+    if (data.directed) drawArrow(ctx, nodes[a].x, nodes[a].y, nodes[b].x, nodes[b].y, 24, '#c8521a');
+    else drawEdge(ctx, nodes[a].x, nodes[a].y, nodes[b].x, nodes[b].y, {color:'#b8b4ac', width:2});
+    if (data.weighted && data.weights[i]) drawEdgeLabel(ctx, nodes[a].x, nodes[a].y, nodes[b].x, nodes[b].y, data.weights[i]);
+  });
+  // nodes
+  nodes.forEach(n => {
+    const llen = n.l.length;
+    const r = llen > 4 ? 30 : 24;
+    drawNode(ctx, n.x, n.y, n.l, {r, fill:'#fff', stroke:'#c8521a', textColor:'#1a1814', strokeWidth:2, fontSize: llen > 4 ? 10 : 12});
+  });
+}
+
+// ═══════════════════════════════════════════
+// BASIC CANVAS (ch2)
+// ═══════════════════════════════════════════
+function drawBasicGraph() {
+  const s = setupCanvas('basic-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  const nodes = [
+    {x:w/2, y:40, l:'Alice'},
+    {x:w*0.15, y:130, l:'Bob'},
+    {x:w*0.85, y:130, l:'Carol'},
+    {x:w*0.3, y:220, l:'Dave'},
+    {x:w*0.7, y:220, l:'Eve'}
+  ];
+  const edges = [[0,1],[0,2],[1,3],[2,4],[3,4]];
+  edges.forEach(([a,b]) => drawEdge(ctx, nodes[a].x, nodes[a].y, nodes[b].x, nodes[b].y, {color:'#2563a8', width:2}));
+  nodes.forEach(n => drawNode(ctx, n.x, n.y, n.l, {r:28, fill:'#eef4fe', stroke:'#2563a8', textColor:'#1a1814', strokeWidth:2, fontSize:11}));
+  // labels
+  ctx.fillStyle = '#c8521a'; ctx.font = '600 11px Geist Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('← edge', nodes[0].x + (nodes[1].x - nodes[0].x)/2 - 10, nodes[0].y + (nodes[1].y - nodes[0].y)/2);
+  ctx.fillStyle = '#2563a8'; ctx.textAlign = 'center';
+  ctx.fillText('node →', nodes[4].x + 60, nodes[4].y);
+}
+
+// ═══════════════════════════════════════════
+// CONCEPT CANVASES
+// ═══════════════════════════════════════════
+function drawConceptCanvas(id) {
+  if (id === 'directed') drawDirectedComparison();
+  if (id === 'weighted') drawWeightedGraph();
+  if (id === 'cycle') drawCycleGraph();
+  if (id === 'connected') drawComponentsGraph();
+}
+
+function drawDirectedComparison() {
+  const s = setupCanvas('dir-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  const half = w / 2;
+  // undirected left
+  const ul = [{x:half*0.25,y:h/2-40,l:'A'},{x:half*0.65,y:h/3,l:'B'},{x:half*0.65,y:h*2/3,l:'C'}];
+  drawEdge(ctx, ul[0].x, ul[0].y, ul[1].x, ul[1].y, {color:'#b8b4ac',width:2});
+  drawEdge(ctx, ul[0].x, ul[0].y, ul[2].x, ul[2].y, {color:'#b8b4ac',width:2});
+  drawEdge(ctx, ul[1].x, ul[1].y, ul[2].x, ul[2].y, {color:'#b8b4ac',width:2});
+  ul.forEach(n => drawNode(ctx, n.x, n.y, n.l, {r:20, fill:'#eef4fe', stroke:'#2563a8', strokeWidth:2}));
+  ctx.fillStyle = '#2563a8'; ctx.font = '600 11px Geist, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('UNDIRECTED', half/2, h - 16);
+  // separator
+  ctx.strokeStyle = '#d4cfc6'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(half, 10); ctx.lineTo(half, h-10); ctx.stroke(); ctx.setLineDash([]);
+  // directed right
+  const dr = [{x:half+half*0.2,y:h/2-40,l:'A'},{x:half+half*0.6,y:h/3,l:'B'},{x:half+half*0.6,y:h*2/3,l:'C'}];
+  drawArrow(ctx, dr[0].x, dr[0].y, dr[1].x, dr[1].y, 20, '#c8521a');
+  drawArrow(ctx, dr[0].x, dr[0].y, dr[2].x, dr[2].y, 20, '#c8521a');
+  drawArrow(ctx, dr[2].x, dr[2].y, dr[1].x, dr[1].y, 20, '#c8521a');
+  dr.forEach(n => drawNode(ctx, n.x, n.y, n.l, {r:20, fill:'#fef3ec', stroke:'#c8521a', strokeWidth:2}));
+  ctx.fillStyle = '#c8521a'; ctx.font = '600 11px Geist, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('DIRECTED', half + half/2, h - 16);
+}
+
+function drawWeightedGraph() {
+  const s = setupCanvas('weighted-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  const nodes = [{x:w*0.15,y:h/2,l:'A'},{x:w*0.4,y:h*0.2,l:'B'},{x:w*0.4,y:h*0.8,l:'C'},{x:w*0.75,y:h/2,l:'D'}];
+  const edges = [[0,1,4],[0,2,7],[1,3,3],[2,3,2],[1,2,6]];
+  edges.forEach(([a,b,w2]) => {
+    drawEdge(ctx, nodes[a].x, nodes[a].y, nodes[b].x, nodes[b].y, {color:'#b8b4ac', width:2});
+    drawEdgeLabel(ctx, nodes[a].x, nodes[a].y, nodes[b].x, nodes[b].y, w2);
+  });
+  nodes.forEach(n => drawNode(ctx, n.x, n.y, n.l, {r:22, fill:'#fff', stroke:'#1a7a4a', strokeWidth:2, textColor:'#1a1814'}));
+}
+
+let cycleAnim = 0, cycleAnimId = null;
+function drawCycleGraph() {
+  const s = setupCanvas('cycle-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  const nodes = [{x:w/2,y:40,l:'A'},{x:w*0.8,y:h/2,l:'B'},{x:w*0.6,y:h-40,l:'C'},{x:w*0.2,y:h*0.65,l:'D'},{x:w*0.15,y:h*0.3,l:'E'}];
+  const cycleEdges = [[0,1],[1,2],[2,3],[3,0]]; // the cycle: A-B-C-D-A
+  const extraEdges = [[4,0],[4,3]]; // E connects but not in cycle
+  if (cycleAnimId) cancelAnimationFrame(cycleAnimId);
+  function animate() {
+    const s2 = setupCanvas('cycle-canvas');
+    if (!s2) return;
+    const ctx2 = s2.ctx, w2 = s2.w, h2 = s2.h;
+    const ns = nodes.map(n => ({...n})); // same coords
+    cycleAnim = (cycleAnim + 0.5) % 100;
+    // extra edges
+    extraEdges.forEach(([a,b]) => drawEdge(ctx2, ns[a].x, ns[a].y, ns[b].x, ns[b].y, {color:'#d4cfc6', width:1.5}));
+    // cycle edges — pulsing highlight
+    const t = cycleAnim / 100;
+    cycleEdges.forEach(([a,b], i) => {
+      const phase = (t + i * 0.25) % 1;
+      const alpha = 0.3 + 0.7 * Math.abs(Math.sin(phase * Math.PI));
+      ctx2.beginPath(); ctx2.moveTo(ns[a].x, ns[a].y); ctx2.lineTo(ns[b].x, ns[b].y);
+      ctx2.strokeStyle = `rgba(200,82,26,${alpha})`; ctx2.lineWidth = 3; ctx2.stroke();
+    });
+    ns.forEach((n, i) => {
+      const isCycle = i < 4;
+      drawNode(ctx2, n.x, n.y, n.l, {r:22, fill: isCycle ? '#fef3ec' : '#f5f2ed', stroke: isCycle ? '#c8521a' : '#d4cfc6', strokeWidth: isCycle ? 2 : 1.5, textColor: isCycle ? '#c8521a' : '#7a7570'});
+    });
+    ctx2.fillStyle = '#c8521a'; ctx2.font = '500 11px Geist, sans-serif'; ctx2.textAlign = 'center';
+    ctx2.fillText('A → B → C → D → A  (cycle!)', w2/2, h2 - 8);
+    cycleAnimId = requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function drawComponentsGraph() {
+  const s = setupCanvas('components-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  // component 1
+  const c1 = [{x:w*0.1,y:h/2,l:'A'},{x:w*0.27,y:h*0.25,l:'B'},{x:w*0.27,y:h*0.75,l:'C'}];
+  drawEdge(ctx,c1[0].x,c1[0].y,c1[1].x,c1[1].y,{color:'#2563a8',width:2});
+  drawEdge(ctx,c1[0].x,c1[0].y,c1[2].x,c1[2].y,{color:'#2563a8',width:2});
+  drawEdge(ctx,c1[1].x,c1[1].y,c1[2].x,c1[2].y,{color:'#2563a8',width:2});
+  c1.forEach(n => drawNode(ctx,n.x,n.y,n.l,{r:20,fill:'#eef4fe',stroke:'#2563a8',strokeWidth:2}));
+  // component 2
+  const c2 = [{x:w*0.6,y:h*0.3,l:'D'},{x:w*0.8,y:h*0.3,l:'E'},{x:w*0.7,y:h*0.7,l:'F'},{x:w*0.9,y:h*0.7,l:'G'}];
+  drawEdge(ctx,c2[0].x,c2[0].y,c2[1].x,c2[1].y,{color:'#1a7a4a',width:2});
+  drawEdge(ctx,c2[2].x,c2[2].y,c2[3].x,c2[3].y,{color:'#1a7a4a',width:2});
+  c2.forEach(n => drawNode(ctx,n.x,n.y,n.l,{r:20,fill:'#e8f5ee',stroke:'#1a7a4a',strokeWidth:2}));
+  // labels
+  ctx.fillStyle = '#2563a8'; ctx.font = '600 11px Geist, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('Component 1', w*0.19, h - 8);
+  ctx.fillStyle = '#1a7a4a';
+  ctx.fillText('Component 2', w*0.75, h - 8);
+  // gap indicator
+  ctx.strokeStyle = '#e4e0d8'; ctx.lineWidth = 1; ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(w*0.44, 10); ctx.lineTo(w*0.44, h-20); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#7a7570'; ctx.font = '11px Geist, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('no path', w*0.44, h/2 - 6);
+  ctx.fillText('across', w*0.44, h/2 + 8);
+}
+
+// ═══════════════════════════════════════════
+// VOCAB CANVAS WITH HOVER
+// ═══════════════════════════════════════════
+let vocabHover = -1;
+const vocabNodes = [];
+let vocabEdges = [];
+
+function initVocabCanvas() {
+  const c = document.getElementById('vocab-canvas');
+  if (!c) return;
+  const w = c.clientWidth;
+  const h = 260;
+  vocabNodes.length = 0;
+  vocabNodes.push(
+    {x:w*0.5, y:50, l:'A'},
+    {x:w*0.2, y:140, l:'B'},
+    {x:w*0.8, y:140, l:'C'},
+    {x:w*0.35, y:230, l:'D'},
+    {x:w*0.65, y:230, l:'E'}
+  );
+  vocabEdges = [[0,1],[0,2],[1,2],[1,3],[2,4],[3,4]];
+  drawVocabGraph();
+
+  c.addEventListener('mousemove', (e) => {
+    const rect = c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const mx = (e.clientX - rect.left);
+    const my = (e.clientY - rect.top);
+    let found = -1;
+    vocabNodes.forEach((n, i) => {
+      const dx = mx - n.x, dy = my - n.y;
+      if (Math.sqrt(dx*dx+dy*dy) < 28) found = i;
+    });
+    if (found !== vocabHover) { vocabHover = found; drawVocabGraph(); }
+  });
+  c.addEventListener('mouseleave', () => { vocabHover = -1; drawVocabGraph(); });
+}
+
+function drawVocabGraph() {
+  const s = setupCanvas('vocab-canvas');
+  if (!s) return;
+  const { ctx, w, h } = s;
+  vocabEdges.forEach(([a,b]) => {
+    const highlighted = vocabHover !== -1 && (a === vocabHover || b === vocabHover);
+    drawEdge(ctx, vocabNodes[a].x, vocabNodes[a].y, vocabNodes[b].x, vocabNodes[b].y, {
+      color: highlighted ? '#c8521a' : '#d4cfc6', width: highlighted ? 2.5 : 1.5
+    });
+  });
+  vocabNodes.forEach((n, i) => {
+    const isHover = i === vocabHover;
+    const degree = vocabEdges.filter(([a,b]) => a===i||b===i).length;
+    const isNeighbor = vocabHover !== -1 && vocabEdges.some(([a,b]) => (a===vocabHover&&b===i)||(b===vocabHover&&a===i));
+    let fill = '#fff', stroke = '#d4cfc6', tc = '#3d3a35';
+    if (isHover) { fill = '#fef3ec'; stroke = '#c8521a'; tc = '#c8521a'; }
+    else if (isNeighbor) { fill = '#fffbf5'; stroke = '#e8b888'; tc = '#3d3a35'; }
+    drawNode(ctx, n.x, n.y, n.l, {r:26, fill, stroke, textColor:tc, strokeWidth:isHover?2.5:1.5});
+    if (isHover) {
+      ctx.fillStyle = '#c8521a'; ctx.font = '600 11px Geist Mono, monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText('degree: ' + degree, n.x, n.y + 30);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// PLAYGROUND
+// ═══════════════════════════════════════════
+let pgTool = 'node';
+let pgNodes = [], pgEdges = [];
+let pgSelected = -1;
+let pgNodeIdCounter = 0;
+const NODE_LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+function setTool(t) {
+  pgTool = t;
+  pgSelected = -1;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + t).classList.add('active');
+  const hints = {
+    node: 'Click anywhere on the canvas to add a node',
+    edge: 'Click the first node, then click the second node to connect them',
+    delete: 'Click on a node or near an edge to delete it'
+  };
+  document.getElementById('pg-hint').textContent = hints[t];
+  drawPlayground();
+}
+
+function clearPlayground() {
+  pgNodes = []; pgEdges = []; pgSelected = -1; pgNodeIdCounter = 0;
+  drawPlayground();
+}
+
+function loadExample() {
+  pgNodes = [
+    {x:200, y:80, l:'Alice', id:0},
+    {x:90, y:180, l:'Bob', id:1},
+    {x:310, y:180, l:'Carol', id:2},
+    {x:150, y:280, l:'Dave', id:3},
+    {x:270, y:280, l:'Eve', id:4}
+  ];
+  pgEdges = [[0,1],[0,2],[1,3],[2,4],[3,4]];
+  pgNodeIdCounter = 5;
+  drawPlayground();
+}
+
+function getPgCanvas() {
+  const c = document.getElementById('pg-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight || 300;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h, c };
+}
+
+function drawPlayground() {
+  const { ctx, w, h } = getPgCanvas();
+  ctx.clearRect(0, 0, w, h);
+  // grid dots
+  ctx.fillStyle = '#e8e4dc';
+  for (let x = 20; x < w; x += 30) for (let y = 20; y < h; y += 30) {
+    ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI*2); ctx.fill();
+  }
+  // edges
+  pgEdges.forEach(([a, b]) => {
+    drawEdge(ctx, pgNodes[a].x, pgNodes[a].y, pgNodes[b].x, pgNodes[b].y, {color:'#b8b4ac', width:2});
+  });
+  // nodes
+  pgNodes.forEach((n, i) => {
+    const isSelected = i === pgSelected;
+    const llen = n.l.length;
+    const r = llen > 4 ? 30 : 24;
+    drawNode(ctx, n.x, n.y, n.l, {
+      r, fill: isSelected ? '#fef3ec' : '#fff',
+      stroke: isSelected ? '#c8521a' : '#3d3a35',
+      textColor: '#1a1814', strokeWidth: isSelected ? 2.5 : 1.5,
+      fontSize: llen > 4 ? 10 : 13
+    });
+    if (isSelected) {
+      ctx.beginPath(); ctx.arc(n.x, n.y, r + 6, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(200,82,26,0.3)'; ctx.lineWidth = 2;
+      ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+    }
+  });
+  if (pgNodes.length === 0) {
+    ctx.fillStyle = '#b8b4ac'; ctx.font = '14px Geist, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('Click to add your first node →', w/2, h/2);
+  }
+}
+
+function getNodeAt(x, y) {
+  for (let i = pgNodes.length - 1; i >= 0; i--) {
+    const n = pgNodes[i];
+    const r = n.l.length > 4 ? 30 : 24;
+    const dx = x - n.x, dy = y - n.y;
+    if (Math.sqrt(dx*dx + dy*dy) < r + 4) return i;
+  }
+  return -1;
+}
+
+document.getElementById('pg-canvas').addEventListener('click', (e) => {
+  const c = document.getElementById('pg-canvas');
+  const rect = c.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  if (pgTool === 'node') {
+    const label = NODE_LABELS[pgNodeIdCounter % 26] || String(pgNodeIdCounter);
+    pgNodes.push({x, y, l: label, id: pgNodeIdCounter++});
+    drawPlayground();
+  } else if (pgTool === 'edge') {
+    const hit = getNodeAt(x, y);
+    if (hit === -1) { pgSelected = -1; drawPlayground(); return; }
+    if (pgSelected === -1) { pgSelected = hit; drawPlayground(); return; }
+    if (pgSelected !== hit) {
+      const already = pgEdges.some(([a,b]) => (a===pgSelected&&b===hit)||(b===pgSelected&&a===hit));
+      if (!already) pgEdges.push([pgSelected, hit]);
+    }
+    pgSelected = -1; drawPlayground();
+  } else if (pgTool === 'delete') {
+    const hit = getNodeAt(x, y);
+    if (hit !== -1) {
+      pgEdges = pgEdges.filter(([a,b]) => a!==hit && b!==hit)
+        .map(([a,b]) => [a>hit?a-1:a, b>hit?b-1:b]);
+      pgNodes.splice(hit, 1);
+      pgSelected = -1; drawPlayground();
+    }
+  }
+});
+
+// ═══════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════
+const answers = {1:'b', 2:'c', 3:'b'};
+const feedback = {
+  1: { b: '✓ Correct! Following is one-way — you can follow someone without them following back. That asymmetry = directed graph.', a: '✗ Not quite. Undirected means the connection is mutual (both directions). Instagram follows are one-way.', c: '✗ Not quite. Weighted means edges have values (cost, distance). Following has no "weight" — it just exists or not.' },
+  2: { c: '✓ Exactly right. A cycle means the algorithm keeps revisiting the same nodes forever. This is the #1 reason graph algorithms track visited nodes.', a: '✗ Not quite. Speed isn\'t the issue — correctness is. Without a visited set, the algorithm never terminates on a cyclic graph.', b: '✗ Not quite. Actually the opposite — without a visited set you\'d revisit nodes endlessly, not miss them.' },
+  3: { b: '✓ Correct! A–B–C is one component. D is completely isolated with no edges. Two groups = two components.', a: '✗ Not quite. For one component, every node must be reachable from every other. D has no edges — you can\'t reach it from A, B, or C.', c: '✗ Not quite. Component count = number of separate groups, not number of nodes. A, B, C are all connected to each other.' }
+};
+
+function answer(q, choice) {
+  if (quizAnswered[q-1]) return;
+  const qDiv = document.getElementById('q' + q);
+  const opts = qDiv.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.classList.add('locked'));
+  const correct = answers[q];
+  opts.forEach((o, i) => {
+    const letters = ['a','b','c'];
+    if (letters[i] === correct) o.classList.add('correct');
+    else if (letters[i] === choice && choice !== correct) o.classList.add('wrong');
+  });
+  const fb = document.getElementById('qf' + q);
+  fb.textContent = feedback[q][choice];
+  fb.className = 'quiz-feedback show ' + (choice === correct ? 'ok' : 'no');
+  quizAnswered[q-1] = true;
+  updateProgress();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load', () => {
+  drawBasicGraph();
+  initVocabCanvas();
+  drawPlayground();
+});
+window.addEventListener('resize', () => {
+  drawBasicGraph();
+  initVocabCanvas();
+  drawPlayground();
+  if (currentExample) drawExampleGraph(currentExample);
+  const openConcept = document.querySelector('.concept-panel.active');
+  if (openConcept) {
+    const id = openConcept.id.replace('concept-','');
+    drawConceptCanvas(id);
+  }
+});
+</script>
+</body>
+</html>

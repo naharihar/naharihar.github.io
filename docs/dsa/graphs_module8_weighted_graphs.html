@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8 — Weighted Graphs &amp; Dijkstra</title>
+<script>
+  (() => {
+    try {
+      if (localStorage.getItem('dsa-theme') === 'dark') document.documentElement.classList.add('dark');
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1a1814;--ink2:#3f3a34;--ink3:#7a7367;--paper:#f5f2ed;--paper2:#ede8df;--paper3:#e1dbd0;--border:#d3ccc0;--blue:#255fa6;--green:#1d7f4f;--warm:#c6521a;--purple:#6b3db2;--header:rgba(245,242,237,.92);--serif:'Instrument Serif',Georgia,serif;--sans:'Geist',system-ui,sans-serif;--mono:'Geist Mono',monospace}
+  html.dark{--ink:#ecebf4;--ink2:#c3bed2;--ink3:#8f88a5;--paper:#111117;--paper2:#191922;--paper3:#232330;--border:#313144;--blue:#8db5ff;--green:#58d49b;--warm:#f59b5a;--purple:#b39cff;--header:rgba(17,17,23,.92)}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth} body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75}
+  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--border);background:var(--header);backdrop-filter:blur(8px)}
+  .nav-title{font-family:var(--serif);font-size:1.05rem}.nav-side{font-size:.8rem;color:var(--ink3)} .nav-side a{color:var(--ink3);text-decoration:none}
+  .theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--paper2);color:var(--ink3);cursor:pointer}
+  .wrap{max-width:860px;margin:0 auto;padding:4rem 2rem 5rem}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:.7rem}
+  h1,h2,h3{font-family:var(--serif);line-height:1.2} h1{font-size:clamp(2.2rem,5vw,3.5rem);margin-bottom:1rem} h1 em{color:var(--blue);font-style:italic} h2{font-size:1.85rem;margin:2.2rem 0 1rem}
+  p{color:var(--ink2);margin-bottom:1rem} strong{color:var(--ink)}
+  .callout{background:var(--paper2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;padding:1rem 1.1rem;margin:1rem 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem} @media(max-width:760px){.grid,.practice{grid-template-columns:1fr} nav,.wrap{padding-left:1rem;padding-right:1rem}}
+  .card{background:var(--paper2);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem}
+  .card h3{font-size:1.15rem;margin-bottom:.45rem}
+  .lang-toggle{display:flex;gap:4px;background:var(--paper2);border:1px solid var(--border);border-radius:8px;padding:4px}
+  .lang-btn{border:none;background:none;color:var(--ink3);cursor:pointer;font-family:var(--mono);font-size:.76rem;padding:5px 12px;border-radius:6px}
+  .lang-btn.active{background:var(--blue);color:#fff}
+  .code-wrap{margin-top:1rem;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .code-head{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--border);background:var(--paper3)}
+  .code-panel{display:none}.code-panel.active{display:block}
+  .code{background:#191817;border-top:1px solid #34312e}
+  pre{padding:1rem;overflow-x:auto;font-family:var(--mono);font-size:.78rem;line-height:1.7;color:#ece6d8}
+  .kw{color:#cf9060}.fn{color:#7ab8e8}.cm{color:#7e7568;font-style:italic}.st{color:#88c880}.nm{color:#e8c878}.ty{color:#c888c8}
+  .practice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin-top:1rem}
+  .practice-box{background:var(--paper2);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem}
+  .practice-box h4{font-family:var(--mono);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem}
+  .practice-box ul{padding-left:1.1rem}.practice-box li{margin:.35rem 0;color:var(--ink2);font-size:.9rem}
+  .footer-nav{display:flex;justify-content:space-between;gap:1rem;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+  <nav>
+    <div class="nav-side"><a href="graphs_module7_union_find.html">← Module 7</a></div>
+    <div class="nav-title">Module 8 · Weighted Graphs &amp; Dijkstra</div>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  </nav>
+  <main class="wrap">
+    <div class="eyebrow">Graphs Deep Dive · Advanced Module</div>
+    <h1>Weighted graphs — when <em>BFS stops working</em></h1>
+    <p>BFS is perfect only when every edge has the same cost. The moment one path costs 2 and another costs 7, “fewest edges” is no longer the same thing as “cheapest path.” That is exactly where Dijkstra enters the picture.</p>
+    <div class="callout"><strong>Recognition signal:</strong> shortest path is still the goal, but edges have weights like time, price, effort, risk, or distance. Unweighted shortest path → BFS. Weighted shortest path with non-negative weights → Dijkstra.</div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>The queue changes</h3>
+        <p>BFS uses FIFO order. Dijkstra uses a <strong>min-heap</strong> so the next node processed is always the cheapest-known frontier node.</p>
+      </div>
+      <div class="card">
+        <h3>The invariant</h3>
+        <p>When a node is popped from the min-heap with its best known distance, that distance is final — provided all edge weights are non-negative.</p>
+      </div>
+    </div>
+
+    <h2>Core template</h2>
+    <div class="code-wrap">
+      <div class="code-head">
+        <strong>Dijkstra with a min-heap</strong>
+        <div class="lang-toggle">
+          <button class="lang-btn active" onclick="setLang('java', event)">Java</button>
+          <button class="lang-btn" onclick="setLang('python', event)">Python</button>
+        </div>
+      </div>
+      <div class="code-panel active" data-lang="java">
+        <div class="code"><pre><span class="cm">// graph[node] = list of {neighbor, weight}</span>
+<span class="ty">PriorityQueue</span>&lt;<span class="kw">int</span>[]&gt; pq = <span class="kw">new</span> <span class="ty">PriorityQueue</span>&lt;&gt;((a,b) -&gt; a[<span class="nm">1</span>] - b[<span class="nm">1</span>]);
+Arrays.fill(dist, <span class="ty">Integer</span>.MAX_VALUE);
+dist[src] = <span class="nm">0</span>;
+pq.add(<span class="kw">new int</span>[]{src, <span class="nm">0</span>});
+
+<span class="kw">while</span> (!pq.isEmpty()) {
+    <span class="kw">int</span>[] cur = pq.poll();
+    <span class="kw">int</span> node = cur[<span class="nm">0</span>], d = cur[<span class="nm">1</span>];
+    <span class="kw">if</span> (d &gt; dist[node]) <span class="kw">continue</span>;
+    <span class="kw">for</span> (<span class="kw">int</span>[] edge : graph.get(node)) {
+        <span class="kw">int</span> nei = edge[<span class="nm">0</span>], w = edge[<span class="nm">1</span>];
+        <span class="kw">int</span> nd = d + w;
+        <span class="kw">if</span> (nd &lt; dist[nei]) {
+            dist[nei] = nd;
+            pq.add(<span class="kw">new int</span>[]{nei, nd});
+        }
+    }
+}</pre></div>
+      </div>
+      <div class="code-panel" data-lang="python">
+        <div class="code"><pre><span class="kw">import</span> heapq
+
+dist = [<span class="fn">float</span>(<span class="st">'inf'</span>)] * n
+dist[src] = <span class="nm">0</span>
+pq = [(<span class="nm">0</span>, src)]  <span class="cm"># (distance, node)</span>
+
+<span class="kw">while</span> pq:
+    d, node = heapq.heappop(pq)
+    <span class="kw">if</span> d &gt; dist[node]:
+        <span class="kw">continue</span>
+    <span class="kw">for</span> nei, w <span class="kw">in</span> graph[node]:
+        nd = d + w
+        <span class="kw">if</span> nd &lt; dist[nei]:
+            dist[nei] = nd
+            heapq.heappush(pq, (nd, nei))</pre></div>
+      </div>
+    </div>
+
+    <h2>How to think about it</h2>
+    <p>Dijkstra is a “best-so-far frontier” algorithm. The heap stores candidate paths. Each pop asks: “Among all unfinished routes, which one is currently cheapest?” That one is safe to finalize before the rest.</p>
+    <div class="callout"><strong>Common mistake:</strong> writing BFS because the prompt says “shortest path,” while missing that the edge costs are not equal. The word <em>shortest</em> does not automatically mean BFS. It only means BFS when all moves cost the same.</div>
+
+    <h2>Practice ladder</h2>
+    <div class="practice">
+      <div class="practice-box">
+        <h4 style="color:var(--green)">Starter</h4>
+        <ul>
+          <li>Weighted shortest path on a tiny custom graph</li>
+          <li>743. Network Delay Time</li>
+          <li>1514. Path with Maximum Probability (variation in scoring)</li>
+        </ul>
+      </div>
+      <div class="practice-box">
+        <h4 style="color:var(--blue)">Core</h4>
+        <ul>
+          <li>787. Cheapest Flights Within K Stops</li>
+          <li>1631. Path With Minimum Effort</li>
+          <li>505. The Maze II</li>
+        </ul>
+      </div>
+      <div class="practice-box">
+        <h4 style="color:var(--purple)">Stretch</h4>
+        <ul>
+          <li>2662. Minimum Cost of a Path With Special Roads</li>
+          <li>1786. Number of Restricted Paths</li>
+          <li>882. Reachable Nodes in Subdivided Graph</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:1rem">
+      <div class="card">
+        <h3>Still BFS</h3>
+        <p>If every move costs exactly one, keep using BFS. Don’t bring a heap to an unweighted problem.</p>
+      </div>
+      <div class="card">
+        <h3>Not Dijkstra</h3>
+        <p>If weights can be negative, Dijkstra’s guarantee breaks. That’s when Bellman-Ford or other tools enter the picture.</p>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <a href="graphs_module7_union_find.html">← Back to Module 7</a>
+      <a href="graphs_deep_dive.html">Return to Graphs hub →</a>
+    </div>
+  </main>
+  <script>
+    function updateThemeButton(){const btn=document.getElementById('theme-btn');if(!btn)return;btn.textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+    function toggleTheme(){const next=!document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',next);updateThemeButton();try{localStorage.setItem('dsa-theme',next?'dark':'light');}catch(e){}}
+    function setLang(lang,e){document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active',btn.textContent.toLowerCase()===lang));document.querySelectorAll('.code-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.lang===lang));}
+    updateThemeButton();
+  </script>
+</body>
+</html>

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 — BFS From First Principles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1814;--ink2:#3d3a35;--ink3:#7a7570;
+  --paper:#f5f2ed;--paper2:#edeae3;--paper3:#e4e0d8;--border:#d4cfc6;
+  --warm:#c8521a;--blue:#2563a8;--green:#1a7a4a;--amber:#b07010;--red:#a82020;--purple:#6b35a8;
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'Geist',system-ui,sans-serif;
+  --font-mono:'Geist Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;}
+
+.progress-bar{position:fixed;top:0;left:0;right:0;z-index:200;height:3px;background:var(--paper3);}
+.progress-fill{height:100%;background:var(--blue);width:0%;transition:width .4s ease;}
+
+nav{position:sticky;top:3px;z-index:100;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;}
+.nav-module{font-family:var(--font-mono);font-size:.72rem;color:var(--ink3);letter-spacing:.08em;}
+.nav-title{font-family:var(--font-display);font-size:1rem;color:var(--ink2);}
+.nav-prev{font-size:.78rem;color:var(--ink3);text-decoration:none;}
+
+.chapter{max-width:740px;margin:0 auto;padding:5rem 2rem 3rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
+.chapter.visible{opacity:1;transform:none;}
+.eyebrow{font-family:var(--font-mono);font-size:.68rem;color:var(--blue);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;}
+h2{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.2;margin-bottom:1.4rem;}
+h2 em{font-style:italic;color:var(--blue);}
+h3{font-family:var(--font-display);font-size:1.3rem;margin:2rem 0 .7rem;}
+p{color:var(--ink2);margin-bottom:1rem;font-size:.97rem;}
+p strong{color:var(--ink);}
+
+.insight{background:var(--paper2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1.5rem 0;font-size:.9rem;color:var(--ink2);}
+.insight.warm{border-left-color:var(--warm);}
+.insight.green{border-left-color:var(--green);}
+.insight.amber{border-left-color:var(--amber);}
+.insight.red{border-left-color:var(--red);}
+.insight.purple{border-left-color:var(--purple);}
+.insight strong{color:var(--ink);}
+
+.divider{max-width:740px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:1rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.divider span{font-family:var(--font-mono);font-size:.65rem;color:var(--ink3);letter-spacing:.1em;white-space:nowrap;}
+
+/* CODE */
+.code-block{background:#1e1c18;border-radius:10px;overflow:hidden;margin:1rem 0;border:1px solid #3a3630;}
+.code-hdr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#2a2720;border-bottom:1px solid #3a3630;}
+.code-fn{font-family:var(--font-mono);font-size:.7rem;color:#8a8070;}
+.code-lg{font-family:var(--font-mono);font-size:.68rem;color:#5a8a5a;}
+pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-height:1.75;overflow-x:auto;color:#e0dcd0;}
+.kw{color:#cf9060;}.fn{color:#7ab8e8;}.cm{color:#6a6458;font-style:italic;}.st{color:#88c880;}.nm{color:#e8c878;}.ty{color:#c888c8;}
+
+/* PANELS */
+.panel{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin:1.5rem 0;}
+.panel-hdr{padding:.65rem 1rem;background:var(--paper2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.panel-lbl{font-family:var(--font-mono);font-size:.7rem;color:var(--ink3);letter-spacing:.06em;}
+.controls{display:flex;gap:8px;}
+.btn{background:var(--paper2);border:1.5px solid var(--border);border-radius:7px;padding:6px 14px;font-size:.8rem;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--paper3);border-color:var(--ink3);color:var(--ink);}
+.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff;}
+.btn.blue:hover{background:#1a4e8a;}
+.btn:disabled{opacity:.4;cursor:default;}
+.log{padding:.7rem 1rem;font-family:var(--font-mono);font-size:.75rem;color:var(--ink2);background:var(--paper2);border-top:1px solid var(--border);min-height:44px;line-height:1.55;}
+
+/* QUEUE DISPLAY */
+.queue-row{display:flex;align-items:center;gap:6px;padding:.6rem 1rem;background:var(--paper2);border-top:1px solid var(--border);flex-wrap:wrap;}
+.queue-lbl{font-family:var(--font-mono);font-size:.68rem;color:var(--ink3);flex-shrink:0;}
+.queue-items{display:flex;gap:4px;flex-wrap:wrap;}
+.q-item{background:#fff;border:1.5px solid var(--blue);border-radius:5px;padding:2px 10px;font-family:var(--font-mono);font-size:.75rem;color:var(--blue);font-weight:600;}
+.q-item.front{background:var(--blue);color:#fff;}
+.q-item.dist{font-size:.65rem;border-color:var(--amber);color:var(--amber);}
+
+/* SIDE BY SIDE */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;}
+@media(max-width:560px){.compare{grid-template-columns:1fr;}}
+.compare-panel{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;}
+.compare-hdr{padding:.5rem 1rem;font-size:.75rem;font-weight:600;letter-spacing:.04em;border-bottom:1px solid var(--border);}
+.compare-hdr.dfs{background:#fef3ec;color:var(--warm);}
+.compare-hdr.bfs{background:#eef4fe;color:var(--blue);}
+.compare-body{padding:.8rem 1rem;font-size:.82rem;color:var(--ink2);}
+.compare-body li{margin-left:1rem;margin-bottom:3px;}
+
+/* QUIZ */
+.quiz-q{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;margin:1rem 0;}
+.quiz-q p{font-weight:500;color:var(--ink);margin-bottom:.8rem;font-size:.92rem;}
+.quiz-opts{display:flex;flex-direction:column;gap:6px;}
+.qopt{background:var(--paper2);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:.85rem;color:var(--ink2);cursor:pointer;text-align:left;transition:all .15s;}
+.qopt:hover:not(.locked){border-color:var(--ink3);color:var(--ink);background:#fff;}
+.qopt.correct{background:#e8f5ee;border-color:var(--green);color:var(--green);}
+.qopt.wrong{background:#faeaea;border-color:var(--red);color:var(--red);}
+.qopt.locked{cursor:default;}
+.qfb{margin-top:.6rem;font-size:.83rem;font-weight:500;display:none;}
+.qfb.show{display:block;}
+.qfb.ok{color:var(--green);}
+.qfb.no{color:var(--red);}
+
+.completion{display:none;background:linear-gradient(135deg,#1a3a7a 0%,#2563a8 100%);border-radius:12px;padding:2rem;text-align:center;margin:2rem 0;color:#fff;}
+.completion.show{display:block;animation:fadeUp .5s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.completion h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:.5rem;}
+.completion p{opacity:.85;font-size:.9rem;margin-bottom:.3rem;}
+.btn-next{display:inline-block;margin-top:1rem;background:#fff;color:var(--blue);font-weight:600;font-size:.9rem;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;transition:transform .15s;}
+.btn-next:hover{transform:scale(1.03);}
+
+.term{display:inline-block;background:var(--paper3);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-family:var(--font-mono);font-size:.82em;color:var(--ink2);}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+<nav>
+  <span class="nav-module">MODULE 04 / 06</span>
+  <span class="nav-title">BFS From First Principles</span>
+  <a class="nav-prev" href="graphs_module3.html">← Module 3</a>
+</nav>
+
+<!-- ══════════════════════════════
+     CH1 — THE ONE THING DFS CANNOT DO
+══════════════════════════════ -->
+<div class="chapter visible" id="ch1">
+  <div class="eyebrow">Chapter 1 of 6</div>
+  <h2>DFS is great.<br>But it has one <em>fatal flaw.</em></h2>
+
+  <p>You now know DFS well. It explores deeply, backtracks, and finds all reachable nodes. It's the right tool for connectivity, cycles, and component counting.</p>
+
+  <p>But here's the question DFS <strong>cannot answer correctly</strong>:</p>
+
+  <div style="background:#fff;border:2px solid var(--blue);border-radius:10px;padding:1.2rem 1.4rem;margin:1.5rem 0;text-align:center;">
+    <p style="font-family:var(--font-display);font-size:1.2rem;color:var(--ink);margin:0">"What is the <em style="color:var(--blue)">shortest path</em> from node A to node B?"</p>
+  </div>
+
+  <p>Let's prove this with a tiny example. DFS from node 0 to node 3:</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;">
+    <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem;color:var(--warm);">DFS FINDS THIS PATH (4 hops)</div>
+      <canvas id="dfs-bad-canvas" height="180" style="display:block;width:100%;"></canvas>
+      <div style="padding:.5rem 1rem;font-family:var(--font-mono);font-size:.75rem;color:var(--warm);">0 → 1 → 2 → 3 (went deep first)</div>
+    </div>
+    <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem;color:var(--blue);">THE ACTUAL SHORTEST (1 hop)</div>
+      <canvas id="bfs-good-canvas" height="180" style="display:block;width:100%;"></canvas>
+      <div style="padding:.5rem 1rem;font-family:var(--font-mono);font-size:.75rem;color:var(--blue);">0 → 3 (direct edge exists!)</div>
+    </div>
+  </div>
+
+  <p>DFS doesn't know or care about shortest paths — it just goes deep. It might stumble onto the shortest path by luck, or it might find a path 10 hops longer. <strong>You cannot trust DFS for shortest path.</strong></p>
+
+  <div class="insight warm">
+    <strong>Why DFS fails here:</strong> DFS commits to one direction immediately and goes as far as possible. By the time it considers the direct edge 0→3, it's already deep in the 0→1→2→3 path. DFS is blind to the fact that a closer route exists.
+  </div>
+</div>
+
+<div class="divider"><span>A DIFFERENT STRATEGY</span></div>
+
+<!-- ══════════════════════════════
+     CH2 — THE RIPPLE IDEA
+══════════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="eyebrow">Chapter 2 of 6</div>
+  <h2>Think of a <em>ripple</em> in water.</h2>
+
+  <p>Drop a stone in a pond. Ripples spread outward in perfect circles — everything at distance 1 gets wet before anything at distance 2. Everything at distance 2 before distance 3. The wave is perfectly fair.</p>
+
+  <p>BFS works the same way. <strong>It explores all nodes at distance 1 before any at distance 2. All at distance 2 before any at distance 3.</strong> This layer-by-layer expansion is the entire reason BFS guarantees shortest paths.</p>
+
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin:1.5rem 0;">
+    <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem;color:var(--ink3);">BFS EXPANDS LEVEL BY LEVEL — LIKE RIPPLES</div>
+    <canvas id="ripple-canvas" height="240" style="display:block;width:100%;"></canvas>
+    <div style="padding:.5rem 1rem;font-size:.8rem;color:var(--ink3);font-family:var(--font-mono)" id="ripple-caption">Press the button to animate the BFS ripple</div>
+    <div style="padding:.5rem 1rem;background:var(--paper2);border-top:1px solid var(--border);display:flex;gap:8px;">
+      <button class="btn blue" onclick="animateRipple()">▶ Animate ripple</button>
+      <button class="btn" onclick="resetRipple()">Reset</button>
+    </div>
+  </div>
+
+  <div class="insight green">
+    <strong>The guarantee:</strong> When BFS first reaches a node, it's guaranteed to be via the shortest path. Why? Because BFS processes nodes in order of distance. If there were a shorter path, BFS would have found it already at an earlier level — but there's nothing earlier left to process. The first time = the shortest time.
+  </div>
+</div>
+
+<div class="divider"><span>THE KEY DIFFERENCE — THE QUEUE</span></div>
+
+<!-- ══════════════════════════════
+     CH3 — QUEUE VS STACK
+══════════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="eyebrow">Chapter 3 of 6</div>
+  <h2>One data structure change.<br><em>Everything</em> changes.</h2>
+
+  <p>Here's the beautiful thing: BFS and DFS are almost identical code. The <strong>only structural difference</strong> is what data structure holds the nodes to visit next.</p>
+
+  <div class="compare">
+    <div class="compare-panel">
+      <div class="compare-hdr dfs">DFS — uses a STACK</div>
+      <div class="compare-body">
+        <p style="margin-bottom:.5rem">A stack is <strong>LIFO</strong> — Last In, First Out.</p>
+        <ul>
+          <li>Push neighbors onto stack</li>
+          <li>Pop the <em>most recently added</em> node</li>
+          <li>Goes deep before wide</li>
+          <li>Like a pile of plates</li>
+        </ul>
+        <div style="margin-top:.8rem;font-family:var(--font-mono);font-size:.75rem;background:var(--paper2);padding:.5rem;border-radius:5px;">Push: [1,2] → Pop: 2 → deep</div>
+      </div>
+    </div>
+    <div class="compare-panel">
+      <div class="compare-hdr bfs">BFS — uses a QUEUE</div>
+      <div class="compare-body">
+        <p style="margin-bottom:.5rem">A queue is <strong>FIFO</strong> — First In, First Out.</p>
+        <ul>
+          <li>Enqueue neighbors</li>
+          <li>Dequeue the <em>oldest</em> node</li>
+          <li>Goes wide before deep</li>
+          <li>Like a line at a shop</li>
+        </ul>
+        <div style="margin-top:.8rem;font-family:var(--font-mono);font-size:.75rem;background:var(--paper2);padding:.5rem;border-radius:5px;">Enqueue: [1,2] → Dequeue: 1 → wide</div>
+      </div>
+    </div>
+  </div>
+
+  <p>That's it. Swap the stack for a queue and DFS becomes BFS. The queue enforces the ripple order — nodes entered first are processed first, which means closer nodes always come before farther ones.</p>
+
+  <div class="insight">
+    <strong>Stack = depth first. Queue = breadth first.</strong> This is not a coincidence — it's the definition. The data structure <em>is</em> the algorithm.
+  </div>
+</div>
+
+<div class="divider"><span>THE CODE</span></div>
+
+<!-- ══════════════════════════════
+     CH4 — BFS CODE
+══════════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="eyebrow">Chapter 4 of 6</div>
+  <h2>The BFS template.<br>Learn it <em>once, use it forever.</em></h2>
+
+  <p>Compare this side by side with DFS. Spot the differences — there are only two: <strong>deque instead of recursion</strong>, and <strong>enqueue at discovery time, not visit time</strong>.</p>
+
+  <div class="code-block">
+    <div class="code-hdr"><span class="code-fn">bfs.py</span><span class="code-lg">Python</span></div>
+    <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">bfs</span>(graph, start):
+    visited = {start}          <span class="cm"># mark BEFORE enqueuing, not after dequeuing</span>
+    queue = deque([start])     <span class="cm"># deque = efficient queue (O(1) popleft)</span>
+    order = []
+
+    <span class="kw">while</span> queue:
+        node = queue.<span class="fn">popleft</span>()   <span class="cm"># FIFO: take from the FRONT</span>
+        order.<span class="fn">append</span>(node)
+
+        <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> neighbor <span class="kw">not in</span> visited:
+                visited.<span class="fn">add</span>(neighbor)       <span class="cm"># mark when enqueuing</span>
+                queue.<span class="fn">append</span>(neighbor)      <span class="cm"># add to BACK of queue</span>
+
+    <span class="kw">return</span> order   <span class="cm"># nodes in BFS (shortest-path) order</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-hdr"><span class="code-fn">BFS.java</span><span class="code-lg">Java</span></div>
+    <pre>List&lt;<span class="ty">Integer</span>&gt; <span class="fn">bfs</span>(List&lt;<span class="ty">Integer</span>&gt;[] graph, <span class="ty">int</span> start) {
+    <span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[graph.length];
+    Queue&lt;<span class="ty">Integer</span>&gt; queue = <span class="kw">new</span> LinkedList&lt;&gt;();
+    List&lt;<span class="ty">Integer</span>&gt; order = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+    visited[start] = <span class="kw">true</span>;   <span class="cm">// mark BEFORE enqueuing</span>
+    queue.<span class="fn">add</span>(start);
+
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="ty">int</span> node = queue.<span class="fn">poll</span>();   <span class="cm">// poll() = dequeue from front (FIFO)</span>
+        order.<span class="fn">add</span>(node);
+
+        <span class="kw">for</span> (<span class="ty">int</span> neighbor : graph[node]) {
+            <span class="kw">if</span> (!visited[neighbor]) {
+                visited[neighbor] = <span class="kw">true</span>;  <span class="cm">// mark when enqueuing</span>
+                queue.<span class="fn">add</span>(neighbor);
+            }
+        }
+    }
+    <span class="kw">return</span> order;
+}</pre>
+  </div>
+
+  <div class="insight warm">
+    <strong>Critical: mark visited when enqueuing, not dequeuing.</strong> If you mark on dequeue, the same node can be added to the queue multiple times before it's processed, causing duplicated work (or incorrect distance counts). Always mark the moment you enqueue.
+  </div>
+
+  <h3>BFS for shortest path distance</h3>
+  <p>To find actual distances, carry the distance alongside each node. When the target is first dequeued, that distance is guaranteed to be the shortest.</p>
+
+  <div class="code-block">
+    <div class="code-hdr"><span class="code-fn">bfs_shortest.py</span><span class="code-lg">Python — Shortest Path Distance</span></div>
+    <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">shortest_path</span>(graph, start, target):
+    <span class="kw">if</span> start == target: <span class="kw">return</span> <span class="nm">0</span>
+    visited = {start}
+    queue = deque([(start, <span class="nm">0</span>)])   <span class="cm"># (node, distance_from_start)</span>
+
+    <span class="kw">while</span> queue:
+        node, dist = queue.<span class="fn">popleft</span>()
+        <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> neighbor == target:
+                <span class="kw">return</span> dist + <span class="nm">1</span>   <span class="cm"># ✓ first time = shortest path</span>
+            <span class="kw">if</span> neighbor <span class="kw">not in</span> visited:
+                visited.<span class="fn">add</span>(neighbor)
+                queue.<span class="fn">append</span>((neighbor, dist + <span class="nm">1</span>))
+
+    <span class="kw">return</span> <span class="nm">-1</span>   <span class="cm"># target unreachable</span></pre>
+  </div>
+</div>
+
+<div class="divider"><span>WATCH BFS LIVE</span></div>
+
+<!-- ══════════════════════════════
+     CH5 — BFS VISUALIZER
+══════════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="eyebrow">Chapter 5 of 6</div>
+  <h2>Watch the queue <em>in action.</em></h2>
+
+  <p>Step through BFS on the same 5-node graph from Module 3. This time, watch the <strong>queue</strong> below the graph — nodes are added at the back and removed from the front, keeping the level-by-level order.</p>
+
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-lbl">BFS QUEUE VISUALIZER — bfs(graph, start=0)</span>
+      <div class="controls">
+        <button class="btn blue" id="bfs-step-btn" onclick="bfsStep()">Step →</button>
+        <button class="btn" onclick="bfsReset()">Reset</button>
+      </div>
+    </div>
+    <canvas id="bfs-canvas" height="230" style="display:block;width:100%;"></canvas>
+    <div class="queue-row">
+      <span class="queue-lbl">QUEUE:</span>
+      <div class="queue-items" id="queue-display"><span style="font-family:var(--font-mono);font-size:.75rem;color:var(--ink3)">empty</span></div>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--ink3);margin-left:auto" id="queue-note"></span>
+    </div>
+    <div class="log" id="bfs-log">Press Step → to begin BFS from node 0.</div>
+  </div>
+
+  <h3>DFS vs BFS — side by side on the same graph</h3>
+  <p>Below is the same graph, same start node, same goal: reach node 4. Watch how DFS and BFS take completely different paths — and only BFS guarantees the shortest one.</p>
+
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-lbl">DFS vs BFS COMPARISON — START=0, TARGET=4</span>
+      <div class="controls">
+        <button class="btn blue" id="cmp-step-btn" onclick="cmpStep()">Step →</button>
+        <button class="btn" onclick="cmpReset()">Reset</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);">
+      <div style="padding:.4rem .8rem;background:#fef6f0;border-right:1px solid var(--border);font-family:var(--font-mono);font-size:.7rem;color:var(--warm);">DFS (goes deep)</div>
+      <div style="padding:.4rem .8rem;background:#eef4fe;font-family:var(--font-mono);font-size:.7rem;color:var(--blue);">BFS (goes wide)</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;">
+      <canvas id="dfs-cmp-canvas" height="200" style="display:block;width:100%;border-right:1px solid var(--border);"></canvas>
+      <canvas id="bfs-cmp-canvas" height="200" style="display:block;width:100%;"></canvas>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);">
+      <div class="log" id="dfs-cmp-log" style="border-right:1px solid var(--border);">DFS: not started</div>
+      <div class="log" id="bfs-cmp-log">BFS: not started</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><span>CHECK YOUR UNDERSTANDING</span></div>
+
+<!-- ══════════════════════════════
+     CH6 — QUIZ
+══════════════════════════════ -->
+<div class="chapter" id="ch6">
+  <div class="eyebrow">Chapter 6 of 6</div>
+  <h2>Four questions.<br>The last one is the <em>key insight.</em></h2>
+
+  <div class="quiz-q" id="q1">
+    <p>Q1. BFS on this graph starts at A. Neighbors visited alphabetically. What order are nodes visited?<br><span style="font-family:var(--font-mono);font-size:.82rem;color:var(--ink3)">Edges: A–B, A–C, B–D, C–D</span></p>
+    <div class="quiz-opts">
+      <button class="qopt" onclick="answer(1,'a')">A, B, D, C</button>
+      <button class="qopt" onclick="answer(1,'b')">A, B, C, D ✓</button>
+      <button class="qopt" onclick="answer(1,'c')">A, C, B, D</button>
+    </div>
+    <div class="qfb" id="qf1"></div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p>Q2. Why do we use <code class="term">deque</code> in Python instead of a regular list for BFS?</p>
+    <div class="quiz-opts">
+      <button class="qopt" onclick="answer(2,'a')">deque is more readable</button>
+      <button class="qopt" onclick="answer(2,'b')">list.pop(0) is O(n) — it shifts every element. deque.popleft() is O(1) ✓</button>
+      <button class="qopt" onclick="answer(2,'c')">deque supports larger graphs</button>
+    </div>
+    <div class="qfb" id="qf2"></div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p>Q3. You need to find whether two people are connected in a social network, and if so, how many degrees of separation. Which algorithm?</p>
+    <div class="quiz-opts">
+      <button class="qopt" onclick="answer(3,'a')">DFS — finds a path</button>
+      <button class="qopt" onclick="answer(3,'b')">BFS — finds the shortest path (fewest degrees) ✓</button>
+      <button class="qopt" onclick="answer(3,'c')">Either works equally well</button>
+    </div>
+    <div class="qfb" id="qf3"></div>
+  </div>
+
+  <div class="quiz-q" id="q4">
+    <p>Q4. This is the key question. <strong>Why does BFS guarantee the shortest path?</strong></p>
+    <div class="quiz-opts">
+      <button class="qopt" onclick="answer(4,'a')">Because it visits every node, so it can't miss the shortest path</button>
+      <button class="qopt" onclick="answer(4,'b')">Because the queue ensures nodes at distance k are fully processed before any at distance k+1, so the first time a node is reached it must be via the shortest route ✓</button>
+      <button class="qopt" onclick="answer(4,'c')">Because it uses a queue, which is faster than a stack</button>
+    </div>
+    <div class="qfb" id="qf4"></div>
+  </div>
+
+  <div class="completion" id="completion">
+    <h3>Module 4 Complete 🎉</h3>
+    <p>You now understand both core graph traversals — DFS and BFS — from first principles.</p>
+    <p style="margin-top:.5rem;font-family:'Geist Mono',monospace;font-size:.78rem;background:rgba(255,255,255,.15);padding:.5rem .8rem;border-radius:6px;text-align:left;">
+      DFS → Stack (LIFO) → depth first → connectivity, cycles.<br>
+      BFS → Queue (FIFO) → breadth first → shortest path (unweighted).
+    </p>
+    <p style="margin-top:.6rem"><strong>Up next:</strong> Module 5 — The 4 graph patterns. You have the tools. Now we see what problems they solve and how to recognise them instantly in interviews.</p>
+    <a class="btn-next" href="graphs_module5.html">I'm ready for Module 5 →</a>
+  </div>
+</div>
+
+<div style="height:4rem"></div>
+
+<script>
+// ════════════════════
+// PROGRESS
+// ════════════════════
+let qDone=[false,false,false,false];
+function updateProgress(){
+  const n=qDone.filter(Boolean).length;
+  document.getElementById('progress').style.width=(n/4*100)+'%';
+  if(n===4) document.getElementById('completion').classList.add('show');
+}
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.06});
+document.querySelectorAll('.chapter').forEach(c=>obs.observe(c));
+
+// ════════════════════
+// DRAW UTILS
+// ════════════════════
+function setupCanvas(id,h){
+  const c=document.getElementById(id);if(!c)return null;
+  const dpr=window.devicePixelRatio||1;
+  const w=c.clientWidth,ch=h||parseInt(c.getAttribute('height'))||200;
+  c.width=w*dpr;c.height=ch*dpr;
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,ch);
+  return{ctx,w,h:ch};
+}
+function dNode(ctx,x,y,lbl,o={}){
+  const r=o.r||22;
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=o.fill||'#fff';ctx.fill();
+  ctx.strokeStyle=o.stroke||'#d4cfc6';ctx.lineWidth=o.sw||1.5;ctx.stroke();
+  ctx.fillStyle=o.tc||'#3d3a35';
+  ctx.font=`${o.fw||500} ${o.fs||13}px Geist,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(lbl,x,y);
+}
+function dEdge(ctx,x1,y1,x2,y2,color,w){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=color||'#d4cfc6';ctx.lineWidth=w||1.5;ctx.stroke();
+}
+function dArrow(ctx,x1,y1,x2,y2,nr,color){
+  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  const ux=dx/len,uy=dy/len;
+  const ex=x2-ux*(nr+2),ey=y2-uy*(nr+2);
+  ctx.beginPath();ctx.moveTo(x1+ux*nr,y1+uy*nr);ctx.lineTo(ex,ey);
+  ctx.strokeStyle=color||'#d4cfc6';ctx.lineWidth=2;ctx.stroke();
+  const a=Math.atan2(ey-(y1+uy*nr),ex-(x1+ux*nr));
+  ctx.beginPath();ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-9*Math.cos(a-.4),ey-9*Math.sin(a-.4));
+  ctx.lineTo(ex-9*Math.cos(a+.4),ey-9*Math.sin(a+.4));
+  ctx.closePath();ctx.fillStyle=color||'#d4cfc6';ctx.fill();
+}
+
+// ════════════════════
+// DFS BAD / BFS GOOD (CH1)
+// ════════════════════
+// Graph: 0-1, 0-3, 1-2, 2-3
+function ch1Nodes(w,h){
+  return[{x:w*.15,y:h*.5,l:'0'},{x:w*.4,y:h*.2,l:'1'},{x:w*.7,y:h*.2,l:'2'},{x:w*.85,y:h*.5,l:'3'}];
+}
+const CH1_EDGES=[[0,1],[1,2],[2,3],[0,3]];
+
+function drawDfsBad(){
+  const s=setupCanvas('dfs-bad-canvas',180);if(!s)return;
+  const{ctx,w,h}=s;
+  const n=ch1Nodes(w,h);
+  CH1_EDGES.forEach(([a,b])=>dEdge(ctx,n[a].x,n[a].y,n[b].x,n[b].y,'#d4cfc6',1.5));
+  // highlight DFS path: 0->1->2->3
+  [[0,1],[1,2],[2,3]].forEach(([a,b])=>dEdge(ctx,n[a].x,n[a].y,n[b].x,n[b].y,'#e8a878',3));
+  n.forEach((nd,i)=>{
+    const on=[0,1,2,3].includes(i);
+    dNode(ctx,nd.x,nd.y,nd.l,{r:22,fill:on?'#fef3ec':'#fff',stroke:on?'#c8521a':'#d4cfc6',sw:on?2:1.5,tc:on?'#c8521a':'#7a7570'});
+  });
+  // path labels
+  ctx.fillStyle='#c8521a';ctx.font='600 11px Geist Mono,monospace';ctx.textAlign='center';
+  [[0,1],[1,2],[2,3]].forEach(([a,b],i)=>{
+    const mx=(n[a].x+n[b].x)/2,my=(n[a].y+n[b].y)/2-8;
+    ctx.fillText(String(i+1),mx,my);
+  });
+}
+function drawBfsGood(){
+  const s=setupCanvas('bfs-good-canvas',180);if(!s)return;
+  const{ctx,w,h}=s;
+  const n=ch1Nodes(w,h);
+  CH1_EDGES.forEach(([a,b])=>dEdge(ctx,n[a].x,n[a].y,n[b].x,n[b].y,'#d4cfc6',1.5));
+  dEdge(ctx,n[0].x,n[0].y,n[3].x,n[3].y,'#2563a8',3);
+  n.forEach((nd,i)=>{
+    const on=[0,3].includes(i);
+    dNode(ctx,nd.x,nd.y,nd.l,{r:22,fill:on?'#eef4fe':'#fff',stroke:on?'#2563a8':'#d4cfc6',sw:on?2:1.5,tc:on?'#2563a8':'#7a7570'});
+  });
+  ctx.fillStyle='#2563a8';ctx.font='600 11px Geist Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('1',(n[0].x+n[3].x)/2,(n[0].y+n[3].y)/2-8);
+}
+
+// ════════════════════
+// RIPPLE ANIMATION (CH2)
+// ════════════════════
+// Graph: center=0, ring=[1,2,3,4,5], outer=[6,7]
+let rippleAnim=null,rippleLevel=0;
+const RIPPLE_LEVELS=[
+  {nodes:[0],color:'#2563a8',label:'Level 0 (start)'},
+  {nodes:[1,2,3],color:'#5a9de8',label:'Level 1 (distance 1)'},
+  {nodes:[4,5,6,7],color:'#9bbff0',label:'Level 2 (distance 2)'},
+];
+
+function getRipplePositions(w,h){
+  const cx=w/2,cy=h/2;
+  return[
+    {x:cx,y:cy},          // 0
+    {x:cx-110,y:cy-40},   // 1
+    {x:cx,y:cy-90},       // 2
+    {x:cx+110,y:cy-40},   // 3
+    {x:cx-140,y:cy+70},   // 4
+    {x:cx+140,y:cy+70},   // 5
+    {x:cx-50,y:cy+110},   // 6
+    {x:cx+50,y:cy+110},   // 7
+  ];
+}
+const RIPPLE_EDGES=[[0,1],[0,2],[0,3],[1,4],[2,6],[2,7],[3,5]];
+
+function drawRipple(levelShown){
+  const s=setupCanvas('ripple-canvas',240);if(!s)return;
+  const{ctx,w,h}=s;
+  const pos=getRipplePositions(w,h);
+  // draw edges
+  RIPPLE_EDGES.forEach(([a,b])=>dEdge(ctx,pos[a].x,pos[a].y,pos[b].x,pos[b].y,'#d4cfc6',1.5));
+  // draw level rings
+  const rings=[{cx:pos[0].x,cy:pos[0].y,r:0},{cx:pos[0].x,cy:pos[0].y,r:130},{cx:pos[0].x,cy:pos[0].y,r:185}];
+  for(let l=1;l<=Math.min(levelShown,2);l++){
+    ctx.beginPath();ctx.arc(rings[l].cx,rings[l].cy,rings[l].r,0,Math.PI*2);
+    const alpha=l===levelShown?.25:.1;
+    ctx.strokeStyle=`rgba(37,99,168,${alpha})`;ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([]);
+  }
+  // draw nodes
+  pos.forEach((p,i)=>{
+    let level=-1;
+    RIPPLE_LEVELS.forEach((lv,li)=>{if(lv.nodes.includes(i))level=li;});
+    const visible=level<=levelShown&&level>=0;
+    dNode(ctx,p.x,p.y,String(i),{r:20,
+      fill:visible?(level===0?'#2563a8':level===1?'#eef4fe':'#f0f5ff'):'#f5f2ed',
+      stroke:visible?(level===0?'#2563a8':level===1?'#2563a8':'#9bbff0'):'#d4cfc6',
+      sw:visible?2:1,
+      tc:visible?(level===0?'#fff':level===1?'#2563a8':'#4a7ab0'):'#c8c4bc'
+    });
+    if(visible&&level>0){
+      ctx.fillStyle=level===1?'#2563a8':'#9bbff0';
+      ctx.font='500 10px Geist Mono,monospace';ctx.textAlign='center';ctx.textBaseline='top';
+      ctx.fillText('d='+level,p.x,p.y+24);
+    }
+  });
+  // legend
+  const shown=RIPPLE_LEVELS.slice(0,levelShown+1);
+  shown.forEach((lv,i)=>{
+    ctx.fillStyle=lv.color;ctx.font='600 11px Geist,sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText('● '+lv.label,12,10+i*16);
+  });
+}
+
+function animateRipple(){
+  if(rippleAnim)clearInterval(rippleAnim);
+  rippleLevel=0;drawRipple(0);
+  document.getElementById('ripple-caption').textContent='Level 0: just the start node (distance 0)';
+  const captions=['Level 0: just the start node (distance 0)','Level 1: all nodes exactly 1 hop away','Level 2: all nodes exactly 2 hops away — BFS finishes'];
+  let step=0;
+  rippleAnim=setInterval(()=>{
+    step++;rippleLevel=step;drawRipple(step);
+    document.getElementById('ripple-caption').textContent=captions[Math.min(step,2)];
+    if(step>=2)clearInterval(rippleAnim);
+  },1000);
+}
+function resetRipple(){
+  if(rippleAnim)clearInterval(rippleAnim);
+  rippleLevel=0;drawRipple(-1);
+  document.getElementById('ripple-caption').textContent='Press the button to animate the BFS ripple';
+}
+
+// ════════════════════
+// BFS QUEUE VISUALIZER (CH5)
+// ════════════════════
+const BFS_G={0:[1,2],1:[0,3],2:[0,3],3:[1,2,4],4:[3]};
+const BFS_EDGES_V=[[0,1],[0,2],[1,3],[2,3],[3,4]];
+
+function bfsNodePos(w,h){
+  return[{x:w/2,y:36},{x:w*.15,y:120},{x:w*.85,y:120},{x:w*.5,y:168},{x:w*.5,y:h-26}];
+}
+
+const BFS_STEPS=[
+  {visited:[0],queue:[{n:0,d:0}],cur:-1,log:"Init: enqueue node 0 (dist=0). Mark 0 visited immediately."},
+  {visited:[0,1,2],queue:[{n:1,d:1},{n:2,d:1}],cur:0,log:"Dequeue 0 (dist=0). Neighbors 1,2 unvisited → enqueue both (dist=1). Mark them visited."},
+  {visited:[0,1,2,3],queue:[{n:2,d:1},{n:3,d:2}],cur:1,log:"Dequeue 1 (dist=1). Neighbor 0 visited. Neighbor 3 unvisited → enqueue (dist=2). Mark 3 visited."},
+  {visited:[0,1,2,3],queue:[{n:3,d:2}],cur:2,log:"Dequeue 2 (dist=1). Neighbors 0,3 both already visited. Nothing new to enqueue."},
+  {visited:[0,1,2,3,4],queue:[{n:4,d:3}],cur:3,log:"Dequeue 3 (dist=2). Neighbors 1,2 visited. Neighbor 4 unvisited → enqueue (dist=3). Mark 4 visited."},
+  {visited:[0,1,2,3,4],queue:[],cur:4,log:"Dequeue 4 (dist=3). Neighbor 3 visited. Queue empty. ✓ BFS complete! All 5 nodes visited."},
+];
+let bfsStepN=0;
+
+function drawBfsGraph(visitedSet,curNode){
+  const s=setupCanvas('bfs-canvas',230);if(!s)return;
+  const{ctx,w,h}=s;
+  const pos=bfsNodePos(w,h);
+  BFS_EDGES_V.forEach(([a,b])=>{
+    const active=visitedSet.includes(a)&&visitedSet.includes(b);
+    dEdge(ctx,pos[a].x,pos[a].y,pos[b].x,pos[b].y,active?'#2563a8':'#d4cfc6',active?2.5:1.5);
+  });
+  pos.forEach((p,i)=>{
+    const isCur=i===curNode,isVis=visitedSet.includes(i);
+    dNode(ctx,p.x,p.y,String(i),{r:22,
+      fill:isCur?'#d0e0f8':isVis?'#eef4fe':'#fff',
+      stroke:isCur?'#2563a8':isVis?'#2563a8':'#d4cfc6',
+      sw:isCur?2.5:isVis?2:1.5,
+      tc:isCur?'#1a3a7a':isVis?'#2563a8':'#7a7570'
+    });
+  });
+}
+
+function renderQueue(items){
+  const el=document.getElementById('queue-display');
+  if(!items.length){el.innerHTML='<span style="font-family:var(--font-mono);font-size:.75rem;color:var(--ink3)">empty</span>';
+    document.getElementById('queue-note').textContent='';return;}
+  el.innerHTML=items.map((it,i)=>`<div class="q-item${i===0?' front':''}">${it.n}<span style="font-size:.65rem;opacity:.7"> d=${it.d}</span></div>`).join('');
+  document.getElementById('queue-note').textContent='← dequeue from front';
+}
+
+function bfsStep(){
+  if(bfsStepN>=BFS_STEPS.length){document.getElementById('bfs-step-btn').disabled=true;return;}
+  const st=BFS_STEPS[bfsStepN];
+  drawBfsGraph(st.visited,st.cur);
+  renderQueue(st.queue);
+  document.getElementById('bfs-log').textContent=st.log;
+  bfsStepN++;
+}
+function bfsReset(){
+  bfsStepN=0;
+  drawBfsGraph([],[]);
+  renderQueue([]);
+  document.getElementById('bfs-log').textContent='Press Step → to begin BFS from node 0.';
+  document.getElementById('bfs-step-btn').disabled=false;
+}
+
+// ════════════════════
+// DFS vs BFS COMPARISON
+// ════════════════════
+// Same graph, find node 4 from 0
+const CMP_EDGES=[[0,1],[0,2],[1,3],[2,3],[3,4]];
+const DFS_PATH_STEPS=[
+  {visited:[0],cur:0,path:[0],log:"DFS: visit 0. Go deep into neighbor 1."},
+  {visited:[0,1],cur:1,path:[0,1],log:"DFS: visit 1. Go deep into neighbor 3."},
+  {visited:[0,1,3],cur:3,path:[0,1,3],log:"DFS: visit 3. Go deep into neighbor 2."},
+  {visited:[0,1,3,2],cur:2,path:[0,1,3,2],log:"DFS: visit 2. No new neighbors. Backtrack."},
+  {visited:[0,1,3,2,4],cur:4,path:[0,1,3,4],log:"DFS: backtrack to 3, try 4. ✓ Found! Path: 0→1→3→4 (3 hops)"},
+];
+const BFS_PATH_STEPS=[
+  {visited:[0],cur:0,q:[0],log:"BFS: enqueue 0."},
+  {visited:[0,1,2],cur:0,q:[1,2],log:"BFS: dequeue 0. Enqueue neighbors 1,2 (dist=1)."},
+  {visited:[0,1,2,3],cur:1,q:[2,3],log:"BFS: dequeue 1. Enqueue 3 (dist=2)."},
+  {visited:[0,1,2,3],cur:2,q:[3],log:"BFS: dequeue 2. Neighbor 3 already visited. Nothing new."},
+  {visited:[0,1,2,3,4],cur:3,q:[4],log:"BFS: dequeue 3. Enqueue 4 (dist=3)."},
+  {visited:[0,1,2,3,4],cur:4,q:[],log:"BFS: dequeue 4. ✓ Found! Path: 0→2→3→4 OR 0→1→3→4 (3 hops). Shortest confirmed."},
+];
+let cmpStepN=0;
+
+function cmpNodePos(canvas_id){
+  const c=document.getElementById(canvas_id);
+  if(!c)return[];
+  const w=c.clientWidth,h=200;
+  return[{x:w/2,y:32},{x:w*.18,y:110},{x:w*.82,y:110},{x:w*.5,y:155},{x:w*.5,y:h-22}];
+}
+
+function drawCmpGraph(cid,visitedSet,curNode,pathColor){
+  const s=setupCanvas(cid,200);if(!s)return;
+  const{ctx,w,h}=s;
+  const pos=cmpNodePos(cid);
+  CMP_EDGES.forEach(([a,b])=>{
+    const active=visitedSet.includes(a)&&visitedSet.includes(b);
+    dEdge(ctx,pos[a].x,pos[a].y,pos[b].x,pos[b].y,active?pathColor:'#d4cfc6',active?2.5:1.5);
+  });
+  pos.forEach((p,i)=>{
+    const isCur=i===curNode,isVis=visitedSet.includes(i);
+    const pc=pathColor==='#c8521a';
+    dNode(ctx,p.x,p.y,String(i),{r:20,
+      fill:isCur?(pc?'#fef3ec':'#d0e0f8'):isVis?(pc?'#fef8f5':'#eef4fe'):'#fff',
+      stroke:isCur?pathColor:isVis?pathColor:'#d4cfc6',
+      sw:isCur?2.5:isVis?2:1.5,
+      tc:isCur?pathColor:isVis?pathColor:'#7a7570'
+    });
+  });
+}
+
+function cmpStep(){
+  const maxN=Math.max(DFS_PATH_STEPS.length,BFS_PATH_STEPS.length);
+  if(cmpStepN>=maxN){document.getElementById('cmp-step-btn').disabled=true;return;}
+  const di=Math.min(cmpStepN,DFS_PATH_STEPS.length-1);
+  const bi=Math.min(cmpStepN,BFS_PATH_STEPS.length-1);
+  const ds=DFS_PATH_STEPS[di];
+  const bs=BFS_PATH_STEPS[bi];
+  drawCmpGraph('dfs-cmp-canvas',ds.visited,ds.cur,'#c8521a');
+  drawCmpGraph('bfs-cmp-canvas',bs.visited,bs.cur,'#2563a8');
+  document.getElementById('dfs-cmp-log').textContent=ds.log;
+  document.getElementById('bfs-cmp-log').textContent=bs.log;
+  cmpStepN++;
+}
+function cmpReset(){
+  cmpStepN=0;
+  drawCmpGraph('dfs-cmp-canvas',[],- 1,'#c8521a');
+  drawCmpGraph('bfs-cmp-canvas',[],-1,'#2563a8');
+  document.getElementById('dfs-cmp-log').textContent='DFS: not started';
+  document.getElementById('bfs-cmp-log').textContent='BFS: not started';
+  document.getElementById('cmp-step-btn').disabled=false;
+}
+
+// ════════════════════
+// QUIZ
+// ════════════════════
+const ANS={1:'b',2:'b',3:'b',4:'b'};
+const FB={
+  1:{b:'✓ Correct! BFS explores level by level. From A, enqueue B and C (dist=1). Dequeue B → enqueue D (dist=2). Dequeue C → D already queued. Dequeue D. Order: A,B,C,D.',
+    a:'✗ That\'s DFS order — going deep first (A→B→D then backtrack to C). BFS would visit B and C before going to D.',
+    c:'✗ Alphabetically C comes before D, but in BFS you\'d visit B before C (both are neighbors of A, B comes first alphabetically).'},
+  2:{b:'✓ Exactly. list.pop(0) is O(n) because Python has to shift all remaining elements left. On a graph with millions of nodes, this turns O(V+E) BFS into O(V²). deque.popleft() is O(1).',
+    a:'✗ Readability isn\'t the reason — performance is. list.pop(0) gives wrong time complexity.',
+    c:'✗ deque and list both handle any size. The difference is purely time complexity of the front-removal operation.'},
+  3:{b:'✓ Right. DFS would find some path but it might not be the shortest. BFS guarantees fewest hops, which is exactly what "degrees of separation" measures.',
+    a:'✗ DFS finds a path but not necessarily the shortest. If you just want connectivity (do they know each other?) DFS works. But for minimum degrees, you need BFS.',
+    c:'✗ For connectivity only, either works. But for shortest path / minimum degrees, only BFS guarantees the right answer.'},
+  4:{b:'✓ This is the core insight. The FIFO queue forces nodes at distance k to be fully processed before any at distance k+1. So when a node is first dequeued, there\'s no unprocessed shorter path left — it\'s guaranteed shortest.',
+    a:'✗ DFS also visits every reachable node, but doesn\'t guarantee shortest path. "Visiting everything" is necessary but not sufficient.',
+    c:'✗ Speed isn\'t the reason — correctness is. The queue enforces a specific processing order (by distance) that guarantees optimality.'}
+};
+
+function answer(q,choice){
+  if(qDone[q-1])return;
+  const qDiv=document.getElementById('q'+q);
+  const opts=qDiv.querySelectorAll('.qopt');
+  opts.forEach(o=>o.classList.add('locked'));
+  const letters=['a','b','c'];
+  opts.forEach((o,i)=>{
+    if(letters[i]===ANS[q])o.classList.add('correct');
+    else if(letters[i]===choice&&choice!==ANS[q])o.classList.add('wrong');
+  });
+  const fb=document.getElementById('qf'+q);
+  fb.textContent=FB[q][choice];
+  fb.className='qfb show '+(choice===ANS[q]?'ok':'no');
+  qDone[q-1]=true;
+  updateProgress();
+}
+
+// ════════════════════
+// INIT
+// ════════════════════
+window.addEventListener('load',()=>{
+  drawDfsBad();drawBfsGood();
+  drawRipple(-1);
+  drawBfsGraph([],[]);renderQueue([]);
+  cmpReset();
+});
+window.addEventListener('resize',()=>{
+  drawDfsBad();drawBfsGood();
+  drawRipple(rippleLevel>0?rippleLevel:-1);
+  const si=Math.min(bfsStepN,BFS_STEPS.length)-1;
+  if(si>=0){const st=BFS_STEPS[si];drawBfsGraph(st.visited,st.cur);}else drawBfsGraph([],[]);
+  const di2=Math.min(cmpStepN,DFS_PATH_STEPS.length)-1;
+  const bi2=Math.min(cmpStepN,BFS_PATH_STEPS.length)-1;
+  if(di2>=0)drawCmpGraph('dfs-cmp-canvas',DFS_PATH_STEPS[di2].visited,DFS_PATH_STEPS[di2].cur,'#c8521a');
+  else drawCmpGraph('dfs-cmp-canvas',[],- 1,'#c8521a');
+  if(bi2>=0)drawCmpGraph('bfs-cmp-canvas',BFS_PATH_STEPS[bi2].visited,BFS_PATH_STEPS[bi2].cur,'#2563a8');
+  else drawCmpGraph('bfs-cmp-canvas',[],- 1,'#2563a8');
+});
+</script>
+</body>
+</html>

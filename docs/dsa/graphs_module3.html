@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 — DFS From First Principles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1814;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --paper: #f5f2ed;
+  --paper2: #edeae3;
+  --paper3: #e4e0d8;
+  --border: #d4cfc6;
+  --warm: #c8521a;
+  --warm2: #a8421a;
+  --blue: #2563a8;
+  --green: #1a7a4a;
+  --amber: #b07010;
+  --red: #a82020;
+  --purple: #6b35a8;
+  --teal: #1a7a6a;
+  --shadow: rgba(26,24,20,0.1);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;}
+
+.progress-bar{position:fixed;top:0;left:0;right:0;z-index:200;height:3px;background:var(--paper3);}
+.progress-fill{height:100%;background:var(--green);width:0%;transition:width .4s ease;}
+
+nav{position:sticky;top:3px;z-index:100;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;}
+.nav-module{font-family:var(--font-mono);font-size:.72rem;color:var(--ink3);letter-spacing:.08em;}
+.nav-title{font-family:var(--font-display);font-size:1rem;color:var(--ink2);}
+.nav-prev{font-size:.78rem;color:var(--ink3);text-decoration:none;}
+
+.chapter{max-width:740px;margin:0 auto;padding:5rem 2rem 3rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
+.chapter.visible{opacity:1;transform:none;}
+.chapter-eyebrow{font-family:var(--font-mono);font-size:.68rem;color:var(--green);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;}
+.chapter h2{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.2;margin-bottom:1.4rem;}
+.chapter h2 em{font-style:italic;color:var(--green);}
+.chapter h3{font-family:var(--font-display);font-size:1.3rem;margin:2rem 0 .7rem;}
+.chapter p{color:var(--ink2);margin-bottom:1rem;font-size:.97rem;}
+.chapter p strong{color:var(--ink);}
+
+.insight{background:var(--paper2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1.5rem 0;font-size:.9rem;color:var(--ink2);}
+.insight.warm{border-left-color:var(--warm);}
+.insight.blue{border-left-color:var(--blue);}
+.insight.amber{border-left-color:var(--amber);}
+.insight.red{border-left-color:var(--red);}
+.insight strong{color:var(--ink);}
+
+.chapter-divider{max-width:740px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:1rem;}
+.chapter-divider::before,.chapter-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.chapter-divider span{font-family:var(--font-mono);font-size:.65rem;color:var(--ink3);letter-spacing:.1em;white-space:nowrap;}
+
+/* CODE */
+.code-block{background:#1e1c18;border-radius:10px;overflow:hidden;margin:1rem 0;border:1px solid #3a3630;}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#2a2720;border-bottom:1px solid #3a3630;}
+.code-filename{font-family:var(--font-mono);font-size:.7rem;color:#8a8070;}
+.code-lang{font-family:var(--font-mono);font-size:.68rem;color:#5a8a5a;}
+pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-height:1.75;overflow-x:auto;color:#e0dcd0;}
+.kw{color:#cf9060;}.fn{color:#7ab8e8;}.cm{color:#6a6458;font-style:italic;}.st{color:#88c880;}.nm{color:#e8c878;}.op{color:#c8a868;}.ty{color:#c888c8;}
+.line-hl{background:rgba(90,160,80,.15);display:block;margin:0 -1.2rem;padding:0 1.2rem;}
+
+/* MAZE */
+.maze-wrap{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin:1.5rem 0;}
+.maze-header{padding:.6rem 1rem;background:var(--paper2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.maze-label{font-family:var(--font-mono);font-size:.7rem;color:var(--ink3);letter-spacing:.06em;}
+.maze-controls{display:flex;gap:8px;}
+.btn{background:var(--paper2);border:1.5px solid var(--border);border-radius:7px;padding:6px 14px;font-size:.8rem;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--paper3);border-color:var(--ink3);color:var(--ink);}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff;}
+.btn.primary:hover{background:#156038;}
+.btn:disabled{opacity:.4;cursor:default;}
+#maze-canvas{display:block;width:100%;}
+.maze-log{padding:.7rem 1rem;font-family:var(--font-mono);font-size:.75rem;color:var(--ink2);background:var(--paper2);border-top:1px solid var(--border);min-height:42px;line-height:1.5;}
+
+/* STACK VISUALIZER */
+.stack-wrap{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin:1.5rem 0;}
+.stack-header{padding:.6rem 1rem;background:var(--paper2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.stack-body{display:grid;grid-template-columns:1fr 1fr;min-height:320px;}
+@media(max-width:560px){.stack-body{grid-template-columns:1fr;}}
+.stack-graph-pane{padding:1rem;border-right:1px solid var(--border);}
+.stack-right-pane{padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+.stack-label{font-family:var(--font-mono);font-size:.68rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+#stack-canvas{display:block;width:100%;border:1px solid var(--border);border-radius:8px;background:var(--paper2);}
+.call-stack{display:flex;flex-direction:column-reverse;gap:4px;min-height:140px;padding:.5rem;}
+.stack-frame{background:var(--paper2);border:1.5px solid var(--border);border-radius:6px;padding:5px 12px;font-family:var(--font-mono);font-size:.78rem;color:var(--ink2);transition:all .3s;display:flex;align-items:center;gap:8px;}
+.stack-frame.top{background:#e8f5ee;border-color:var(--green);color:var(--green);font-weight:600;}
+.stack-frame.entering{animation:pushIn .3s ease;}
+@keyframes pushIn{from{transform:translateY(-8px);opacity:0;}to{transform:none;opacity:1;}}
+.visited-list{display:flex;flex-wrap:wrap;gap:5px;}
+.visited-badge{background:#e8f5ee;border:1px solid var(--green);border-radius:4px;padding:2px 8px;font-family:var(--font-mono);font-size:.75rem;color:var(--green);}
+.stack-log{font-family:var(--font-mono);font-size:.73rem;color:var(--ink2);background:var(--paper2);border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;line-height:1.6;min-height:44px;}
+
+/* QUIZ */
+.quiz-q{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;margin:1rem 0;}
+.quiz-q p{font-weight:500;color:var(--ink);margin-bottom:.8rem;font-size:.92rem;}
+.quiz-options{display:flex;flex-direction:column;gap:6px;}
+.quiz-opt{background:var(--paper2);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:.85rem;color:var(--ink2);cursor:pointer;text-align:left;transition:all .15s;}
+.quiz-opt:hover:not(.locked){border-color:var(--ink3);color:var(--ink);background:#fff;}
+.quiz-opt.correct{background:#e8f5ee;border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:#faeaea;border-color:var(--red);color:var(--red);}
+.quiz-opt.locked{cursor:default;}
+.quiz-feedback{margin-top:.6rem;font-size:.83rem;font-weight:500;display:none;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{color:var(--green);}
+.quiz-feedback.no{color:var(--red);}
+
+.completion{display:none;background:linear-gradient(135deg,#156038 0%,#1a7a4a 100%);border-radius:12px;padding:2rem;text-align:center;margin:2rem 0;color:#fff;}
+.completion.show{display:block;animation:fadeUp .5s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.completion h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:.5rem;}
+.completion p{opacity:.85;font-size:.9rem;margin-bottom:.3rem;}
+.btn-next{display:inline-block;margin-top:1rem;background:#fff;color:var(--green);font-weight:600;font-size:.9rem;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;transition:transform .15s;}
+.btn-next:hover{transform:scale(1.03);}
+
+.term{display:inline-block;background:var(--paper3);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-family:var(--font-mono);font-size:.82em;color:var(--ink2);}
+.hl{color:var(--warm);font-weight:600;}
+.hl-g{color:var(--green);font-weight:600;}
+.hl-b{color:var(--blue);font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<nav>
+  <span class="nav-module">MODULE 03 / 06</span>
+  <span class="nav-title">DFS From First Principles</span>
+  <a class="nav-prev" href="graphs_module2.html">← Module 2</a>
+</nav>
+
+<!-- ═══════════════════════════
+     CH1 — YOU ARE THE ALGORITHM
+═══════════════════════════ -->
+<div class="chapter visible" id="ch1">
+  <div class="chapter-eyebrow">Chapter 1 of 6</div>
+  <h2>Before we write code —<br>you <em>become</em> the algorithm.</h2>
+
+  <p>Most tutorials show you DFS code and then say "trace through it." We're doing the opposite. You're going to solve a maze using your own instincts — and then we'll show you that what you just did <em>is</em> DFS.</p>
+
+  <p>Imagine you're dropped into the maze below. Your goal: reach the <strong style="color:var(--red)">exit (E)</strong> from the <strong style="color:var(--green)">start (S)</strong>. You can only move up, down, left, right. Walls block you.</p>
+
+  <p><strong>How would a human naturally explore this?</strong> You'd pick a direction and keep going until you hit a wall or a dead end. Then you'd backtrack to the last junction and try a different direction. You wouldn't stop and think — it's instinctive.</p>
+
+  <p>Step through the maze below and watch that instinct play out step by step.</p>
+
+  <div class="maze-wrap">
+    <div class="maze-header">
+      <span class="maze-label">MAZE — STEP THROUGH THE DFS EXPLORATION</span>
+      <div class="maze-controls">
+        <button class="btn primary" id="maze-step-btn" onclick="mazeStep()">Step →</button>
+        <button class="btn" onclick="mazeReset()">Reset</button>
+      </div>
+    </div>
+    <canvas id="maze-canvas" height="300"></canvas>
+    <div class="maze-log" id="maze-log">Press Step → to begin. Watch how exploration works.</div>
+  </div>
+
+  <div class="insight warm">
+    <strong>What you just watched:</strong> The algorithm picked a direction, went as far as possible, hit a dead end, and <em>backtracked</em> — returning to the last decision point and trying a new direction. This backtracking behavior is the defining characteristic of DFS. It's "depth-first" because it always goes as deep as possible before trying alternatives.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>FROM MAZE TO GRAPH</span></div>
+
+<!-- ═══════════════════════════
+     CH2 — MAZE IS A GRAPH
+═══════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="chapter-eyebrow">Chapter 2 of 6</div>
+  <h2>The maze <em>is</em> a graph.<br>Every cell is a node.</h2>
+
+  <p>Here's the key insight that connects what you just did to graph algorithms: <strong>a maze is just a graph in disguise.</strong> Every open cell is a node. Every two adjacent open cells share an edge. The walls just mean "no edge here."</p>
+
+  <p>So solving a maze and doing DFS on a graph are the same problem. The maze just makes the structure visual.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;">
+    <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem;color:var(--ink3);">MAZE VIEW</div>
+      <canvas id="maze2-canvas" height="200" style="display:block;width:100%;"></canvas>
+    </div>
+    <div style="background:var(--paper2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:.5rem 1rem;background:var(--paper3);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem;color:var(--ink3);">SAME THING AS GRAPH</div>
+      <canvas id="graph2-canvas" height="200" style="display:block;width:100%;"></canvas>
+    </div>
+  </div>
+
+  <p>Now here's the one crucial difference between a maze and a graph: <strong>in a graph, you can revisit nodes.</strong> There are no one-way corridors. If you don't track where you've been, you'll loop forever.</p>
+
+  <div class="insight red">
+    <strong>The visited set — why it's non-negotiable:</strong> Without tracking visited nodes, DFS on a graph with a cycle will revisit the same node, recurse into it again, revisit its neighbor, recurse again… forever. Every graph DFS needs a <code class="term">visited</code> set. No exceptions.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>THE THREE RULES OF DFS</span></div>
+
+<!-- ═══════════════════════════
+     CH3 — THREE RULES
+═══════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="chapter-eyebrow">Chapter 3 of 6</div>
+  <h2>DFS is just <em>three rules</em>.</h2>
+
+  <p>Before we see any code, let's distill what you observed in the maze into three simple rules. Every DFS implementation — recursive or iterative, on any graph — follows exactly these rules:</p>
+
+  <div style="display:flex;flex-direction:column;gap:.8rem;margin:1.5rem 0;">
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:1rem 1.4rem;display:flex;align-items:flex-start;gap:1rem;">
+      <div style="background:var(--green);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;margin-top:2px;">1</div>
+      <div>
+        <strong style="font-size:.95rem;">Visit the current node. Mark it as seen.</strong>
+        <p style="margin:0;font-size:.85rem;color:var(--ink3);margin-top:3px;">Add it to your <code class="term">visited</code> set immediately. This prevents re-processing.</p>
+      </div>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:1rem 1.4rem;display:flex;align-items:flex-start;gap:1rem;">
+      <div style="background:var(--green);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;margin-top:2px;">2</div>
+      <div>
+        <strong style="font-size:.95rem;">For each unvisited neighbor, recurse.</strong>
+        <p style="margin:0;font-size:.85rem;color:var(--ink3);margin-top:3px;">Go deep — follow one path as far as it goes before trying others. This is the "depth-first" part.</p>
+      </div>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:1rem 1.4rem;display:flex;align-items:flex-start;gap:1rem;">
+      <div style="background:var(--green);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;margin-top:2px;">3</div>
+      <div>
+        <strong style="font-size:.95rem;">When there are no unvisited neighbors, return (backtrack).</strong>
+        <p style="margin:0;font-size:.85rem;color:var(--ink3);margin-top:3px;">The function returns to its caller, which tries the next unvisited neighbor. This is the "backtracking" part — it's automatic via the call stack.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight blue">
+    <strong>The magic of recursion:</strong> Backtracking happens for free. When a recursive call finishes, execution returns to wherever it was called from. The call stack <em>is</em> your backtracking memory — you don't manage it manually. This is why recursive DFS looks so short.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>THE CODE EMERGES</span></div>
+
+<!-- ═══════════════════════════
+     CH4 — CODE
+═══════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="chapter-eyebrow">Chapter 4 of 6</div>
+  <h2>Now the code writes <em>itself.</em></h2>
+
+  <p>Watch the three rules translate directly into code. Each line maps to exactly one rule.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">dfs.py</span><span class="code-lang">Python</span></div>
+    <pre><span class="kw">def</span> <span class="fn">dfs</span>(graph, node, visited):
+    <span class="cm"># Rule 1: mark this node as visited</span>
+    visited.add(node)
+    <span class="fn">print</span>(node)   <span class="cm"># or do whatever you need here</span>
+
+    <span class="cm"># Rule 2: recurse into every UNVISITED neighbor</span>
+    <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+        <span class="kw">if</span> neighbor <span class="kw">not in</span> visited:
+            <span class="fn">dfs</span>(graph, neighbor, visited)
+
+    <span class="cm"># Rule 3: (implicit) when loop ends, function returns → backtrack</span>
+
+
+<span class="cm"># How to call it: start from node 0</span>
+graph = {<span class="nm">0</span>:[<span class="nm">1</span>,<span class="nm">2</span>], <span class="nm">1</span>:[<span class="nm">0</span>,<span class="nm">3</span>], <span class="nm">2</span>:[<span class="nm">0</span>,<span class="nm">3</span>], <span class="nm">3</span>:[<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">4</span>], <span class="nm">4</span>:[<span class="nm">3</span>]}
+<span class="fn">dfs</span>(graph, <span class="nm">0</span>, set())</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">DFS.java</span><span class="code-lang">Java</span></div>
+    <pre><span class="kw">void</span> <span class="fn">dfs</span>(List&lt;<span class="ty">Integer</span>&gt;[] graph, <span class="ty">int</span> node, <span class="ty">boolean</span>[] visited) {
+    <span class="cm">// Rule 1: mark visited</span>
+    visited[node] = <span class="kw">true</span>;
+    System.out.<span class="fn">println</span>(node);  <span class="cm">// or do whatever you need here</span>
+
+    <span class="cm">// Rule 2: recurse into every unvisited neighbor</span>
+    <span class="kw">for</span> (<span class="ty">int</span> neighbor : graph[node]) {
+        <span class="kw">if</span> (!visited[neighbor]) {
+            <span class="fn">dfs</span>(graph, neighbor, visited);
+        }
+    }
+    <span class="cm">// Rule 3: (implicit) method returns → backtrack</span>
+}
+
+<span class="cm">// How to call it:</span>
+<span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[n];
+<span class="fn">dfs</span>(graph, <span class="nm">0</span>, visited);</pre>
+  </div>
+
+  <div class="insight warm">
+    <strong>That's the entire algorithm.</strong> 7 lines of logic. Every DFS you'll ever write is a variation of this. The only thing that changes is what you <em>do</em> with each node when you visit it — print it, count it, check a condition, add it to a result. The structure never changes.
+  </div>
+
+  <h3>The same thing, without recursion</h3>
+  <p>Recursion uses the system's call stack implicitly. You can also manage the stack yourself with an explicit stack (a list). Same algorithm, same result — just more visible.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">dfs_iterative.py</span><span class="code-lang">Python — Iterative DFS</span></div>
+    <pre><span class="kw">def</span> <span class="fn">dfs_iterative</span>(graph, start):
+    visited = set()
+    stack = [start]         <span class="cm"># explicit stack replaces call stack</span>
+
+    <span class="kw">while</span> stack:
+        node = stack.<span class="fn">pop</span>()  <span class="cm"># pop = "go deeper" (LIFO)</span>
+        <span class="kw">if</span> node <span class="kw">in</span> visited:
+            <span class="kw">continue</span>
+        visited.<span class="fn">add</span>(node)
+        <span class="fn">print</span>(node)
+
+        <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> neighbor <span class="kw">not in</span> visited:
+                stack.<span class="fn">append</span>(neighbor)  <span class="cm"># push neighbors to explore later</span>
+
+    <span class="kw">return</span> visited</pre>
+  </div>
+
+  <div class="insight">
+    <strong>Recursive vs Iterative DFS:</strong> Both visit nodes in depth-first order. Use recursive for cleaner code (most interview problems). Use iterative when the graph is very deep and you're worried about hitting Python's recursion limit (~1000 calls deep). Java's limit is higher but the same concern applies.
+  </div>
+</div>
+
+<div class="chapter-divider"><span>WATCH THE CALL STACK LIVE</span></div>
+
+<!-- ═══════════════════════════
+     CH5 — STACK VISUALIZER
+═══════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="chapter-eyebrow">Chapter 5 of 6</div>
+  <h2>Watch the call stack <em>grow and shrink.</em></h2>
+
+  <p>The hardest thing about DFS is understanding the call stack. When does a function return? What gets "remembered"? Step through the visualizer below — it shows both the graph being explored <em>and</em> the live call stack at every moment.</p>
+
+  <div class="stack-wrap">
+    <div class="stack-header">
+      <span class="maze-label">DFS CALL STACK VISUALIZER — dfs(graph, start=0)</span>
+      <div class="maze-controls">
+        <button class="btn primary" id="stack-step-btn" onclick="stackStep()">Step →</button>
+        <button class="btn" onclick="stackReset()">Reset</button>
+      </div>
+    </div>
+    <div class="stack-body">
+      <div class="stack-graph-pane">
+        <div class="stack-label">Graph</div>
+        <canvas id="stack-canvas" height="220"></canvas>
+        <div style="margin-top:.6rem;">
+          <div class="stack-label">Visited</div>
+          <div class="visited-list" id="visited-list"><span style="font-family:var(--font-mono);font-size:.75rem;color:var(--ink3)">none yet</span></div>
+        </div>
+      </div>
+      <div class="stack-right-pane">
+        <div>
+          <div class="stack-label">Call Stack (top = currently executing)</div>
+          <div style="background:var(--paper2);border:1px solid var(--border);border-radius:8px;padding:.5rem;min-height:160px;" id="call-stack-display">
+            <div style="font-family:var(--font-mono);font-size:.73rem;color:var(--ink3);padding:.3rem">Stack is empty. Press Step → to begin.</div>
+          </div>
+        </div>
+        <div>
+          <div class="stack-label">What's happening</div>
+          <div class="stack-log" id="stack-log">DFS from node 0. Adjacency list: {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2,4], 4:[3]}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight blue">
+    <strong>The key moment to watch:</strong> When DFS finishes a node and its call pops off the stack, execution returns to the previous frame — which then continues checking its <em>own</em> remaining neighbors. That's backtracking. It's not a special operation; it's just function return.
+  </div>
+
+  <h3>Counting connected components</h3>
+  <p>The most common beginner graph problem is: <em>"how many connected groups exist?"</em> DFS solves this with one extra idea — run DFS from every unvisited node, counting how many times you start a fresh DFS.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-filename">connected_components.py</span><span class="code-lang">Python</span></div>
+    <pre><span class="kw">def</span> <span class="fn">count_components</span>(n, edges):
+    <span class="cm"># Step 0: build adjacency list</span>
+    graph = {i: [] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n)}
+    <span class="kw">for</span> u, v <span class="kw">in</span> edges:
+        graph[u].<span class="fn">append</span>(v)
+        graph[v].<span class="fn">append</span>(u)
+
+    visited = set()
+    count = <span class="nm">0</span>
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(node):
+        visited.<span class="fn">add</span>(node)
+        <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> nei <span class="kw">not in</span> visited:
+                <span class="fn">dfs</span>(nei)
+
+    <span class="cm"># Try starting DFS from every node</span>
+    <span class="kw">for</span> node <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">if</span> node <span class="kw">not in</span> visited:   <span class="cm"># only start a new DFS if unvisited</span>
+            <span class="fn">dfs</span>(node)
+            count += <span class="nm">1</span>           <span class="cm"># each new DFS start = new component</span>
+
+    <span class="kw">return</span> count
+
+<span class="cm"># Example: 5 nodes, 2 separate components</span>
+<span class="fn">print</span>(<span class="fn">count_components</span>(<span class="nm">5</span>, [[<span class="nm">0</span>,<span class="nm">1</span>],[<span class="nm">0</span>,<span class="nm">2</span>],[<span class="nm">3</span>,<span class="nm">4</span>]]))  <span class="cm"># → 2</span></pre>
+  </div>
+</div>
+
+<div class="chapter-divider"><span>CHECK YOUR UNDERSTANDING</span></div>
+
+<!-- ═══════════════════════════
+     CH6 — QUIZ
+═══════════════════════════ -->
+<div class="chapter" id="ch6">
+  <div class="chapter-eyebrow">Chapter 6 of 6</div>
+  <h2>Four questions to <em>lock it in.</em></h2>
+
+  <div class="quiz-q" id="q1">
+    <p>Q1. DFS on this graph starts at node A. Neighbors are visited in alphabetical order. What order are nodes visited?<br><span style="font-family:var(--font-mono);font-size:.82rem;color:var(--ink3)">Graph: A–B, A–C, B–D, C–D</span></p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(1,'a')">A, B, C, D</button>
+      <button class="quiz-opt" onclick="answer(1,'b')">A, B, D, C ✓</button>
+      <button class="quiz-opt" onclick="answer(1,'c')">A, C, B, D</button>
+    </div>
+    <div class="quiz-feedback" id="qf1"></div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p>Q2. You remove the <code class="term">visited</code> set from DFS and run it on a graph with a cycle A–B–C–A. What happens?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(2,'a')">It runs slower but still finishes</button>
+      <button class="quiz-opt" onclick="answer(2,'b')">It misses some nodes</button>
+      <button class="quiz-opt" onclick="answer(2,'c')">It loops forever: A→B→C→A→B→C→… ✓</button>
+    </div>
+    <div class="quiz-feedback" id="qf2"></div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p>Q3. A graph has 6 nodes. After running DFS from node 0, only nodes 0, 1, 2 are in the visited set. What does this tell you?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(3,'a')">DFS had a bug — it should visit all 6 nodes</button>
+      <button class="quiz-opt" onclick="answer(3,'b')">Nodes 3, 4, 5 are in a separate connected component ✓</button>
+      <button class="quiz-opt" onclick="answer(3,'c')">Nodes 3, 4, 5 are too far away for DFS to reach</button>
+    </div>
+    <div class="quiz-feedback" id="qf3"></div>
+  </div>
+
+  <div class="quiz-q" id="q4">
+    <p>Q4. What's the time complexity of DFS on a graph with V nodes and E edges?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(4,'a')">O(V²) — we check every pair of nodes</button>
+      <button class="quiz-opt" onclick="answer(4,'b')">O(V + E) — we visit each node once and each edge once ✓</button>
+      <button class="quiz-opt" onclick="answer(4,'c')">O(E) — edges are what matter, not nodes</button>
+    </div>
+    <div class="quiz-feedback" id="qf4"></div>
+  </div>
+
+  <div class="completion" id="completion">
+    <h3>Module 3 Complete 🎉</h3>
+    <p>You traced DFS through a maze, watched the call stack live, and saw three rules become seven lines of code. That's DFS — fully understood from first principles.</p>
+    <p style="margin-top:.5rem;font-family:'Geist Mono',monospace;font-size:.8rem;background:rgba(255,255,255,.15);padding:.5rem .8rem;border-radius:6px;text-align:left;">
+      Mark visited → Recurse into unvisited neighbors → Return (backtrack).<br>
+      Time: O(V+E). Always need a visited set on graphs.
+    </p>
+    <p style="margin-top:.6rem"><strong>Up next:</strong> Module 4 — BFS. Same idea, different order. And you'll finally see why BFS — not DFS — finds the <em>shortest</em> path.</p>
+    <a class="btn-next" href="graphs_module4.html">I'm ready for Module 4 →</a>
+  </div>
+</div>
+
+<div style="height:4rem"></div>
+
+<script>
+// ═══════════════════
+// PROGRESS
+// ═══════════════════
+let quizDone=[false,false,false,false];
+function updateProgress(){
+  const n=quizDone.filter(Boolean).length;
+  document.getElementById('progress').style.width=(n/4*100)+'%';
+  if(n===4) document.getElementById('completion').classList.add('show');
+}
+
+// ═══════════════════
+// SCROLL REVEAL
+// ═══════════════════
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.06});
+document.querySelectorAll('.chapter').forEach(c=>obs.observe(c));
+
+// ═══════════════════
+// DRAW UTILS
+// ═══════════════════
+function setupCanvas(id,h){
+  const c=document.getElementById(id);if(!c)return null;
+  const dpr=window.devicePixelRatio||1;
+  const w=c.clientWidth,ch=h||parseInt(c.getAttribute('height'))||200;
+  c.width=w*dpr;c.height=ch*dpr;
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,ch);
+  return{ctx,w,h:ch};
+}
+function dNode(ctx,x,y,lbl,opts={}){
+  const r=opts.r||22;
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=opts.fill||'#fff';ctx.fill();
+  ctx.strokeStyle=opts.stroke||'#d4cfc6';ctx.lineWidth=opts.sw||1.5;ctx.stroke();
+  ctx.fillStyle=opts.tc||'#3d3a35';
+  ctx.font=`${opts.fw||500} ${opts.fs||13}px Geist,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(lbl,x,y);
+}
+function dEdge(ctx,x1,y1,x2,y2,color,w){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=color||'#d4cfc6';ctx.lineWidth=w||1.5;ctx.stroke();
+}
+
+// ═══════════════════
+// MAZE VISUALIZER
+// ═══════════════════
+// 0=wall, 1=open, 2=visited, 3=backtrack(wrong), 4=path(found)
+const MAZE_ROWS=6,MAZE_COLS=8;
+const MAZE_DEF=[
+  [0,0,0,0,0,0,0,0],
+  [0,1,1,0,1,1,1,0],
+  [0,1,0,0,1,0,1,0],
+  [0,1,1,1,1,0,1,0],
+  [0,0,0,1,0,0,1,0],
+  [0,0,0,0,0,0,0,0],
+];
+const S_R=1,S_C=1,E_R=1,E_C=6;
+
+// Pre-computed DFS steps with narration
+const MAZE_STEPS=[
+  {r:1,c:1,msg:"Start at S(1,1). Mark visited. Neighbors: down(2,1), right(1,2).",cells:[[1,1]],stack:[[1,1]],found:false},
+  {r:2,c:1,msg:"Go to (2,1). Mark visited. Try going deeper down first.",cells:[[1,1],[2,1]],stack:[[1,1],[2,1]],found:false},
+  {r:3,c:1,msg:"Go to (3,1). Mark visited. Keep going down...",cells:[[1,1],[2,1],[3,1]],stack:[[1,1],[2,1],[3,1]],found:false},
+  {r:3,c:2,msg:"Go right to (3,2). Mark visited.",cells:[[1,1],[2,1],[3,1],[3,2]],stack:[[1,1],[2,1],[3,1],[3,2]],found:false},
+  {r:3,c:3,msg:"Go right to (3,3). Mark visited.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3]],found:false},
+  {r:3,c:4,msg:"Go right to (3,4). Mark visited.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4]],found:false},
+  {r:4,c:3,msg:"Go down to (4,3). Dead end — no unvisited neighbors below or sides.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[4,3]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[4,3]],found:false},
+  {r:3,c:4,msg:"⬅ BACKTRACK to (3,4). Try next unvisited neighbor: up (2,4).",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4]],found:false,back:true},
+  {r:2,c:4,msg:"Go to (2,4). Mark visited.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4]],found:false},
+  {r:1,c:4,msg:"Go up to (1,4). Mark visited.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4],[1,4]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4],[1,4]],found:false},
+  {r:1,c:5,msg:"Go right to (1,5). Mark visited.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4],[1,4],[1,5]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4],[1,4],[1,5]],found:false},
+  {r:1,c:6,msg:"✓ FOUND EXIT at (1,6)! DFS is complete. Path traced in green.",cells:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4],[1,4],[1,5],[1,6]],stack:[[1,1],[2,1],[3,1],[3,2],[3,3],[3,4],[2,4],[1,4],[1,5],[1,6]],found:true},
+];
+let mazeStep_n=0;
+let mazeCurrent=[];
+let mazeFound=false;
+
+function drawMaze(highlightCells,found){
+  const s=setupCanvas('maze-canvas',300);if(!s)return;
+  const {ctx,w,h}=s;
+  const cs=Math.min(w/MAZE_COLS,h/MAZE_ROWS);
+  const ox=(w-cs*MAZE_COLS)/2,oy=(h-cs*MAZE_ROWS)/2;
+
+  for(let r=0;r<MAZE_ROWS;r++)for(let c=0;c<MAZE_COLS;c++){
+    const x=ox+c*cs,y=oy+r*cs;
+    const isWall=MAZE_DEF[r][c]===0;
+    const isStart=r===S_R&&c===S_C,isEnd=r===E_R&&c===E_C;
+    const isVisited=highlightCells&&highlightCells.some(([vr,vc])=>vr===r&&vc===c);
+    let bg=isWall?'#2a2720':'#f5f2ed';
+    if(isVisited&&!isWall) bg=found?'#c8e8d0':'#d0e8d8';
+    if(isStart) bg='#d0e8d0';
+    if(isEnd) bg='#fcd0d0';
+    ctx.fillStyle=bg;ctx.fillRect(x,y,cs,cs);
+    if(!isWall){
+      ctx.strokeStyle='#e4e0d8';ctx.lineWidth=.5;ctx.strokeRect(x,y,cs,cs);
+    }
+    if(isStart){
+      ctx.fillStyle='#1a7a4a';ctx.font=`bold ${Math.floor(cs*.45)}px Geist,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('S',x+cs/2,y+cs/2);
+    }
+    if(isEnd){
+      ctx.fillStyle='#a82020';ctx.font=`bold ${Math.floor(cs*.45)}px Geist,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('E',x+cs/2,y+cs/2);
+    }
+    if(isVisited&&!isStart&&!isEnd&&!isWall){
+      ctx.fillStyle=found?'#1a7a4a':'rgba(26,122,74,.5)';
+      ctx.font=`${Math.floor(cs*.3)}px Geist,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('·',x+cs/2,y+cs/2);
+    }
+  }
+  // current cell highlight
+  if(highlightCells&&highlightCells.length>0&&!found){
+    const [cr,cc]=highlightCells[highlightCells.length-1];
+    const x=ox+cc*cs+2,y=oy+cr*cs+2;
+    ctx.strokeStyle='#c8521a';ctx.lineWidth=2.5;
+    ctx.strokeRect(x,y,cs-4,cs-4);
+  }
+}
+
+function mazeStep(){
+  if(mazeStep_n>=MAZE_STEPS.length){
+    document.getElementById('maze-log').textContent='DFS complete! Press Reset to start again.';
+    document.getElementById('maze-step-btn').disabled=true;
+    return;
+  }
+  const step=MAZE_STEPS[mazeStep_n];
+  mazeCurrent=step.cells;
+  mazeFound=step.found;
+  drawMaze(mazeCurrent,mazeFound);
+  document.getElementById('maze-log').textContent=step.msg;
+  mazeStep_n++;
+}
+
+function mazeReset(){
+  mazeStep_n=0;mazeCurrent=[];mazeFound=false;
+  drawMaze([],false);
+  document.getElementById('maze-log').textContent='Press Step → to begin. Watch how exploration works.';
+  document.getElementById('maze-step-btn').disabled=false;
+}
+
+// ═══════════════════
+// MAZE=GRAPH SIDE BY SIDE
+// ═══════════════════
+function drawMazeSide(){
+  const s=setupCanvas('maze2-canvas',200);if(!s)return;
+  const {ctx,w,h}=s;
+  const ROWS=4,COLS=4;
+  const MINI=[[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]];
+  const cs=Math.min(w/COLS,h/ROWS);
+  const ox=(w-cs*COLS)/2,oy=(h-cs*ROWS)/2;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const x=ox+c*cs,y=oy+r*cs;
+    ctx.fillStyle=MINI[r][c]===0?'#2a2720':'#f5f2ed';
+    ctx.fillRect(x,y,cs,cs);
+    if(MINI[r][c]===1){ctx.strokeStyle='#d4cfc6';ctx.lineWidth=.5;ctx.strokeRect(x,y,cs,cs);}
+  }
+  // labels on open cells
+  const labels=[[1,1,'A'],[1,2,'B'],[2,1,'C'],[2,2,'D']];
+  labels.forEach(([r,c,l])=>{
+    const x=ox+c*cs,y=oy+r*cs;
+    ctx.fillStyle='#1a7a4a';ctx.font=`600 ${Math.floor(cs*.4)}px Geist,sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l,x+cs/2,y+cs/2);
+  });
+}
+
+function drawGraphSide(){
+  const s=setupCanvas('graph2-canvas',200);if(!s)return;
+  const {ctx,w,h}=s;
+  const nodes=[{x:w*.3,y:h*.3,l:'A'},{x:w*.7,y:h*.3,l:'B'},{x:w*.3,y:h*.7,l:'C'},{x:w*.7,y:h*.7,l:'D'}];
+  const edges=[[0,1],[0,2],[1,3],[2,3]];
+  edges.forEach(([a,b])=>dEdge(ctx,nodes[a].x,nodes[a].y,nodes[b].x,nodes[b].y,'#b8b4ac',2));
+  nodes.forEach(n=>dNode(ctx,n.x,n.y,n.l,{r:22,fill:'#e8f5ee',stroke:'#1a7a4a',sw:2,tc:'#1a1814'}));
+  ctx.fillStyle='#7a7570';ctx.font='11px Geist,sans-serif';ctx.textAlign='center';
+  ctx.fillText('Open cells = nodes',w/2,h-8);
+}
+
+// ═══════════════════
+// CALL STACK VISUALIZER
+// ═══════════════════
+const SV_GRAPH={0:[1,2],1:[0,3],2:[0,3],3:[1,2,4],4:[3]};
+const SV_EDGES=[[0,1],[0,2],[1,3],[2,3],[3,4]];
+const SV_POS=()=>{
+  const c=document.getElementById('stack-canvas');
+  if(!c)return[];
+  const w=c.clientWidth;
+  return[{x:w/2,y:30},{x:w*.15,y:110},{x:w*.85,y:110},{x:w*.5,y:155},{x:w*.5,y:210}];
+};
+
+// Pre-computed stack steps
+const STACK_STEPS=[
+  {stack:['dfs(0)'],visited:[0],cur:0,log:"Call dfs(0). Mark 0 visited. Will explore neighbors [1, 2] in order."},
+  {stack:['dfs(0)','dfs(1)'],visited:[0,1],cur:1,log:"Inside dfs(0): neighbor 1 is unvisited → call dfs(1). Mark 1 visited."},
+  {stack:['dfs(0)','dfs(1)','dfs(3)'],visited:[0,1,3],cur:3,log:"Inside dfs(1): neighbor 0 is visited, neighbor 3 is unvisited → call dfs(3). Mark 3 visited."},
+  {stack:['dfs(0)','dfs(1)','dfs(3)','dfs(2)'],visited:[0,1,3,2],cur:2,log:"Inside dfs(3): 1 visited, 2 unvisited → call dfs(2). Mark 2 visited."},
+  {stack:['dfs(0)','dfs(1)','dfs(3)','dfs(2)','dfs(4)'],visited:[0,1,3,2,4],cur:4,log:"Inside dfs(2): 0 visited, 3 visited. Back to dfs(3): 4 unvisited → call dfs(4). Mark 4 visited."},
+  {stack:['dfs(0)','dfs(1)','dfs(3)','dfs(2)'],visited:[0,1,3,2,4],cur:3,log:"⬅ dfs(4): no unvisited neighbors. RETURN. Stack pops. Back in dfs(3)."},
+  {stack:['dfs(0)','dfs(1)','dfs(3)'],visited:[0,1,3,2,4],cur:3,log:"⬅ dfs(2): no more unvisited neighbors. RETURN. Stack pops. Back in dfs(3)."},
+  {stack:['dfs(0)','dfs(1)'],visited:[0,1,3,2,4],cur:1,log:"⬅ dfs(3): all neighbors visited. RETURN. Stack pops. Back in dfs(1)."},
+  {stack:['dfs(0)'],visited:[0,1,3,2,4],cur:0,log:"⬅ dfs(1): no more unvisited neighbors. RETURN. Stack pops. Back in dfs(0)."},
+  {stack:['dfs(0)'],visited:[0,1,3,2,4],cur:0,log:"Inside dfs(0): neighbor 2 is now visited (was reached via dfs(3)). Skip it."},
+  {stack:[],visited:[0,1,3,2,4],cur:-1,log:"✓ dfs(0): all neighbors visited. RETURN. Stack empty. DFS complete! All 5 nodes visited."},
+];
+let svStep=0;
+
+function drawStackGraph(curNode,visitedNodes){
+  const s=setupCanvas('stack-canvas',220);if(!s)return;
+  const {ctx,w,h}=s;
+  const pos=SV_POS();
+  SV_EDGES.forEach(([a,b])=>{
+    const isActive=visitedNodes.includes(a)&&visitedNodes.includes(b);
+    dEdge(ctx,pos[a].x,pos[a].y,pos[b].x,pos[b].y,isActive?'#1a7a4a':'#d4cfc6',isActive?2.5:1.5);
+  });
+  pos.forEach((p,i)=>{
+    const isCur=i===curNode;
+    const isVis=visitedNodes.includes(i);
+    let fill='#fff',stroke='#d4cfc6',tc='#7a7570',sw=1.5;
+    if(isCur){fill='#d0e8d8';stroke='#1a7a4a';tc='#1a7a4a';sw=2.5;}
+    else if(isVis){fill='#e8f5ee';stroke='#1a7a4a';tc='#1a7a4a';sw=2;}
+    dNode(ctx,p.x,p.y,String(i),{r:22,fill,stroke,tc,sw});
+  });
+}
+
+function renderCallStack(frames){
+  const el=document.getElementById('call-stack-display');
+  if(frames.length===0){
+    el.innerHTML='<div style="font-family:var(--font-mono);font-size:.73rem;color:var(--green);padding:.3rem">✓ Stack empty — DFS complete</div>';
+    return;
+  }
+  el.innerHTML='';
+  frames.forEach((f,i)=>{
+    const div=document.createElement('div');
+    div.className='stack-frame'+(i===frames.length-1?' top entering':'');
+    div.innerHTML=`<span style="color:var(--ink3);font-size:.68rem">${i===frames.length-1?'▶':' '}</span>${f}`;
+    el.appendChild(div);
+  });
+}
+
+function renderVisited(nodes){
+  const el=document.getElementById('visited-list');
+  if(nodes.length===0){el.innerHTML='<span style="font-family:var(--font-mono);font-size:.75rem;color:var(--ink3)">none yet</span>';return;}
+  el.innerHTML=nodes.map(n=>`<div class="visited-badge">${n}</div>`).join('');
+}
+
+function stackStep(){
+  if(svStep>=STACK_STEPS.length){
+    document.getElementById('stack-step-btn').disabled=true;
+    return;
+  }
+  const step=STACK_STEPS[svStep];
+  drawStackGraph(step.cur,step.visited);
+  renderCallStack(step.stack);
+  renderVisited(step.visited);
+  document.getElementById('stack-log').textContent=step.log;
+  svStep++;
+}
+
+function stackReset(){
+  svStep=0;
+  drawStackGraph(-1,[]);
+  renderCallStack([]);
+  renderVisited([]);
+  document.getElementById('stack-log').textContent='DFS from node 0. Adjacency list: {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2,4], 4:[3]}';
+  document.getElementById('stack-step-btn').disabled=false;
+}
+
+// ═══════════════════
+// QUIZ
+// ═══════════════════
+const ANS={1:'b',2:'c',3:'b',4:'b'};
+const FB={
+  1:{
+    b:'✓ Correct! From A, DFS picks B first (alphabetical). From B, it goes to D (only unvisited neighbor). D has no unvisited neighbors → backtrack to B → backtrack to A → try C. Visit C. A→B→D→C.',
+    a:'✗ That would be BFS order (level by level). DFS goes deep first: A→B→D, then backtracks to visit C.',
+    c:'✗ If DFS visited C before B, it would need to pick C first from A\'s neighbors. But alphabetical order means B comes first.'
+  },
+  2:{
+    c:'✓ Exactly. Without visited tracking, DFS visits A, recurses into B, recurses into C, and C\'s neighbor A hasn\'t been "visited" so it recurses into A again. Infinite loop.',
+    a:'✗ It wouldn\'t slow down — it would never finish at all. Cycles cause infinite recursion, not just slowness.',
+    b:'✗ The opposite — without a visited set it visits nodes too many times, not too few.'
+  },
+  3:{
+    b:'✓ Correct. DFS from a node visits every node reachable from that starting point. If nodes 3,4,5 weren\'t visited, there\'s simply no path from node 0 to any of them — they\'re a separate component.',
+    a:'✗ DFS is correct — it finds everything reachable from the start. If some nodes aren\'t reached, they aren\'t reachable from node 0, not a bug.',
+    c:'✗ DFS has no concept of "too far." It will follow any path no matter how long, as long as nodes are connected.'
+  },
+  4:{
+    b:'✓ Correct. Each node is visited exactly once: O(V). Each edge is examined exactly twice (once from each end in undirected): O(E). Total: O(V+E).',
+    a:'✗ O(V²) would be the adjacency matrix traversal cost — one per cell. With an adjacency list, we only look at actual edges.',
+    c:'✗ Nodes matter too. Even with no edges, visiting every node is O(V). The full answer is O(V+E).'
+  }
+};
+
+function answer(q,choice){
+  if(quizDone[q-1])return;
+  const qDiv=document.getElementById('q'+q);
+  const opts=qDiv.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('locked'));
+  const letters=['a','b','c'];
+  opts.forEach((o,i)=>{
+    if(letters[i]===ANS[q])o.classList.add('correct');
+    else if(letters[i]===choice&&choice!==ANS[q])o.classList.add('wrong');
+  });
+  const fb=document.getElementById('qf'+q);
+  fb.textContent=FB[q][choice];
+  fb.className='quiz-feedback show '+(choice===ANS[q]?'ok':'no');
+  quizDone[q-1]=true;
+  updateProgress();
+}
+
+// ═══════════════════
+// INIT
+// ═══════════════════
+window.addEventListener('load',()=>{
+  drawMaze([],false);
+  drawMazeSide();
+  drawGraphSide();
+  stackReset();
+});
+window.addEventListener('resize',()=>{
+  drawMaze(mazeCurrent,mazeFound);
+  drawMazeSide();
+  drawGraphSide();
+  drawStackGraph(svStep>0?STACK_STEPS[Math.min(svStep,STACK_STEPS.length)-1].cur:-1,
+    svStep>0?STACK_STEPS[Math.min(svStep,STACK_STEPS.length)-1].visited:[]);
+});
+</script>
+</body>
+</html>
