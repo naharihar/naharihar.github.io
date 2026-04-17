@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 1 — What Even Is a Graph?</title>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -26,6 +35,20 @@
   --font-body: 'Geist', system-ui, sans-serif;
   --font-mono: 'Geist Mono', monospace;
 }
+html.dark {
+  --ink: #f3efe7;
+  --ink2: #d8d0c3;
+  --ink3: #a69a88;
+  --paper: #181511;
+  --paper2: #211c16;
+  --paper3: #2a241d;
+  --border: #3a3126;
+  --shadow: rgba(0,0,0,0.35);
+}
+html.dark [style*="background:#fff"]{background:#211c16 !important;}
+html.dark [style*="background:rgba(255,255,255,0.15)"]{background:rgba(255,255,255,0.06) !important;}
+html.dark [style*="color:#3d3a35"]{color:var(--ink2) !important;}
+html.dark [style*="color:#7a7570"]{color:var(--ink3) !important;}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -57,6 +80,7 @@ nav {
   border-bottom: 1px solid var(--border);
   padding: 0 2rem; height: 52px;
 }
+html.dark nav { background: rgba(24,21,17,0.92); }
 .nav-module { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink3); letter-spacing: 0.08em; }
 .nav-title { font-family: var(--font-display); font-size: 1rem; color: var(--ink2); }
 .nav-next {
@@ -66,6 +90,19 @@ nav {
   transition: opacity 0.3s;
 }
 .nav-next.unlocked { opacity: 1; pointer-events: auto; }
+.nav-actions { display: flex; align-items: center; gap: 0.8rem; }
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--paper2);
+  color: var(--ink2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  padding: 0.38rem 0.7rem;
+  cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--ink3); color: var(--ink); }
 
 /* SECTIONS */
 .chapter {
@@ -317,7 +354,10 @@ canvas { display: block; width: 100%; }
 <nav>
   <span class="nav-module">MODULE 01 / 06</span>
   <span class="nav-title">What Even Is a Graph?</span>
-  <a class="nav-next unlocked" id="nav-next" href="graphs_module2.html">Module 2 →</a>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+    <a class="nav-next unlocked" id="nav-next" href="graphs_module2.html">Module 2 →</a>
+  </div>
 </nav>
 
 <!-- ══════════════════════════════════════════
@@ -603,6 +643,19 @@ canvas { display: block; width: 100%; }
 <div style="height:4rem"></div>
 
 <script>
+function updateThemeButton() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+}
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  try {
+    localStorage.setItem('dsa-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  } catch (e) {}
+  updateThemeButton();
+}
+
 // ═══════════════════════════════════════════
 // PROGRESS
 // ═══════════════════════════════════════════
@@ -1152,6 +1205,7 @@ function answer(q, choice) {
 // INIT
 // ═══════════════════════════════════════════
 window.addEventListener('load', () => {
+  updateThemeButton();
   drawBasicGraph();
   initVocabCanvas();
   drawPlayground();

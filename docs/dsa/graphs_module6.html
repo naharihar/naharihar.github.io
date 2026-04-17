@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 6 — The Problem-Solving Playbook</title>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -16,6 +25,14 @@
   --font-body:'Geist',system-ui,sans-serif;
   --font-mono:'Geist Mono',monospace;
 }
+html.dark{
+  --ink:#f3efe7;--ink2:#d8d0c3;--ink3:#a69a88;
+  --paper:#181511;--paper2:#211c16;--paper3:#2a241d;--border:#3a3126;
+}
+html.dark [style*="background:#fff"]{background:#211c16 !important;}
+html.dark [style*="background:rgba(255,255,255,.15)"]{background:rgba(255,255,255,0.06) !important;}
+html.dark [style*="color:#3d3a35"]{color:var(--ink2) !important;}
+html.dark [style*="color:#7a7570"]{color:var(--ink3) !important;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;}
@@ -24,8 +41,14 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .progress-fill{height:100%;background:var(--teal);width:0%;transition:width .4s ease;}
 
 nav{position:sticky;top:3px;z-index:100;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;}
+html.dark nav{background:rgba(24,21,17,.92);}
 .nav-module{font-family:var(--font-mono);font-size:.72rem;color:var(--ink3);letter-spacing:.08em;}
 .nav-title{font-family:var(--font-display);font-size:1rem;color:var(--ink2);}
+.nav-actions{display:flex;align-items:center;gap:.8rem;}
+.theme-toggle,.lang-btn{border:1px solid var(--border);background:var(--paper2);color:var(--ink2);border-radius:999px;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;padding:.38rem .7rem;cursor:pointer;}
+.theme-toggle:hover,.lang-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.lang-toggle{display:inline-flex;align-items:center;gap:.35rem;}
+.lang-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
 
 .chapter{max-width:760px;margin:0 auto;padding:5rem 2rem 3rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
 .chapter.visible{opacity:1;transform:none;}
@@ -51,6 +74,8 @@ p strong{color:var(--ink);}
 
 /* CODE */
 .code-block{background:#1e1c18;border-radius:10px;overflow:hidden;margin:1rem 0;border:1px solid #3a3630;}
+.lang-pane{display:none;}
+.lang-pane.active{display:block;}
 .code-hdr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#2a2720;border-bottom:1px solid #3a3630;}
 .code-fn{font-family:var(--font-mono);font-size:.7rem;color:#8a8070;}
 .code-lg{font-family:var(--font-mono);font-size:.68rem;color:#5a8a5a;}
@@ -150,7 +175,14 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
 <nav>
   <span class="nav-module">MODULE 06 / 06</span>
   <span class="nav-title">The Problem-Solving Playbook</span>
-  <a href="graphs_module5.html" style="font-size:.78rem;color:var(--ink3);text-decoration:none;">← Module 5</a>
+  <div class="nav-actions">
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-java-btn" onclick="setLang('java')">Java</button>
+      <button class="lang-btn" id="lang-python-btn" onclick="setLang('python')">Python</button>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+    <a href="graphs_module5.html" style="font-size:.78rem;color:var(--ink3);text-decoration:none;">← Module 5</a>
+  </div>
 </nav>
 
 <!-- ══════════════════════════════
@@ -283,7 +315,7 @@ Output: false
         <button class="sol-btn" onclick="toggleSol('sol1',this)">▾ Show solution</button>
         <div class="sol-body" id="sol1">
           <div class="pat-badge pat-1">Pattern 1 — Connected Components / Reachability</div>
-          <div class="code-block">
+          <div class="code-block lang-pane python">
             <div class="code-hdr"><span class="code-fn">1971_path_exists.py</span><span class="code-lg">Python</span></div>
             <pre><span class="kw">from</span> collections <span class="kw">import</span> defaultdict, deque
 
@@ -307,6 +339,26 @@ Output: false
                 visited.<span class="fn">add</span>(nei)
                 queue.<span class="fn">append</span>(nei)
     <span class="kw">return False</span></pre>
+          </div>
+          <div class="code-block lang-pane java">
+            <div class="code-hdr"><span class="code-fn">PathExists.java</span><span class="code-lg">Java</span></div>
+            <pre><span class="ty">boolean</span> <span class="fn">validPath</span>(<span class="ty">int</span> n, <span class="ty">int</span>[][] edges, <span class="ty">int</span> source, <span class="ty">int</span> destination) {
+    <span class="kw">if</span> (source == destination) <span class="kw">return true</span>;
+    List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[n];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span>[] e : edges) { graph[e[<span class="nm">0</span>]].add(e[<span class="nm">1</span>]); graph[e[<span class="nm">1</span>]].add(e[<span class="nm">0</span>]); }
+    Queue&lt;<span class="ty">Integer</span>&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    <span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[n];
+    visited[source] = <span class="kw">true</span>; queue.<span class="fn">add</span>(source);
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="ty">int</span> node = queue.<span class="fn">poll</span>();
+        <span class="kw">for</span> (<span class="ty">int</span> nei : graph[node]) {
+            <span class="kw">if</span> (nei == destination) <span class="kw">return true</span>;
+            <span class="kw">if</span> (!visited[nei]) { visited[nei] = <span class="kw">true</span>; queue.<span class="fn">add</span>(nei); }
+        }
+    }
+    <span class="kw">return false</span>;
+}</pre>
           </div>
           <div class="insight green" style="margin-top:.5rem"><strong>Why it works:</strong> BFS explores every node reachable from source. If destination is reachable, we hit it. If the queue empties without finding it, it's in a different component.</div>
         </div>
@@ -352,7 +404,7 @@ Output: 3</div>
         <button class="sol-btn" onclick="toggleSol('sol2',this)">▾ Show solution</button>
         <div class="sol-body" id="sol2">
           <div class="pat-badge pat-1">Pattern 1 — Connected Components on a Grid</div>
-          <div class="code-block">
+          <div class="code-block lang-pane python">
             <div class="code-hdr"><span class="code-fn">200_num_islands.py</span><span class="code-lg">Python</span></div>
             <pre><span class="kw">def</span> <span class="fn">numIslands</span>(grid):
     <span class="kw">if not</span> grid: <span class="kw">return</span> <span class="nm">0</span>
@@ -373,6 +425,26 @@ Output: 3</div>
                 <span class="fn">dfs</span>(r, c)   <span class="cm"># explore entire island</span>
                 count += <span class="nm">1</span>  <span class="cm"># each DFS launch = one island</span>
     <span class="kw">return</span> count</pre>
+          </div>
+          <div class="code-block lang-pane java">
+            <div class="code-hdr"><span class="code-fn">NumberOfIslands.java</span><span class="code-lg">Java</span></div>
+            <pre><span class="ty">int</span> <span class="fn">numIslands</span>(<span class="ty">char</span>[][] grid) {
+    <span class="ty">int</span> rows = grid.length, cols = grid[<span class="nm">0</span>].length, count = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> r = <span class="nm">0</span>; r &lt; rows; r++) {
+        <span class="kw">for</span> (<span class="ty">int</span> c = <span class="nm">0</span>; c &lt; cols; c++) {
+            <span class="kw">if</span> (grid[r][c] == <span class="st">'1'</span>) { <span class="fn">dfs</span>(grid, r, c); count++; }
+        }
+    }
+    <span class="kw">return</span> count;
+
+}
+
+<span class="kw">void</span> <span class="fn">dfs</span>(<span class="ty">char</span>[][] grid, <span class="ty">int</span> r, <span class="ty">int</span> c) {
+    <span class="kw">if</span> (r &lt; <span class="nm">0</span> || c &lt; <span class="nm">0</span> || r &gt;= grid.length || c &gt;= grid[<span class="nm">0</span>].length || grid[r][c] != <span class="st">'1'</span>) <span class="kw">return</span>;
+    grid[r][c] = <span class="st">'#'</span>;
+    <span class="fn">dfs</span>(grid, r + <span class="nm">1</span>, c); <span class="fn">dfs</span>(grid, r - <span class="nm">1</span>, c);
+    <span class="fn">dfs</span>(grid, r, c + <span class="nm">1</span>); <span class="fn">dfs</span>(grid, r, c - <span class="nm">1</span>);
+}</pre>
           </div>
           <div class="insight warm" style="margin-top:.5rem"><strong>The grid trick:</strong> No explicit adjacency list needed on grids. The four direction moves <em>are</em> the neighbor lookup. Bounds checking replaces the "is this a valid node?" check.</div>
         </div>
@@ -417,7 +489,7 @@ Output: -1  (bottom-left orange is isolated)</div>
         <button class="sol-btn" onclick="toggleSol('sol3',this)">▾ Show solution</button>
         <div class="sol-body" id="sol3">
           <div class="pat-badge pat-2">Pattern 2 — Multi-Source BFS</div>
-          <div class="code-block">
+          <div class="code-block lang-pane python">
             <div class="code-hdr"><span class="code-fn">994_rotting_oranges.py</span><span class="code-lg">Python</span></div>
             <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -444,6 +516,28 @@ Output: -1  (bottom-left orange is isolated)</div>
                 queue.<span class="fn">append</span>((nr, nc, t+<span class="nm">1</span>))
 
     <span class="kw">return</span> time <span class="kw">if</span> fresh == <span class="nm">0</span> <span class="kw">else</span> <span class="nm">-1</span></pre>
+          </div>
+          <div class="code-block lang-pane java">
+            <div class="code-hdr"><span class="code-fn">RottingOranges.java</span><span class="code-lg">Java</span></div>
+            <pre><span class="ty">int</span> <span class="fn">orangesRotting</span>(<span class="ty">int</span>[][] grid) {
+    Queue&lt;<span class="ty">int</span>[]&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    <span class="ty">int</span> fresh = <span class="nm">0</span>, time = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> r = <span class="nm">0</span>; r &lt; grid.length; r++) <span class="kw">for</span> (<span class="ty">int</span> c = <span class="nm">0</span>; c &lt; grid[<span class="nm">0</span>].length; c++) {
+        <span class="kw">if</span> (grid[r][c] == <span class="nm">2</span>) queue.<span class="fn">add</span>(<span class="kw">new int</span>[] {r, c, <span class="nm">0</span>});
+        <span class="kw">if</span> (grid[r][c] == <span class="nm">1</span>) fresh++;
+    }
+    <span class="kw">int</span>[][] dirs = {{<span class="nm">1</span>,<span class="nm">0</span>},{-<span class="nm">1</span>,<span class="nm">0</span>},{<span class="nm">0</span>,<span class="nm">1</span>},{<span class="nm">0</span>,-<span class="nm">1</span>}};
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="ty">int</span>[] cur = queue.<span class="fn">poll</span>(); time = Math.<span class="fn">max</span>(time, cur[<span class="nm">2</span>]);
+        <span class="kw">for</span> (<span class="ty">int</span>[] d : dirs) {
+            <span class="ty">int</span> nr = cur[<span class="nm">0</span>] + d[<span class="nm">0</span>], nc = cur[<span class="nm">1</span>] + d[<span class="nm">1</span>];
+            <span class="kw">if</span> (nr &gt;= <span class="nm">0</span> && nr &lt; grid.length && nc &gt;= <span class="nm">0</span> && nc &lt; grid[<span class="nm">0</span>].length && grid[nr][nc] == <span class="nm">1</span>) {
+                grid[nr][nc] = <span class="nm">2</span>; fresh--; queue.<span class="fn">add</span>(<span class="kw">new int</span>[] {nr, nc, cur[<span class="nm">2</span>] + <span class="nm">1</span>});
+            }
+        }
+    }
+    <span class="kw">return</span> fresh == <span class="nm">0</span> ? time : -<span class="nm">1</span>;
+}</pre>
           </div>
         </div>
       </div>
@@ -488,7 +582,7 @@ Output: false  (0 needs 1, but 1 needs 0 — impossible cycle)</div>
         <button class="sol-btn" onclick="toggleSol('sol4',this)">▾ Show solution</button>
         <div class="sol-body" id="sol4">
           <div class="pat-badge pat-3">Pattern 3 — Cycle Detection (Directed Graph)</div>
-          <div class="code-block">
+          <div class="code-block lang-pane python">
             <div class="code-hdr"><span class="code-fn">207_course_schedule.py</span><span class="code-lg">Python</span></div>
             <pre><span class="kw">def</span> <span class="fn">canFinish</span>(numCourses, prerequisites):
     graph = [[] <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(numCourses)]
@@ -506,6 +600,28 @@ Output: false  (0 needs 1, but 1 needs 0 — impossible cycle)</div>
         <span class="kw">return True</span>
 
     <span class="kw">return all</span>(<span class="fn">dfs</span>(i) <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(numCourses) <span class="kw">if</span> state[i] == <span class="nm">0</span>)</pre>
+          </div>
+          <div class="code-block lang-pane java">
+            <div class="code-hdr"><span class="code-fn">CourseSchedule.java</span><span class="code-lg">Java</span></div>
+            <pre><span class="ty">boolean</span> <span class="fn">canFinish</span>(<span class="ty">int</span> numCourses, <span class="ty">int</span>[][] prerequisites) {
+    List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[numCourses];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span>[] p : prerequisites) graph[p[<span class="nm">1</span>]].add(p[<span class="nm">0</span>]);
+    <span class="ty">int</span>[] state = <span class="kw">new int</span>[numCourses];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) <span class="kw">if</span> (state[i] == <span class="nm">0</span> && !<span class="fn">dfs</span>(graph, i, state)) <span class="kw">return false</span>;
+    <span class="kw">return true</span>;
+
+}
+
+<span class="ty">boolean</span> <span class="fn">dfs</span>(List&lt;<span class="ty">Integer</span>&gt;[] graph, <span class="ty">int</span> node, <span class="ty">int</span>[] state) {
+    state[node] = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> nei : graph[node]) {
+        <span class="kw">if</span> (state[nei] == <span class="nm">1</span>) <span class="kw">return false</span>;
+        <span class="kw">if</span> (state[nei] == <span class="nm">0</span> && !<span class="fn">dfs</span>(graph, nei, state)) <span class="kw">return false</span>;
+    }
+    state[node] = <span class="nm">2</span>;
+    <span class="kw">return true</span>;
+}</pre>
           </div>
         </div>
       </div>
@@ -549,7 +665,7 @@ Output: []  (cycle — impossible)</div>
         <button class="sol-btn" onclick="toggleSol('sol5',this)">▾ Show solution</button>
         <div class="sol-body" id="sol5">
           <div class="pat-badge pat-4">Pattern 4 — Topological Sort (Kahn's Algorithm)</div>
-          <div class="code-block">
+          <div class="code-block lang-pane python">
             <div class="code-hdr"><span class="code-fn">210_course_schedule_ii.py</span><span class="code-lg">Python</span></div>
             <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -573,6 +689,20 @@ Output: []  (cycle — impossible)</div>
                 queue.<span class="fn">append</span>(next_course)
 
     <span class="kw">return</span> order <span class="kw">if</span> <span class="fn">len</span>(order) == numCourses <span class="kw">else</span> []</pre>
+          </div>
+          <div class="code-block lang-pane java">
+            <div class="code-hdr"><span class="code-fn">CourseScheduleII.java</span><span class="code-lg">Java</span></div>
+            <pre><span class="ty">int</span>[] <span class="fn">findOrder</span>(<span class="ty">int</span> numCourses, <span class="ty">int</span>[][] prerequisites) {
+    List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[numCourses];
+    <span class="ty">int</span>[] indegree = <span class="kw">new int</span>[numCourses];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span>[] p : prerequisites) { graph[p[<span class="nm">1</span>]].add(p[<span class="nm">0</span>]); indegree[p[<span class="nm">0</span>]]++; }
+    Queue&lt;<span class="ty">Integer</span>&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) <span class="kw">if</span> (indegree[i] == <span class="nm">0</span>) queue.<span class="fn">add</span>(i);
+    <span class="ty">int</span>[] order = <span class="kw">new int</span>[numCourses]; <span class="ty">int</span> idx = <span class="nm">0</span>;
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) { <span class="ty">int</span> cur = queue.<span class="fn">poll</span>(); order[idx++] = cur; <span class="kw">for</span> (<span class="ty">int</span> next : graph[cur]) <span class="kw">if</span> (--indegree[next] == <span class="nm">0</span>) queue.<span class="fn">add</span>(next); }
+    <span class="kw">return</span> idx == numCourses ? order : <span class="kw">new int</span>[<span class="nm">0</span>];
+}</pre>
           </div>
           <div class="insight purple" style="margin-top:.5rem"><strong>Notice:</strong> Courses 4 and 5 are essentially the same problem. The only difference is what you return. This is very common — learning one template solves a whole family of problems.</div>
         </div>
@@ -617,7 +747,7 @@ Path:   hit → hot → dot → dog → cog (5 words = 4 transformations)</div>
         <button class="sol-btn" onclick="toggleSol('sol6',this)">▾ Show solution</button>
         <div class="sol-body" id="sol6">
           <div class="pat-badge pat-2">Pattern 2 — BFS on an Implicit Graph</div>
-          <div class="code-block">
+          <div class="code-block lang-pane python">
             <div class="code-hdr"><span class="code-fn">127_word_ladder.py</span><span class="code-lg">Python</span></div>
             <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -639,6 +769,35 @@ Path:   hit → hot → dot → dog → cog (5 words = 4 transformations)</div>
                     visited.<span class="fn">add</span>(neighbor)
                     queue.<span class="fn">append</span>((neighbor, length + <span class="nm">1</span>))
     <span class="kw">return</span> <span class="nm">0</span>  <span class="cm"># unreachable</span></pre>
+          </div>
+          <div class="code-block lang-pane java">
+            <div class="code-hdr"><span class="code-fn">WordLadder.java</span><span class="code-lg">Java</span></div>
+            <pre><span class="ty">int</span> <span class="fn">ladderLength</span>(String beginWord, String endWord, List&lt;String&gt; wordList) {
+    Set&lt;String&gt; words = <span class="kw">new</span> HashSet&lt;&gt;(wordList);
+    <span class="kw">if</span> (!words.<span class="fn">contains</span>(endWord)) <span class="kw">return</span> <span class="nm">0</span>;
+    Queue&lt;String&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    queue.<span class="fn">add</span>(beginWord);
+    Set&lt;String&gt; visited = <span class="kw">new</span> HashSet&lt;&gt;(); visited.<span class="fn">add</span>(beginWord);
+    <span class="ty">int</span> length = <span class="nm">1</span>;
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="kw">for</span> (<span class="ty">int</span> size = queue.size(); size &gt; <span class="nm">0</span>; size--) {
+            String word = queue.<span class="fn">poll</span>();
+            <span class="kw">if</span> (word.<span class="fn">equals</span>(endWord)) <span class="kw">return</span> length;
+            <span class="ty">char</span>[] chars = word.<span class="fn">toCharArray</span>();
+            <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; chars.length; i++) {
+                <span class="ty">char</span> old = chars[i];
+                <span class="kw">for</span> (<span class="ty">char</span> ch = <span class="st">'a'</span>; ch &lt;= <span class="st">'z'</span>; ch++) {
+                    chars[i] = ch;
+                    String next = <span class="kw">new</span> String(chars);
+                    <span class="kw">if</span> (words.<span class="fn">contains</span>(next) && visited.<span class="fn">add</span>(next)) queue.<span class="fn">add</span>(next);
+                }
+                chars[i] = old;
+            }
+        }
+        length++;
+    }
+    <span class="kw">return</span> <span class="nm">0</span>;
+}</pre>
           </div>
           <div class="insight amber" style="margin-top:.5rem"><strong>The key insight:</strong> You never need to explicitly build the graph. BFS generates neighbors on-the-fly by trying all 26-letter substitutions. If the result is in the wordList, it's a valid edge. This pattern — BFS on implicit graphs — appears in many "transform X to Y in minimum steps" problems.</div>
         </div>
@@ -783,6 +942,24 @@ Path:   hit → hot → dot → dog → cog (5 words = 4 transformations)</div>
 <div style="height:5rem"></div>
 
 <script>
+function updateThemeButton(){
+  const btn=document.getElementById('theme-toggle');
+  if(btn)btn.textContent=document.documentElement.classList.contains('dark')?'Light mode':'Dark mode';
+}
+
+function toggleTheme(){
+  document.documentElement.classList.toggle('dark');
+  try{localStorage.setItem('dsa-theme',document.documentElement.classList.contains('dark')?'dark':'light');}catch(e){}
+  updateThemeButton();
+}
+
+function setLang(lang){
+  document.getElementById('lang-java-btn')?.classList.toggle('active',lang==='java');
+  document.getElementById('lang-python-btn')?.classList.toggle('active',lang==='python');
+  document.querySelectorAll('.lang-pane').forEach(el=>el.classList.toggle('active',el.classList.contains(lang)));
+  try{localStorage.setItem('graphs-lang',lang);}catch(e){}
+}
+
 // SCROLL REVEAL
 const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.05});
 document.querySelectorAll('.chapter').forEach(c=>obs.observe(c));
@@ -822,6 +999,9 @@ function togglePattern(n){
   const b=document.getElementById('pb'+n);
   if(b)b.classList.toggle('open');
 }
+
+updateThemeButton();
+setLang((()=>{try{return localStorage.getItem('graphs-lang')||'java';}catch(e){return 'java';}})());
 </script>
 </body>
 </html>

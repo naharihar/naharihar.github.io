@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Basics for DSA — AlgorithmCraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f12; --bg2: #13161b; --bg3: #1a1e25; --bg4: #222832;
+  --border: #252c38; --border2: #303a4a;
+  --text: #e4e8f0; --text2: #8a95a8; --text3: #4e5a6b;
+  --accent: #f4a24a; --accent2: #e07c2a;
+  --blue: #5b9cf6; --blue-bg: rgba(91,156,246,0.08); --blue-border: rgba(91,156,246,0.2);
+  --green: #4ec994; --green-bg: rgba(78,201,148,0.08); --green-border: rgba(78,201,148,0.2);
+  --yellow: #fbbf24; --yellow-bg: rgba(251,191,36,0.08); --yellow-border: rgba(251,191,36,0.2);
+  --orange: #f4a24a; --orange-bg: rgba(244,162,74,0.08); --orange-border: rgba(244,162,74,0.2);
+  --red: #f06565; --purple: #a78bfa; --teal: #2dd4bf;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', 'Courier New', monospace;
+  --radius: 10px; --radius-sm: 6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,15,18,0.94); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 2rem; height: 54px; gap: 2px;
+}
+.nav-brand { font-family: var(--serif); font-size: 1.1rem; color: var(--accent); text-decoration: none; margin-right: 1.5rem; white-space: nowrap; letter-spacing: 0.01em; flex-shrink: 0; }
+nav a:not(.nav-brand) {
+  color: var(--text2); text-decoration: none; font-size: 12.5px; font-weight: 500;
+  padding: 0 11px; height: 54px; display: flex; align-items: center;
+  border-bottom: 2px solid transparent; transition: color .18s, border-color .18s; white-space: nowrap;
+}
+nav a:not(.nav-brand):hover { color: var(--text); border-bottom-color: var(--border2); }
+.lang-toggle { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
+.lang-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  font-family: var(--mono); font-size: 11.5px; padding: 4px 13px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s; font-weight: 400;
+}
+.lang-btn.active { background: var(--accent); color: #0d0f12; border-color: var(--accent); font-weight: 500; }
+
+/* HERO */
+.hero { padding: 5rem 2rem 3.5rem; max-width: 860px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-tag {
+  display: inline-block; background: var(--orange-bg); color: var(--accent);
+  border: 1px solid var(--orange-border); font-size: 11px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 1.5rem;
+}
+.hero h1 { font-family: var(--serif); font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.15; margin-bottom: 1.2rem; }
+.hero h1 em { color: var(--accent); font-style: italic; }
+.hero-sub { font-size: 1.05rem; color: var(--text2); max-width: 600px; margin-bottom: 2rem; line-height: 1.75; }
+.hero-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-size: 12px; padding: 5px 14px; border-radius: 20px; font-weight: 500; }
+
+/* PAGE LAYOUT */
+.page { max-width: 860px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+/* SECTION HEADERS */
+.section-header { display: flex; align-items: baseline; gap: 1rem; padding: 3.5rem 0 1.5rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+.section-header:first-child { border-top: none; padding-top: 3rem; }
+.section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .1em; white-space: nowrap; margin-top: 4px; }
+.section-header h2 { font-family: var(--serif); font-size: clamp(1.55rem, 3vw, 2rem); line-height: 1.25; }
+
+/* CALLOUTS */
+.callout { border-left: 3px solid var(--orange); background: var(--orange-bg); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1rem 1.25rem; margin: 1.5rem 0; font-size: 14.5px; line-height: 1.65; }
+.callout strong { color: var(--accent); font-weight: 600; }
+.callout.blue { border-left-color: var(--blue); background: var(--blue-bg); }
+.callout.blue strong { color: var(--blue); }
+.callout.green { border-left-color: var(--green); background: var(--green-bg); }
+.callout.green strong { color: var(--green); }
+.callout.yellow { border-left-color: var(--yellow); background: var(--yellow-bg); }
+.callout.yellow strong { color: var(--yellow); }
+
+/* CODE BLOCKS */
+.code-block { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 1.25rem 0; }
+.code-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.code-tab { padding: 8px 16px; font-family: var(--mono); font-size: 11.5px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; background: none; border-top: none; border-left: none; border-right: none; }
+.code-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.lang-pane { display: none; }
+.lang-pane.active { display: block; }
+pre { padding: 1.1rem 1.25rem; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.8; }
+.cm { color: var(--text3); font-style: italic; }
+.kw { color: var(--blue); }
+.tp { color: var(--teal); }
+.str { color: var(--green); }
+.nm { color: var(--yellow); }
+.fn { color: var(--accent); }
+.py-kw { color: #c792ea; }
+.py-fn { color: var(--teal); }
+.py-str { color: var(--green); }
+.py-cm { color: var(--text3); font-style: italic; }
+.py-num { color: var(--yellow); }
+
+/* SNIPPET ACCORDION */
+.snippet-group { margin: 1.5rem 0; }
+.snippet-group-label { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.snippet { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+.snippet-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; transition: background .15s; }
+.snippet-head:hover { background: var(--bg3); }
+.snippet-title { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.snippet-badge { font-size: 11px; font-family: var(--mono); padding: 2px 9px; border-radius: 10px; background: var(--orange-bg); color: var(--accent); border: 1px solid var(--orange-border); margin-right: 10px; }
+.snippet-chevron { font-size: 10px; color: var(--text3); transition: transform .2s; }
+.snippet-chevron.open { transform: rotate(90deg); }
+.snippet-body { display: none; border-top: 1px solid var(--border); }
+.snippet-body.open { display: block; }
+.snippet-note { font-size: 12.5px; color: var(--text2); padding: 8px 16px 12px; line-height: 1.6; background: var(--bg3); border-top: 1px solid var(--border); }
+.snippet-warn { font-size: 12.5px; color: var(--yellow); padding: 8px 16px 10px; background: var(--yellow-bg); border-top: 1px solid var(--yellow-border); }
+.snippet-tip { font-size: 12.5px; color: var(--green); padding: 8px 16px 10px; background: var(--green-bg); border-top: 1px solid var(--green-border); }
+
+/* METHOD GRID */
+.method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 1rem 0; }
+.method-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; }
+.method-sig { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+.method-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* COMPARE TABLE */
+.compare-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 13px; }
+.compare-table th { text-align: left; padding: 9px 14px; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-weight: 500; font-size: 11.5px; letter-spacing: .04em; }
+.compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.55; }
+.compare-table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--accent); white-space: nowrap; }
+.compare-table tr:nth-child(even) td { background: var(--bg2); }
+.compare-table tr:hover td { background: var(--bg3); }
+
+/* CHEAT SHEET */
+.cheat-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 12.5px; }
+.cheat-table th { text-align: left; padding: 10px 14px; background: var(--bg4); border: 1px solid var(--border2); color: var(--text2); font-weight: 600; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; }
+.cheat-table td { padding: 10px 14px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
+.cheat-table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--teal); font-weight: 500; white-space: nowrap; }
+.cheat-table tr:hover td { background: var(--bg3); }
+.tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 8px; margin: 1px; }
+.tag-o1 { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.tag-ologn { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.tag-on { background: var(--orange-bg); color: var(--accent); border: 1px solid var(--orange-border); }
+
+/* VISUALIZER */
+.viz-container { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0; }
+.viz-label { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.viz-array { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+.viz-cell {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  transition: all .3s; color: var(--text2);
+}
+.viz-cell.highlight { background: var(--orange-bg); border-color: var(--accent); color: var(--accent); transform: translateY(-3px); }
+.viz-cell.found { background: var(--green-bg); border-color: var(--green); color: var(--green); transform: translateY(-3px); }
+.viz-cell.dim { opacity: 0.35; }
+.viz-cell.head { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.viz-cell.tail { background: rgba(167,139,250,0.1); border-color: var(--purple); color: var(--purple); }
+.viz-log { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--text2); min-height: 44px; line-height: 1.7; margin-bottom: 1rem; }
+.viz-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.viz-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text); font-family: var(--sans); font-size: 13px; padding: 7px 18px; border-radius: var(--radius-sm); cursor: pointer; transition: all .15s; }
+.viz-btn:hover { background: var(--bg4); border-color: var(--accent); color: var(--accent); }
+.viz-btn.primary { background: var(--orange-bg); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.viz-ptr { font-size: 11px; font-family: var(--mono); color: var(--text3); margin-top: 4px; display: flex; gap: 12px; }
+.viz-ptr span { color: var(--text2); }
+
+/* BUGS SECTION */
+.bug-card { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 0 var(--radius) var(--radius) 0; padding: 1.1rem 1.25rem; margin: 10px 0; }
+.bug-title { font-size: 13px; font-weight: 600; color: var(--red); margin-bottom: 6px; }
+.bug-body { font-size: 13.5px; color: var(--text2); line-height: 1.65; }
+.fix-card { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 1.1rem 1.25rem; margin: 10px 0; }
+.fix-title { font-size: 13px; font-weight: 600; color: var(--green); margin-bottom: 6px; }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 2.5rem 2rem; max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 1rem; }
+footer p { font-size: 13px; color: var(--text3); }
+footer span { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+p { margin-bottom: .9rem; color: var(--text2); }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--text); font-weight: 600; }
+h3 { font-family: var(--serif); font-size: 1.2rem; color: var(--text); margin: 1.5rem 0 .75rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="index.html">AlgorithmCraft</a>
+  <a href="#arrays">Arrays</a>
+  <a href="#strings">Strings</a>
+  <a href="#arraylist">ArrayList</a>
+  <a href="#hashmap">HashMap</a>
+  <a href="#hashset">HashSet</a>
+  <a href="#deque">Deque</a>
+  <a href="#pq">PriorityQueue</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <a href="#patterns">Patterns</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag" id="hero-tag">Java</div>
+  <h1 id="hero-title">Java Basics<br>for <em>DSA Problems</em></h1>
+  <p class="hero-sub" id="hero-sub">A complete reference for arrays, strings, and the full Java Collections Framework — written specifically for DSA practice. Every method, every gotcha, every pattern you'll reach for in an interview.</p>
+  <div class="hero-pills">
+    <span class="pill">Arrays</span>
+    <span class="pill">Strings &amp; StringBuilder</span>
+    <span class="pill">ArrayList</span>
+    <span class="pill">HashMap / TreeMap</span>
+    <span class="pill">HashSet</span>
+    <span class="pill">ArrayDeque</span>
+    <span class="pill">PriorityQueue</span>
+    <span class="pill">Common Bugs</span>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 01 — ARRAYS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="arrays">
+  <span class="section-num">01 —</span>
+  <h2>Arrays</h2>
+</div>
+
+<p>Arrays are the foundation of DSA. Java arrays are <strong>fixed-size</strong> and <strong>typed</strong> — once created you cannot resize them. They live on the heap and all elements are zero-initialized.</p>
+
+<div class="callout">
+  <strong>Key mental model:</strong> arr.length is a <em>field</em>, not a method — no parentheses. String uses .length() with (). 2D arrays are arrays of arrays: grid[row][col].
+</div>
+
+<!-- 1D Arrays -->
+<div class="snippet-group">
+  <div class="snippet-group-label">Declaration &amp; initialization</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">1D array — all ways to create</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// declare with size — default value is 0 for int, null for objects, false for boolean</span>
+<span class="kw">int</span>[] arr = <span class="kw">new int</span>[<span class="nm">5</span>];           <span class="cm">// [0, 0, 0, 0, 0]</span>
+<span class="kw">boolean</span>[] seen = <span class="kw">new boolean</span>[<span class="nm">10</span>]; <span class="cm">// [false, false, ...]</span>
+<span class="tp">String</span>[] words = <span class="kw">new</span> <span class="tp">String</span>[<span class="nm">4</span>];   <span class="cm">// [null, null, null, null]</span>
+
+<span class="cm">// declare with inline values</span>
+<span class="kw">int</span>[] arr = {<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>, <span class="nm">5</span>};
+
+<span class="cm">// fill entire array with a specific value</span>
+<span class="tp">Arrays</span>.<span class="fn">fill</span>(arr, <span class="nm">-1</span>);    <span class="cm">// [-1, -1, -1, -1, -1]</span>
+<span class="tp">Arrays</span>.<span class="fn">fill</span>(arr, <span class="nm">0</span>, <span class="nm">3</span>, <span class="nm">9</span>); <span class="cm">// fill indices [0,3) with 9</span>
+
+<span class="cm">// length — field, no parentheses!</span>
+<span class="kw">int</span> n = arr.length;  <span class="cm">// not arr.length()</span></pre></div>
+        <div class="lang-pane python"><pre><span class="py-cm"># list with default value</span>
+arr = [<span class="py-num">0</span>] * <span class="py-num">5</span>           <span class="py-cm"># [0, 0, 0, 0, 0]</span>
+seen = [<span class="py-kw">False</span>] * <span class="py-num">10</span>
+
+<span class="py-cm"># inline values</span>
+arr = [<span class="py-num">1</span>, <span class="py-num">2</span>, <span class="py-num">3</span>, <span class="py-num">4</span>, <span class="py-num">5</span>]
+
+<span class="py-cm"># length</span>
+n = <span class="py-fn">len</span>(arr)</pre></div>
+      </div>
+      <div class="snippet-tip">For DSA: prefer int[] over Integer[] for performance. Use Integer[] only when you need null checks or Collections methods.</div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">2D array — grids, matrices, intervals</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// rows x cols, all zeros</span>
+<span class="kw">int</span>[][] grid = <span class="kw">new int</span>[<span class="nm">3</span>][<span class="nm">4</span>];  <span class="cm">// 3 rows, 4 cols</span>
+
+<span class="cm">// inline 2D values</span>
+<span class="kw">int</span>[][] grid = {{<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>}, {<span class="nm">4</span>,<span class="nm">5</span>,<span class="nm">6</span>}};
+
+<span class="cm">// access</span>
+<span class="kw">int</span> val = grid[<span class="nm">1</span>][<span class="nm">2</span>];   <span class="cm">// row 1, col 2 → 6</span>
+grid[<span class="nm">0</span>][<span class="nm">0</span>] = <span class="nm">99</span>;
+
+<span class="cm">// dimensions</span>
+<span class="kw">int</span> rows = grid.length;         <span class="cm">// number of rows</span>
+<span class="kw">int</span> cols = grid[<span class="nm">0</span>].length;     <span class="cm">// number of cols</span>
+
+<span class="cm">// fill entire 2D array</span>
+<span class="kw">for</span> (<span class="kw">int</span>[] row : grid) <span class="tp">Arrays</span>.<span class="fn">fill</span>(row, <span class="nm">-1</span>);</pre></div>
+        <div class="lang-pane python"><pre><span class="py-cm"># 3 rows x 4 cols</span>
+grid = [[<span class="py-num">0</span>] * <span class="py-num">4</span> <span class="py-kw">for</span> _ <span class="py-kw">in</span> <span class="py-fn">range</span>(<span class="py-num">3</span>)]  <span class="py-cm"># correct!</span>
+<span class="py-cm"># do NOT use [[0]*4]*3 — all rows share same reference</span>
+
+grid[<span class="py-num">1</span>][<span class="py-num">2</span>] = <span class="py-num">6</span>
+rows, cols = <span class="py-fn">len</span>(grid), <span class="py-fn">len</span>(grid[<span class="py-num">0</span>])</pre></div>
+      </div>
+      <div class="snippet-warn">⚠ In Python: never use [[0]*cols]*rows — all rows point to the same list. Use a list comprehension instead.</div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">char array — for string manipulation problems</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// String → char[] (strings are immutable, char[] is mutable)</span>
+<span class="kw">char</span>[] ch = <span class="str">"hello"</span>.toCharArray();
+
+<span class="cm">// char[] → String</span>
+<span class="tp">String</span> s = <span class="kw">new</span> <span class="tp">String</span>(ch);
+
+<span class="cm">// sort characters (great for anagram checks)</span>
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(ch);   <span class="cm">// ch is now: ['e','h','l','l','o']</span>
+
+<span class="cm">// access &amp; modify individual chars</span>
+<span class="kw">char</span> c = ch[<span class="nm">0</span>];
+ch[<span class="nm">0</span>] = <span class="str">'H'</span>;
+
+<span class="cm">// check if char is letter/digit</span>
+<span class="tp">Character</span>.<span class="fn">isLetter</span>(c);
+<span class="tp">Character</span>.<span class="fn">isDigit</span>(c);
+<span class="tp">Character</span>.<span class="fn">toLowerCase</span>(c);
+<span class="tp">Character</span>.<span class="fn">toUpperCase</span>(c);</pre></div>
+        <div class="lang-pane python"><pre>ch = <span class="py-fn">list</span>(<span class="py-str">"hello"</span>)        <span class="py-cm"># str → list of chars</span>
+s = <span class="py-str">""</span>.join(ch)         <span class="py-cm"># list → str</span>
+ch.sort()               <span class="py-cm"># sort in place</span>
+c.isalpha()             <span class="py-cm"># letter check</span>
+c.isdigit()             <span class="py-cm"># digit check</span>
+c.lower(); c.upper()</pre></div>
+      </div>
+      <div class="snippet-note">Convert to char[] when you need to modify individual characters in-place — e.g., reversing, swapping, or building output character by character.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sorting -->
+<div class="snippet-group">
+  <div class="snippet-group-label">Sorting &amp; searching</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Arrays.sort — primitives, objects, and custom order</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// sort int[] ascending — in-place, O(n log n)</span>
+<span class="kw">int</span>[] arr = {<span class="nm">3</span>,<span class="nm">1</span>,<span class="nm">4</span>,<span class="nm">1</span>,<span class="nm">5</span>};
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(arr);   <span class="cm">// [1,1,3,4,5]</span>
+
+<span class="cm">// sort only a subrange [from, to)  </span>
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(arr, <span class="nm">1</span>, <span class="nm">4</span>);  <span class="cm">// sorts indices 1,2,3 only</span>
+
+<span class="cm">// sort Integer[] descending — needs wrapper type, not int[]</span>
+<span class="tp">Integer</span>[] boxed = {<span class="nm">3</span>,<span class="nm">1</span>,<span class="nm">4</span>};
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(boxed, <span class="tp">Collections</span>.<span class="fn">reverseOrder</span>());
+
+<span class="cm">// sort 2D array by first column (interval problems)</span>
+<span class="kw">int</span>[][] intervals = {{<span class="nm">3</span>,<span class="nm">6</span>},{<span class="nm">1</span>,<span class="nm">4</span>},{<span class="nm">2</span>,<span class="nm">5</span>}};
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(intervals, (a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(a[<span class="nm">0</span>], b[<span class="nm">0</span>]));
+<span class="cm">// result: [[1,4],[2,5],[3,6]]</span>
+
+<span class="cm">// sort by multiple criteria: first by start, then by end desc</span>
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(intervals, (a, b) ->
+    a[<span class="nm">0</span>] != b[<span class="nm">0</span>] ? <span class="tp">Integer</span>.<span class="fn">compare</span>(a[<span class="nm">0</span>], b[<span class="nm">0</span>]) : <span class="tp">Integer</span>.<span class="fn">compare</span>(b[<span class="nm">1</span>], a[<span class="nm">1</span>]));</pre></div>
+        <div class="lang-pane python"><pre>arr = [<span class="py-num">3</span>,<span class="py-num">1</span>,<span class="py-num">4</span>,<span class="py-num">1</span>,<span class="py-num">5</span>]
+arr.sort()                          <span class="py-cm"># in-place ascending</span>
+arr.sort(reverse=<span class="py-kw">True</span>)             <span class="py-cm"># descending</span>
+
+intervals = [[<span class="py-num">3</span>,<span class="py-num">6</span>],[<span class="py-num">1</span>,<span class="py-num">4</span>],[<span class="py-num">2</span>,<span class="py-num">5</span>]]
+intervals.sort(key=<span class="py-kw">lambda</span> x: x[<span class="py-num">0</span>])  <span class="py-cm"># by first col</span>
+intervals.sort(key=<span class="py-kw">lambda</span> x: (x[<span class="py-num">0</span>], -x[<span class="py-num">1</span>]))  <span class="py-cm"># multi-key</span></pre></div>
+      </div>
+      <div class="snippet-warn">⚠ Arrays.sort on int[] cannot accept a Comparator. Convert to Integer[] first if you need custom sort on primitives. Always use Integer.compare(a,b) not a-b to avoid overflow.</div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Copy, search, print</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// copy full array (new independent array)</span>
+<span class="kw">int</span>[] copy = <span class="tp">Arrays</span>.<span class="fn">copyOf</span>(arr, arr.length);
+
+<span class="cm">// copy subrange [from, to) — to can exceed length (pads with 0)</span>
+<span class="kw">int</span>[] sub = <span class="tp">Arrays</span>.<span class="fn">copyOfRange</span>(arr, <span class="nm">1</span>, <span class="nm">4</span>);
+
+<span class="cm">// binary search — array MUST be sorted first, returns index or negative</span>
+<span class="kw">int</span> idx = <span class="tp">Arrays</span>.<span class="fn">binarySearch</span>(arr, <span class="nm">3</span>);
+
+<span class="cm">// compare two arrays</span>
+<span class="kw">boolean</span> eq = <span class="tp">Arrays</span>.<span class="fn">equals</span>(arr1, arr2);
+
+<span class="cm">// print — never use arr.toString(), it prints garbage like [I@1b6d3586</span>
+<span class="tp">System</span>.out.<span class="fn">println</span>(<span class="tp">Arrays</span>.<span class="fn">toString</span>(arr));      <span class="cm">// [1, 2, 3]</span>
+<span class="tp">System</span>.out.<span class="fn">println</span>(<span class="tp">Arrays</span>.<span class="fn">deepToString</span>(grid));  <span class="cm">// [[1,2],[3,4]]</span>
+
+<span class="cm">// convert to List — returns fixed-size list (cannot add/remove!)</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>);
+<span class="cm">// mutable list from array:</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; mutable = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(<span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>));</pre></div>
+        <div class="lang-pane python"><pre>copy = arr[:]              <span class="py-cm"># or arr.copy()</span>
+sub  = arr[<span class="py-num">1</span>:<span class="py-num">4</span>]            <span class="py-cm"># subrange</span>
+
+<span class="py-kw">import</span> bisect
+idx = bisect.bisect_left(arr, <span class="py-num">3</span>)  <span class="py-cm"># binary search</span>
+
+arr1 == arr2               <span class="py-cm"># equality check</span>
+<span class="py-fn">print</span>(arr)                 <span class="py-cm"># just works</span></pre></div>
+      </div>
+      <div class="snippet-note">Arrays.asList returns a fixed-size backed list — calling .add() throws UnsupportedOperationException. Wrap in new ArrayList&lt;&gt;(...) when you need a truly mutable list.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Array Visualizer -->
+<div class="viz-container">
+  <div class="viz-label">Interactive — Arrays.sort step-through</div>
+  <div id="sort-array" class="viz-array"></div>
+  <div id="sort-log" class="viz-log">Press Step to watch selection sort find minimums one by one.</div>
+  <div class="viz-controls">
+    <button class="viz-btn primary" onclick="sortStep()">Step &#8594;</button>
+    <button class="viz-btn" onclick="sortReset()">Reset</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 02 — STRINGS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="strings">
+  <span class="section-num">02 —</span>
+  <h2>Strings &amp; StringBuilder</h2>
+</div>
+
+<p>Strings in Java are <strong>immutable</strong> — every operation like <code>+</code>, <code>substring</code>, or <code>replace</code> creates a brand new String object. This matters in loops: building a string by concatenation in a loop is O(n²). Use <strong>StringBuilder</strong> for any in-loop string building.</p>
+
+<div class="callout yellow">
+  <strong>The classic O(n²) trap:</strong> String result = ""; for (...) result += c; — each += copies the entire string. Always use StringBuilder in loops.
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">Initialization &amp; basic methods</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Creating and inspecting strings</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// creation</span>
+<span class="tp">String</span> s = <span class="str">"hello"</span>;
+<span class="tp">String</span> empty = <span class="str">""</span>;
+<span class="tp">String</span> rep = <span class="str">"ab"</span>.repeat(<span class="nm">3</span>);   <span class="cm">// "ababab"</span>
+<span class="tp">String</span> fromNum = <span class="tp">String</span>.<span class="fn">valueOf</span>(<span class="nm">42</span>);   <span class="cm">// "42"</span>
+<span class="kw">int</span> num = <span class="tp">Integer</span>.<span class="fn">parseInt</span>(<span class="str">"42"</span>);  <span class="cm">// 42</span>
+
+<span class="cm">// length, access</span>
+<span class="kw">int</span> len = s.<span class="fn">length</span>();              <span class="cm">// 5 — with (), unlike array</span>
+<span class="kw">char</span> c = s.<span class="fn">charAt</span>(<span class="nm">1</span>);             <span class="cm">// 'e'</span>
+<span class="kw">int</span> idx = s.<span class="fn">indexOf</span>(<span class="str">'l'</span>);         <span class="cm">// 2 (first occurrence)</span>
+<span class="kw">int</span> last = s.<span class="fn">lastIndexOf</span>(<span class="str">'l'</span>);    <span class="cm">// 3</span>
+
+<span class="cm">// checks</span>
+s.<span class="fn">isEmpty</span>();                       <span class="cm">// true if ""</span>
+s.<span class="fn">isBlank</span>();                       <span class="cm">// true if "" or whitespace only</span>
+s.<span class="fn">contains</span>(<span class="str">"ell"</span>);               <span class="cm">// true</span>
+s.<span class="fn">startsWith</span>(<span class="str">"hel"</span>);             <span class="cm">// true</span>
+s.<span class="fn">endsWith</span>(<span class="str">"lo"</span>);                <span class="cm">// true</span>
+
+<span class="cm">// comparison — never use == for strings!</span>
+s.<span class="fn">equals</span>(<span class="str">"hello"</span>);              <span class="cm">// true</span>
+s.<span class="fn">equalsIgnoreCase</span>(<span class="str">"HELLO"</span>);    <span class="cm">// true</span>
+s.<span class="fn">compareTo</span>(<span class="str">"hello"</span>);           <span class="cm">// 0 (lexicographic)</span></pre></div>
+        <div class="lang-pane python"><pre>s = <span class="py-str">"hello"</span>
+<span class="py-fn">len</span>(s)                    <span class="py-cm"># 5</span>
+s[<span class="py-num">1</span>]                      <span class="py-cm"># 'e'</span>
+s.<span class="py-fn">index</span>(<span class="py-str">'l'</span>)              <span class="py-cm"># 2</span>
+s.<span class="py-fn">rindex</span>(<span class="py-str">'l'</span>)             <span class="py-cm"># 3</span>
+s == <span class="py-str">"hello"</span>              <span class="py-cm"># True (== works for strings)</span>
+s.<span class="py-fn">lower</span>(); s.<span class="py-fn">upper</span>()
+<span class="py-str">"ab"</span> * <span class="py-num">3</span>                  <span class="py-cm"># "ababab"</span>
+<span class="py-fn">int</span>(<span class="py-str">"42"</span>); <span class="py-fn">str</span>(<span class="py-num">42</span>)</pre></div>
+      </div>
+      <div class="snippet-warn">⚠ Never compare strings with == in Java. == checks reference equality (same object in memory). Always use .equals() or .equalsIgnoreCase().</div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Substring, split, trim, replace</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">String</span> s = <span class="str">"hello world"</span>;
+
+<span class="cm">// substring — [start, end) exclusive end</span>
+s.<span class="fn">substring</span>(<span class="nm">6</span>);           <span class="cm">// "world"</span>
+s.<span class="fn">substring</span>(<span class="nm">0</span>, <span class="nm">5</span>);        <span class="cm">// "hello"</span>
+
+<span class="cm">// split — returns String[], takes regex</span>
+<span class="tp">String</span>[] parts = s.<span class="fn">split</span>(<span class="str">" "</span>);      <span class="cm">// ["hello", "world"]</span>
+<span class="tp">String</span>[] csv = <span class="str">"a,b,c"</span>.<span class="fn">split</span>(<span class="str">","</span>);  <span class="cm">// ["a","b","c"]</span>
+
+<span class="cm">// trim vs strip — strip handles Unicode whitespace too</span>
+<span class="str">"  hi  "</span>.<span class="fn">trim</span>();    <span class="cm">// "hi"</span>
+<span class="str">"  hi  "</span>.<span class="fn">strip</span>();   <span class="cm">// "hi" (prefer strip in Java 11+)</span>
+
+<span class="cm">// replace — replaces ALL occurrences</span>
+s.<span class="fn">replace</span>(<span class="str">'l'</span>, <span class="str">'r'</span>);         <span class="cm">// "herro worrd"</span>
+s.<span class="fn">replace</span>(<span class="str">"world"</span>, <span class="str">"Java"</span>); <span class="cm">// "hello Java"</span>
+s.<span class="fn">replaceAll</span>(<span class="str">"[aeiou]"</span>, <span class="str">"*"</span>); <span class="cm">// regex replace</span>
+
+<span class="cm">// join</span>
+<span class="tp">String</span> joined = <span class="tp">String</span>.<span class="fn">join</span>(<span class="str">", "</span>, <span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>); <span class="cm">// "a, b, c"</span>
+<span class="tp">String</span> joined2 = <span class="tp">String</span>.<span class="fn">join</span>(<span class="str">"-"</span>, list);  <span class="cm">// from List&lt;String&gt;</span>
+
+<span class="cm">// to upper/lower</span>
+s.<span class="fn">toUpperCase</span>(); s.<span class="fn">toLowerCase</span>();</pre></div>
+        <div class="lang-pane python"><pre>s = <span class="py-str">"hello world"</span>
+s[<span class="py-num">6</span>:]          <span class="py-cm"># "world"</span>
+s[<span class="py-num">0</span>:<span class="py-num">5</span>]         <span class="py-cm"># "hello"</span>
+s.<span class="py-fn">split</span>(<span class="py-str">" "</span>)   <span class="py-cm"># ["hello", "world"]</span>
+s.<span class="py-fn">strip</span>()       <span class="py-cm"># trim</span>
+s.<span class="py-fn">replace</span>(<span class="py-str">"world"</span>, <span class="py-str">"Java"</span>)
+<span class="py-str">", "</span>.<span class="py-fn">join</span>([<span class="py-str">"a"</span>,<span class="py-str">"b"</span>,<span class="py-str">"c"</span>])  <span class="py-cm"># "a, b, c"</span></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">StringBuilder — mutable string building</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">StringBuilder — all key methods</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">StringBuilder</span> sb = <span class="kw">new</span> <span class="tp">StringBuilder</span>();
+
+<span class="cm">// add to end</span>
+sb.<span class="fn">append</span>(<span class="str">"hello"</span>);   <span class="cm">// "hello"</span>
+sb.<span class="fn">append</span>(<span class="str">' '</span>);       <span class="cm">// "hello "</span>
+sb.<span class="fn">append</span>(<span class="nm">42</span>);        <span class="cm">// "hello 42" — works with any type</span>
+
+<span class="cm">// insert at index</span>
+sb.<span class="fn">insert</span>(<span class="nm">0</span>, <span class="str">">>> "</span>);  <span class="cm">// ">>> hello 42"</span>
+
+<span class="cm">// delete range [start, end)</span>
+sb.<span class="fn">delete</span>(<span class="nm">0</span>, <span class="nm">4</span>);       <span class="cm">// "hello 42"</span>
+
+<span class="cm">// delete single char at index</span>
+sb.<span class="fn">deleteCharAt</span>(<span class="nm">5</span>);    <span class="cm">// "hello42"</span>
+
+<span class="cm">// replace range</span>
+sb.<span class="fn">replace</span>(<span class="nm">5</span>, <span class="nm">7</span>, <span class="str">"!!"</span>);  <span class="cm">// "hello!!"</span>
+
+<span class="cm">// reverse entire content</span>
+sb.<span class="fn">reverse</span>();           <span class="cm">// "!!olleh"</span>
+
+<span class="cm">// length and char access</span>
+sb.<span class="fn">length</span>();
+sb.<span class="fn">charAt</span>(<span class="nm">0</span>);
+sb.<span class="fn">setCharAt</span>(<span class="nm">0</span>, <span class="str">'H'</span>);   <span class="cm">// modify in place</span>
+
+<span class="cm">// convert back to String</span>
+<span class="tp">String</span> result = sb.<span class="fn">toString</span>();</pre></div>
+        <div class="lang-pane python"><pre><span class="py-cm"># Python lists are the StringBuilder equivalent</span>
+parts = []
+parts.<span class="py-fn">append</span>(<span class="py-str">"hello"</span>)
+parts.<span class="py-fn">append</span>(<span class="py-str">" "</span>)
+parts.<span class="py-fn">append</span>(<span class="py-fn">str</span>(<span class="py-num">42</span>))
+result = <span class="py-str">""</span>.<span class="py-fn">join</span>(parts)
+
+<span class="py-cm"># or just build with list and join at end</span>
+ch = [<span class="py-str">'h'</span>,<span class="py-str">'e'</span>,<span class="py-str">'l'</span>,<span class="py-str">'l'</span>,<span class="py-str">'o'</span>]
+ch.<span class="py-fn">reverse</span>()
+result = <span class="py-str">""</span>.<span class="py-fn">join</span>(ch)</pre></div>
+      </div>
+      <div class="snippet-tip">In DSA: use StringBuilder when building a result string in a loop. .append() is O(1) amortized. .toString() is O(n) — call it once at the end.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 03 — ARRAYLIST -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="arraylist">
+  <span class="section-num">03 —</span>
+  <h2>ArrayList &amp; LinkedList</h2>
+</div>
+
+<p>ArrayList is your go-to dynamic array — O(1) get/set, O(1) amortized add-to-end, O(n) insert/remove from middle. It's backed by an array that doubles when capacity is exceeded. Use it when you need index access and mostly append to end.</p>
+
+<div class="callout blue">
+  <strong>DSA usage:</strong> ArrayList&lt;Integer&gt; for dynamic result lists, ArrayList&lt;List&lt;Integer&gt;&gt; for 2D results like subsets/permutations, ArrayList&lt;int[]&gt; for storing coordinate pairs.
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">ArrayList — initialization &amp; all methods</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Creating an ArrayList</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// empty list</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+<span class="cm">// with initial capacity (avoids resizing, good when size is known)</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(<span class="nm">100</span>);
+
+<span class="cm">// from an existing collection</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; copy = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(otherList);
+
+<span class="cm">// from array values — mutable</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(<span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>));
+
+<span class="cm">// 2D list (for subsets, paths, combinations)</span>
+<span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; res = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();</pre></div>
+        <div class="lang-pane python"><pre>lst = []
+lst = [<span class="py-num">0</span>] * <span class="py-num">100</span>          <span class="py-cm"># with capacity hint</span>
+copy = lst[:]            <span class="py-cm"># shallow copy</span>
+lst = [<span class="py-num">1</span>, <span class="py-num">2</span>, <span class="py-num">3</span>]
+res = []                 <span class="py-cm"># 2D: list of lists</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Add, remove, get, set — all operations</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(<span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="nm">10</span>,<span class="nm">20</span>,<span class="nm">30</span>));
+
+<span class="cm">// add</span>
+list.<span class="fn">add</span>(<span class="nm">40</span>);              <span class="cm">// append to end: [10,20,30,40]</span>
+list.<span class="fn">add</span>(<span class="nm">1</span>, <span class="nm">99</span>);           <span class="cm">// insert at index 1: [10,99,20,30,40]</span>
+
+<span class="cm">// get, set</span>
+<span class="kw">int</span> val = list.<span class="fn">get</span>(<span class="nm">0</span>);    <span class="cm">// 10</span>
+list.<span class="fn">set</span>(<span class="nm">0</span>, <span class="nm">100</span>);          <span class="cm">// replace index 0: [100,99,20,30,40]</span>
+
+<span class="cm">// remove by INDEX (returns removed element)</span>
+list.<span class="fn">remove</span>(<span class="nm">0</span>);            <span class="cm">// removes index 0: [99,20,30,40]</span>
+
+<span class="cm">// remove by VALUE — must pass Integer object, not int</span>
+list.<span class="fn">remove</span>(<span class="tp">Integer</span>.<span class="fn">valueOf</span>(<span class="nm">20</span>));  <span class="cm">// removes value 20</span>
+
+<span class="cm">// size, empty check</span>
+list.<span class="fn">size</span>();
+list.<span class="fn">isEmpty</span>();
+
+<span class="cm">// check and find</span>
+list.<span class="fn">contains</span>(<span class="nm">30</span>);        <span class="cm">// true</span>
+list.<span class="fn">indexOf</span>(<span class="nm">30</span>);         <span class="cm">// index of first occurrence</span>
+
+<span class="cm">// sublist (view — changes affect original)</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; sub = list.<span class="fn">subList</span>(<span class="nm">1</span>, <span class="nm">3</span>);  <span class="cm">// [1,3) exclusive</span>
+
+<span class="cm">// clear all</span>
+list.<span class="fn">clear</span>();
+
+<span class="cm">// convert to array</span>
+<span class="tp">Integer</span>[] arr = list.<span class="fn">toArray</span>(<span class="kw">new</span> <span class="tp">Integer</span>[<span class="nm">0</span>]);</pre></div>
+        <div class="lang-pane python"><pre>lst = [<span class="py-num">10</span>, <span class="py-num">20</span>, <span class="py-num">30</span>]
+lst.<span class="py-fn">append</span>(<span class="py-num">40</span>)         <span class="py-cm"># add to end</span>
+lst.<span class="py-fn">insert</span>(<span class="py-num">1</span>, <span class="py-num">99</span>)       <span class="py-cm"># insert at index</span>
+lst[<span class="py-num">0</span>]                  <span class="py-cm"># get</span>
+lst[<span class="py-num">0</span>] = <span class="py-num">100</span>            <span class="py-cm"># set</span>
+lst.<span class="py-fn">pop</span>(<span class="py-num">0</span>)              <span class="py-cm"># remove by index</span>
+lst.<span class="py-fn">remove</span>(<span class="py-num">20</span>)          <span class="py-cm"># remove by value</span>
+<span class="py-fn">len</span>(lst)                <span class="py-cm"># size</span>
+<span class="py-num">30</span> <span class="py-kw">in</span> lst              <span class="py-cm"># contains</span>
+lst[<span class="py-num">1</span>:<span class="py-num">3</span>]               <span class="py-cm"># sublist</span></pre></div>
+      </div>
+      <div class="snippet-warn">⚠ list.remove(0) removes index 0. list.remove(Integer.valueOf(20)) removes the value 20. Passing a plain int always removes by index — always wrap in Integer.valueOf() to remove by value.</div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Sorting &amp; iterating</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// sort ascending</span>
+<span class="tp">Collections</span>.<span class="fn">sort</span>(list);
+
+<span class="cm">// sort descending</span>
+<span class="tp">Collections</span>.<span class="fn">sort</span>(list, <span class="tp">Collections</span>.<span class="fn">reverseOrder</span>());
+
+<span class="cm">// sort with lambda</span>
+list.<span class="fn">sort</span>((a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(a, b));
+
+<span class="cm">// iterate — for-each (most common)</span>
+<span class="kw">for</span> (<span class="kw">int</span> x : list) { ... }
+
+<span class="cm">// iterate with index</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; list.<span class="fn">size</span>(); i++) {
+    <span class="kw">int</span> x = list.<span class="fn">get</span>(i);
+}
+
+<span class="cm">// iterate 2D list</span>
+<span class="kw">for</span> (<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; row : res) {
+    <span class="kw">for</span> (<span class="kw">int</span> x : row) { ... }
+}
+
+<span class="cm">// useful Collections methods</span>
+<span class="tp">Collections</span>.<span class="fn">max</span>(list);      <span class="cm">// max element</span>
+<span class="tp">Collections</span>.<span class="fn">min</span>(list);      <span class="cm">// min element</span>
+<span class="tp">Collections</span>.<span class="fn">reverse</span>(list);  <span class="cm">// reverse in-place</span>
+<span class="tp">Collections</span>.<span class="fn">frequency</span>(list, <span class="nm">5</span>);  <span class="cm">// count of value 5</span></pre></div>
+        <div class="lang-pane python"><pre>lst.sort()                  <span class="py-cm"># ascending in-place</span>
+lst.sort(reverse=<span class="py-kw">True</span>)      <span class="py-cm"># descending</span>
+<span class="py-fn">sorted</span>(lst)                 <span class="py-cm"># new sorted list</span>
+
+<span class="py-kw">for</span> x <span class="py-kw">in</span> lst: ...
+<span class="py-kw">for</span> i, x <span class="py-kw">in</span> <span class="py-fn">enumerate</span>(lst): ...
+
+<span class="py-fn">max</span>(lst); <span class="py-fn">min</span>(lst)
+lst.<span class="py-fn">reverse</span>()
+lst.<span class="py-fn">count</span>(<span class="py-num">5</span>)</pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 04 — HASHMAP -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="hashmap">
+  <span class="section-num">04 —</span>
+  <h2>HashMap, LinkedHashMap &amp; TreeMap</h2>
+</div>
+
+<p>HashMap gives you O(1) average put/get/remove. It's the single most used collection in DSA — frequency counts, memoization, grouping, caching. Know its methods cold.</p>
+
+<div class="callout">
+  <strong>Three map flavors:</strong> HashMap (O(1), unordered) → LinkedHashMap (O(1), insertion order) → TreeMap (O(log n), sorted keys). Pick based on whether you need ordering.
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">HashMap — initialization &amp; all methods</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Creating a HashMap</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// basic — key and value types must be objects, not primitives</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; map = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+<span class="cm">// character frequency counter</span>
+<span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; freq = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+<span class="cm">// group elements: index → list of values</span>
+<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; groups = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+<span class="cm">// memoization cache for recursion</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; memo = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+<span class="cm">// insertion-order map (use for LRU Cache problems)</span>
+<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; lru = <span class="kw">new</span> <span class="tp">LinkedHashMap</span>&lt;&gt;();
+
+<span class="cm">// sorted keys (use for range queries)</span>
+<span class="tp">TreeMap</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; sorted = <span class="kw">new</span> <span class="tp">TreeMap</span>&lt;&gt;();</pre></div>
+        <div class="lang-pane python"><pre><span class="py-cm"># dict is HashMap</span>
+d = {}
+freq = {}
+groups = {}
+memo = {}
+
+<span class="py-kw">from</span> collections <span class="py-kw">import</span> OrderedDict
+lru = OrderedDict()
+
+<span class="py-cm"># sorted keys — use SortedList or dict + sorted()</span>
+<span class="py-kw">from</span> sortedcontainers <span class="py-kw">import</span> SortedDict
+sd = SortedDict()</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Put, get, remove — and the safe alternatives</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; map = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+<span class="cm">// put — overwrites if key exists</span>
+map.<span class="fn">put</span>(<span class="str">"apple"</span>, <span class="nm">3</span>);
+map.<span class="fn">put</span>(<span class="str">"apple"</span>, <span class="nm">5</span>);   <span class="cm">// now "apple" → 5</span>
+
+<span class="cm">// get — returns null if key absent (beware NPE on unboxing!)</span>
+<span class="tp">Integer</span> val = map.<span class="fn">get</span>(<span class="str">"apple"</span>);     <span class="cm">// 5</span>
+<span class="tp">Integer</span> missing = map.<span class="fn">get</span>(<span class="str">"mango"</span>); <span class="cm">// null</span>
+
+<span class="cm">// getOrDefault — safe, returns fallback if absent (does NOT insert)</span>
+<span class="kw">int</span> count = map.<span class="fn">getOrDefault</span>(<span class="str">"mango"</span>, <span class="nm">0</span>);  <span class="cm">// 0</span>
+
+<span class="cm">// containsKey, containsValue</span>
+map.<span class="fn">containsKey</span>(<span class="str">"apple"</span>);    <span class="cm">// true</span>
+map.<span class="fn">containsValue</span>(<span class="nm">5</span>);       <span class="cm">// true</span>
+
+<span class="cm">// remove</span>
+map.<span class="fn">remove</span>(<span class="str">"apple"</span>);         <span class="cm">// removes key, returns old value</span>
+
+<span class="cm">// size, empty</span>
+map.<span class="fn">size</span>(); map.<span class="fn">isEmpty</span>();
+
+<span class="cm">// putIfAbsent — only inserts if key not present</span>
+map.<span class="fn">putIfAbsent</span>(<span class="str">"mango"</span>, <span class="nm">0</span>);</pre></div>
+        <div class="lang-pane python"><pre>d = {}
+d[<span class="py-str">"apple"</span>] = <span class="py-num">3</span>
+d.get(<span class="py-str">"apple"</span>)          <span class="py-cm"># 3</span>
+d.get(<span class="py-str">"mango"</span>)          <span class="py-cm"># None</span>
+d.get(<span class="py-str">"mango"</span>, <span class="py-num">0</span>)       <span class="py-cm"># 0 — with default</span>
+<span class="py-str">"apple"</span> <span class="py-kw">in</span> d           <span class="py-cm"># True</span>
+<span class="py-kw">del</span> d[<span class="py-str">"apple"</span>]
+d.pop(<span class="py-str">"apple"</span>, <span class="py-kw">None</span>)   <span class="py-cm"># safe remove
+<span class="py-fn">len</span>(d)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Frequency counting — the #1 HashMap pattern</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// Pattern 1: getOrDefault — most readable</span>
+<span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; freq = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">char</span> c : s.<span class="fn">toCharArray</span>()) {
+    freq.<span class="fn">put</span>(c, freq.<span class="fn">getOrDefault</span>(c, <span class="nm">0</span>) + <span class="nm">1</span>);
+}
+
+<span class="cm">// Pattern 2: merge — cleaner, handles null automatically</span>
+<span class="kw">for</span> (<span class="kw">char</span> c : s.<span class="fn">toCharArray</span>()) {
+    freq.<span class="fn">merge</span>(c, <span class="nm">1</span>, <span class="tp">Integer</span>::sum);  <span class="cm">// add 1, or set to 1 if absent</span>
+}
+
+<span class="cm">// Pattern 3: computeIfAbsent — for grouping into lists</span>
+<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; groups = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span>[] pair : pairs) {
+    groups.<span class="fn">computeIfAbsent</span>(pair[<span class="nm">0</span>], k -> <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;())
+           .<span class="fn">add</span>(pair[<span class="nm">1</span>]);
+}
+
+<span class="cm">// decrement (for sliding window)</span>
+freq.<span class="fn">put</span>(c, freq.<span class="fn">get</span>(c) - <span class="nm">1</span>);
+<span class="kw">if</span> (freq.<span class="fn">get</span>(c) == <span class="nm">0</span>) freq.<span class="fn">remove</span>(c);</pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">from</span> collections <span class="py-kw">import</span> defaultdict, Counter
+
+<span class="py-cm"># Counter — best for frequency</span>
+freq = Counter(s)            <span class="py-cm"># instant char frequency</span>
+freq[<span class="py-str">'a'</span>] += <span class="py-num">1</span>
+
+<span class="py-cm"># defaultdict</span>
+groups = defaultdict(<span class="py-fn">list</span>)
+groups[key].<span class="py-fn">append</span>(val)    <span class="py-cm"># no KeyError</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Iterating a HashMap</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// iterate key-value pairs (most common)</span>
+<span class="kw">for</span> (<span class="tp">Map.Entry</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; entry : map.<span class="fn">entrySet</span>()) {
+    <span class="tp">String</span> key = entry.<span class="fn">getKey</span>();
+    <span class="kw">int</span> val = entry.<span class="fn">getValue</span>();
+}
+
+<span class="cm">// iterate keys only</span>
+<span class="kw">for</span> (<span class="tp">String</span> key : map.<span class="fn">keySet</span>()) { ... }
+
+<span class="cm">// iterate values only</span>
+<span class="kw">for</span> (<span class="kw">int</span> val : map.<span class="fn">values</span>()) { ... }
+
+<span class="cm">// find key with max value (common pattern)</span>
+<span class="tp">String</span> maxKey = <span class="tp">Collections</span>.<span class="fn">max</span>(
+    map.<span class="fn">entrySet</span>(),
+    <span class="tp">Map</span>.<span class="tp">Entry</span>.<span class="fn">comparingByValue</span>()
+).<span class="fn">getKey</span>();</pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">for</span> k, v <span class="py-kw">in</span> d.items(): ...
+<span class="py-kw">for</span> k <span class="py-kw">in</span> d: ...
+<span class="py-kw">for</span> v <span class="py-kw">in</span> d.values(): ...
+
+max_key = <span class="py-fn">max</span>(d, key=d.get)</pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">TreeMap — sorted keys &amp; range queries</div>
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">TreeMap navigation methods</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">TreeMap</span>&lt;<span class="tp">Integer</span>, <span class="tp">String</span>&gt; tm = <span class="kw">new</span> <span class="tp">TreeMap</span>&lt;&gt;();
+tm.<span class="fn">put</span>(<span class="nm">10</span>, <span class="str">"a"</span>); tm.<span class="fn">put</span>(<span class="nm">20</span>, <span class="str">"b"</span>); tm.<span class="fn">put</span>(<span class="nm">30</span>, <span class="str">"c"</span>);
+<span class="cm">// keys: 10, 20, 30</span>
+
+<span class="cm">// Navigation — for k = 25:</span>
+tm.<span class="fn">floorKey</span>(<span class="nm">25</span>);    <span class="cm">// 20  — greatest key ≤ 25</span>
+tm.<span class="fn">lowerKey</span>(<span class="nm">25</span>);    <span class="cm">// 20  — greatest key &lt; 25 (strict)</span>
+tm.<span class="fn">ceilingKey</span>(<span class="nm">25</span>); <span class="cm">// 30  — smallest key ≥ 25</span>
+tm.<span class="fn">higherKey</span>(<span class="nm">25</span>);  <span class="cm">// 30  — smallest key &gt; 25 (strict)</span>
+
+<span class="cm">// When k exactly matches (k = 20):</span>
+tm.<span class="fn">floorKey</span>(<span class="nm">20</span>);    <span class="cm">// 20  (≤ includes equal)</span>
+tm.<span class="fn">lowerKey</span>(<span class="nm">20</span>);    <span class="cm">// 10  (strict &lt;, excludes equal)</span>
+
+<span class="cm">// First / last key</span>
+tm.<span class="fn">firstKey</span>();      <span class="cm">// 10</span>
+tm.<span class="fn">lastKey</span>();       <span class="cm">// 30</span>
+
+<span class="cm">// All return null if no key exists — always null-check!</span>
+<span class="tp">Integer</span> floor = tm.<span class="fn">floorKey</span>(<span class="nm">5</span>);  <span class="cm">// null — nothing ≤ 5</span>
+<span class="kw">if</span> (floor != <span class="kw">null</span>) { ... }</pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">from</span> sortedcontainers <span class="py-kw">import</span> SortedDict
+tm = SortedDict()
+tm[<span class="py-num">10</span>] = <span class="py-str">"a"</span>; tm[<span class="py-num">20</span>] = <span class="py-str">"b"</span>; tm[<span class="py-num">30</span>] = <span class="py-str">"c"</span>
+
+<span class="py-cm"># floor equivalent</span>
+keys = tm.keys()
+idx = keys.bisect_right(<span class="py-num">25</span>) - <span class="py-num">1</span>
+floor = keys[idx] <span class="py-kw">if</span> idx >= <span class="py-num">0</span> <span class="py-kw">else</span> <span class="py-kw">None</span>  <span class="py-cm"># 20</span>
+
+<span class="py-cm"># ceiling equivalent</span>
+idx = keys.bisect_left(<span class="py-num">25</span>)
+ceil = keys[idx] <span class="py-kw">if</span> idx < <span class="py-fn">len</span>(keys) <span class="py-kw">else</span> <span class="py-kw">None</span>  <span class="py-cm"># 30</span></pre></div>
+      </div>
+      <div class="snippet-note">TreeMap is your go-to for interval problems, calendar overlaps, and any problem asking "find the nearest value ≤ or ≥ x". All navigation methods return null if no qualifying key exists.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 05 — HASHSET -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="hashset">
+  <span class="section-num">05 —</span>
+  <h2>HashSet &amp; TreeSet</h2>
+</div>
+
+<p>HashSet gives O(1) contains — the fastest way to answer "have I seen this before?" Use it for deduplication, cycle detection, and visited tracking in BFS/DFS.</p>
+
+<div class="callout green">
+  <strong>When to use Set over Map:</strong> If you only need membership (yes/no) and not a count or associated value, use a Set. It's cleaner and signals intent clearly.
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">HashSet &amp; TreeSet</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">HashSet — all methods</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">core</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; set = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+<span class="cm">// add — returns false if already present</span>
+set.<span class="fn">add</span>(<span class="nm">1</span>); set.<span class="fn">add</span>(<span class="nm">2</span>); set.<span class="fn">add</span>(<span class="nm">3</span>);
+<span class="kw">boolean</span> added = set.<span class="fn">add</span>(<span class="nm">1</span>);  <span class="cm">// false — 1 already in set</span>
+
+<span class="cm">// contains — O(1)</span>
+set.<span class="fn">contains</span>(<span class="nm">2</span>);   <span class="cm">// true</span>
+set.<span class="fn">contains</span>(<span class="nm">9</span>);   <span class="cm">// false</span>
+
+<span class="cm">// remove</span>
+set.<span class="fn">remove</span>(<span class="nm">2</span>);    <span class="cm">// returns true if was present</span>
+
+<span class="cm">// size, empty</span>
+set.<span class="fn">size</span>(); set.<span class="fn">isEmpty</span>();
+
+<span class="cm">// from array — deduplicate</span>
+<span class="kw">int</span>[] arr = {<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">2</span>,<span class="nm">3</span>};
+<span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; deduped = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> x : arr) deduped.<span class="fn">add</span>(x);  <span class="cm">// {1,2,3}</span>
+
+<span class="cm">// from List</span>
+<span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; s = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;(list);
+
+<span class="cm">// iterate (order not guaranteed)</span>
+<span class="kw">for</span> (<span class="kw">int</span> x : set) { ... }
+
+<span class="cm">// set operations</span>
+setA.<span class="fn">retainAll</span>(setB);  <span class="cm">// intersection (modifies setA!)</span>
+setA.<span class="fn">addAll</span>(setB);     <span class="cm">// union</span>
+setA.<span class="fn">removeAll</span>(setB);  <span class="cm">// difference</span></pre></div>
+        <div class="lang-pane python"><pre>s = set()
+s.<span class="py-fn">add</span>(<span class="py-num">1</span>); s.<span class="py-fn">add</span>(<span class="py-num">2</span>)
+<span class="py-num">2</span> <span class="py-kw">in</span> s            <span class="py-cm"># True — O(1)</span>
+s.<span class="py-fn">discard</span>(<span class="py-num">2</span>)      <span class="py-cm"># safe remove</span>
+s.<span class="py-fn">remove</span>(<span class="py-num">2</span>)       <span class="py-cm"># raises KeyError if absent</span>
+
+<span class="py-cm"># from list</span>
+s = <span class="py-fn">set</span>([<span class="py-num">1</span>,<span class="py-num">2</span>,<span class="py-num">2</span>,<span class="py-num">3</span>])  <span class="py-cm"># {1,2,3}</span>
+
+<span class="py-cm"># set operations</span>
+a & b   <span class="py-cm"># intersection</span>
+a | b   <span class="py-cm"># union</span>
+a - b   <span class="py-cm"># difference</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">TreeSet — sorted set with navigation</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">TreeSet</span>&lt;<span class="tp">Integer</span>&gt; ts = <span class="kw">new</span> <span class="tp">TreeSet</span>&lt;&gt;();
+ts.<span class="fn">add</span>(<span class="nm">10</span>); ts.<span class="fn">add</span>(<span class="nm">20</span>); ts.<span class="fn">add</span>(<span class="nm">30</span>);
+
+<span class="cm">// same navigation as TreeMap</span>
+ts.<span class="fn">floor</span>(<span class="nm">25</span>);    <span class="cm">// 20</span>
+ts.<span class="fn">ceiling</span>(<span class="nm">25</span>); <span class="cm">// 30</span>
+ts.<span class="fn">lower</span>(<span class="nm">20</span>);   <span class="cm">// 10</span>
+ts.<span class="fn">higher</span>(<span class="nm">20</span>);  <span class="cm">// 30</span>
+ts.<span class="fn">first</span>();      <span class="cm">// 10</span>
+ts.<span class="fn">last</span>();       <span class="cm">// 30</span>
+ts.<span class="fn">pollFirst</span>(); <span class="cm">// removes and returns 10</span>
+ts.<span class="fn">pollLast</span>();  <span class="cm">// removes and returns 30</span>
+
+<span class="cm">// subSet, headSet, tailSet</span>
+ts.<span class="fn">subSet</span>(<span class="nm">10</span>, <span class="kw">true</span>, <span class="nm">30</span>, <span class="kw">false</span>); <span class="cm">// [10, 20] — [from inclusive, to exclusive)</span>
+ts.<span class="fn">headSet</span>(<span class="nm">25</span>);  <span class="cm">// all keys &lt; 25: [10, 20]</span>
+ts.<span class="fn">tailSet</span>(<span class="nm">20</span>);  <span class="cm">// all keys ≥ 20: [20, 30]</span></pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">from</span> sortedcontainers <span class="py-kw">import</span> SortedList
+sl = SortedList([<span class="py-num">10</span>, <span class="py-num">20</span>, <span class="py-num">30</span>])
+
+<span class="py-cm"># floor: largest ≤ 25</span>
+i = sl.bisect_right(<span class="py-num">25</span>) - <span class="py-num">1</span>
+floor = sl[i] <span class="py-kw">if</span> i >= <span class="py-num">0</span> <span class="py-kw">else</span> <span class="py-kw">None</span>
+
+<span class="py-cm"># ceiling: smallest ≥ 25</span>
+i = sl.bisect_left(<span class="py-num">25</span>)
+ceil = sl[i] <span class="py-kw">if</span> i < <span class="py-fn">len</span>(sl) <span class="py-kw">else</span> <span class="py-kw">None</span></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 06 — ARRAYDEQUE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="deque">
+  <span class="section-num">06 —</span>
+  <h2>ArrayDeque — Stack &amp; Queue</h2>
+</div>
+
+<p>ArrayDeque is a double-ended queue backed by a resizable array. Use it as both a <strong>Stack</strong> (LIFO) and a <strong>Queue</strong> (FIFO). Never use the legacy <code>Stack</code> class — it's synchronized and slow.</p>
+
+<div class="callout yellow">
+  <strong>Common mistake:</strong> push/pop give you a Stack (LIFO). addLast/removeFirst give you a Queue (FIFO). Mixing them gives wrong BFS/DFS behavior.
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">Stack &amp; Queue patterns</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">As a Stack — DFS, parentheses, monotonic</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+stack.<span class="fn">push</span>(<span class="nm">1</span>);     <span class="cm">// addFirst — puts at HEAD</span>
+stack.<span class="fn">push</span>(<span class="nm">2</span>);
+stack.<span class="fn">push</span>(<span class="nm">3</span>);     <span class="cm">// stack: [3, 2, 1] (head → tail)</span>
+
+stack.<span class="fn">peek</span>();      <span class="cm">// 3 — see top without removing (null if empty)</span>
+stack.<span class="fn">pop</span>();       <span class="cm">// 3 — remove top (throws if empty)</span>
+stack.<span class="fn">isEmpty</span>();   <span class="cm">// false</span>
+
+<span class="cm">// Iterative DFS template</span>
+<span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+stack.<span class="fn">push</span>(start);
+<span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>()) {
+    <span class="kw">int</span> node = stack.<span class="fn">pop</span>();
+    <span class="cm">// process node...</span>
+    <span class="kw">for</span> (<span class="kw">int</span> neighbor : graph[node]) {
+        <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+            visited.<span class="fn">add</span>(neighbor);
+            stack.<span class="fn">push</span>(neighbor);
+        }
+    }
+}</pre></div>
+        <div class="lang-pane python"><pre>stack = []
+stack.<span class="py-fn">append</span>(<span class="py-num">1</span>)   <span class="py-cm"># push</span>
+stack[-<span class="py-num">1</span>]         <span class="py-cm"># peek</span>
+stack.<span class="py-fn">pop</span>()       <span class="py-cm"># pop</span>
+
+<span class="py-cm"># DFS</span>
+stack = [start]
+<span class="py-kw">while</span> stack:
+    node = stack.<span class="py-fn">pop</span>()
+    <span class="py-kw">for</span> nb <span class="py-kw">in</span> graph[node]:
+        <span class="py-kw">if</span> nb <span class="py-kw">not in</span> visited:
+            visited.<span class="py-fn">add</span>(nb)
+            stack.<span class="py-fn">append</span>(nb)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">As a Queue — BFS, level-order</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+queue.<span class="fn">addLast</span>(<span class="nm">1</span>);    <span class="cm">// enqueue — adds to TAIL</span>
+queue.<span class="fn">addLast</span>(<span class="nm">2</span>);
+queue.<span class="fn">addLast</span>(<span class="nm">3</span>);    <span class="cm">// queue: [1, 2, 3] (head → tail)</span>
+
+queue.<span class="fn">peekFirst</span>();   <span class="cm">// 1 — see front (null if empty)</span>
+queue.<span class="fn">removeFirst</span>(); <span class="cm">// 1 — dequeue (throws if empty)</span>
+
+<span class="cm">// BFS template — grid problems</span>
+<span class="tp">Deque</span>&lt;<span class="kw">int</span>[]&gt; queue = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+queue.<span class="fn">addLast</span>(<span class="kw">new int</span>[]{startRow, startCol});
+<span class="kw">boolean</span>[][] visited = <span class="kw">new boolean</span>[rows][cols];
+visited[startRow][startCol] = <span class="kw">true</span>;
+
+<span class="kw">int</span>[][] dirs = {{<span class="nm">0</span>,<span class="nm">1</span>},{<span class="nm">0</span>,-<span class="nm">1</span>},{<span class="nm">1</span>,<span class="nm">0</span>},{-<span class="nm">1</span>,<span class="nm">0</span>}};
+<span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+    <span class="kw">int</span>[] curr = queue.<span class="fn">removeFirst</span>();
+    <span class="kw">int</span> r = curr[<span class="nm">0</span>], c = curr[<span class="nm">1</span>];
+    <span class="kw">for</span> (<span class="kw">int</span>[] d : dirs) {
+        <span class="kw">int</span> nr = r + d[<span class="nm">0</span>], nc = c + d[<span class="nm">1</span>];
+        <span class="kw">if</span> (nr >= <span class="nm">0</span> && nr < rows && nc >= <span class="nm">0</span> && nc < cols
+                && !visited[nr][nc]) {
+            visited[nr][nc] = <span class="kw">true</span>;
+            queue.<span class="fn">addLast</span>(<span class="kw">new int</span>[]{nr, nc});
+        }
+    }
+}</pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">from</span> collections <span class="py-kw">import</span> deque
+queue = deque()
+queue.<span class="py-fn">append</span>(<span class="py-num">1</span>)        <span class="py-cm"># addLast</span>
+queue[<span class="py-num">0</span>]               <span class="py-cm"># peekFirst</span>
+queue.<span class="py-fn">popleft</span>()        <span class="py-cm"># removeFirst — O(1)</span>
+
+<span class="py-cm"># BFS grid</span>
+queue = deque([(start_r, start_c)])
+visited = [[<span class="py-kw">False</span>]*cols <span class="py-kw">for</span> _ <span class="py-kw">in</span> <span class="py-fn">range</span>(rows)]
+<span class="py-kw">while</span> queue:
+    r, c = queue.<span class="py-fn">popleft</span>()
+    <span class="py-kw">for</span> dr, dc <span class="py-kw">in</span> [(<span class="py-num">0</span>,<span class="py-num">1</span>),(<span class="py-num">0</span>,-<span class="py-num">1</span>),(<span class="py-num">1</span>,<span class="py-num">0</span>),(-<span class="py-num">1</span>,<span class="py-num">0</span>)]:
+        nr, nc = r+dr, c+dc
+        <span class="py-kw">if</span> <span class="py-num">0</span> <= nr < rows <span class="py-kw">and</span> <span class="py-num">0</span> <= nc < cols <span class="py-kw">and not</span> visited[nr][nc]:
+            visited[nr][nc] = <span class="py-kw">True</span>
+            queue.<span class="py-fn">append</span>((nr, nc))</pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Deque cheat sheet -->
+<table class="compare-table" style="margin-top:1rem">
+  <thead><tr><th>Method</th><th>Stack role</th><th>Queue role</th><th>Throws if empty?</th></tr></thead>
+  <tbody>
+    <tr><td>push(x) / addFirst(x)</td><td>push to top</td><td>—</td><td>no</td></tr>
+    <tr><td>pop() / removeFirst()</td><td>pop top</td><td>dequeue front</td><td>yes — use pollFirst() for null</td></tr>
+    <tr><td>peek() / peekFirst()</td><td>see top</td><td>see front</td><td>no — returns null</td></tr>
+    <tr><td>addLast(x)</td><td>—</td><td>enqueue back</td><td>no</td></tr>
+    <tr><td>peekLast()</td><td>—</td><td>see back</td><td>no — returns null</td></tr>
+    <tr><td>removeLast()</td><td>—</td><td>dequeue back</td><td>yes — use pollLast() for null</td></tr>
+  </tbody>
+</table>
+
+<!-- Deque Visualizer -->
+<div class="viz-container" style="margin-top:1.5rem">
+  <div class="viz-label">Interactive — Stack (LIFO) vs Queue (FIFO)</div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Stack (push/pop)</div>
+      <div id="stack-viz" class="viz-array" style="flex-direction:column-reverse;min-height:60px"></div>
+    </div>
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Queue (addLast/removeFirst)</div>
+      <div id="queue-viz" class="viz-array" style="min-height:60px"></div>
+    </div>
+  </div>
+  <div id="dq-log" class="viz-log">Press Push/Enqueue to add 1–5. Press Pop/Dequeue to remove.</div>
+  <div class="viz-controls">
+    <button class="viz-btn primary" onclick="stackPush()">Stack: push &#8594;</button>
+    <button class="viz-btn" onclick="stackPop()">Stack: pop</button>
+    <button class="viz-btn primary" onclick="queueAdd()">Queue: addLast &#8594;</button>
+    <button class="viz-btn" onclick="queueRemove()">Queue: removeFirst</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 07 — PRIORITY QUEUE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="pq">
+  <span class="section-num">07 —</span>
+  <h2>PriorityQueue — Heap</h2>
+</div>
+
+<p>PriorityQueue is a min-heap by default — <code>poll()</code> always returns the <strong>smallest</strong> element. It's your go-to for top-K problems, Dijkstra's algorithm, and any "always process the most urgent item" pattern.</p>
+
+<div class="callout">
+  <strong>Default = min-heap.</strong> For a max-heap: new PriorityQueue&lt;&gt;(Collections.reverseOrder()). For custom objects: pass a Comparator. PriorityQueue does NOT support O(1) random access — only peek/poll the top.
+</div>
+
+<div class="snippet-group">
+  <div class="snippet-group-label">PriorityQueue — all patterns</div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Min-heap, max-heap, and custom Comparator</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron open">&#9654;</span></div>
+    </div>
+    <div class="snippet-body open">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// MIN-HEAP (default) — smallest element at top</span>
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; minPQ = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;();
+minPQ.<span class="fn">offer</span>(<span class="nm">5</span>); minPQ.<span class="fn">offer</span>(<span class="nm">1</span>); minPQ.<span class="fn">offer</span>(<span class="nm">3</span>);
+minPQ.<span class="fn">peek</span>();   <span class="cm">// 1  — see min (null if empty)</span>
+minPQ.<span class="fn">poll</span>();   <span class="cm">// 1  — remove and return min (null if empty)</span>
+
+<span class="cm">// MAX-HEAP — largest element at top</span>
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; maxPQ = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(<span class="tp">Collections</span>.<span class="fn">reverseOrder</span>());
+<span class="cm">// or: new PriorityQueue&lt;&gt;((a, b) -> Integer.compare(b, a))</span>
+
+<span class="cm">// CUSTOM COMPARATOR — sort int[] pairs by first element</span>
+<span class="tp">PriorityQueue</span>&lt;<span class="kw">int</span>[]&gt; pq = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(
+    (a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(a[<span class="nm">0</span>], b[<span class="nm">0</span>])
+);
+pq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{<span class="nm">3</span>, <span class="nm">10</span>});
+pq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{<span class="nm">1</span>, <span class="nm">20</span>});
+pq.<span class="fn">poll</span>();  <span class="cm">// [1, 20] — smallest first element</span>
+
+<span class="cm">// all key methods</span>
+pq.<span class="fn">offer</span>(x);    <span class="cm">// add — O(log n)</span>
+pq.<span class="fn">peek</span>();      <span class="cm">// see top — O(1), null if empty</span>
+pq.<span class="fn">poll</span>();      <span class="cm">// remove top — O(log n), null if empty</span>
+pq.<span class="fn">size</span>();
+pq.<span class="fn">isEmpty</span>();
+pq.<span class="fn">contains</span>(x); <span class="cm">// O(n) — avoid in hot loops</span></pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">import</span> heapq
+
+<span class="py-cm"># min-heap</span>
+heap = []
+heapq.<span class="py-fn">heappush</span>(heap, <span class="py-num">5</span>)
+heapq.<span class="py-fn">heappush</span>(heap, <span class="py-num">1</span>)
+heap[<span class="py-num">0</span>]               <span class="py-cm"># peek: 1</span>
+heapq.<span class="py-fn">heappop</span>(heap)   <span class="py-cm"># pop: 1</span>
+
+<span class="py-cm"># max-heap — negate values</span>
+heapq.<span class="py-fn">heappush</span>(heap, -<span class="py-num">5</span>)
+-heapq.<span class="py-fn">heappop</span>(heap)  <span class="py-cm"># 5</span>
+
+<span class="py-cm"># custom: push tuples (priority, value)</span>
+heapq.<span class="py-fn">heappush</span>(heap, (<span class="py-num">3</span>, <span class="py-str">"a"</span>))
+heapq.<span class="py-fn">heappush</span>(heap, (<span class="py-num">1</span>, <span class="py-str">"b"</span>))
+heapq.<span class="py-fn">heappop</span>(heap)   <span class="py-cm"># (1, "b")</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <div class="snippet-head" onclick="tog(this)">
+      <span class="snippet-title">Top-K pattern — the most common heap use case</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">dsa</span><span class="snippet-chevron">&#9654;</span></div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-block">
+        <div class="lang-pane java active"><pre><span class="cm">// Find top K largest elements — use a min-heap of size K</span>
+<span class="cm">// Logic: maintain K largest seen. If new element > min of heap, swap.</span>
+<span class="kw">int</span>[] nums = {<span class="nm">3</span>,<span class="nm">2</span>,<span class="nm">1</span>,<span class="nm">5</span>,<span class="nm">6</span>,<span class="nm">4</span>};
+<span class="kw">int</span> k = <span class="nm">2</span>;
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; minHeap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;();
+
+<span class="kw">for</span> (<span class="kw">int</span> n : nums) {
+    minHeap.<span class="fn">offer</span>(n);
+    <span class="kw">if</span> (minHeap.<span class="fn">size</span>() > k) minHeap.<span class="fn">poll</span>(); <span class="cm">// evict smallest</span>
+}
+<span class="cm">// minHeap.peek() = kth largest = 5</span>
+
+<span class="cm">// Find K most frequent elements</span>
+<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; freq = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> n : nums) freq.<span class="fn">merge</span>(n, <span class="nm">1</span>, <span class="tp">Integer</span>::sum);
+
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; pq = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(
+    (a, b) -> freq.<span class="fn">get</span>(a) - freq.<span class="fn">get</span>(b)  <span class="cm">// min-heap by frequency</span>
+);
+<span class="kw">for</span> (<span class="kw">int</span> key : freq.<span class="fn">keySet</span>()) {
+    pq.<span class="fn">offer</span>(key);
+    <span class="kw">if</span> (pq.<span class="fn">size</span>() > k) pq.<span class="fn">poll</span>();
+}
+<span class="cm">// pq contains the k most frequent elements</span></pre></div>
+        <div class="lang-pane python"><pre><span class="py-kw">import</span> heapq
+nums = [<span class="py-num">3</span>,<span class="py-num">2</span>,<span class="py-num">1</span>,<span class="py-num">5</span>,<span class="py-num">6</span>,<span class="py-num">4</span>]
+k = <span class="py-num">2</span>
+
+<span class="py-cm"># top-K largest — nsmallest with negation OR nlargest</span>
+heapq.<span class="py-fn">nlargest</span>(k, nums)   <span class="py-cm"># [6, 5]</span>
+
+<span class="py-cm"># manual min-heap of size k</span>
+heap = []
+<span class="py-kw">for</span> n <span class="py-kw">in</span> nums:
+    heapq.<span class="py-fn">heappush</span>(heap, n)
+    <span class="py-kw">if</span> <span class="py-fn">len</span>(heap) > k:
+        heapq.<span class="py-fn">heappop</span>(heap)
+<span class="py-cm"># heap[0] = kth largest = 5</span></pre></div>
+      </div>
+      <div class="snippet-tip">Key insight: to find the K largest, maintain a min-heap of size K. The minimum of that heap is the Kth largest. Evict anything smaller than the current minimum.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 08 — COMMON BUGS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="bugs">
+  <span class="section-num">08 —</span>
+  <h2>5 Bugs That Will Cost You</h2>
+</div>
+
+<p>These are the exact mistakes that appeared in your self-assessment — and the ones that come up most in real problems. Learn them once and never lose points to syntax again.</p>
+
+<div class="bug-card">
+  <div class="bug-title">Bug 1 — Backtracking reference trap</div>
+  <div class="bug-body">res.add(path) adds a reference to the mutable list. All entries in res end up empty when DFS unwinds.</div>
+</div>
+<div class="code-block"><div class="lang-pane java active"><pre><span class="cm">// WRONG — all entries in res point to the same list</span>
+res.<span class="fn">add</span>(path);
+
+<span class="cm">// CORRECT — snapshot the current state</span>
+res.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));</pre></div><div class="lang-pane python"><pre><span class="py-cm"># WRONG</span>
+res.<span class="py-fn">append</span>(path)
+<span class="py-cm"># CORRECT</span>
+res.<span class="py-fn">append</span>(path[:])</pre></div></div>
+
+<div class="bug-card" style="margin-top:1rem">
+  <div class="bug-title">Bug 2 — Integer overflow in Comparator</div>
+  <div class="bug-body">(a - b) as a comparator overflows when a = Integer.MIN_VALUE and b = 1, producing a huge positive number and wrong sort order.</div>
+</div>
+<div class="code-block"><div class="lang-pane java active"><pre><span class="cm">// WRONG — silent overflow</span>
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(arr, (a, b) -> a - b);
+
+<span class="cm">// CORRECT</span>
+<span class="tp">Arrays</span>.<span class="fn">sort</span>(arr, (a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(a, b));</pre></div><div class="lang-pane python"><pre><span class="py-cm"># Python ints don't overflow — subtraction is safe
+# but use key= style for clarity
+arr.sort(key=<span class="py-kw">lambda</span> x: x)</span></pre></div></div>
+
+<div class="bug-card" style="margin-top:1rem">
+  <div class="bug-title">Bug 3 — String comparison with ==</div>
+  <div class="bug-body">== checks reference identity in Java. Two String objects with the same characters are not == unless they're the same interned object.</div>
+</div>
+<div class="code-block"><div class="lang-pane java active"><pre><span class="cm">// WRONG</span>
+<span class="kw">if</span> (s1 == s2) { ... }
+
+<span class="cm">// CORRECT</span>
+<span class="kw">if</span> (s1.<span class="fn">equals</span>(s2)) { ... }
+<span class="kw">if</span> (s1.<span class="fn">equalsIgnoreCase</span>(s2)) { ... }</pre></div><div class="lang-pane python"><pre><span class="py-cm"># Python == works correctly for strings</span>
+<span class="py-kw">if</span> s1 == s2: ...</pre></div></div>
+
+<div class="bug-card" style="margin-top:1rem">
+  <div class="bug-title">Bug 4 — Missing recursion base case</div>
+  <div class="bug-body">Forgetting one of the base cases causes infinite recursion, eventually crashing with StackOverflowError.</div>
+</div>
+<div class="code-block"><div class="lang-pane java active"><pre><span class="cm">// WRONG — missing n == 1 case causes infinite recursion</span>
+<span class="kw">int</span> <span class="fn">fib</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>);
+}
+
+<span class="cm">// CORRECT</span>
+<span class="kw">int</span> <span class="fn">fib</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">if</span> (n == <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>);
+}</pre></div><div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">fib</span>(n):
+    <span class="py-kw">if</span> n == <span class="py-num">0</span>: <span class="py-kw">return</span> <span class="py-num">0</span>
+    <span class="py-kw">if</span> n == <span class="py-num">1</span>: <span class="py-kw">return</span> <span class="py-num">1</span>
+    <span class="py-kw">return</span> <span class="py-fn">fib</span>(n-<span class="py-num">1</span>) + <span class="py-fn">fib</span>(n-<span class="py-num">2</span>)</pre></div></div>
+
+<div class="bug-card" style="margin-top:1rem">
+  <div class="bug-title">Bug 5 — ArrayList.remove(int) vs remove(Object)</div>
+  <div class="bug-body">list.remove(1) removes the element at index 1. list.remove(Integer.valueOf(1)) removes the value 1. Passing a plain int always removes by index.</div>
+</div>
+<div class="code-block"><div class="lang-pane java active"><pre><span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(<span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>));
+
+list.<span class="fn">remove</span>(<span class="nm">1</span>);                     <span class="cm">// removes INDEX 1 → [10, 30]</span>
+list.<span class="fn">remove</span>(<span class="tp">Integer</span>.<span class="fn">valueOf</span>(<span class="nm">10</span>));    <span class="cm">// removes VALUE 10 → [30]</span></pre></div><div class="lang-pane python"><pre>lst = [<span class="py-num">10</span>, <span class="py-num">20</span>, <span class="py-num">30</span>]
+lst.<span class="py-fn">pop</span>(<span class="py-num">1</span>)       <span class="py-cm"># by index: [10, 30]</span>
+lst.<span class="py-fn">remove</span>(<span class="py-num">10</span>)   <span class="py-cm"># by value: [30]</span></pre></div></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 09 — CHEAT SHEET -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="cheatsheet">
+  <span class="section-num">09 —</span>
+  <h2>DSA Cheat Sheet</h2>
+</div>
+
+<p>When you open a new problem, use this table to pick the right data structure in under 10 seconds.</p>
+
+<table class="cheat-table">
+  <thead>
+    <tr>
+      <th>Structure</th>
+      <th>Use when the problem needs…</th>
+      <th>Key ops</th>
+      <th>Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>int[] / Integer[]</td>
+      <td>fixed-size indexed storage, DP table, frequency array (256 chars)</td>
+      <td>arr[i], Arrays.sort, Arrays.fill</td>
+      <td><span class="tag tag-o1">O(1) access</span></td>
+    </tr>
+    <tr>
+      <td>ArrayList&lt;T&gt;</td>
+      <td>dynamic list, building result, adjacency list for graphs</td>
+      <td>add, get, set, remove, sort</td>
+      <td><span class="tag tag-o1">O(1) append</span> <span class="tag tag-on">O(n) insert</span></td>
+    </tr>
+    <tr>
+      <td>StringBuilder</td>
+      <td>building a String in a loop — anagram, reverse, decode</td>
+      <td>append, reverse, deleteCharAt, toString</td>
+      <td><span class="tag tag-o1">O(1) append</span></td>
+    </tr>
+    <tr>
+      <td>HashMap&lt;K,V&gt;</td>
+      <td>frequency count, memoization, two-sum index lookup, grouping</td>
+      <td>put, get, getOrDefault, merge, computeIfAbsent</td>
+      <td><span class="tag tag-o1">O(1) avg</span></td>
+    </tr>
+    <tr>
+      <td>HashSet&lt;T&gt;</td>
+      <td>visited tracking in BFS/DFS, deduplication, "seen before?" check</td>
+      <td>add, contains, remove</td>
+      <td><span class="tag tag-o1">O(1) avg</span></td>
+    </tr>
+    <tr>
+      <td>TreeMap&lt;K,V&gt;</td>
+      <td>sorted keys, range queries, "nearest interval start", calendar problems</td>
+      <td>floorKey, ceilingKey, firstKey, lastKey</td>
+      <td><span class="tag tag-ologn">O(log n)</span></td>
+    </tr>
+    <tr>
+      <td>TreeSet&lt;T&gt;</td>
+      <td>ordered unique elements, sliding window min/max, rank queries</td>
+      <td>floor, ceiling, pollFirst, subSet</td>
+      <td><span class="tag tag-ologn">O(log n)</span></td>
+    </tr>
+    <tr>
+      <td>ArrayDeque (Stack)</td>
+      <td>DFS, parentheses matching, monotonic stack, undo operations</td>
+      <td>push, pop, peek</td>
+      <td><span class="tag tag-o1">O(1)</span></td>
+    </tr>
+    <tr>
+      <td>ArrayDeque (Queue)</td>
+      <td>BFS, level-order traversal, sliding window deque</td>
+      <td>addLast, removeFirst, peekFirst</td>
+      <td><span class="tag tag-o1">O(1)</span></td>
+    </tr>
+    <tr>
+      <td>PriorityQueue</td>
+      <td>top-K, Dijkstra, merge K sorted, "always process minimum first"</td>
+      <td>offer, poll, peek</td>
+      <td><span class="tag tag-ologn">O(log n) poll</span> <span class="tag tag-o1">O(1) peek</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout blue" style="margin-top:2rem">
+  <strong>Interview signal sentence:</strong> "I'll use a HashMap for O(1) frequency lookup, then a min-heap of size K to maintain the top-K elements as I scan — giving O(n log K) overall instead of O(n log n) with a full sort."
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 10 — REAL DSA PATTERNS WITH int[] AND COLLECTIONS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-header" id="patterns">
+  <span class="section-num">10 —</span>
+  <h2>Real DSA Patterns — Collections in Action</h2>
+</div>
+
+<p>This is where syntax becomes skill. Each pattern below shows exactly which collection to reach for, why, and how int[] and wrapper types interact in real problem code.</p>
+
+<!-- ── PATTERN 1: TWO SUM ── -->
+<h3>Pattern 1 — Two Sum &amp; index lookup</h3>
+<p>Store <strong>value → index</strong> in a HashMap. For each number, check if its complement already exists. This is the canonical O(n) vs O(n²) upgrade — raw array would require a nested loop.</p>
+<div class="callout green">
+  <strong>Why HashMap wins:</strong> HashMap.containsKey() is O(1). Scanning an int[] for the complement is O(n). One lookup per element → O(n) total.
+</div>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Two Sum — HashMap&lt;Integer, Integer&gt; for value → index</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">HashMap</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: find two indices where nums[i] + nums[j] == target</span>
+<span class="kw">public int</span>[] <span class="fn">twoSum</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> target) {
+    <span class="cm">// int[] as input — primitives fine here, it's just an array</span>
+    <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; seen = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; nums.length; i++) {
+        <span class="kw">int</span> complement = target - nums[i];
+
+        <span class="kw">if</span> (seen.<span class="fn">containsKey</span>(complement)) {
+            <span class="cm">// return int[] — primitives fine as return type</span>
+            <span class="kw">return new int</span>[]{seen.<span class="fn">get</span>(complement), i};
+        }
+        seen.<span class="fn">put</span>(nums[i], i);   <span class="cm">// autoboxing: int → Integer for map key</span>
+    }
+    <span class="kw">return new int</span>[]{-<span class="nm">1</span>, -<span class="nm">1</span>};
+}
+
+<span class="cm">// int[] input: nums = [2, 7, 11, 15], target = 9</span>
+<span class="cm">// Step i=0: complement=7, not in map. map: {2→0}</span>
+<span class="cm">// Step i=1: complement=2, FOUND at index 0 → return [0, 1]</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">two_sum</span>(nums, target):
+    seen = {}
+    <span class="py-kw">for</span> i, n <span class="py-kw">in</span> <span class="py-fn">enumerate</span>(nums):
+        complement = target - n
+        <span class="py-kw">if</span> complement <span class="py-kw">in</span> seen:
+            <span class="py-kw">return</span> [seen[complement], i]
+        seen[n] = i
+    <span class="py-kw">return</span> [-<span class="py-num">1</span>, -<span class="py-num">1</span>]</pre></div>
+    </div>
+    <div class="snippet-note">int[] is used for input and return type — primitives work fine. The HashMap must be Map&lt;Integer, Integer&gt; — wrapper types required for generics.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 2: SLIDING WINDOW ── -->
+<h3>Pattern 2 — Sliding Window with frequency map</h3>
+<p>Use a <strong>HashMap or int[26] array</strong> to track character frequencies inside a window. The int[26] trick works when the alphabet is fixed (lowercase a-z) and is faster than a HashMap because there's no boxing overhead.</p>
+<div class="callout blue">
+  <strong>int[26] vs HashMap:</strong> When the key space is small and fixed (26 letters, 10 digits, 256 ASCII), a primitive int[] indexed by character value beats HashMap — O(1) with zero allocation overhead.
+</div>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Longest substring without repeating — HashSet for "seen"</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">HashSet</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: find length of longest substring with all unique chars</span>
+<span class="kw">public int</span> <span class="fn">lengthOfLongestSubstring</span>(<span class="tp">String</span> s) {
+    <span class="tp">Set</span>&lt;<span class="tp">Character</span>&gt; window = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;(); <span class="cm">// Character, not char</span>
+    <span class="kw">int</span> left = <span class="nm">0</span>, maxLen = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="kw">int</span> right = <span class="nm">0</span>; right &lt; s.<span class="fn">length</span>(); right++) {
+        <span class="kw">char</span> c = s.<span class="fn">charAt</span>(right);
+
+        <span class="cm">// shrink window from left until c is no longer a duplicate</span>
+        <span class="kw">while</span> (window.<span class="fn">contains</span>(c)) {
+            window.<span class="fn">remove</span>(s.<span class="fn">charAt</span>(left));  <span class="cm">// autoboxed char → Character</span>
+            left++;
+        }
+        window.<span class="fn">add</span>(c);
+        maxLen = <span class="tp">Math</span>.<span class="fn">max</span>(maxLen, right - left + <span class="nm">1</span>);
+    }
+    <span class="kw">return</span> maxLen;
+}
+<span class="cm">// s = "abcabcbb" → 3 ("abc")</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">length_of_longest_substring</span>(s):
+    window = set()
+    left = maxLen = <span class="py-num">0</span>
+    <span class="py-kw">for</span> right, c <span class="py-kw">in</span> <span class="py-fn">enumerate</span>(s):
+        <span class="py-kw">while</span> c <span class="py-kw">in</span> window:
+            window.<span class="py-fn">discard</span>(s[left])
+            left += <span class="py-num">1</span>
+        window.<span class="py-fn">add</span>(c)
+        maxLen = <span class="py-fn">max</span>(maxLen, right - left + <span class="py-num">1</span>)
+    <span class="py-kw">return</span> maxLen</pre></div>
+    </div>
+  </div>
+</div>
+
+<div class="snippet" style="margin-top:8px">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Anagram check — int[26] array beats HashMap here</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">int[26]</span><span class="snippet-chevron">&#9654;</span></div>
+  </div>
+  <div class="snippet-body">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: given s and p, find all start indices where p's anagram appears in s</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">findAnagrams</span>(<span class="tp">String</span> s, <span class="tp">String</span> p) {
+    <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(); <span class="cm">// List needs Integer, not int</span>
+
+    <span class="cm">// int[26] — primitive array indexed by (char - 'a'). Faster than HashMap.</span>
+    <span class="kw">int</span>[] pCount = <span class="kw">new int</span>[<span class="nm">26</span>];
+    <span class="kw">int</span>[] wCount = <span class="kw">new int</span>[<span class="nm">26</span>];
+
+    <span class="kw">for</span> (<span class="kw">char</span> c : p.<span class="fn">toCharArray</span>()) pCount[c - <span class="str">'a'</span>]++;
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; s.<span class="fn">length</span>(); i++) {
+        wCount[s.<span class="fn">charAt</span>(i) - <span class="str">'a'</span>]++;         <span class="cm">// add right char</span>
+
+        <span class="kw">if</span> (i &gt;= p.<span class="fn">length</span>()) {
+            wCount[s.<span class="fn">charAt</span>(i - p.<span class="fn">length</span>()) - <span class="str">'a'</span>]--;  <span class="cm">// remove left char</span>
+        }
+        <span class="kw">if</span> (<span class="tp">Arrays</span>.<span class="fn">equals</span>(pCount, wCount)) {
+            result.<span class="fn">add</span>(i - p.<span class="fn">length</span>() + <span class="nm">1</span>);  <span class="cm">// autoboxing: int → Integer</span>
+        }
+    }
+    <span class="kw">return</span> result;
+}
+<span class="cm">// s="cbaebabacd", p="abc" → [0, 6]</span>
+<span class="cm">// int[26] comparison with Arrays.equals() is O(26) = O(1) effectively</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">from</span> collections <span class="py-kw">import</span> Counter
+<span class="py-kw">def</span> <span class="py-fn">find_anagrams</span>(s, p):
+    result = []
+    pCount = Counter(p)
+    wCount = Counter(s[:len(p)])
+    <span class="py-kw">if</span> wCount == pCount: result.<span class="py-fn">append</span>(<span class="py-num">0</span>)
+    <span class="py-kw">for</span> i <span class="py-kw">in</span> <span class="py-fn">range</span>(len(p), len(s)):
+        wCount[s[i]] += <span class="py-num">1</span>
+        wCount[s[i - len(p)]] -= <span class="py-num">1</span>
+        <span class="py-kw">if</span> wCount[s[i - len(p)]] == <span class="py-num">0</span>:
+            <span class="py-kw">del</span> wCount[s[i - len(p)]]
+        <span class="py-kw">if</span> wCount == pCount:
+            result.<span class="py-fn">append</span>(i - len(p) + <span class="py-num">1</span>)
+    <span class="py-kw">return</span> result</pre></div>
+    </div>
+    <div class="snippet-tip">int[26] trick: c - 'a' maps 'a'→0, 'b'→1 ... 'z'→25. Use this any time your key space is small letters or digits — no boxing, no hashing, just array indexing.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 3: BFS SHORTEST PATH ── -->
+<h3>Pattern 3 — BFS shortest path with int[] in queue</h3>
+<p>BFS on a grid needs a queue storing <strong>coordinates as int[]</strong>. The queue is <code>Deque&lt;int[]&gt;</code> — the int[] is an object so it can go into a collection, but its internal values are primitives for speed.</p>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">01 Matrix — BFS with Deque&lt;int[]&gt; storing {row, col, dist}</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">Deque&lt;int[]&gt;</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: for each cell, find distance to nearest 0</span>
+<span class="kw">public int</span>[][] <span class="fn">updateMatrix</span>(<span class="kw">int</span>[][] mat) {
+    <span class="kw">int</span> rows = mat.length, cols = mat[<span class="nm">0</span>].length;
+    <span class="kw">int</span>[][] dist = <span class="kw">new int</span>[rows][cols];   <span class="cm">// result grid — primitives</span>
+    <span class="kw">boolean</span>[][] visited = <span class="kw">new boolean</span>[rows][cols];
+
+    <span class="cm">// int[] as element type in Deque — {row, col}</span>
+    <span class="tp">Deque</span>&lt;<span class="kw">int</span>[]&gt; queue = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+    <span class="cm">// multi-source BFS: seed all 0-cells at distance 0</span>
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nm">0</span>; r &lt; rows; r++) {
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">0</span>; c &lt; cols; c++) {
+            <span class="kw">if</span> (mat[r][c] == <span class="nm">0</span>) {
+                visited[r][c] = <span class="kw">true</span>;
+                queue.<span class="fn">addLast</span>(<span class="kw">new int</span>[]{r, c});  <span class="cm">// int[] stored as object</span>
+            }
+        }
+    }
+
+    <span class="kw">int</span>[][] dirs = {{<span class="nm">0</span>,<span class="nm">1</span>},{<span class="nm">0</span>,-<span class="nm">1</span>},{<span class="nm">1</span>,<span class="nm">0</span>},{-<span class="nm">1</span>,<span class="nm">0</span>}};
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="kw">int</span>[] curr = queue.<span class="fn">removeFirst</span>();   <span class="cm">// unpack int[] back to primitives</span>
+        <span class="kw">int</span> r = curr[<span class="nm">0</span>], c = curr[<span class="nm">1</span>];
+
+        <span class="kw">for</span> (<span class="kw">int</span>[] d : dirs) {
+            <span class="kw">int</span> nr = r + d[<span class="nm">0</span>], nc = c + d[<span class="nm">1</span>];
+            <span class="kw">if</span> (nr &gt;= <span class="nm">0</span> && nr &lt; rows && nc &gt;= <span class="nm">0</span> && nc &lt; cols
+                    && !visited[nr][nc]) {
+                visited[nr][nc] = <span class="kw">true</span>;
+                dist[nr][nc] = dist[r][c] + <span class="nm">1</span>;  <span class="cm">// primitive arithmetic</span>
+                queue.<span class="fn">addLast</span>(<span class="kw">new int</span>[]{nr, nc});
+            }
+        }
+    }
+    <span class="kw">return</span> dist;
+}
+<span class="cm">// Deque&lt;int[]&gt; — int[] is the object in the collection</span>
+<span class="cm">// The values inside int[] (r, c) are primitives — fast access</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">from</span> collections <span class="py-kw">import</span> deque
+<span class="py-kw">def</span> <span class="py-fn">update_matrix</span>(mat):
+    rows, cols = <span class="py-fn">len</span>(mat), <span class="py-fn">len</span>(mat[<span class="py-num">0</span>])
+    dist = [[<span class="py-fn">float</span>(<span class="py-str">'inf'</span>)]*cols <span class="py-kw">for</span> _ <span class="py-kw">in</span> <span class="py-fn">range</span>(rows)]
+    q = deque()
+    <span class="py-kw">for</span> r <span class="py-kw">in</span> <span class="py-fn">range</span>(rows):
+        <span class="py-kw">for</span> c <span class="py-kw">in</span> <span class="py-fn">range</span>(cols):
+            <span class="py-kw">if</span> mat[r][c] == <span class="py-num">0</span>:
+                dist[r][c] = <span class="py-num">0</span>
+                q.<span class="py-fn">append</span>((r, c))
+    <span class="py-kw">for</span> r, c <span class="py-kw">in</span> q:
+        <span class="py-kw">for</span> dr, dc <span class="py-kw">in</span> [(<span class="py-num">0</span>,<span class="py-num">1</span>),(<span class="py-num">0</span>,-<span class="py-num">1</span>),(<span class="py-num">1</span>,<span class="py-num">0</span>),(-<span class="py-num">1</span>,<span class="py-num">0</span>)]:
+            nr, nc = r+dr, c+dc
+            <span class="py-kw">if</span> <span class="py-num">0</span> <= nr < rows <span class="py-kw">and</span> <span class="py-num">0</span> <= nc < cols:
+                <span class="py-kw">if</span> dist[nr][nc] > dist[r][c] + <span class="py-num">1</span>:
+                    dist[nr][nc] = dist[r][c] + <span class="py-num">1</span>
+                    q.<span class="py-fn">append</span>((nr, nc))
+    <span class="py-kw">return</span> dist</pre></div>
+    </div>
+    <div class="snippet-note">Pattern: new int[]{r, c} packages two primitives as a single object for the queue. When you pull it out, unpack immediately: int r = curr[0], c = curr[1]. This is standard Java grid BFS.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 4: DFS BACKTRACKING ── -->
+<h3>Pattern 4 — DFS / Backtracking building List&lt;List&lt;Integer&gt;&gt;</h3>
+<p>Backtracking builds results in a <code>List&lt;List&lt;Integer&gt;&gt;</code>. The path is a mutable <code>List&lt;Integer&gt;</code> — must use <code>Integer</code> not <code>int</code>. The snapshot rule (new ArrayList&lt;&gt;(path)) is critical.</p>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Subsets — DFS with List&lt;Integer&gt; path, List&lt;List&lt;Integer&gt;&gt; result</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">ArrayList</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: return all subsets of nums</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">subsets</span>(<span class="kw">int</span>[] nums) {
+    <span class="cm">// int[] input — fine as array</span>
+    <span class="cm">// result must be List&lt;List&lt;Integer&gt;&gt; — no primitives in generics</span>
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">dfs</span>(nums, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private void</span> <span class="fn">dfs</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> start,
+                  <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path,
+                  <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+
+    result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));  <span class="cm">// SNAPSHOT — not result.add(path)!</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = start; i &lt; nums.length; i++) {
+        path.<span class="fn">add</span>(nums[i]);          <span class="cm">// autoboxing: int nums[i] → Integer</span>
+        <span class="fn">dfs</span>(nums, i + <span class="nm">1</span>, path, result);
+        path.<span class="fn">remove</span>(path.<span class="fn">size</span>() - <span class="nm">1</span>); <span class="cm">// remove by INDEX (not value!)</span>
+    }
+}
+<span class="cm">// nums=[1,2,3] → [[], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]]</span>
+<span class="cm">//</span>
+<span class="cm">// path.remove(path.size()-1) removes last element by index</span>
+<span class="cm">// Do NOT write path.remove(nums[i]) — that removes by value (wrong!)</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">subsets</span>(nums):
+    result = []
+    <span class="py-kw">def</span> <span class="py-fn">dfs</span>(start, path):
+        result.<span class="py-fn">append</span>(path[:])  <span class="py-cm"># snapshot with slice</span>
+        <span class="py-kw">for</span> i <span class="py-kw">in</span> <span class="py-fn">range</span>(start, <span class="py-fn">len</span>(nums)):
+            path.<span class="py-fn">append</span>(nums[i])
+            <span class="py-fn">dfs</span>(i + <span class="py-num">1</span>, path)
+            path.<span class="py-fn">pop</span>()
+    <span class="py-fn">dfs</span>(<span class="py-num">0</span>, [])
+    <span class="py-kw">return</span> result</pre></div>
+    </div>
+  </div>
+</div>
+
+<div class="snippet" style="margin-top:8px">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Combination Sum — backtracking with duplicate skip</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">ArrayList</span><span class="snippet-chevron">&#9654;</span></div>
+  </div>
+  <div class="snippet-body">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: find all combinations that sum to target (can reuse elements)</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">combinationSum</span>(<span class="kw">int</span>[] candidates, <span class="kw">int</span> target) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">Arrays</span>.<span class="fn">sort</span>(candidates);  <span class="cm">// sort int[] so we can prune early</span>
+    <span class="fn">dfs</span>(candidates, target, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private void</span> <span class="fn">dfs</span>(<span class="kw">int</span>[] cands, <span class="kw">int</span> remain, <span class="kw">int</span> start,
+                  <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path,
+                  <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (remain == <span class="nm">0</span>) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));  <span class="cm">// snapshot!</span>
+        <span class="kw">return</span>;
+    }
+    <span class="kw">for</span> (<span class="kw">int</span> i = start; i &lt; cands.length; i++) {
+        <span class="kw">if</span> (cands[i] &gt; remain) <span class="kw">break</span>;  <span class="cm">// pruning — sorted so rest will also exceed</span>
+        path.<span class="fn">add</span>(cands[i]);              <span class="cm">// int autoboxed → Integer</span>
+        <span class="fn">dfs</span>(cands, remain - cands[i], i, path, result);  <span class="cm">// i not i+1: can reuse</span>
+        path.<span class="fn">remove</span>(path.<span class="fn">size</span>() - <span class="nm">1</span>);
+    }
+}
+<span class="cm">// candidates=[2,3,6,7], target=7 → [[2,2,3],[7]]</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">combination_sum</span>(candidates, target):
+    candidates.<span class="py-fn">sort</span>()
+    result = []
+    <span class="py-kw">def</span> <span class="py-fn">dfs</span>(remain, start, path):
+        <span class="py-kw">if</span> remain == <span class="py-num">0</span>:
+            result.<span class="py-fn">append</span>(path[:])
+            <span class="py-kw">return</span>
+        <span class="py-kw">for</span> i <span class="py-kw">in</span> <span class="py-fn">range</span>(start, <span class="py-fn">len</span>(candidates)):
+            <span class="py-kw">if</span> candidates[i] > remain: <span class="py-kw">break</span>
+            path.<span class="py-fn">append</span>(candidates[i])
+            <span class="py-fn">dfs</span>(remain - candidates[i], i, path)
+            path.<span class="py-fn">pop</span>()
+    <span class="py-fn">dfs</span>(target, <span class="py-num">0</span>, [])
+    <span class="py-kw">return</span> result</pre></div>
+    </div>
+    <div class="snippet-note">sort() on int[] runs before DFS — enables the if (cands[i] > remain) break pruning. Without sorting you can't prune and must check all branches.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 5: HEAP TOP-K ── -->
+<h3>Pattern 5 — Heap with int[] pairs for weighted problems</h3>
+<p>Dijkstra's and similar weighted graph problems store <strong>{distance, node}</strong> as int[] in the PriorityQueue. The Comparator sorts on index [0] (the weight). This avoids creating a custom class just to hold two integers.</p>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Dijkstra shortest path — PriorityQueue&lt;int[]&gt; with {dist, node}</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">PriorityQueue&lt;int[]&gt;</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: single source shortest path — weighted graph</span>
+<span class="kw">public int</span>[] <span class="fn">dijkstra</span>(<span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="kw">int</span>[]&gt;&gt; graph, <span class="kw">int</span> src) {
+    <span class="kw">int</span> n = graph.<span class="fn">size</span>();
+    <span class="kw">int</span>[] dist = <span class="kw">new int</span>[n];          <span class="cm">// int[] result — primitives</span>
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(dist, <span class="tp">Integer</span>.MAX_VALUE);
+    dist[src] = <span class="nm">0</span>;
+
+    <span class="cm">// min-heap of {distance, node} — int[] as element, sorted by dist</span>
+    <span class="tp">PriorityQueue</span>&lt;<span class="kw">int</span>[]&gt; pq = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(
+        (a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(a[<span class="nm">0</span>], b[<span class="nm">0</span>])  <span class="cm">// sort by distance</span>
+    );
+    pq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{<span class="nm">0</span>, src});  <span class="cm">// {dist=0, node=src}</span>
+
+    <span class="kw">while</span> (!pq.<span class="fn">isEmpty</span>()) {
+        <span class="kw">int</span>[] curr = pq.<span class="fn">poll</span>();
+        <span class="kw">int</span> d = curr[<span class="nm">0</span>], u = curr[<span class="nm">1</span>];
+
+        <span class="kw">if</span> (d &gt; dist[u]) <span class="kw">continue</span>;   <span class="cm">// stale entry — skip</span>
+
+        <span class="kw">for</span> (<span class="kw">int</span>[] edge : graph.<span class="fn">get</span>(u)) {
+            <span class="kw">int</span> v = edge[<span class="nm">0</span>], w = edge[<span class="nm">1</span>];  <span class="cm">// neighbor, weight</span>
+            <span class="kw">if</span> (dist[u] + w &lt; dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{dist[v], v});
+            }
+        }
+    }
+    <span class="kw">return</span> dist;
+}
+<span class="cm">// graph is List&lt;List&lt;int[]&gt;&gt; — adjacency list where each int[] = {neighbor, weight}</span>
+<span class="cm">// PriorityQueue&lt;int[]&gt; — int[] is object in heap, values inside are primitives</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">import</span> heapq
+<span class="py-kw">def</span> <span class="py-fn">dijkstra</span>(graph, src):
+    n = <span class="py-fn">len</span>(graph)
+    dist = [<span class="py-fn">float</span>(<span class="py-str">'inf'</span>)] * n
+    dist[src] = <span class="py-num">0</span>
+    heap = [(0, src)]
+    <span class="py-kw">while</span> heap:
+        d, u = heapq.<span class="py-fn">heappop</span>(heap)
+        <span class="py-kw">if</span> d > dist[u]: <span class="py-kw">continue</span>
+        <span class="py-kw">for</span> v, w <span class="py-kw">in</span> graph[u]:
+            <span class="py-kw">if</span> dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heapq.<span class="py-fn">heappush</span>(heap, (dist[v], v))
+    <span class="py-kw">return</span> dist</pre></div>
+    </div>
+    <div class="snippet-note">int[] in PriorityQueue is the standard Java pattern for Dijkstra. The alternative is a custom class or record — int[] is faster to write in interviews. Always sort by index [0] which holds the priority.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 6: DP ── -->
+<h3>Pattern 6 — Dynamic Programming with int[] and int[][]</h3>
+<p>DP tables are almost always primitive <strong>int[]</strong> or <strong>int[][]</strong> — never <code>ArrayList</code> or <code>Integer[]</code>. Random access is the whole point, and primitives give maximum speed with zero boxing.</p>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Coin Change — int[] dp table, bottom-up</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">int[] DP</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: fewest coins to make amount. coins=[1,5,10], amount=18 → 4</span>
+<span class="kw">public int</span> <span class="fn">coinChange</span>(<span class="kw">int</span>[] coins, <span class="kw">int</span> amount) {
+    <span class="cm">// int[] dp — primitive, size amount+1, all initialized to amount+1 (infinity)</span>
+    <span class="kw">int</span>[] dp = <span class="kw">new int</span>[amount + <span class="nm">1</span>];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(dp, amount + <span class="nm">1</span>);  <span class="cm">// fill with "impossible" sentinel</span>
+    dp[<span class="nm">0</span>] = <span class="nm">0</span>;                    <span class="cm">// base case: 0 coins to make amount 0</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt;= amount; i++) {
+        <span class="kw">for</span> (<span class="kw">int</span> coin : coins) {
+            <span class="kw">if</span> (coin &lt;= i) {
+                dp[i] = <span class="tp">Math</span>.<span class="fn">min</span>(dp[i], dp[i - coin] + <span class="nm">1</span>);
+            }
+        }
+    }
+    <span class="kw">return</span> dp[amount] &gt; amount ? -<span class="nm">1</span> : dp[amount];
+}
+<span class="cm">// dp[0]=0, dp[1]=1, dp[5]=1, dp[10]=1, dp[18]=4 (10+5+1+1+1... → 10+5+1+1+1=5? no: 10+5+3*1=4)</span>
+<span class="cm">// int[] — direct index access O(1), no boxing, exactly right here</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">coin_change</span>(coins, amount):
+    dp = [amount + <span class="py-num">1</span>] * (amount + <span class="py-num">1</span>)
+    dp[<span class="py-num">0</span>] = <span class="py-num">0</span>
+    <span class="py-kw">for</span> i <span class="py-kw">in</span> <span class="py-fn">range</span>(<span class="py-num">1</span>, amount + <span class="py-num">1</span>):
+        <span class="py-kw">for</span> coin <span class="py-kw">in</span> coins:
+            <span class="py-kw">if</span> coin <= i:
+                dp[i] = <span class="py-fn">min</span>(dp[i], dp[i - coin] + <span class="py-num">1</span>)
+    <span class="py-kw">return</span> dp[amount] <span class="py-kw">if</span> dp[amount] <= amount <span class="py-kw">else</span> -<span class="py-num">1</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<div class="snippet" style="margin-top:8px">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Longest Common Subsequence — int[][] 2D DP</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">int[][] DP</span><span class="snippet-chevron">&#9654;</span></div>
+  </div>
+  <div class="snippet-body">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: length of longest common subsequence of two strings</span>
+<span class="kw">public int</span> <span class="fn">longestCommonSubsequence</span>(<span class="tp">String</span> text1, <span class="tp">String</span> text2) {
+    <span class="kw">int</span> m = text1.<span class="fn">length</span>(), n = text2.<span class="fn">length</span>();
+
+    <span class="cm">// int[][] dp — 2D primitive table, (m+1) x (n+1)</span>
+    <span class="kw">int</span>[][] dp = <span class="kw">new int</span>[m + <span class="nm">1</span>][n + <span class="nm">1</span>]; <span class="cm">// auto-initialized to 0</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt;= m; i++) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">1</span>; j &lt;= n; j++) {
+            <span class="kw">if</span> (text1.<span class="fn">charAt</span>(i-<span class="nm">1</span>) == text2.<span class="fn">charAt</span>(j-<span class="nm">1</span>)) {
+                dp[i][j] = dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>] + <span class="nm">1</span>;   <span class="cm">// chars match</span>
+            } <span class="kw">else</span> {
+                dp[i][j] = <span class="tp">Math</span>.<span class="fn">max</span>(dp[i-<span class="nm">1</span>][j], dp[i][j-<span class="nm">1</span>]); <span class="cm">// take best</span>
+            }
+        }
+    }
+    <span class="kw">return</span> dp[m][n];
+}
+<span class="cm">// text1="abcde", text2="ace" → 3 ("ace")</span>
+<span class="cm">// int[][] — 2D table, each cell O(1) access. Total: O(m*n) time &amp; space</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">longest_common_subsequence</span>(text1, text2):
+    m, n = <span class="py-fn">len</span>(text1), <span class="py-fn">len</span>(text2)
+    dp = [[<span class="py-num">0</span>]*(n+<span class="py-num">1</span>) <span class="py-kw">for</span> _ <span class="py-kw">in</span> <span class="py-fn">range</span>(m+<span class="py-num">1</span>)]
+    <span class="py-kw">for</span> i <span class="py-kw">in</span> <span class="py-fn">range</span>(<span class="py-num">1</span>, m+<span class="py-num">1</span>):
+        <span class="py-kw">for</span> j <span class="py-kw">in</span> <span class="py-fn">range</span>(<span class="py-num">1</span>, n+<span class="py-num">1</span>):
+            <span class="py-kw">if</span> text1[i-<span class="py-num">1</span>] == text2[j-<span class="py-num">1</span>]:
+                dp[i][j] = dp[i-<span class="py-num">1</span>][j-<span class="py-num">1</span>] + <span class="py-num">1</span>
+            <span class="py-kw">else</span>:
+                dp[i][j] = <span class="py-fn">max</span>(dp[i-<span class="py-num">1</span>][j], dp[i][j-<span class="py-num">1</span>])
+    <span class="py-kw">return</span> dp[m][n]</pre></div>
+    </div>
+    <div class="snippet-note">2D DP tables are always int[][] — never ArrayList&lt;ArrayList&lt;Integer&gt;&gt;. Direct index access dp[i][j] is the whole point. auto-initialized to 0 saves a fill() call for base cases.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 7: MONOTONIC STACK ── -->
+<h3>Pattern 7 — Monotonic Stack with ArrayDeque&lt;Integer&gt;</h3>
+<p>The monotonic stack keeps elements in sorted order — as you push, you pop anything that violates the invariant. Used for "next greater element", histogram areas, and temperature spans.</p>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Daily Temperatures — monotonic stack of indices</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">Deque&lt;Integer&gt;</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: for each day, how many days until a warmer temperature?</span>
+<span class="kw">public int</span>[] <span class="fn">dailyTemperatures</span>(<span class="kw">int</span>[] temps) {
+    <span class="kw">int</span>[] answer = <span class="kw">new int</span>[temps.length];   <span class="cm">// int[] result</span>
+
+    <span class="cm">// stack stores INDICES (Integer), not temperatures</span>
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;(); <span class="cm">// Integer, not int</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; temps.length; i++) {
+        <span class="cm">// pop all indices whose temperature is less than current</span>
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>() && temps[stack.<span class="fn">peek</span>()] &lt; temps[i]) {
+            <span class="kw">int</span> prevIdx = stack.<span class="fn">pop</span>();           <span class="cm">// unboxing Integer → int</span>
+            answer[prevIdx] = i - prevIdx;
+        }
+        stack.<span class="fn">push</span>(i);  <span class="cm">// push current index (autoboxed int → Integer)</span>
+    }
+    <span class="kw">return</span> answer;
+}
+<span class="cm">// temps=[73,74,75,71,69,72,76,73]</span>
+<span class="cm">// answer=[1, 1, 4, 2, 1, 1, 0, 0]</span>
+<span class="cm">// Stack stores Integer (indices), result array stores int (days)</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">def</span> <span class="py-fn">daily_temperatures</span>(temps):
+    answer = [<span class="py-num">0</span>] * <span class="py-fn">len</span>(temps)
+    stack = []  <span class="py-cm"># stores indices</span>
+    <span class="py-kw">for</span> i, t <span class="py-kw">in</span> <span class="py-fn">enumerate</span>(temps):
+        <span class="py-kw">while</span> stack <span class="py-kw">and</span> temps[stack[-<span class="py-num">1</span>]] < t:
+            prev = stack.<span class="py-fn">pop</span>()
+            answer[prev] = i - prev
+        stack.<span class="py-fn">append</span>(i)
+    <span class="py-kw">return</span> answer</pre></div>
+    </div>
+    <div class="snippet-note">Stack stores indices (Integer in Deque) not values. When you pop, you compute i - prevIdx using both as primitives. This is the standard monotonic stack structure.</div>
+  </div>
+</div>
+
+<!-- ── PATTERN 8: GRAPH ADJACENCY LIST ── -->
+<h3>Pattern 8 — Graph as List&lt;List&lt;Integer&gt;&gt; or List&lt;List&lt;int[]&gt;&gt;</h3>
+<p>Adjacency lists combine ArrayList and int[] in the same structure. Unweighted graphs use <code>List&lt;List&lt;Integer&gt;&gt;</code>. Weighted graphs use <code>List&lt;List&lt;int[]&gt;&gt;</code> where each int[] is {neighbor, weight}.</p>
+<div class="snippet">
+  <div class="snippet-head" onclick="tog(this)">
+    <span class="snippet-title">Build graph + topological sort (BFS / Kahn's algorithm)</span>
+    <div style="display:flex;align-items:center;gap:8px"><span class="snippet-badge">List&lt;List&lt;Integer&gt;&gt;</span><span class="snippet-chevron open">&#9654;</span></div>
+  </div>
+  <div class="snippet-body open">
+    <div class="code-block">
+      <div class="lang-pane java active"><pre><span class="cm">// Problem: course schedule — can you finish all courses given prerequisites?</span>
+<span class="kw">public boolean</span> <span class="fn">canFinish</span>(<span class="kw">int</span> numCourses, <span class="kw">int</span>[][] prerequisites) {
+    <span class="cm">// adjacency list — List&lt;List&lt;Integer&gt;&gt; (Integer, not int)</span>
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="kw">int</span>[] inDegree = <span class="kw">new int</span>[numCourses];    <span class="cm">// int[] — counts, primitive fine</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++)
+        graph.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;());
+
+    <span class="cm">// build graph from int[][] prerequisites</span>
+    <span class="kw">for</span> (<span class="kw">int</span>[] pre : prerequisites) {
+        graph.<span class="fn">get</span>(pre[<span class="nm">1</span>]).<span class="fn">add</span>(pre[<span class="nm">0</span>]);  <span class="cm">// autoboxing int → Integer</span>
+        inDegree[pre[<span class="nm">0</span>]]++;
+    }
+
+    <span class="cm">// BFS queue — Integer nodes with in-degree 0</span>
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++)
+        <span class="kw">if</span> (inDegree[i] == <span class="nm">0</span>) queue.<span class="fn">addLast</span>(i);  <span class="cm">// autoboxing</span>
+
+    <span class="kw">int</span> processed = <span class="nm">0</span>;
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="kw">int</span> node = queue.<span class="fn">removeFirst</span>();  <span class="cm">// unboxing Integer → int</span>
+        processed++;
+        <span class="kw">for</span> (<span class="kw">int</span> neighbor : graph.<span class="fn">get</span>(node)) {  <span class="cm">// unboxing in for-each</span>
+            <span class="kw">if</span> (--inDegree[neighbor] == <span class="nm">0</span>)
+                queue.<span class="fn">addLast</span>(neighbor);
+        }
+    }
+    <span class="kw">return</span> processed == numCourses;
+}
+<span class="cm">// prerequisites=[[1,0],[2,1]] → true (0→1→2, no cycle)</span></pre></div>
+      <div class="lang-pane python"><pre><span class="py-kw">from</span> collections <span class="py-kw">import</span> defaultdict, deque
+<span class="py-kw">def</span> <span class="py-fn">can_finish</span>(numCourses, prerequisites):
+    graph = defaultdict(<span class="py-fn">list</span>)
+    in_degree = [<span class="py-num">0</span>] * numCourses
+    <span class="py-kw">for</span> a, b <span class="py-kw">in</span> prerequisites:
+        graph[b].<span class="py-fn">append</span>(a)
+        in_degree[a] += <span class="py-num">1</span>
+    q = deque(i <span class="py-kw">for</span> i <span class="py-kw">in</span> <span class="py-fn">range</span>(numCourses) <span class="py-kw">if</span> in_degree[i] == <span class="py-num">0</span>)
+    processed = <span class="py-num">0</span>
+    <span class="py-kw">for</span> node <span class="py-kw">in</span> q:
+        processed += <span class="py-num">1</span>
+        <span class="py-kw">for</span> nb <span class="py-kw">in</span> graph[node]:
+            in_degree[nb] -= <span class="py-num">1</span>
+            <span class="py-kw">if</span> in_degree[nb] == <span class="py-num">0</span>:
+                q.<span class="py-fn">append</span>(nb)
+    <span class="py-kw">return</span> processed == numCourses</pre></div>
+    </div>
+    <div class="snippet-note">inDegree is int[] — primitive array indexed by node. The graph is List&lt;List&lt;Integer&gt;&gt; — needs Integer for the inner list. Both live in the same function, which is normal.</div>
+  </div>
+</div>
+
+<!-- ── QUICK REFERENCE: int[] vs Integer ── -->
+<h3 style="margin-top:2.5rem">Quick reference — int[] vs Integer in every context</h3>
+<table class="cheat-table">
+  <thead>
+    <tr><th>Situation</th><th>Use</th><th>Why</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Function parameter</td><td>int[] nums</td><td>Primitives fine — it's just an array reference</td></tr>
+    <tr><td>Function return type</td><td>int[] / int</td><td>Primitives fine</td></tr>
+    <tr><td>DP table</td><td>int[] dp, int[][] dp</td><td>Primitives — fast, auto-initialized to 0</td></tr>
+    <tr><td>Frequency array (fixed alphabet)</td><td>int[26] or int[256]</td><td>Fastest — direct char index, no boxing</td></tr>
+    <tr><td>ArrayList element</td><td>List&lt;Integer&gt;</td><td>Generics need objects — autoboxing handles it</td></tr>
+    <tr><td>HashMap key or value</td><td>Map&lt;Integer, Integer&gt;</td><td>Generics only — no primitives allowed</td></tr>
+    <tr><td>HashSet element</td><td>Set&lt;Integer&gt;</td><td>Generics only</td></tr>
+    <tr><td>Deque element (stack/queue)</td><td>Deque&lt;Integer&gt;</td><td>Generics only — autoboxed on push</td></tr>
+    <tr><td>PriorityQueue element (single value)</td><td>PriorityQueue&lt;Integer&gt;</td><td>Generics only</td></tr>
+    <tr><td>PriorityQueue element (pair/tuple)</td><td>PriorityQueue&lt;int[]&gt;</td><td>int[] is an object — can go in collections</td></tr>
+    <tr><td>Graph adjacency list</td><td>List&lt;List&lt;Integer&gt;&gt;</td><td>Nodes stored as Integer in lists</td></tr>
+    <tr><td>Weighted edge in graph</td><td>List&lt;List&lt;int[]&gt;&gt;</td><td>int[] = {neighbor, weight} is an object</td></tr>
+    <tr><td>BFS/DFS visited array</td><td>boolean[] visited</td><td>Primitive — direct index by node id</td></tr>
+    <tr><td>Backtracking path</td><td>List&lt;Integer&gt; path</td><td>Needs add/remove — must be a List</td></tr>
+    <tr><td>Backtracking result</td><td>List&lt;List&lt;Integer&gt;&gt;</td><td>Nested lists — must be objects</td></tr>
+  </tbody>
+</table>
+
+<div class="callout green" style="margin-top:1.5rem">
+  <strong>The one sentence rule:</strong> Use int[] when size is fixed and you need index access. Use Integer (in a collection) when you need dynamic sizing, insertion, or removal. When you need both in one structure — like {dist, node} in a heap — use int[] as the element type so the pair becomes an object the collection can hold.
+</div>
+
+<!-- FOOTER -->
+<div style="border-top:1px solid var(--border);padding:2.5rem 0 0;margin-top:3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+  <p id="footer-text" style="font-size:13px;margin:0">AlgorithmCraft · Java DSA Basics Reference</p>
+  <span style="font-family:var(--mono);font-size:12px;color:var(--accent)"><a href="index.html" style="color:inherit;text-decoration:none;">Back to DSA</a></span>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+// ── LANGUAGE TOGGLE ──
+let currentLang = 'java';
+
+const langContent = {
+  java: {
+    tag:    'Java',
+    h1:     'Java Basics<br>for <em>DSA Problems</em>',
+    sub:    'A complete reference for arrays, strings, and the full Java Collections Framework — written specifically for DSA practice. Every method, every gotcha, every pattern you\'ll reach for in an interview.',
+    title:  'Java Basics for DSA — AlgorithmCraft',
+    footer: 'AlgorithmCraft · Java Basics for DSA',
+  },
+  python: {
+    tag:    'Python',
+    h1:     'Python Basics<br>for <em>DSA Problems</em>',
+    sub:    'A complete reference for lists, strings, and the full Python collections toolkit — written specifically for DSA practice. Every method, every gotcha, every pattern you\'ll reach for in an interview.',
+    title:  'Python Basics for DSA — AlgorithmCraft',
+    footer: 'AlgorithmCraft · Python Basics for DSA',
+  }
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+  const c = langContent[lang];
+  const tag = document.getElementById('hero-tag');
+  const h1  = document.getElementById('hero-title');
+  const sub = document.getElementById('hero-sub');
+  const footer = document.getElementById('footer-text');
+  const fade = (el, newHTML) => {
+    if (!el) return;
+    el.style.transition = 'opacity .22s';
+    el.style.opacity = '0';
+    setTimeout(() => { el.innerHTML = newHTML; el.style.opacity = '1'; }, 210);
+  };
+  fade(tag, c.tag);
+  fade(h1, c.h1);
+  fade(sub, c.sub);
+  if (footer) footer.textContent = c.footer;
+  document.title = c.title;
+}
+
+// ── SNIPPET ACCORDION ──
+function tog(head) {
+  const body = head.nextElementSibling;
+  const chev = head.querySelector('.snippet-chevron');
+  const open = body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', open);
+}
+
+// ── SORT VISUALIZER ──
+let sortArr = [5, 2, 8, 1, 9, 3, 7, 4, 6];
+let sortStep = 0;
+let sortI = 0, sortMinIdx = 0, sortJ = 1;
+let sortDone = false;
+
+function renderSortArr(highlightI, highlightMin, doneUpTo) {
+  const cont = document.getElementById('sort-array');
+  if (!cont) return;
+  cont.innerHTML = '';
+  sortArr.forEach((v, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'viz-cell';
+    if (idx < doneUpTo) cell.classList.add('found');
+    else if (idx === highlightMin) cell.classList.add('highlight');
+    else if (idx === highlightI) cell.classList.add('head');
+    cell.textContent = v;
+    cont.appendChild(cell);
+  });
+}
+
+function sortReset() {
+  sortArr = [5,2,8,1,9,3,7,4,6];
+  sortI = 0; sortMinIdx = 0; sortJ = 1; sortDone = false;
+  renderSortArr(-1, -1, 0);
+  const log = document.getElementById('sort-log');
+  if (log) log.textContent = 'Press Step to watch selection sort find minimums one by one.';
+}
+
+function sortStepFn() {
+  if (sortDone) { sortReset(); return; }
+  const n = sortArr.length;
+  const log = document.getElementById('sort-log');
+  if (sortI >= n - 1) {
+    renderSortArr(-1, -1, n);
+    if (log) log.textContent = 'Sorted! Arrays.sort() uses dual-pivot quicksort for primitives. Click Step to reset.';
+    sortDone = true;
+    return;
+  }
+  if (sortJ < n) {
+    if (sortArr[sortJ] < sortArr[sortMinIdx]) sortMinIdx = sortJ;
+    renderSortArr(sortI, sortMinIdx, sortI);
+    if (log) log.textContent = `Scanning index ${sortJ}: ${sortArr[sortJ]}. Current min at index ${sortMinIdx} = ${sortArr[sortMinIdx]}.`;
+    sortJ++;
+  } else {
+    const tmp = sortArr[sortI]; sortArr[sortI] = sortArr[sortMinIdx]; sortArr[sortMinIdx] = tmp;
+    renderSortArr(-1, -1, sortI + 1);
+    if (log) log.textContent = `Swapped index ${sortI} ↔ ${sortMinIdx}. ${sortArr[sortI]} is now in its final position.`;
+    sortI++; sortMinIdx = sortI; sortJ = sortI + 1;
+  }
+}
+
+// expose to inline onclick
+window.sortStep = sortStepFn;
+window.sortReset = sortReset;
+
+// ── DEQUE VISUALIZER ──
+let stackData = [];
+let queueData = [];
+let dqCounter = 1;
+
+function renderDeque() {
+  const sv = document.getElementById('stack-viz');
+  const qv = document.getElementById('queue-viz');
+  if (!sv || !qv) return;
+  sv.innerHTML = '';
+  [...stackData].reverse().forEach((v, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'viz-cell' + (i === 0 ? ' highlight' : '');
+    cell.textContent = v;
+    cell.style.marginBottom = '4px';
+    sv.appendChild(cell);
+  });
+  qv.innerHTML = '';
+  queueData.forEach((v, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'viz-cell' + (i === 0 ? ' head' : '');
+    cell.textContent = v;
+    qv.appendChild(cell);
+  });
+}
+
+function stackPush() {
+  if (stackData.length >= 6) { document.getElementById('dq-log').textContent = 'Stack full for demo. Pop first.'; return; }
+  const v = dqCounter++;
+  stackData.push(v);
+  renderDeque();
+  document.getElementById('dq-log').textContent = `stack.push(${v}) → added to TOP. LIFO: last in, first out. Stack: [${[...stackData].reverse().join(', ')}]`;
+}
+function stackPop() {
+  if (!stackData.length) { document.getElementById('dq-log').textContent = 'Stack is empty — stack.pop() would throw EmptyStackException.'; return; }
+  const v = stackData.pop();
+  renderDeque();
+  document.getElementById('dq-log').textContent = `stack.pop() → removed ${v} from TOP. Remaining: [${[...stackData].reverse().join(', ')}]`;
+}
+function queueAdd() {
+  if (queueData.length >= 6) { document.getElementById('dq-log').textContent = 'Queue full for demo. Dequeue first.'; return; }
+  const v = dqCounter++;
+  queueData.push(v);
+  renderDeque();
+  document.getElementById('dq-log').textContent = `queue.addLast(${v}) → added to TAIL. FIFO: first in, first out. Queue: [${queueData.join(' → ')}]`;
+}
+function queueRemove() {
+  if (!queueData.length) { document.getElementById('dq-log').textContent = 'Queue is empty — queue.removeFirst() would throw NoSuchElementException.'; return; }
+  const v = queueData.shift();
+  renderDeque();
+  document.getElementById('dq-log').textContent = `queue.removeFirst() → removed ${v} from FRONT. Remaining: [${queueData.join(' → ')}]`;
+}
+
+window.stackPush = stackPush;
+window.stackPop = stackPop;
+window.queueAdd = queueAdd;
+window.queueRemove = queueRemove;
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  renderSortArr(-1, -1, 0);
+  renderDeque();
+  // open first snippet in each group by default handled by HTML class
+});
+</script>
+</body>
+</html>

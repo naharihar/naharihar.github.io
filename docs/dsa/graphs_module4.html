@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 4 — BFS From First Principles</title>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -15,6 +24,14 @@
   --font-body:'Geist',system-ui,sans-serif;
   --font-mono:'Geist Mono',monospace;
 }
+html.dark{
+  --ink:#f3efe7;--ink2:#d8d0c3;--ink3:#a69a88;
+  --paper:#181511;--paper2:#211c16;--paper3:#2a241d;--border:#3a3126;
+}
+html.dark [style*="background:#fff"]{background:#211c16 !important;}
+html.dark [style*="background:rgba(255,255,255,.15)"]{background:rgba(255,255,255,0.06) !important;}
+html.dark [style*="color:#3d3a35"]{color:var(--ink2) !important;}
+html.dark [style*="color:#7a7570"]{color:var(--ink3) !important;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;}
@@ -23,9 +40,15 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .progress-fill{height:100%;background:var(--blue);width:0%;transition:width .4s ease;}
 
 nav{position:sticky;top:3px;z-index:100;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;}
+html.dark nav{background:rgba(24,21,17,.92);}
 .nav-module{font-family:var(--font-mono);font-size:.72rem;color:var(--ink3);letter-spacing:.08em;}
 .nav-title{font-family:var(--font-display);font-size:1rem;color:var(--ink2);}
 .nav-prev{font-size:.78rem;color:var(--ink3);text-decoration:none;}
+.nav-actions{display:flex;align-items:center;gap:.8rem;}
+.theme-toggle,.lang-btn{border:1px solid var(--border);background:var(--paper2);color:var(--ink2);border-radius:999px;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;padding:.38rem .7rem;cursor:pointer;}
+.theme-toggle:hover,.lang-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.lang-toggle{display:inline-flex;align-items:center;gap:.35rem;}
+.lang-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
 
 .chapter{max-width:740px;margin:0 auto;padding:5rem 2rem 3rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
 .chapter.visible{opacity:1;transform:none;}
@@ -50,6 +73,8 @@ p strong{color:var(--ink);}
 
 /* CODE */
 .code-block{background:#1e1c18;border-radius:10px;overflow:hidden;margin:1rem 0;border:1px solid #3a3630;}
+.lang-pane{display:none;}
+.lang-pane.active{display:block;}
 .code-hdr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#2a2720;border-bottom:1px solid #3a3630;}
 .code-fn{font-family:var(--font-mono);font-size:.7rem;color:#8a8070;}
 .code-lg{font-family:var(--font-mono);font-size:.68rem;color:#5a8a5a;}
@@ -117,7 +142,14 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-heig
 <nav>
   <span class="nav-module">MODULE 04 / 06</span>
   <span class="nav-title">BFS From First Principles</span>
-  <a class="nav-prev" href="graphs_module3.html">← Module 3</a>
+  <div class="nav-actions">
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-java-btn" onclick="setLang('java')">Java</button>
+      <button class="lang-btn" id="lang-python-btn" onclick="setLang('python')">Python</button>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+    <a class="nav-prev" href="graphs_module3.html">← Module 3</a>
+  </div>
 </nav>
 
 <!-- ══════════════════════════════
@@ -243,7 +275,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-heig
 
   <p>Compare this side by side with DFS. Spot the differences — there are only two: <strong>deque instead of recursion</strong>, and <strong>enqueue at discovery time, not visit time</strong>.</p>
 
-  <div class="code-block">
+  <div class="code-block lang-pane python">
     <div class="code-hdr"><span class="code-fn">bfs.py</span><span class="code-lg">Python</span></div>
     <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -264,7 +296,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-heig
     <span class="kw">return</span> order   <span class="cm"># nodes in BFS (shortest-path) order</span></pre>
   </div>
 
-  <div class="code-block">
+  <div class="code-block lang-pane java">
     <div class="code-hdr"><span class="code-fn">BFS.java</span><span class="code-lg">Java</span></div>
     <pre>List&lt;<span class="ty">Integer</span>&gt; <span class="fn">bfs</span>(List&lt;<span class="ty">Integer</span>&gt;[] graph, <span class="ty">int</span> start) {
     <span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[graph.length];
@@ -296,7 +328,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-heig
   <h3>BFS for shortest path distance</h3>
   <p>To find actual distances, carry the distance alongside each node. When the target is first dequeued, that distance is guaranteed to be the shortest.</p>
 
-  <div class="code-block">
+  <div class="code-block lang-pane python">
     <div class="code-hdr"><span class="code-fn">bfs_shortest.py</span><span class="code-lg">Python — Shortest Path Distance</span></div>
     <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -315,6 +347,30 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-heig
                 queue.<span class="fn">append</span>((neighbor, dist + <span class="nm">1</span>))
 
     <span class="kw">return</span> <span class="nm">-1</span>   <span class="cm"># target unreachable</span></pre>
+  </div>
+
+  <div class="code-block lang-pane java">
+    <div class="code-hdr"><span class="code-fn">BFSShortest.java</span><span class="code-lg">Java — Shortest Path Distance</span></div>
+    <pre><span class="ty">int</span> <span class="fn">shortestPath</span>(List&lt;<span class="ty">Integer</span>&gt;[] graph, <span class="ty">int</span> start, <span class="ty">int</span> target) {
+    <span class="kw">if</span> (start == target) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[graph.length];
+    Queue&lt;<span class="ty">int</span>[]&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    visited[start] = <span class="kw">true</span>;
+    queue.<span class="fn">add</span>(<span class="kw">new int</span>[] {start, <span class="nm">0</span>});
+
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="ty">int</span>[] cur = queue.<span class="fn">poll</span>();
+        <span class="ty">int</span> node = cur[<span class="nm">0</span>], dist = cur[<span class="nm">1</span>];
+        <span class="kw">for</span> (<span class="ty">int</span> neighbor : graph[node]) {
+            <span class="kw">if</span> (neighbor == target) <span class="kw">return</span> dist + <span class="nm">1</span>;
+            <span class="kw">if</span> (!visited[neighbor]) {
+                visited[neighbor] = <span class="kw">true</span>;
+                queue.<span class="fn">add</span>(<span class="kw">new int</span>[] {neighbor, dist + <span class="nm">1</span>});
+            }
+        }
+    }
+    <span class="kw">return</span> -<span class="nm">1</span>;
+}</pre>
   </div>
 </div>
 
@@ -436,6 +492,24 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;line-heig
 <div style="height:4rem"></div>
 
 <script>
+function updateThemeButton(){
+  const btn=document.getElementById('theme-toggle');
+  if(btn)btn.textContent=document.documentElement.classList.contains('dark')?'Light mode':'Dark mode';
+}
+
+function toggleTheme(){
+  document.documentElement.classList.toggle('dark');
+  try{localStorage.setItem('dsa-theme',document.documentElement.classList.contains('dark')?'dark':'light');}catch(e){}
+  updateThemeButton();
+}
+
+function setLang(lang){
+  document.getElementById('lang-java-btn')?.classList.toggle('active',lang==='java');
+  document.getElementById('lang-python-btn')?.classList.toggle('active',lang==='python');
+  document.querySelectorAll('.lang-pane').forEach(el=>el.classList.toggle('active',el.classList.contains(lang)));
+  try{localStorage.setItem('graphs-lang',lang);}catch(e){}
+}
+
 // ════════════════════
 // PROGRESS
 // ════════════════════
@@ -786,6 +860,8 @@ function answer(q,choice){
 // INIT
 // ════════════════════
 window.addEventListener('load',()=>{
+  updateThemeButton();
+  setLang((()=>{try{return localStorage.getItem('graphs-lang')||'java';}catch(e){return 'java';}})());
   drawDfsBad();drawBfsGood();
   drawRipple(-1);
   drawBfsGraph([],[]);renderQueue([]);

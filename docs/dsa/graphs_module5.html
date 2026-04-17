@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 5 — The 4 Graph Patterns</title>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -16,6 +25,14 @@
   --font-body:'Geist',system-ui,sans-serif;
   --font-mono:'Geist Mono',monospace;
 }
+html.dark{
+  --ink:#f3efe7;--ink2:#d8d0c3;--ink3:#a69a88;
+  --paper:#181511;--paper2:#211c16;--paper3:#2a241d;--border:#3a3126;
+}
+html.dark [style*="background:#fff"]{background:#211c16 !important;}
+html.dark [style*="background:rgba(255,255,255,.15)"]{background:rgba(255,255,255,0.06) !important;}
+html.dark [style*="color:#3d3a35"]{color:var(--ink2) !important;}
+html.dark [style*="color:#7a7570"]{color:var(--ink3) !important;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;}
@@ -24,8 +41,14 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .progress-fill{height:100%;background:var(--purple);width:0%;transition:width .4s ease;}
 
 nav{position:sticky;top:3px;z-index:100;display:flex;align-items:center;justify-content:space-between;background:rgba(245,242,237,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;}
+html.dark nav{background:rgba(24,21,17,.92);}
 .nav-module{font-family:var(--font-mono);font-size:.72rem;color:var(--ink3);letter-spacing:.08em;}
 .nav-title{font-family:var(--font-display);font-size:1rem;color:var(--ink2);}
+.nav-actions{display:flex;align-items:center;gap:.8rem;}
+.theme-toggle,.lang-btn{border:1px solid var(--border);background:var(--paper2);color:var(--ink2);border-radius:999px;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;padding:.38rem .7rem;cursor:pointer;}
+.theme-toggle:hover,.lang-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.lang-toggle{display:inline-flex;align-items:center;gap:.35rem;}
+.lang-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
 
 .chapter{max-width:760px;margin:0 auto;padding:5rem 2rem 3rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
 .chapter.visible{opacity:1;transform:none;}
@@ -73,6 +96,8 @@ p strong{color:var(--ink);}
 
 /* CODE */
 .code-block{background:#1e1c18;border-radius:10px;overflow:hidden;margin:1rem 0;border:1px solid #3a3630;}
+.lang-pane{display:none;}
+.lang-pane.active{display:block;}
 .code-hdr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#2a2720;border-bottom:1px solid #3a3630;}
 .code-fn{font-family:var(--font-mono);font-size:.7rem;color:#8a8070;}
 .code-lg{font-family:var(--font-mono);font-size:.68rem;color:#5a8a5a;}
@@ -146,7 +171,14 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
 <nav>
   <span class="nav-module">MODULE 05 / 06</span>
   <span class="nav-title">The 4 Graph Patterns</span>
-  <a href="graphs_module4.html" style="font-size:.78rem;color:var(--ink3);text-decoration:none;">← Module 4</a>
+  <div class="nav-actions">
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-java-btn" onclick="setLang('java')">Java</button>
+      <button class="lang-btn" id="lang-python-btn" onclick="setLang('python')">Python</button>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+    <a href="graphs_module4.html" style="font-size:.78rem;color:var(--ink3);text-decoration:none;">← Module 4</a>
+  </div>
 </nav>
 
 <!-- ══════════════════════════════
@@ -224,7 +256,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
         <span class="lc-tag hard">827. Making A Large Island</span>
       </div>
 
-      <div class="code-block">
+      <div class="code-block lang-pane python">
         <div class="code-hdr"><span class="code-fn">connected_components.py</span><span class="code-lg">Python</span></div>
         <pre><span class="kw">def</span> <span class="fn">count_components</span>(n, edges):
     <span class="cm"># Step 0: build adjacency list</span>
@@ -248,6 +280,27 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
             count += <span class="nm">1</span>
 
     <span class="kw">return</span> count</pre>
+      </div>
+
+      <div class="code-block lang-pane java">
+        <div class="code-hdr"><span class="code-fn">ConnectedComponents.java</span><span class="code-lg">Java</span></div>
+        <pre><span class="ty">int</span> <span class="fn">countComponents</span>(<span class="ty">int</span> n, <span class="ty">int</span>[][] edges) {
+    List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[n];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span>[] e : edges) {
+        graph[e[<span class="nm">0</span>]].add(e[<span class="nm">1</span>]);
+        graph[e[<span class="nm">1</span>]].add(e[<span class="nm">0</span>]);
+    }
+    <span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[n];
+    <span class="ty">int</span> count = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> node = <span class="nm">0</span>; node &lt; n; node++) {
+        <span class="kw">if</span> (!visited[node]) {
+            <span class="fn">dfs</span>(graph, node, visited);
+            count++;
+        }
+    }
+    <span class="kw">return</span> count;
+}</pre>
       </div>
 
       <div class="insight blue" style="margin-top:.5rem">
@@ -283,7 +336,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
         <span class="lc-tag hard">317. Shortest Distance from All Buildings</span>
       </div>
 
-      <div class="code-block">
+      <div class="code-block lang-pane python">
         <div class="code-hdr"><span class="code-fn">bfs_shortest.py</span><span class="code-lg">Python</span></div>
         <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -301,6 +354,26 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
                 visited.<span class="fn">add</span>(nei)
                 queue.<span class="fn">append</span>((nei, dist + <span class="nm">1</span>))
     <span class="kw">return</span> <span class="nm">-1</span>  <span class="cm"># unreachable</span></pre>
+      </div>
+
+      <div class="code-block lang-pane java">
+        <div class="code-hdr"><span class="code-fn">BFSShortest.java</span><span class="code-lg">Java</span></div>
+        <pre><span class="ty">int</span> <span class="fn">bfsShortest</span>(List&lt;<span class="ty">Integer</span>&gt;[] graph, <span class="ty">int</span> start, <span class="ty">int</span> target) {
+    <span class="kw">if</span> (start == target) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="ty">boolean</span>[] visited = <span class="kw">new boolean</span>[graph.length];
+    Queue&lt;<span class="ty">int</span>[]&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    visited[start] = <span class="kw">true</span>;
+    queue.<span class="fn">add</span>(<span class="kw">new int</span>[] {start, <span class="nm">0</span>});
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="ty">int</span>[] cur = queue.<span class="fn">poll</span>();
+        <span class="ty">int</span> node = cur[<span class="nm">0</span>], dist = cur[<span class="nm">1</span>];
+        <span class="kw">for</span> (<span class="ty">int</span> nei : graph[node]) {
+            <span class="kw">if</span> (nei == target) <span class="kw">return</span> dist + <span class="nm">1</span>;
+            <span class="kw">if</span> (!visited[nei]) { visited[nei] = <span class="kw">true</span>; queue.<span class="fn">add</span>(<span class="kw">new int</span>[] {nei, dist + <span class="nm">1</span>}); }
+        }
+    }
+    <span class="kw">return</span> -<span class="nm">1</span>;
+}</pre>
       </div>
 
       <div class="insight green" style="margin-top:.5rem">
@@ -349,7 +422,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
         <span class="lc-tag med">802. Find Eventual Safe States</span>
       </div>
 
-      <div class="code-block">
+      <div class="code-block lang-pane python">
         <div class="code-hdr"><span class="code-fn">cycle_directed.py</span><span class="code-lg">Python — Directed Graph (3-color DFS)</span></div>
         <pre><span class="kw">def</span> <span class="fn">has_cycle</span>(n, edges):
     graph = [[] <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n)]
@@ -370,6 +443,18 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
         <span class="kw">return False</span>
 
     <span class="kw">return</span> <span class="fn">any</span>(<span class="fn">dfs</span>(i) <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n) <span class="kw">if</span> state[i] == <span class="nm">0</span>)</pre>
+      </div>
+
+      <div class="code-block lang-pane java">
+        <div class="code-hdr"><span class="code-fn">CycleDirected.java</span><span class="code-lg">Java</span></div>
+        <pre><span class="ty">boolean</span> <span class="fn">hasCycle</span>(<span class="ty">int</span> n, <span class="ty">int</span>[][] edges) {
+    List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[n];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span>[] e : edges) graph[e[<span class="nm">0</span>]].add(e[<span class="nm">1</span>]);
+    <span class="ty">int</span>[] state = <span class="kw">new int</span>[n]; <span class="cm">// 0=unvisited, 1=in path, 2=done</span>
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) if (state[i] == <span class="nm">0</span> && <span class="fn">dfsCycle</span>(graph, i, state)) <span class="kw">return true</span>;
+    <span class="kw">return false</span>;
+}</pre>
       </div>
 
       <div class="insight warm" style="margin-top:.5rem">
@@ -404,7 +489,7 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
         <span class="lc-tag hard">329. Longest Increasing Path</span>
       </div>
 
-      <div class="code-block">
+      <div class="code-block lang-pane python">
         <div class="code-hdr"><span class="code-fn">topo_sort.py</span><span class="code-lg">Python — Kahn's Algorithm</span></div>
         <pre><span class="kw">from</span> collections <span class="kw">import</span> deque
 
@@ -430,6 +515,25 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
 
     <span class="cm"># If order has all n nodes, no cycle. Otherwise cycle exists.</span>
     <span class="kw">return</span> order <span class="kw">if</span> <span class="fn">len</span>(order) == n <span class="kw">else</span> []</pre>
+      </div>
+
+      <div class="code-block lang-pane java">
+        <div class="code-hdr"><span class="code-fn">TopoSort.java</span><span class="code-lg">Java — Kahn's Algorithm</span></div>
+        <pre>List&lt;<span class="ty">Integer</span>&gt; <span class="fn">topoSort</span>(<span class="ty">int</span> n, <span class="ty">int</span>[][] edges) {
+    List&lt;<span class="ty">Integer</span>&gt;[] graph = <span class="kw">new</span> ArrayList[n];
+    <span class="ty">int</span>[] indegree = <span class="kw">new int</span>[n];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) graph[i] = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span>[] e : edges) { graph[e[<span class="nm">0</span>]].add(e[<span class="nm">1</span>]); indegree[e[<span class="nm">1</span>]]++; }
+    Queue&lt;<span class="ty">Integer</span>&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++) <span class="kw">if</span> (indegree[i] == <span class="nm">0</span>) queue.<span class="fn">add</span>(i);
+    List&lt;<span class="ty">Integer</span>&gt; order = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+        <span class="ty">int</span> node = queue.<span class="fn">poll</span>();
+        order.<span class="fn">add</span>(node);
+        <span class="kw">for</span> (<span class="ty">int</span> nei : graph[node]) <span class="kw">if</span> (--indegree[nei] == <span class="nm">0</span>) queue.<span class="fn">add</span>(nei);
+    }
+    <span class="kw">return</span> order.size() == n ? order : Collections.<span class="ty">emptyList</span>();
+}</pre>
       </div>
 
       <div class="insight" style="margin-top:.5rem">
@@ -686,6 +790,24 @@ pre{padding:1.1rem 1.2rem;font-family:var(--font-mono);font-size:.79rem;line-hei
 <div style="height:4rem"></div>
 
 <script>
+function updateThemeButton(){
+  const btn=document.getElementById('theme-toggle');
+  if(btn)btn.textContent=document.documentElement.classList.contains('dark')?'Light mode':'Dark mode';
+}
+
+function toggleTheme(){
+  document.documentElement.classList.toggle('dark');
+  try{localStorage.setItem('dsa-theme',document.documentElement.classList.contains('dark')?'dark':'light');}catch(e){}
+  updateThemeButton();
+}
+
+function setLang(lang){
+  document.getElementById('lang-java-btn')?.classList.toggle('active',lang==='java');
+  document.getElementById('lang-python-btn')?.classList.toggle('active',lang==='python');
+  document.querySelectorAll('.lang-pane').forEach(el=>el.classList.toggle('active',el.classList.contains(lang)));
+  try{localStorage.setItem('graphs-lang',lang);}catch(e){}
+}
+
 // ══════════════════
 // PROGRESS
 // ══════════════════
@@ -924,6 +1046,8 @@ function answer(q,choice){
 // INIT
 // ══════════════════
 window.addEventListener('load',()=>{
+  updateThemeButton();
+  setLang((()=>{try{return localStorage.getItem('graphs-lang')||'java';}catch(e){return 'java';}})());
   drawCC([],- 1);
   topoReset();
 });
