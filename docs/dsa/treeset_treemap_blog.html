@@ -4,6 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TreeSet & TreeMap — AlgorithmCraft</title>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  } catch (e) {}
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
   :root {
@@ -21,6 +30,12 @@
     --red: #ef4444;
     --code-bg: #0a0c10;
   }
+  html.light {
+    --bg: #f7f3ec; --bg2: #efe9df; --bg3: #e7dfd1;
+    --border: #d3c7b6; --text: #1f1b16; --muted: #6c6257;
+    --accent: #c96b1b; --accent2: #2563a8; --accent3: #1a7a4a;
+    --accent4: #b07010; --accent5: #6b35a8; --red: #a82020; --code-bg: #fffaf3;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.7; }
@@ -33,12 +48,15 @@
     background: rgba(13,15,20,0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
   }
+  html.light nav { background: rgba(247,243,236,0.92); }
   .nav-brand { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--accent); text-decoration: none; margin-right: 8px; }
   nav a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color .2s; }
   nav a:hover { color: var(--text); }
   .lang-toggle { display: flex; gap: 4px; margin-left: auto; background: var(--bg3); border-radius: 8px; padding: 3px; }
   .lang-btn { background: none; border: none; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 4px 12px; border-radius: 6px; cursor: pointer; transition: all .2s; }
   .lang-btn.active { background: var(--accent); color: #fff; }
+  .theme-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 4px 12px; border-radius: 6px; cursor: pointer; transition: all .2s; }
+  .theme-btn:hover { color: var(--text); }
 
   /* HERO */
   .hero {
@@ -170,6 +188,7 @@
     <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
     <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
   </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
 </nav>
 
 <div class="hero">
@@ -901,6 +920,19 @@ min_val = freq.<span class="fn">keys</span>()[<span class="num">0</span>]    <sp
 </footer>
 
 <script>
+function updateThemeButton() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = document.documentElement.classList.contains('light') ? 'Dark mode' : 'Light mode';
+}
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('light');
+  try {
+    localStorage.setItem('dsa-theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  } catch (e) {}
+  updateThemeButton();
+}
+
 // ─── LANGUAGE TOGGLE ───
 let currentLang = 'java';
 function setLang(lang) {
@@ -997,6 +1029,7 @@ document.querySelector('.viz-btn').onclick = doVizStep;
 
 // init
 renderArray([], false, []);
+updateThemeButton();
 </script>
 </body>
 </html>

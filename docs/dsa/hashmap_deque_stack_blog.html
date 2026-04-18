@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HashMap · Deque · Stack — AlgorithmCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  } catch (e) {}
+})();
+</script>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161d;
+    --bg3: #1a1e28;
+    --border: #252a38;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --accent: #f97316;
+    --accent2: #3b82f6;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #a78bfa;
+    --red: #ef4444;
+    --code-bg: #0a0c10;
+  }
+  html.light {
+    --bg: #f7f3ec;
+    --bg2: #fffdfa;
+    --bg3: #f0e8dd;
+    --border: #ddcdbb;
+    --text: #2c2621;
+    --muted: #786a5d;
+    --accent: #c86432;
+    --accent2: #2563eb;
+    --accent3: #0f9f6e;
+    --accent4: #c98507;
+    --accent5: #8b5cf6;
+    --red: #dc2626;
+    --code-bg: #f5efe7;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.7; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    padding: 0 40px; height: 56px;
+    background: rgba(13,15,20,0.94); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  html.light nav { background: rgba(247,243,236,0.94); }
+  .nav-brand { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--accent); text-decoration: none; margin-right: 4px; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: color .2s; }
+  nav a:hover { color: var(--text); }
+  .nav-sep { color: var(--border); font-size: 0.8rem; }
+  .lang-toggle { display: flex; gap: 4px; margin-left: auto; background: var(--bg3); border-radius: 8px; padding: 3px; }
+  .lang-btn { background: none; border: none; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 4px 12px; border-radius: 6px; cursor: pointer; transition: all .2s; }
+  .lang-btn.active { background: var(--accent); color: #fff; }
+  .theme-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 7px 12px; border-radius: 8px; cursor: pointer; transition: all .2s; }
+  .theme-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .hero { padding: 90px 40px 70px; max-width: 860px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+  .hero-tag { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 18px; }
+  .hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.12; margin-bottom: 22px; }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 1.05rem; max-width: 640px; }
+  .hero-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+  .pill { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* TOPIC SWITCHER */
+  .topic-nav { display: flex; gap: 0; margin: 0 auto; max-width: 860px; padding: 0 40px; border-bottom: 1px solid var(--border); }
+  .topic-tab { flex: 1; padding: 16px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: var(--muted); font-family: 'DM Serif Display', serif; font-size: 1.1rem; cursor: pointer; transition: all .2s; text-align: center; }
+  .topic-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .topic-section { display: none; }
+  .topic-section.active { display: block; }
+
+  .content { max-width: 860px; margin: 0 auto; padding: 0 40px 100px; }
+  .section-header { padding-top: 64px; margin-bottom: 28px; }
+  .section-num { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 10px; display: block; }
+  .section-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.9rem; }
+  .section-divider { width: 40px; height: 2px; background: var(--accent); margin-top: 14px; }
+
+  p { margin-bottom: 16px; color: var(--muted); }
+  p strong { color: var(--text); }
+  h3 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin: 28px 0 10px; color: var(--text); }
+
+  .callout { border-left: 3px solid var(--accent); background: rgba(249,115,22,.07); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 20px 0; }
+  .callout.blue { border-color: var(--accent2); background: rgba(59,130,246,.07); }
+  .callout.green { border-color: var(--accent3); background: rgba(16,185,129,.07); }
+  .callout.yellow { border-color: var(--accent4); background: rgba(245,158,11,.07); }
+  .callout p { margin: 0; font-size: 0.9rem; }
+  .callout strong { color: var(--text); }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 18px 0; }
+  .lang-pane { display: none; }
+  .lang-pane.active { display: block; }
+  pre { padding: 18px 22px; overflow-x: auto; font-family: 'DM Mono', monospace; font-size: 0.8rem; line-height: 1.75; }
+  .kw { color: #c792ea; } .type { color: #82aaff; } .fn { color: #82cffd; }
+  .str { color: #c3e88d; } .cm { color: #546e7a; font-style: italic; } .num { color: #f78c6c; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.86rem; }
+  th { text-align: left; padding: 10px 14px; background: var(--bg3); color: var(--text); font-weight: 600; border-bottom: 2px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  td:first-child { color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+  tr:last-child td { border-bottom: none; }
+  .yes { color: var(--accent3); } .no { color: var(--red); }
+
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; }
+  .method-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  .method-card .mn { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--accent2); margin-bottom: 5px; }
+  .method-card .md { font-size: 0.8rem; color: var(--muted); margin: 0; }
+  .method-card .mr { font-family: 'DM Mono', monospace; font-size: 0.73rem; color: var(--accent3); margin-top: 3px; }
+  @media (max-width: 600px) { .method-grid { grid-template-columns: 1fr; } }
+
+  .visualizer { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; }
+  .viz-title { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 18px; }
+  .viz-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .viz-cell { min-width: 44px; height: 44px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.88rem; border: 2px solid var(--border); background: var(--bg3); transition: all .3s; padding: 0 6px; }
+  .viz-cell.active { border-color: var(--accent); background: rgba(249,115,22,.15); color: var(--accent); transform: scale(1.06); }
+  .viz-cell.seen { border-color: var(--accent3); background: rgba(16,185,129,.1); color: var(--accent3); }
+  .viz-cell.dup { border-color: var(--red); background: rgba(239,68,68,.1); color: var(--red); }
+  .viz-cell.stack-top { border-color: var(--accent5); background: rgba(167,139,250,.15); color: var(--accent5); }
+  .viz-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; font-family: 'DM Mono', monospace; }
+  .viz-log { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; min-height: 52px; font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--accent3); margin-bottom: 14px; }
+  .viz-controls { display: flex; gap: 10px; }
+  .viz-btn { background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 7px 18px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+  .viz-btn:hover { opacity: .85; }
+  .viz-btn.sec { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+  .pattern-badge { display: inline-block; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 10px; font-family: 'DM Mono', monospace; font-size: 0.73rem; color: var(--accent5); margin-bottom: 14px; }
+  .problem-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin: 18px 0; }
+  .problem-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .problem-title { font-weight: 600; font-size: 0.98rem; }
+  .diff { font-size: 0.73rem; font-family: 'DM Mono', monospace; padding: 3px 10px; border-radius: 12px; }
+  .diff.easy { background: rgba(16,185,129,.15); color: var(--accent3); }
+  .diff.medium { background: rgba(245,158,11,.15); color: var(--accent4); }
+  .diff.hard { background: rgba(239,68,68,.15); color: var(--red); }
+
+  .cheatsheet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  .cs-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .cs-card h4 { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.8rem; margin-bottom: 10px; }
+  .cs-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+  .cs-row:last-child { border: none; }
+  .cs-key { font-family: 'DM Mono', monospace; color: var(--accent2); font-size: 0.78rem; }
+  .cs-val { color: var(--muted); font-size: 0.78rem; text-align: right; }
+  @media (max-width: 640px) { .cheatsheet-grid { grid-template-columns: 1fr; } }
+
+  footer { text-align: center; padding: 40px; color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">AlgorithmCraft</a>
+  <a href="#core-idea">The Idea</a>
+  <span class="nav-sep">·</span>
+  <a href="#hashmap-section">HashMap</a>
+  <a href="#deque-section">Deque</a>
+  <a href="#stack-section">Stack</a>
+  <span class="nav-sep">·</span>
+  <a href="#deepdive">Deep Dives</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Java Collections · DSA Basics</div>
+  <h1>HashMap · Deque · Stack<br/><em>The Interview Trinity.</em></h1>
+  <p>These three structures appear in over 60% of interview problems. Master their APIs cold, understand the nuance between them, and you'll recognize the right tool instantly under pressure.</p>
+  <div class="hero-pills">
+    <span class="pill">O(1) lookup</span>
+    <span class="pill">Frequency maps</span>
+    <span class="pill">Monotonic stack</span>
+    <span class="pill">Sliding window</span>
+    <span class="pill">BFS / DFS</span>
+    <span class="pill">Parentheses</span>
+  </div>
+</div>
+
+<!-- TOPIC TABS -->
+<div class="topic-nav">
+  <button class="topic-tab active" onclick="showTopic('hashmap', this)">HashMap</button>
+  <button class="topic-tab" onclick="showTopic('deque', this)">Deque</button>
+  <button class="topic-tab" onclick="showTopic('stack', this)">Stack</button>
+</div>
+
+<!-- ═══════════════════════ HASHMAP ═══════════════════════ -->
+<div id="topic-hashmap" class="topic-section active">
+<div class="content">
+
+  <div class="section-header" id="core-idea">
+    <span class="section-num">01 — Core Insight</span>
+    <h2>HashMap: O(1) Everything</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>HashMap's superpower is <strong>O(1) average-time lookup, insertion, and deletion</strong>. The moment a problem asks "have I seen this before?" or "how many times does X appear?", reach for HashMap first.</p>
+
+  <div class="callout">
+    <p><strong>The Core Insight:</strong> HashMap trades space for time. Instead of scanning an array for a value (O(n)), you hash the key to its bucket in constant time. Almost every frequency-counting, caching, or grouping problem has a HashMap at its heart.</p>
+  </div>
+
+  <table>
+    <thead><tr><th>Structure</th><th>Order</th><th>Null keys</th><th>Thread-safe</th><th>Use when</th></tr></thead>
+    <tbody>
+      <tr><td>HashMap</td><td class="no">None</td><td class="yes">1 null key</td><td class="no">No</td><td>General purpose key→value</td></tr>
+      <tr><td>LinkedHashMap</td><td class="yes">Insertion order</td><td class="yes">1 null key</td><td class="no">No</td><td>LRU cache, ordered iteration</td></tr>
+      <tr><td>TreeMap</td><td class="yes">Sorted by key</td><td class="no">No</td><td class="no">No</td><td>Range queries, sorted keys</td></tr>
+      <tr><td>Hashtable</td><td class="no">None</td><td class="no">No</td><td class="yes">Yes</td><td>Legacy — prefer ConcurrentHashMap</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-header" id="hashmap-section">
+    <span class="section-num">02 — All Methods</span>
+    <h2>HashMap API Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="mn">put(k, v)</div>
+      <div class="md">Insert or overwrite key→value. O(1).</div>
+      <div class="mr">→ V (previous value or null)</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">get(k)</div>
+      <div class="md">Retrieve value by key. Returns null if absent.</div>
+      <div class="mr">→ V or null</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">getOrDefault(k, def)</div>
+      <div class="md">Safe get — returns def if key missing. Use in freq maps.</div>
+      <div class="mr">→ V</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">containsKey(k)</div>
+      <div class="md">Check if key exists. O(1).</div>
+      <div class="mr">→ boolean</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">remove(k)</div>
+      <div class="md">Delete a key. O(1).</div>
+      <div class="mr">→ V (removed value or null)</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">putIfAbsent(k, v)</div>
+      <div class="md">Only inserts if key not already present.</div>
+      <div class="mr">→ V (existing or null)</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">merge(k, v, fn)</div>
+      <div class="md">Insert v if absent, or combine with existing using fn. Power method.</div>
+      <div class="mr">→ V</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">getOrDefault + put</div>
+      <div class="md">Classic freq map idiom: map.put(k, map.getOrDefault(k,0)+1)</div>
+      <div class="mr">Pattern, not a method</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">keySet()</div>
+      <div class="md">All keys as a Set. Iterate with for-each.</div>
+      <div class="mr">→ Set&lt;K&gt;</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">values()</div>
+      <div class="md">All values as a Collection.</div>
+      <div class="mr">→ Collection&lt;V&gt;</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">entrySet()</div>
+      <div class="md">All key-value pairs. Most efficient for full iteration.</div>
+      <div class="mr">→ Set&lt;Map.Entry&lt;K,V&gt;&gt;</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">size() / isEmpty() / clear()</div>
+      <div class="md">Basic housekeeping methods.</div>
+      <div class="mr">→ int / boolean / void</div>
+    </div>
+  </div>
+
+  <h3>The 4 Core HashMap Patterns</h3>
+
+  <div class="pattern-badge">Pattern 1 · Frequency Count</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Count character frequencies</span>
+<span class="type">Map</span>&lt;<span class="type">Character</span>, <span class="type">Integer</span>&gt; freq = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">char</span> c : s.<span class="fn">toCharArray</span>()) {
+    freq.<span class="fn">put</span>(c, freq.<span class="fn">getOrDefault</span>(c, <span class="num">0</span>) + <span class="num">1</span>);
+    <span class="cm">// or: freq.merge(c, 1, Integer::sum);</span>
+}
+
+<span class="cm">// Find first non-repeating char</span>
+<span class="kw">for</span> (<span class="kw">char</span> c : s.<span class="fn">toCharArray</span>()) {
+    <span class="kw">if</span> (freq.<span class="fn">get</span>(c) == <span class="num">1</span>) <span class="kw">return</span> c;
+}
+
+<span class="cm">// Iterate all entries</span>
+<span class="kw">for</span> (<span class="type">Map</span>.<span class="type">Entry</span>&lt;<span class="type">Character</span>, <span class="type">Integer</span>&gt; e : freq.<span class="fn">entrySet</span>()) {
+    <span class="type">System</span>.out.<span class="fn">println</span>(e.<span class="fn">getKey</span>() + <span class="str">" → "</span> + e.<span class="fn">getValue</span>());
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> Counter, defaultdict
+
+<span class="cm"># Frequency count</span>
+freq = <span class="fn">Counter</span>(s)             <span class="cm"># most Pythonic</span>
+freq = <span class="fn">defaultdict</span>(<span class="fn">int</span>)      <span class="cm"># or defaultdict</span>
+<span class="kw">for</span> c <span class="kw">in</span> s: freq[c] += <span class="num">1</span>
+
+<span class="cm"># First non-repeating</span>
+<span class="kw">for</span> c <span class="kw">in</span> s:
+    <span class="kw">if</span> freq[c] == <span class="num">1</span>: <span class="kw">return</span> c
+
+<span class="cm"># Iterate entries</span>
+<span class="kw">for</span> k, v <span class="kw">in</span> freq.<span class="fn">items</span>():
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{k} → {v}"</span>)</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 2 · Two Sum / Complement Lookup</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Two Sum: find indices of two numbers that add to target</span>
+<span class="kw">public int</span>[] <span class="fn">twoSum</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> target) {
+    <span class="type">Map</span>&lt;<span class="type">Integer</span>, <span class="type">Integer</span>&gt; seen = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;(); <span class="cm">// value → index</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nums.length; i++) {
+        <span class="kw">int</span> complement = target - nums[i];
+        <span class="kw">if</span> (seen.<span class="fn">containsKey</span>(complement)) {
+            <span class="kw">return new int</span>[] { seen.<span class="fn">get</span>(complement), i };
+        }
+        seen.<span class="fn">put</span>(nums[i], i);
+    }
+    <span class="kw">return new int</span>[] { -<span class="num">1</span>, -<span class="num">1</span> };
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">two_sum</span>(nums, target):
+    seen = {}  <span class="cm"># value → index</span>
+    <span class="kw">for</span> i, n <span class="kw">in</span> <span class="fn">enumerate</span>(nums):
+        complement = target - n
+        <span class="kw">if</span> complement <span class="kw">in</span> seen:
+            <span class="kw">return</span> [seen[complement], i]
+        seen[n] = i
+    <span class="kw">return</span> [-<span class="num">1</span>, -<span class="num">1</span>]</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 3 · Prefix Sum + HashMap</div>
+  <p>Track running totals and use the map to find if a subarray sums to k in O(n). The key insight: if prefixSum[j] - prefixSum[i] == k, then subarray (i,j] sums to k.</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Count subarrays with sum == k (LC 560)</span>
+<span class="kw">public int</span> <span class="fn">subarraySum</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> k) {
+    <span class="type">Map</span>&lt;<span class="type">Integer</span>, <span class="type">Integer</span>&gt; prefixCount = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;();
+    prefixCount.<span class="fn">put</span>(<span class="num">0</span>, <span class="num">1</span>);  <span class="cm">// empty prefix has sum 0</span>
+    <span class="kw">int</span> count = <span class="num">0</span>, sum = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> n : nums) {
+        sum += n;
+        count += prefixCount.<span class="fn">getOrDefault</span>(sum - k, <span class="num">0</span>);
+        prefixCount.<span class="fn">put</span>(sum, prefixCount.<span class="fn">getOrDefault</span>(sum, <span class="num">0</span>) + <span class="num">1</span>);
+    }
+    <span class="kw">return</span> count;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">subarray_sum</span>(nums, k):
+    prefix_count = {<span class="num">0</span>: <span class="num">1</span>}  <span class="cm"># empty prefix</span>
+    count, total = <span class="num">0</span>, <span class="num">0</span>
+    <span class="kw">for</span> n <span class="kw">in</span> nums:
+        total += n
+        count += prefix_count.<span class="fn">get</span>(total - k, <span class="num">0</span>)
+        prefix_count[total] = prefix_count.<span class="fn">get</span>(total, <span class="num">0</span>) + <span class="num">1</span>
+    <span class="kw">return</span> count</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 4 · Grouping / Anagram Bucketing</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Group anagrams (LC 49): same sorted key → same bucket</span>
+<span class="kw">public</span> <span class="type">List</span>&lt;<span class="type">List</span>&lt;<span class="type">String</span>&gt;&gt; <span class="fn">groupAnagrams</span>(<span class="type">String</span>[] strs) {
+    <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">List</span>&lt;<span class="type">String</span>&gt;&gt; groups = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="type">String</span> s : strs) {
+        <span class="kw">char</span>[] ch = s.<span class="fn">toCharArray</span>();
+        <span class="type">Arrays</span>.<span class="fn">sort</span>(ch);
+        <span class="type">String</span> key = <span class="kw">new</span> <span class="type">String</span>(ch);
+        groups.<span class="fn">computeIfAbsent</span>(key, k -> <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(s);
+    }
+    <span class="kw">return new</span> <span class="type">ArrayList</span>&lt;&gt;(groups.<span class="fn">values</span>());
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+<span class="kw">def</span> <span class="fn">group_anagrams</span>(strs):
+    groups = <span class="fn">defaultdict</span>(list)
+    <span class="kw">for</span> s <span class="kw">in</span> strs:
+        key = <span class="str">""</span>.<span class="fn">join</span>(<span class="fn">sorted</span>(s))   <span class="cm"># sorted chars as key</span>
+        groups[key].<span class="fn">append</span>(s)
+    <span class="kw">return</span> <span class="fn">list</span>(groups.<span class="fn">values</span>())</pre>
+    </div>
+  </div>
+
+  <!-- HASHMAP VISUALIZER -->
+  <div class="section-header">
+    <span class="section-num">03 — Visualizer</span>
+    <h2>Two Sum Step-Through</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="visualizer">
+    <div class="viz-title">▶ Two Sum — target = 9</div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Array: [2, 7, 11, 15, 4, 5]</div>
+    <div class="viz-label">Array (current element highlighted):</div>
+    <div class="viz-row" id="hm-array"></div>
+    <div class="viz-label">HashMap (value → index):</div>
+    <div class="viz-row" id="hm-map" style="min-height:44px;background:var(--bg3);border-radius:8px;padding:8px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">—</div>
+    <div class="viz-log" id="hm-log">Press Step → to begin</div>
+    <div class="viz-controls">
+      <button class="viz-btn" id="hm-step-btn">Step →</button>
+      <button class="viz-btn sec" onclick="hmReset()">Reset</button>
+    </div>
+  </div>
+
+  <!-- HASHMAP DEEP DIVE -->
+  <div class="section-header" id="hashmap-deepdive">
+    <span class="section-num">04 — Deep Dives</span>
+    <h2>HashMap Problems Worth Studying</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 560 · Subarray Sum Equals K</span>
+      <span class="diff medium">Medium</span>
+    </div>
+    <p>Find the total number of continuous subarrays whose sum equals k. A naive O(n²) scan misses the insight: track prefix sums in a map.</p>
+    <div class="callout green">
+      <p><strong>Why it works:</strong> If prefix[j] - prefix[i] == k, then the subarray from i+1 to j sums to k. So for every j, we need to know how many previous prefix sums equal prefix[j] - k. The map stores exactly that count.</p>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 128 · Longest Consecutive Sequence</span>
+      <span class="diff medium">Medium</span>
+    </div>
+    <p>Find the longest run of consecutive integers in O(n) time. The trick: only start counting from sequence beginnings (nums[i]-1 not in set).</p>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">longestConsecutive</span>(<span class="kw">int</span>[] nums) {
+    <span class="type">Set</span>&lt;<span class="type">Integer</span>&gt; set = <span class="kw">new</span> <span class="type">HashSet</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> n : nums) set.<span class="fn">add</span>(n);
+    <span class="kw">int</span> best = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> n : set) {
+        <span class="kw">if</span> (!set.<span class="fn">contains</span>(n - <span class="num">1</span>)) {  <span class="cm">// only start of a sequence</span>
+            <span class="kw">int</span> len = <span class="num">1</span>;
+            <span class="kw">while</span> (set.<span class="fn">contains</span>(n + len)) len++;
+            best = <span class="type">Math</span>.<span class="fn">max</span>(best, len);
+        }
+    }
+    <span class="kw">return</span> best;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">longest_consecutive</span>(nums):
+    s = <span class="fn">set</span>(nums)
+    best = <span class="num">0</span>
+    <span class="kw">for</span> n <span class="kw">in</span> s:
+        <span class="kw">if</span> n - <span class="num">1</span> <span class="kw">not in</span> s:    <span class="cm"># start of sequence</span>
+            length = <span class="num">1</span>
+            <span class="kw">while</span> n + length <span class="kw">in</span> s: length += <span class="num">1</span>
+            best = <span class="fn">max</span>(best, length)
+    <span class="kw">return</span> best</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- HASHMAP CHEAT SHEET -->
+  <div class="section-header" id="cheatsheet">
+    <span class="section-num">05 — Cheat Sheet</span>
+    <h2>HashMap Quick Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="cheatsheet-grid">
+    <div class="cs-card">
+      <h4>Core Methods</h4>
+      <div class="cs-row"><span class="cs-key">put(k,v)</span><span class="cs-val">insert / overwrite</span></div>
+      <div class="cs-row"><span class="cs-key">get(k)</span><span class="cs-val">lookup → null if absent</span></div>
+      <div class="cs-row"><span class="cs-key">getOrDefault(k,d)</span><span class="cs-val">safe lookup</span></div>
+      <div class="cs-row"><span class="cs-key">containsKey(k)</span><span class="cs-val">membership check</span></div>
+      <div class="cs-row"><span class="cs-key">remove(k)</span><span class="cs-val">delete key</span></div>
+      <div class="cs-row"><span class="cs-key">merge(k,v,fn)</span><span class="cs-val">insert or combine</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Iteration</h4>
+      <div class="cs-row"><span class="cs-key">keySet()</span><span class="cs-val">iterate keys</span></div>
+      <div class="cs-row"><span class="cs-key">values()</span><span class="cs-val">iterate values</span></div>
+      <div class="cs-row"><span class="cs-key">entrySet()</span><span class="cs-val">iterate key-value pairs</span></div>
+      <div class="cs-row"><span class="cs-key">putIfAbsent(k,v)</span><span class="cs-val">only if key missing</span></div>
+      <div class="cs-row"><span class="cs-key">computeIfAbsent</span><span class="cs-val">lazy init values</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Patterns</h4>
+      <div class="cs-row"><span class="cs-key">Frequency count</span><span class="cs-val">getOrDefault + put</span></div>
+      <div class="cs-row"><span class="cs-key">Two sum</span><span class="cs-val">value → index map</span></div>
+      <div class="cs-row"><span class="cs-key">Prefix sum</span><span class="cs-val">sum → count map</span></div>
+      <div class="cs-row"><span class="cs-key">Anagram group</span><span class="cs-val">sorted str → list</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Complexity</h4>
+      <div class="cs-row"><span class="cs-key">put / get / remove</span><span class="cs-val">O(1) avg, O(n) worst</span></div>
+      <div class="cs-row"><span class="cs-key">containsKey</span><span class="cs-val">O(1) avg</span></div>
+      <div class="cs-row"><span class="cs-key">Iteration</span><span class="cs-val">O(n)</span></div>
+      <div class="cs-row"><span class="cs-key">Space</span><span class="cs-val">O(n)</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>Interview sentence:</strong> "I'll use a HashMap to store each element's complement as I scan left to right — instead of an O(n²) nested loop, each lookup is O(1), giving us O(n) overall."</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════ DEQUE ═══════════════════════ -->
+<div id="topic-deque" class="topic-section">
+<div class="content">
+
+  <div class="section-header" id="deque-section">
+    <span class="section-num">01 — Core Insight</span>
+    <h2>Deque: Double-Ended Power</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>A Deque (Double-Ended Queue) lets you <strong>push and pop from both the front and back in O(1)</strong>. This makes it simultaneously a stack (LIFO) and a queue (FIFO) — and the backbone of the monotonic deque pattern.</p>
+
+  <div class="callout">
+    <p><strong>The Core Insight:</strong> Use Deque when you need to efficiently maintain a window of candidates where outdated or dominated elements must be evicted from both ends. The monotonic deque is one of the most powerful and underused patterns in competitive programming.</p>
+  </div>
+
+  <div class="callout yellow">
+    <p><strong>Java gotcha:</strong> Never use <code>Stack</code> class as a stack in interviews. Use <code>Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;()</code> instead — it's faster, cleaner, and what interviewers expect.</p>
+  </div>
+
+  <table>
+    <thead><tr><th>Implementation</th><th>Backed by</th><th>Null allowed</th><th>Best for</th></tr></thead>
+    <tbody>
+      <tr><td>ArrayDeque</td><td>Resizable array</td><td class="no">No</td><td>Stack and Queue replacement — use this</td></tr>
+      <tr><td>LinkedList</td><td>Doubly linked list</td><td class="yes">Yes</td><td>When you need O(1) middle insertions too</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-header">
+    <span class="section-num">02 — All Methods</span>
+    <h2>Deque API Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="mn">addFirst(e) / offerFirst(e)</div>
+      <div class="md">Add to front. addFirst throws if capacity hit; offerFirst returns false.</div>
+      <div class="mr">→ void / boolean</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">addLast(e) / offerLast(e)</div>
+      <div class="md">Add to back. Same throw vs return distinction.</div>
+      <div class="mr">→ void / boolean</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">removeFirst() / pollFirst()</div>
+      <div class="md">Remove from front. removeFirst throws if empty; pollFirst returns null.</div>
+      <div class="mr">→ E / E or null</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">removeLast() / pollLast()</div>
+      <div class="md">Remove from back. Same throw vs null distinction.</div>
+      <div class="mr">→ E / E or null</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">peekFirst() / getFirst()</div>
+      <div class="md">Peek front without removing. peekFirst returns null; getFirst throws.</div>
+      <div class="mr">→ E or null / E</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">peekLast() / getLast()</div>
+      <div class="md">Peek back without removing.</div>
+      <div class="mr">→ E or null / E</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">push(e) / pop()</div>
+      <div class="md">Stack aliases: push = addFirst, pop = removeFirst.</div>
+      <div class="mr">→ void / E</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">offer(e) / poll()</div>
+      <div class="md">Queue aliases: offer = addLast, poll = removeFirst.</div>
+      <div class="mr">→ boolean / E or null</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">peek()</div>
+      <div class="md">Queue alias: peekFirst — see front without removing.</div>
+      <div class="mr">→ E or null</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">isEmpty() / size()</div>
+      <div class="md">Always isEmpty()-check before peek/poll in interview code.</div>
+      <div class="mr">→ boolean / int</div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <p><strong>API Memory Trick:</strong> "First" = front = left. "Last" = back = right. peek = look. poll/remove = remove. The word "First" or "Last" always tells you which end.</p>
+  </div>
+
+  <h3>The 3 Core Deque Patterns</h3>
+
+  <div class="pattern-badge">Pattern 1 · BFS Queue</div>
+  <p>Deque as a FIFO queue is the backbone of BFS. Use <code>offer()</code> to enqueue and <code>poll()</code> to dequeue.</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// BFS level-order traversal</span>
+<span class="type">Deque</span>&lt;<span class="type">TreeNode</span>&gt; queue = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+queue.<span class="fn">offer</span>(root);
+
+<span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+    <span class="kw">int</span> size = queue.<span class="fn">size</span>();  <span class="cm">// capture level size</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; size; i++) {
+        <span class="type">TreeNode</span> node = queue.<span class="fn">poll</span>();
+        <span class="kw">if</span> (node.left != <span class="kw">null</span>)  queue.<span class="fn">offer</span>(node.left);
+        <span class="kw">if</span> (node.right != <span class="kw">null</span>) queue.<span class="fn">offer</span>(node.right);
+    }
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+queue = <span class="fn">deque</span>([root])
+<span class="kw">while</span> queue:
+    size = <span class="fn">len</span>(queue)
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(size):
+        node = queue.<span class="fn">popleft</span>()       <span class="cm"># poll = popleft</span>
+        <span class="kw">if</span> node.left:  queue.<span class="fn">append</span>(node.left)
+        <span class="kw">if</span> node.right: queue.<span class="fn">append</span>(node.right)</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 2 · Monotonic Deque (Sliding Window Max)</div>
+  <p>The monotonic deque maintains a window of candidates in <strong>decreasing order of value</strong>. When a new element enters, pop everything smaller from the back — they can never be the window max. When an element exits the window, pop from the front if it's the oldest candidate.</p>
+
+  <div class="callout green">
+    <p><strong>The elimination argument:</strong> If element B enters after element A and B ≥ A, then A will never be the window max while B is present. A is dominated. We can safely evict A. This is the key deduction that makes the deque O(n) instead of O(n²).</p>
+  </div>
+
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Sliding Window Maximum (LC 239) — O(n)</span>
+<span class="kw">public int</span>[] <span class="fn">maxSlidingWindow</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> k) {
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; dq = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;(); <span class="cm">// stores INDICES</span>
+    <span class="kw">int</span>[] res = <span class="kw">new int</span>[nums.length - k + <span class="num">1</span>];
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nums.length; i++) {
+        <span class="cm">// Remove indices outside window</span>
+        <span class="kw">while</span> (!dq.<span class="fn">isEmpty</span>() &amp;&amp; dq.<span class="fn">peekFirst</span>() &lt; i - k + <span class="num">1</span>)
+            dq.<span class="fn">pollFirst</span>();
+
+        <span class="cm">// Remove smaller elements from back (they're dominated)</span>
+        <span class="kw">while</span> (!dq.<span class="fn">isEmpty</span>() &amp;&amp; nums[dq.<span class="fn">peekLast</span>()] &lt; nums[i])
+            dq.<span class="fn">pollLast</span>();
+
+        dq.<span class="fn">offerLast</span>(i);
+
+        <span class="kw">if</span> (i &gt;= k - <span class="num">1</span>)
+            res[i - k + <span class="num">1</span>] = nums[dq.<span class="fn">peekFirst</span>()]; <span class="cm">// max = front</span>
+    }
+    <span class="kw">return</span> res;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">max_sliding_window</span>(nums, k):
+    dq = <span class="fn">deque</span>()  <span class="cm"># stores indices</span>
+    res = []
+
+    <span class="kw">for</span> i, n <span class="kw">in</span> <span class="fn">enumerate</span>(nums):
+        <span class="cm"># Remove out-of-window indices</span>
+        <span class="kw">if</span> dq <span class="kw">and</span> dq[<span class="num">0</span>] &lt; i - k + <span class="num">1</span>:
+            dq.<span class="fn">popleft</span>()
+
+        <span class="cm"># Remove dominated elements from back</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> nums[dq[-<span class="num">1</span>]] &lt; n:
+            dq.<span class="fn">pop</span>()
+
+        dq.<span class="fn">append</span>(i)
+        <span class="kw">if</span> i &gt;= k - <span class="num">1</span>:
+            res.<span class="fn">append</span>(nums[dq[<span class="num">0</span>]])
+    <span class="kw">return</span> res</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 3 · Bidirectional BFS / Palindrome Check</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Valid palindrome using deque</span>
+<span class="kw">public boolean</span> <span class="fn">isPalindrome</span>(<span class="type">String</span> s) {
+    <span class="type">Deque</span>&lt;<span class="type">Character</span>&gt; dq = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">char</span> c : s.<span class="fn">toCharArray</span>())
+        <span class="kw">if</span> (<span class="type">Character</span>.<span class="fn">isLetterOrDigit</span>(c))
+            dq.<span class="fn">offer</span>(<span class="type">Character</span>.<span class="fn">toLowerCase</span>(c));
+
+    <span class="kw">while</span> (dq.<span class="fn">size</span>() &gt; <span class="num">1</span>) {
+        <span class="kw">if</span> (!dq.<span class="fn">pollFirst</span>().<span class="fn">equals</span>(dq.<span class="fn">pollLast</span>()))
+            <span class="kw">return false</span>;
+    }
+    <span class="kw">return true</span>;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">is_palindrome</span>(s):
+    dq = <span class="fn">deque</span>(c.<span class="fn">lower</span>() <span class="kw">for</span> c <span class="kw">in</span> s <span class="kw">if</span> c.<span class="fn">isalnum</span>())
+    <span class="kw">while</span> <span class="fn">len</span>(dq) &gt; <span class="num">1</span>:
+        <span class="kw">if</span> dq.<span class="fn">popleft</span>() != dq.<span class="fn">pop</span>():
+            <span class="kw">return False</span>
+    <span class="kw">return True</span></pre>
+    </div>
+  </div>
+
+  <!-- DEQUE VISUALIZER -->
+  <div class="section-header">
+    <span class="section-num">03 — Visualizer</span>
+    <h2>Monotonic Deque — Sliding Window Max</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="visualizer">
+    <div class="viz-title">▶ Sliding Window Maximum — k = 3</div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Array: [1, 3, -1, -3, 5, 3, 6, 7]</div>
+    <div class="viz-label">Array (window orange):</div>
+    <div class="viz-row" id="dq-array"></div>
+    <div class="viz-label">Deque (stores indices, front = max):</div>
+    <div class="viz-row" id="dq-deque" style="min-height:44px;background:var(--bg3);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;">—</div>
+    <div class="viz-label">Result:</div>
+    <div class="viz-row" id="dq-result" style="min-height:36px;background:var(--bg3);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.82rem;">—</div>
+    <div class="viz-log" id="dq-log">Press Step → to begin</div>
+    <div class="viz-controls">
+      <button class="viz-btn" id="dq-step-btn">Step →</button>
+      <button class="viz-btn sec" onclick="dqReset()">Reset</button>
+    </div>
+  </div>
+
+  <!-- DEQUE DEEP DIVE -->
+  <div class="section-header">
+    <span class="section-num">04 — Deep Dives</span>
+    <h2>Deque Problems Worth Studying</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 239 · Sliding Window Maximum</span>
+      <span class="diff hard">Hard</span>
+    </div>
+    <p>Return the max of every window of size k. The monotonic deque solution is O(n) — each element is pushed and popped at most once.</p>
+    <div class="callout green">
+      <p><strong>Amortized O(n):</strong> Even though there's a while loop inside the for loop, each element enters the deque exactly once and leaves exactly once. Total work across all iterations = 2n = O(n).</p>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 862 · Shortest Subarray with Sum At Least K</span>
+      <span class="diff hard">Hard</span>
+    </div>
+    <p>Find shortest subarray with sum ≥ k. Combines prefix sums with a monotonic deque to find the best left boundary for each right pointer.</p>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">shortestSubarray</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> k) {
+    <span class="kw">int</span> n = nums.length;
+    <span class="kw">long</span>[] prefix = <span class="kw">new long</span>[n + <span class="num">1</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) prefix[i+<span class="num">1</span>] = prefix[i] + nums[i];
+
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; dq = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">int</span> res = <span class="type">Integer</span>.MAX_VALUE;
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= n; i++) {
+        <span class="cm">// Try to shrink window from left</span>
+        <span class="kw">while</span> (!dq.<span class="fn">isEmpty</span>() &amp;&amp; prefix[i] - prefix[dq.<span class="fn">peekFirst</span>()] &gt;= k)
+            res = <span class="type">Math</span>.<span class="fn">min</span>(res, i - dq.<span class="fn">pollFirst</span>());
+        <span class="cm">// Maintain increasing prefix sum order</span>
+        <span class="kw">while</span> (!dq.<span class="fn">isEmpty</span>() &amp;&amp; prefix[i] &lt;= prefix[dq.<span class="fn">peekLast</span>()])
+            dq.<span class="fn">pollLast</span>();
+        dq.<span class="fn">offerLast</span>(i);
+    }
+    <span class="kw">return</span> res == <span class="type">Integer</span>.MAX_VALUE ? -<span class="num">1</span> : res;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">shortest_subarray</span>(nums, k):
+    n = <span class="fn">len</span>(nums)
+    prefix = [<span class="num">0</span>] * (n + <span class="num">1</span>)
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): prefix[i+<span class="num">1</span>] = prefix[i] + nums[i]
+
+    dq = <span class="fn">deque</span>()
+    res = <span class="fn">float</span>(<span class="str">'inf'</span>)
+
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n + <span class="num">1</span>):
+        <span class="kw">while</span> dq <span class="kw">and</span> prefix[i] - prefix[dq[<span class="num">0</span>]] &gt;= k:
+            res = <span class="fn">min</span>(res, i - dq.<span class="fn">popleft</span>())
+        <span class="kw">while</span> dq <span class="kw">and</span> prefix[i] &lt;= prefix[dq[-<span class="num">1</span>]]:
+            dq.<span class="fn">pop</span>()
+        dq.<span class="fn">append</span>(i)
+    <span class="kw">return</span> -<span class="num">1</span> <span class="kw">if</span> res == <span class="fn">float</span>(<span class="str">'inf'</span>) <span class="kw">else</span> res</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEQUE CHEAT SHEET -->
+  <div class="section-header">
+    <span class="section-num">05 — Cheat Sheet</span>
+    <h2>Deque Quick Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="cheatsheet-grid">
+    <div class="cs-card">
+      <h4>Add / Remove</h4>
+      <div class="cs-row"><span class="cs-key">offerFirst / pollFirst</span><span class="cs-val">front (safe — no throw)</span></div>
+      <div class="cs-row"><span class="cs-key">offerLast / pollLast</span><span class="cs-val">back (safe — no throw)</span></div>
+      <div class="cs-row"><span class="cs-key">peekFirst / peekLast</span><span class="cs-val">peek without remove</span></div>
+      <div class="cs-row"><span class="cs-key">push / pop / peek</span><span class="cs-val">stack aliases (front)</span></div>
+      <div class="cs-row"><span class="cs-key">offer / poll</span><span class="cs-val">queue aliases (back/front)</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Patterns</h4>
+      <div class="cs-row"><span class="cs-key">BFS queue</span><span class="cs-val">offer back, poll front</span></div>
+      <div class="cs-row"><span class="cs-key">DFS / recursion stack</span><span class="cs-val">push/pop front</span></div>
+      <div class="cs-row"><span class="cs-key">Monotonic window</span><span class="cs-val">pollLast dominated, pollFirst stale</span></div>
+      <div class="cs-row"><span class="cs-key">Palindrome check</span><span class="cs-val">pollFirst == pollLast</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>Interview sentence:</strong> "I'll use a monotonic deque that stores indices in decreasing order of their values — when a new element is larger than the back, I evict the back because it's dominated and can never be the window max. This gives O(n) amortized since each element enters and leaves exactly once."</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════ STACK ═══════════════════════ -->
+<div id="topic-stack" class="topic-section">
+<div class="content">
+
+  <div class="section-header" id="stack-section">
+    <span class="section-num">01 — Core Insight</span>
+    <h2>Stack: LIFO and Nesting</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>A stack processes elements in <strong>Last-In-First-Out</strong> order. Its real power: <strong>matching and nesting problems</strong>. Whenever you see opening/closing pairs, "previous greater element", or "undo" semantics, a stack is almost certainly the right tool.</p>
+
+  <div class="callout">
+    <p><strong>The Core Insight:</strong> Stack excels at problems where you need to defer a decision until you see a future element — like finding the next greater element for each position. Push candidates; pop and resolve them when the right future element arrives.</p>
+  </div>
+
+  <div class="callout yellow">
+    <p><strong>Java gotcha:</strong> <code>java.util.Stack</code> extends Vector and is considered legacy — it's synchronized and slow. Always use <code>Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;()</code> instead. Push = <code>push()</code> or <code>addFirst()</code>, Pop = <code>pop()</code> or <code>removeFirst()</code>.</p>
+  </div>
+
+  <div class="section-header">
+    <span class="section-num">02 — All Methods</span>
+    <h2>Stack API Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="mn">push(e) / addFirst(e)</div>
+      <div class="md">Add to top of stack. O(1).</div>
+      <div class="mr">→ void</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">pop() / removeFirst()</div>
+      <div class="md">Remove and return top. Throws if empty.</div>
+      <div class="mr">→ E</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">peek() / peekFirst()</div>
+      <div class="md">See top without removing. Returns null if empty.</div>
+      <div class="mr">→ E or null</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">isEmpty()</div>
+      <div class="md">Always check before pop/peek to avoid exceptions.</div>
+      <div class="mr">→ boolean</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">size()</div>
+      <div class="md">Number of elements currently on stack.</div>
+      <div class="mr">→ int</div>
+    </div>
+    <div class="method-card">
+      <div class="mn">contains(e)</div>
+      <div class="md">O(n) search — avoid in time-critical loops.</div>
+      <div class="mr">→ boolean</div>
+    </div>
+  </div>
+
+  <h3>The 4 Core Stack Patterns</h3>
+
+  <div class="pattern-badge">Pattern 1 · Matching Brackets / Parentheses</div>
+  <p>Push open brackets; when a close bracket appears, verify it matches the stack's top. The stack always holds the innermost unmatched open bracket.</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="kw">public boolean</span> <span class="fn">isValid</span>(<span class="type">String</span> s) {
+    <span class="type">Deque</span>&lt;<span class="type">Character</span>&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">char</span> c : s.<span class="fn">toCharArray</span>()) {
+        <span class="kw">if</span> (c == <span class="str">'('</span> || c == <span class="str">'{'</span> || c == <span class="str">'['</span>) {
+            stack.<span class="fn">push</span>(c);
+        } <span class="kw">else</span> {
+            <span class="kw">if</span> (stack.<span class="fn">isEmpty</span>()) <span class="kw">return false</span>;
+            <span class="kw">char</span> top = stack.<span class="fn">pop</span>();
+            <span class="kw">if</span> (c == <span class="str">')'</span> &amp;&amp; top != <span class="str">'('</span>) <span class="kw">return false</span>;
+            <span class="kw">if</span> (c == <span class="str">'}'</span> &amp;&amp; top != <span class="str">'{'</span>) <span class="kw">return false</span>;
+            <span class="kw">if</span> (c == <span class="str">']'</span> &amp;&amp; top != <span class="str">'['</span>) <span class="kw">return false</span>;
+        }
+    }
+    <span class="kw">return</span> stack.<span class="fn">isEmpty</span>();
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">is_valid</span>(s):
+    stack = []
+    pairs = {<span class="str">')'</span>: <span class="str">'('</span>, <span class="str">'}'</span>: <span class="str">'{'</span>, <span class="str">']'</span>: <span class="str">'['</span>}
+    <span class="kw">for</span> c <span class="kw">in</span> s:
+        <span class="kw">if</span> c <span class="kw">in</span> <span class="str">'([{'</span>:
+            stack.<span class="fn">append</span>(c)
+        <span class="kw">else</span>:
+            <span class="kw">if not</span> stack <span class="kw">or</span> stack[-<span class="num">1</span>] != pairs[c]:
+                <span class="kw">return False</span>
+            stack.<span class="fn">pop</span>()
+    <span class="kw">return not</span> stack</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 2 · Monotonic Stack (Next Greater Element)</div>
+  <p>Push indices onto a stack. When a new element is greater than the stack's top, the stack's top has found its "next greater element". Pop and record the answer.</p>
+
+  <div class="callout green">
+    <p><strong>The elimination argument:</strong> Once element B > element A and B comes after A, A will never be the "next greater" for anything to B's left that A hasn't already answered. Pop A, record B as A's answer. Stack only holds unanswered candidates.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Next Greater Element (LC 496)</span>
+<span class="kw">public int</span>[] <span class="fn">nextGreaterElement</span>(<span class="kw">int</span>[] nums) {
+    <span class="kw">int</span> n = nums.length;
+    <span class="kw">int</span>[] res = <span class="kw">new int</span>[n];
+    <span class="type">Arrays</span>.<span class="fn">fill</span>(res, -<span class="num">1</span>);
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;(); <span class="cm">// stores indices</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+        <span class="cm">// Pop all elements smaller than current</span>
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>() &amp;&amp; nums[stack.<span class="fn">peek</span>()] &lt; nums[i]) {
+            res[stack.<span class="fn">pop</span>()] = nums[i];
+        }
+        stack.<span class="fn">push</span>(i);
+    }
+    <span class="kw">return</span> res;
+}
+
+<span class="cm">// Daily Temperatures (LC 739) — same pattern, answer = distance</span>
+<span class="kw">public int</span>[] <span class="fn">dailyTemperatures</span>(<span class="kw">int</span>[] temps) {
+    <span class="kw">int</span>[] res = <span class="kw">new int</span>[temps.length];
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; temps.length; i++) {
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>() &amp;&amp; temps[stack.<span class="fn">peek</span>()] &lt; temps[i])
+            res[stack.<span class="fn">pop</span>()] = i - stack.<span class="fn">peek</span>();  <span class="cm">// BUG: see note below</span>
+        stack.<span class="fn">push</span>(i);
+    }
+    <span class="kw">return</span> res;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">next_greater_element</span>(nums):
+    n = <span class="fn">len</span>(nums)
+    res = [-<span class="num">1</span>] * n
+    stack = []  <span class="cm"># stores indices</span>
+
+    <span class="kw">for</span> i, n <span class="kw">in</span> <span class="fn">enumerate</span>(nums):
+        <span class="kw">while</span> stack <span class="kw">and</span> nums[stack[-<span class="num">1</span>]] &lt; n:
+            res[stack.<span class="fn">pop</span>()] = n
+        stack.<span class="fn">append</span>(i)
+    <span class="kw">return</span> res
+
+<span class="kw">def</span> <span class="fn">daily_temperatures</span>(temps):
+    res = [<span class="num">0</span>] * <span class="fn">len</span>(temps)
+    stack = []
+    <span class="kw">for</span> i, t <span class="kw">in</span> <span class="fn">enumerate</span>(temps):
+        <span class="kw">while</span> stack <span class="kw">and</span> temps[stack[-<span class="num">1</span>]] &lt; t:
+            j = stack.<span class="fn">pop</span>()
+            res[j] = i - j
+        stack.<span class="fn">append</span>(i)
+    <span class="kw">return</span> res</pre>
+    </div>
+  </div>
+
+  <div class="callout yellow">
+    <p><strong>Common Daily Temperatures bug:</strong> After popping from the stack, don't call <code>stack.peek()</code> to get the popped index — you already consumed it. Store the popped value in a variable first: <code>int idx = stack.pop(); res[idx] = i - idx;</code></p>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 3 · Min Stack / Stack with Extra Info</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Min Stack: track minimum alongside each element</span>
+<span class="kw">class</span> <span class="type">MinStack</span> {
+    <span class="type">Deque</span>&lt;<span class="kw">int</span>[]&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;(); <span class="cm">// [value, minSoFar]</span>
+
+    <span class="kw">public void</span> <span class="fn">push</span>(<span class="kw">int</span> val) {
+        <span class="kw">int</span> min = stack.<span class="fn">isEmpty</span>() ? val : <span class="type">Math</span>.<span class="fn">min</span>(val, stack.<span class="fn">peek</span>()[<span class="num">1</span>]);
+        stack.<span class="fn">push</span>(<span class="kw">new int</span>[] { val, min });
+    }
+    <span class="kw">public void</span> <span class="fn">pop</span>()    { stack.<span class="fn">pop</span>(); }
+    <span class="kw">public int</span>  <span class="fn">top</span>()    { <span class="kw">return</span> stack.<span class="fn">peek</span>()[<span class="num">0</span>]; }
+    <span class="kw">public int</span>  <span class="fn">getMin</span>(){ <span class="kw">return</span> stack.<span class="fn">peek</span>()[<span class="num">1</span>]; }
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">class</span> <span class="type">MinStack</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.stack = []  <span class="cm"># stores (value, min_so_far)</span>
+
+    <span class="kw">def</span> <span class="fn">push</span>(self, val):
+        cur_min = <span class="fn">min</span>(val, self.stack[-<span class="num">1</span>][<span class="num">1</span>]) <span class="kw">if</span> self.stack <span class="kw">else</span> val
+        self.stack.<span class="fn">append</span>((val, cur_min))
+
+    <span class="kw">def</span> <span class="fn">pop</span>(self):    self.stack.<span class="fn">pop</span>()
+    <span class="kw">def</span> <span class="fn">top</span>(self):    <span class="kw">return</span> self.stack[-<span class="num">1</span>][<span class="num">0</span>]
+    <span class="kw">def</span> <span class="fn">getMin</span>(self): <span class="kw">return</span> self.stack[-<span class="num">1</span>][<span class="num">1</span>]</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:28px">Pattern 4 · Evaluate Expressions / Calculator</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Basic Calculator II (LC 227) — handles +, -, *, /</span>
+<span class="kw">public int</span> <span class="fn">calculate</span>(<span class="type">String</span> s) {
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">int</span> num = <span class="num">0</span>; <span class="kw">char</span> op = <span class="str">'+'</span>;
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; s.<span class="fn">length</span>(); i++) {
+        <span class="kw">char</span> c = s.<span class="fn">charAt</span>(i);
+        <span class="kw">if</span> (<span class="type">Character</span>.<span class="fn">isDigit</span>(c)) num = num * <span class="num">10</span> + (c - <span class="str">'0'</span>);
+        <span class="kw">if</span> ((!<span class="type">Character</span>.<span class="fn">isDigit</span>(c) &amp;&amp; c != <span class="str">' '</span>) || i == s.<span class="fn">length</span>() - <span class="num">1</span>) {
+            <span class="kw">if</span>      (op == <span class="str">'+'</span>) stack.<span class="fn">push</span>(num);
+            <span class="kw">else if</span> (op == <span class="str">'-'</span>) stack.<span class="fn">push</span>(-num);
+            <span class="kw">else if</span> (op == <span class="str">'*'</span>) stack.<span class="fn">push</span>(stack.<span class="fn">pop</span>() * num);
+            <span class="kw">else if</span> (op == <span class="str">'/'</span>) stack.<span class="fn">push</span>(stack.<span class="fn">pop</span>() / num);
+            op = c; num = <span class="num">0</span>;
+        }
+    }
+    <span class="kw">int</span> result = <span class="num">0</span>;
+    <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>()) result += stack.<span class="fn">pop</span>();
+    <span class="kw">return</span> result;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">calculate</span>(s):
+    stack, num, op = [], <span class="num">0</span>, <span class="str">'+'</span>
+    s += <span class="str">'+'</span>  <span class="cm"># sentinel to flush last number</span>
+
+    <span class="kw">for</span> c <span class="kw">in</span> s:
+        <span class="kw">if</span> c.<span class="fn">isdigit</span>():
+            num = num * <span class="num">10</span> + <span class="fn">int</span>(c)
+        <span class="kw">elif</span> c <span class="kw">in</span> <span class="str">'+-*/'</span>:
+            <span class="kw">if</span>   op == <span class="str">'+'</span>: stack.<span class="fn">append</span>(num)
+            <span class="kw">elif</span> op == <span class="str">'-'</span>: stack.<span class="fn">append</span>(-num)
+            <span class="kw">elif</span> op == <span class="str">'*'</span>: stack.<span class="fn">append</span>(stack.<span class="fn">pop</span>() * num)
+            <span class="kw">elif</span> op == <span class="str">'/'</span>: stack.<span class="fn">append</span>(<span class="fn">int</span>(stack.<span class="fn">pop</span>() / num))
+            op, num = c, <span class="num">0</span>
+    <span class="kw">return</span> <span class="fn">sum</span>(stack)</pre>
+    </div>
+  </div>
+
+  <!-- STACK VISUALIZER -->
+  <div class="section-header">
+    <span class="section-num">03 — Visualizer</span>
+    <h2>Monotonic Stack — Next Greater Element</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="visualizer">
+    <div class="viz-title">▶ Next Greater Element</div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Array: [2, 1, 5, 3, 6, 4, 8]</div>
+    <div class="viz-label">Array (current = orange):</div>
+    <div class="viz-row" id="st-array"></div>
+    <div class="viz-label">Stack (top = rightmost, stores indices):</div>
+    <div class="viz-row" id="st-stack" style="min-height:44px;background:var(--bg3);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;">—</div>
+    <div class="viz-label">Result array:</div>
+    <div class="viz-row" id="st-result" style="min-height:36px;background:var(--bg3);border-radius:8px;padding:8px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-family:'DM Mono',monospace;font-size:0.82rem;">—</div>
+    <div class="viz-log" id="st-log">Press Step → to begin</div>
+    <div class="viz-controls">
+      <button class="viz-btn" id="st-step-btn">Step →</button>
+      <button class="viz-btn sec" onclick="stReset()">Reset</button>
+    </div>
+  </div>
+
+  <!-- STACK DEEP DIVES -->
+  <div class="section-header" id="deepdive">
+    <span class="section-num">04 — Deep Dives</span>
+    <h2>Stack Problems Worth Studying</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 84 · Largest Rectangle in Histogram</span>
+      <span class="diff hard">Hard</span>
+    </div>
+    <p>Find the largest rectangle area in a histogram. The monotonic stack finds, for each bar, the nearest shorter bar on its left and right — defining the maximum width it can extend.</p>
+    <div class="callout green">
+      <p><strong>Why monotonic stack:</strong> Maintain an increasing stack. When a bar is shorter than the stack top, the top has found its right boundary. Its left boundary is the new stack top after popping. Area = height × (right - left - 1).</p>
+    </div>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">largestRectangleArea</span>(<span class="kw">int</span>[] heights) {
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">int</span> max = <span class="num">0</span>;
+    <span class="kw">int</span>[] h = <span class="type">Arrays</span>.<span class="fn">copyOf</span>(heights, heights.length + <span class="num">1</span>); <span class="cm">// sentinel 0</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; h.length; i++) {
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>() &amp;&amp; h[stack.<span class="fn">peek</span>()] > h[i]) {
+            <span class="kw">int</span> height = h[stack.<span class="fn">pop</span>()];
+            <span class="kw">int</span> width  = stack.<span class="fn">isEmpty</span>() ? i : i - stack.<span class="fn">peek</span>() - <span class="num">1</span>;
+            max = <span class="type">Math</span>.<span class="fn">max</span>(max, height * width);
+        }
+        stack.<span class="fn">push</span>(i);
+    }
+    <span class="kw">return</span> max;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">largest_rectangle_area</span>(heights):
+    stack = []
+    max_area = <span class="num">0</span>
+    heights = heights + [<span class="num">0</span>]  <span class="cm"># sentinel</span>
+
+    <span class="kw">for</span> i, h <span class="kw">in</span> <span class="fn">enumerate</span>(heights):
+        <span class="kw">while</span> stack <span class="kw">and</span> heights[stack[-<span class="num">1</span>]] &gt; h:
+            height = heights[stack.<span class="fn">pop</span>()]
+            width = i <span class="kw">if not</span> stack <span class="kw">else</span> i - stack[-<span class="num">1</span>] - <span class="num">1</span>
+            max_area = <span class="fn">max</span>(max_area, height * width)
+        stack.<span class="fn">append</span>(i)
+    <span class="kw">return</span> max_area</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 739 · Daily Temperatures</span>
+      <span class="diff medium">Medium</span>
+    </div>
+    <p>For each day, find how many days until a warmer temperature. Monotonic stack — when you see a warmer day, resolve all colder pending days.</p>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span>[] <span class="fn">dailyTemperatures</span>(<span class="kw">int</span>[] temps) {
+    <span class="kw">int</span>[] res = <span class="kw">new int</span>[temps.length];
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; stack = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;(); <span class="cm">// indices</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; temps.length; i++) {
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>() &amp;&amp; temps[stack.<span class="fn">peek</span>()] &lt; temps[i]) {
+            <span class="kw">int</span> idx = stack.<span class="fn">pop</span>();
+            res[idx] = i - idx;  <span class="cm">// store idx before subtracting!</span>
+        }
+        stack.<span class="fn">push</span>(i);
+    }
+    <span class="kw">return</span> res;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">daily_temperatures</span>(temps):
+    res = [<span class="num">0</span>] * <span class="fn">len</span>(temps)
+    stack = []
+    <span class="kw">for</span> i, t <span class="kw">in</span> <span class="fn">enumerate</span>(temps):
+        <span class="kw">while</span> stack <span class="kw">and</span> temps[stack[-<span class="num">1</span>]] &lt; t:
+            j = stack.<span class="fn">pop</span>()
+            res[j] = i - j
+        stack.<span class="fn">append</span>(i)
+    <span class="kw">return</span> res</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK CHEAT SHEET -->
+  <div class="section-header" id="stack-cheatsheet">
+    <span class="section-num">05 — Cheat Sheet</span>
+    <h2>Stack Quick Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="cheatsheet-grid">
+    <div class="cs-card">
+      <h4>Core Methods (use Deque)</h4>
+      <div class="cs-row"><span class="cs-key">push(e)</span><span class="cs-val">add to top</span></div>
+      <div class="cs-row"><span class="cs-key">pop()</span><span class="cs-val">remove top (throws if empty)</span></div>
+      <div class="cs-row"><span class="cs-key">peek()</span><span class="cs-val">see top (null if empty)</span></div>
+      <div class="cs-row"><span class="cs-key">isEmpty()</span><span class="cs-val">always check before pop/peek</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Patterns</h4>
+      <div class="cs-row"><span class="cs-key">Matching brackets</span><span class="cs-val">push open, verify on close</span></div>
+      <div class="cs-row"><span class="cs-key">Next greater</span><span class="cs-val">pop when current > top</span></div>
+      <div class="cs-row"><span class="cs-key">Min stack</span><span class="cs-val">store (val, minSoFar) pairs</span></div>
+      <div class="cs-row"><span class="cs-key">Calculator</span><span class="cs-val">push numbers, flush on operator</span></div>
+      <div class="cs-row"><span class="cs-key">Histogram area</span><span class="cs-val">increasing stack, area on pop</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Recognition Signals</h4>
+      <div class="cs-row"><span class="cs-key">"next/previous greater/smaller"</span><span class="cs-val">→ Monotonic stack</span></div>
+      <div class="cs-row"><span class="cs-key">"valid parentheses/brackets"</span><span class="cs-val">→ Matching stack</span></div>
+      <div class="cs-row"><span class="cs-key">"evaluate expression"</span><span class="cs-val">→ Operator stack</span></div>
+      <div class="cs-row"><span class="cs-key">"undo / history"</span><span class="cs-val">→ Stack of states</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Complexity</h4>
+      <div class="cs-row"><span class="cs-key">push / pop / peek</span><span class="cs-val">O(1)</span></div>
+      <div class="cs-row"><span class="cs-key">Monotonic stack loop</span><span class="cs-val">O(n) amortized</span></div>
+      <div class="cs-row"><span class="cs-key">Space</span><span class="cs-val">O(n)</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>Interview sentence:</strong> "I'll use a monotonic increasing stack — when I encounter an element smaller than the top, I know the top has found its right boundary. Each element is pushed and popped at most once, so the entire algorithm is O(n) amortized."</p>
+  </div>
+
+</div>
+</div>
+<!-- END STACK -->
+
+<footer>
+  <a href="index.html" style="color:inherit;text-decoration:none;">Back to DSA</a> · HashMap · Deque · Stack Reference · Java Collections DSA Series
+</footer>
+
+<script>
+function updateThemeButton() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = document.documentElement.classList.contains('light') ? 'Dark mode' : 'Light mode';
+}
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('light');
+  try {
+    localStorage.setItem('dsa-theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  } catch (e) {}
+  updateThemeButton();
+}
+
+// ─── LANGUAGE TOGGLE ───
+let currentLang = 'java';
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ─── TOPIC TABS ───
+function showTopic(name, btn) {
+  document.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.topic-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('topic-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══ HASHMAP VISUALIZER ═══
+const HM_NUMS = [2, 7, 11, 15, 4, 5];
+const HM_TARGET = 9;
+let hmStep = 0, hmMap = {};
+
+function renderHmArray(hi) {
+  const el = document.getElementById('hm-array');
+  el.innerHTML = '';
+  HM_NUMS.forEach((n, i) => {
+    const c = document.createElement('div');
+    c.className = 'viz-cell' + (i === hi ? ' active' : (i < hi ? ' seen' : ''));
+    c.textContent = n;
+    el.appendChild(c);
+  });
+}
+
+function renderHmMap() {
+  const el = document.getElementById('hm-map');
+  const entries = Object.entries(hmMap);
+  if (!entries.length) { el.textContent = '(empty)'; return; }
+  el.innerHTML = entries.map(([k,v]) =>
+    `<span style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--accent2)">${k}<span style="color:var(--muted)">→${v}</span></span>`
+  ).join('');
+}
+
+function hmDoStep() {
+  if (hmStep >= HM_NUMS.length) {
+    document.getElementById('hm-log').textContent = '✅ Scan complete.';
+    return;
+  }
+  const i = hmStep;
+  const n = HM_NUMS[i];
+  const comp = HM_TARGET - n;
+  let log;
+  if (hmMap.hasOwnProperty(comp)) {
+    log = `i=${i}: num=${n}, complement=${comp} → FOUND! indices [${hmMap[comp]}, ${i}] ✅`;
+    document.getElementById('hm-log').textContent = log;
+    renderHmArray(i);
+    hmStep = HM_NUMS.length;
+    return;
+  }
+  log = `i=${i}: num=${n}, complement=${comp} → not in map. Store ${n}→${i}.`;
+  hmMap[n] = i;
+  renderHmArray(i);
+  renderHmMap();
+  document.getElementById('hm-log').textContent = log;
+  hmStep++;
+}
+
+function hmReset() {
+  hmStep = 0; hmMap = {};
+  renderHmArray(-1);
+  document.getElementById('hm-map').textContent = '—';
+  document.getElementById('hm-log').textContent = 'Press Step → to begin';
+}
+document.getElementById('hm-step-btn').onclick = hmDoStep;
+renderHmArray(-1);
+
+// ═══ DEQUE VISUALIZER ═══
+const DQ_NUMS = [1, 3, -1, -3, 5, 3, 6, 7];
+const DQ_K = 3;
+let dqStep = 0, dqDeque = [], dqResult = [];
+
+function renderDqArray(hi) {
+  const el = document.getElementById('dq-array');
+  el.innerHTML = '';
+  const wStart = Math.max(0, hi - DQ_K + 1);
+  DQ_NUMS.forEach((n, i) => {
+    const c = document.createElement('div');
+    c.className = 'viz-cell';
+    if (i >= wStart && i <= hi) c.classList.add('active');
+    else if (i < hi) c.classList.add('seen');
+    c.textContent = n;
+    el.appendChild(c);
+  });
+}
+
+function renderDqDeque() {
+  const el = document.getElementById('dq-deque');
+  if (!dqDeque.length) { el.textContent = '(empty)'; return; }
+  el.innerHTML = dqDeque.map((idx, pos) =>
+    `<span style="background:var(--bg2);border:1px solid ${pos===0?'var(--accent5)':'var(--border)'};border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.8rem;color:${pos===0?'var(--accent5)':'var(--muted)'}">idx=${idx}(${DQ_NUMS[idx]})</span>`
+  ).join(' ← ');
+}
+
+function dqDoStep() {
+  if (dqStep >= DQ_NUMS.length) {
+    document.getElementById('dq-log').textContent = '✅ Done!';
+    return;
+  }
+  const i = dqStep;
+  const n = DQ_NUMS[i];
+  let log = `i=${i}, val=${n}: `;
+
+  // remove stale
+  if (dqDeque.length && dqDeque[0] < i - DQ_K + 1) {
+    const removed = dqDeque.shift();
+    log += `Front idx=${removed} out of window, removed. `;
+  }
+  // remove dominated
+  const popped = [];
+  while (dqDeque.length && DQ_NUMS[dqDeque[dqDeque.length-1]] < n) {
+    popped.push(DQ_NUMS[dqDeque.pop()]);
+  }
+  if (popped.length) log += `Popped dominated: [${popped}]. `;
+
+  dqDeque.push(i);
+
+  if (i >= DQ_K - 1) {
+    const max = DQ_NUMS[dqDeque[0]];
+    dqResult.push(max);
+    log += `Window full → max = ${max} ✅`;
+    document.getElementById('dq-result').textContent = '[' + dqResult.join(', ') + ']';
+  }
+
+  renderDqArray(i);
+  renderDqDeque();
+  document.getElementById('dq-log').textContent = log;
+  dqStep++;
+}
+
+function dqReset() {
+  dqStep = 0; dqDeque = []; dqResult = [];
+  renderDqArray(-1);
+  document.getElementById('dq-deque').textContent = '—';
+  document.getElementById('dq-result').textContent = '—';
+  document.getElementById('dq-log').textContent = 'Press Step → to begin';
+}
+document.getElementById('dq-step-btn').onclick = dqDoStep;
+renderDqArray(-1);
+
+// ═══ STACK VISUALIZER ═══
+const ST_NUMS = [2, 1, 5, 3, 6, 4, 8];
+let stStep = 0, stStack = [], stResult = [];
+
+function renderStArray(hi) {
+  const el = document.getElementById('st-array');
+  el.innerHTML = '';
+  ST_NUMS.forEach((n, i) => {
+    const c = document.createElement('div');
+    c.className = 'viz-cell';
+    if (i === hi) c.classList.add('active');
+    else if (i < hi) c.classList.add('seen');
+    c.textContent = n;
+    el.appendChild(c);
+  });
+}
+
+function renderStStack() {
+  const el = document.getElementById('st-stack');
+  if (!stStack.length) { el.textContent = '(empty)'; return; }
+  el.innerHTML = stStack.map((idx, pos) =>
+    `<span style="background:var(--bg2);border:1px solid ${pos===stStack.length-1?'var(--accent5)':'var(--border)'};border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.8rem;color:${pos===stStack.length-1?'var(--accent5)':'var(--muted)'}">idx=${idx}(${ST_NUMS[idx]})</span>`
+  ).join(' ');
+}
+
+function renderStResult() {
+  const el = document.getElementById('st-result');
+  if (!stResult.some(v => v !== -1)) { el.textContent = '—'; return; }
+  el.innerHTML = stResult.map((v, i) =>
+    `<span style="font-family:'DM Mono',monospace;font-size:0.8rem;color:${v!==-1?'var(--accent3)':'var(--muted)'}">[${i}]:${v===-1?'?':v}</span>`
+  ).join('  ');
+}
+
+function stDoStep() {
+  if (stStep >= ST_NUMS.length) {
+    // flush remaining
+    while (stStack.length) stStack.pop(); // no answer
+    document.getElementById('st-log').textContent = '✅ Done! Remaining elements have no next greater element (−1).';
+    stResult = stResult.map((v, i) => v === undefined ? -1 : v);
+    renderStResult();
+    return;
+  }
+  const i = stStep;
+  const n = ST_NUMS[i];
+  let log = `i=${i}, val=${n}: `;
+  const resolved = [];
+
+  while (stStack.length && ST_NUMS[stStack[stStack.length-1]] < n) {
+    const top = stStack.pop();
+    stResult[top] = n;
+    resolved.push(`idx=${top}(${ST_NUMS[top]})→${n}`);
+  }
+  if (resolved.length) log += `Resolved: [${resolved.join(', ')}]. `;
+  else log += `No smaller elements to resolve. `;
+
+  stStack.push(i);
+  if (stResult[i] === undefined) stResult[i] = -1;
+  log += `Push idx=${i} onto stack.`;
+
+  renderStArray(i);
+  renderStStack();
+  renderStResult();
+  document.getElementById('st-log').textContent = log;
+  stStep++;
+}
+
+function stReset() {
+  stStep = 0; stStack = []; stResult = [];
+  renderStArray(-1);
+  document.getElementById('st-stack').textContent = '—';
+  document.getElementById('st-result').textContent = '—';
+  document.getElementById('st-log').textContent = 'Press Step → to begin';
+}
+document.getElementById('st-step-btn').onclick = stDoStep;
+renderStArray(-1);
+updateThemeButton();
+</script>
+</body>
+</html>
