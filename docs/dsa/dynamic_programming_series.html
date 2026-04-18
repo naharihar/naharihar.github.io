@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dynamic Programming · First Principles Series</title>
+  <script>
+  (() => {
+    try {
+      if (localStorage.getItem('dsa-theme') === 'light') {
+        document.documentElement.classList.add('light');
+      }
+    } catch (e) {}
+  })();
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --paper: #fbf7f1;
+      --paper-warm: #f3eadf;
+      --paper-deep: #e2d3bf;
+      --ink: #1f1a17;
+      --ink-soft: #5f564d;
+      --accent: #c86432;
+      --accent-soft: #ead4c2;
+      --line: #d8c7b3;
+      --card: #fffdfa;
+    }
+    html.light {
+      --paper: #fbf7f1;
+      --paper-warm: #f3eadf;
+      --paper-deep: #e2d3bf;
+      --ink: #1f1a17;
+      --ink-soft: #5f564d;
+      --accent: #c86432;
+      --accent-soft: #ead4c2;
+      --line: #d8c7b3;
+      --card: #fffdfa;
+    }
+    html:not(.light) {
+      --paper: #0d0f14;
+      --paper-warm: #13161d;
+      --paper-deep: #1a1e28;
+      --ink: #e8eaf0;
+      --ink-soft: #8e95aa;
+      --accent: #f97316;
+      --accent-soft: rgba(249,115,22,.14);
+      --line: #252a38;
+      --card: #13161d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Geist, sans-serif;
+      line-height: 1.7;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      backdrop-filter: blur(14px);
+    }
+    .brand {
+      color: var(--accent);
+      text-decoration: none;
+      font-family: "Instrument Serif", serif;
+      font-size: 1.2rem;
+      margin-right: auto;
+    }
+    nav a:not(.brand) {
+      color: var(--ink-soft);
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    nav a:not(.brand):hover { color: var(--ink); }
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-family: "DM Mono", monospace;
+      font-size: .75rem;
+      cursor: pointer;
+    }
+    .theme-btn:hover { color: var(--ink); border-color: var(--accent); }
+    .hero {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 84px 32px 56px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      font-family: "DM Mono", monospace;
+      color: var(--accent);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: .74rem;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-family: "Instrument Serif", serif;
+      font-size: clamp(2.6rem, 5vw, 4.4rem);
+      line-height: 1.05;
+      margin: 0 0 18px;
+    }
+    h1 em { color: var(--accent); font-style: italic; }
+    .hero p {
+      max-width: 720px;
+      font-size: 1.05rem;
+      color: var(--ink-soft);
+      margin: 0 0 14px;
+    }
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--paper-warm);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-family: "DM Mono", monospace;
+      font-size: .76rem;
+      color: var(--ink-soft);
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 42px 32px 100px;
+    }
+    .intro {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 26px;
+      margin-bottom: 36px;
+    }
+    .panel, .part-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+    }
+    .panel h2, .part-card h2 {
+      margin: 0 0 10px;
+      font-family: "Instrument Serif", serif;
+      font-size: 1.6rem;
+    }
+    .panel p, .part-card p { color: var(--ink-soft); margin: 0 0 14px; }
+    .part-grid {
+      display: grid;
+      gap: 18px;
+    }
+    .part-meta {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-family: "DM Mono", monospace;
+      font-size: .74rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .lesson-list {
+      margin: 12px 0 18px;
+      padding-left: 18px;
+      color: var(--ink-soft);
+    }
+    .lesson-list li { margin-bottom: 6px; }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .btn {
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: .9rem;
+      border: 1px solid var(--line);
+      color: var(--ink);
+    }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn.secondary { background: var(--paper-warm); }
+    .checklist {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--ink-soft);
+    }
+    footer {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 32px 60px;
+      color: var(--ink-soft);
+      font-size: .85rem;
+      border-top: 1px solid var(--line);
+    }
+    footer a { color: inherit; }
+    @media (max-width: 760px) {
+      nav { padding: 12px 18px; gap: 12px; }
+      .hero, .wrap, footer { padding-left: 18px; padding-right: 18px; }
+      .intro { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="index.html">AlgorithmCraft</a>
+    <a href="#parts">The 3 Parts</a>
+    <a href="#why">How to Study It</a>
+    <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">Dynamic Programming · First Principles Series</div>
+    <h1>Dynamic Programming,<br><em>built one question at a time.</em></h1>
+    <p>This series teaches DP the way people actually internalize it: start with brute force, notice the repeated work, define the state carefully, and then earn the recurrence instead of memorizing it.</p>
+    <p>Part 1 builds the foundations. Part 2 shifts to min/max optimization. Part 3 introduces richer state and advanced patterns.</p>
+    <div class="hero-pills">
+      <span class="pill">Brute force first</span>
+      <span class="pill">Memoization to tabulation</span>
+      <span class="pill">Count / Min / Max</span>
+      <span class="pill">State-machine thinking</span>
+      <span class="pill">Java + Python</span>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="intro" id="why">
+      <div class="panel">
+        <h2>How to use this track</h2>
+        <p>If DP still feels slippery, don’t jump straight to the hard problems. Work in order and let the question type change only one variable at a time.</p>
+        <ul class="checklist">
+          <li>Part 1: “How many ways?” and “what repeats?”</li>
+          <li>Part 2: “What is cheapest / maximum?” with the same recurrence skeleton</li>
+          <li>Part 3: “What extra state do I need to remember?”</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>What you’ll practice</h2>
+        <ul class="checklist">
+          <li>1D DP arrays and rolling variables</li>
+          <li>Grid DP and triangle-style dependencies</li>
+          <li>Decision DP: take / skip / restart</li>
+          <li>Stateful DP over strings, colors, and transitions</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="part-grid" id="parts">
+      <article class="part-card">
+        <div class="part-meta">Part 1 · Foundations</div>
+        <h2>Build the mental model</h2>
+        <p>Start with Fibonacci and Climbing Stairs, then expand into counting problems where the core idea is “same subproblem, asked many times.”</p>
+        <ul class="lesson-list">
+          <li>Fibonacci and Climbing Stairs</li>
+          <li>Decode Ways</li>
+          <li>Unique Paths and Pascal’s Triangle</li>
+          <li>Grid counting intuition</li>
+        </ul>
+        <div class="actions">
+          <a class="btn primary" href="dp_part1_foundations.html">Start Part 1</a>
+        </div>
+      </article>
+
+      <article class="part-card">
+        <div class="part-meta">Part 2 · Optimization</div>
+        <h2>Switch from counting to min/max</h2>
+        <p>The recurrence skeleton stays familiar, but addition becomes <code>min</code> or <code>max</code>. This is the bridge most learners need before house robber, coin change, and path-cost problems feel natural.</p>
+        <ul class="lesson-list">
+          <li>Min Cost Climbing Stairs</li>
+          <li>Min Path Sum and Triangle</li>
+          <li>Coin Change</li>
+          <li>House Robber I &amp; II</li>
+          <li>Min Cost Tickets</li>
+        </ul>
+        <div class="actions">
+          <a class="btn primary" href="dp_part2_optimization.html">Open Part 2</a>
+        </div>
+      </article>
+
+      <article class="part-card">
+        <div class="part-meta">Part 3 · State Machines & Advanced</div>
+        <h2>Design the state before the code</h2>
+        <p>This is where DP gets real. The problem is no longer just “position”; the state needs to remember color, cooldown, keyboard position, or edit history.</p>
+        <ul class="lesson-list">
+          <li>Paint Fence and Paint House</li>
+          <li>Knight Dialer</li>
+          <li>Rod Cutting and Word Break</li>
+          <li>Edit Distance</li>
+          <li>Maximum Subarray as “restart or extend”</li>
+        </ul>
+        <div class="actions">
+          <a class="btn primary" href="dp_part3_advanced.html">Open Part 3</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <a href="index.html">Back to DSA</a> · Dynamic Programming First Principles Series
+  </footer>
+
+  <script>
+    function updateThemeButton() {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = document.documentElement.classList.contains('light') ? 'Dark mode' : 'Light mode';
+    }
+    function toggleTheme() {
+      document.documentElement.classList.toggle('light');
+      try {
+        localStorage.setItem('dsa-theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+      } catch (e) {}
+      updateThemeButton();
+    }
+    updateThemeButton();
+  </script>
+</body>
+</html>

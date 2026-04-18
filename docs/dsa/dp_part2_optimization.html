@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DP From First Principles · Part 2: Optimization</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  } catch (e) {}
+})();
+</script>
+<style>
+:root {
+  --bg:#0d0f14; --surface:#13161d; --raised:#1a1e28; --border:#252a38;
+  --text:#e8eaf0; --muted:#7a8099;
+  --orange:#f97316; --blue:#3b82f6; --green:#10b981;
+  --yellow:#f59e0b; --purple:#a78bfa; --red:#ef4444; --ink:#0a0c10;
+}
+html.light {
+  --bg:#f7f3ec; --surface:#fffdfa; --raised:#f0e8dd; --border:#ddcdbb;
+  --text:#2c2621; --muted:#786a5d;
+  --orange:#c86432; --blue:#2563eb; --green:#0f9f6e;
+  --yellow:#c98507; --purple:#8b5cf6; --red:#dc2626; --ink:#f5efe7;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.8}
+
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:22px;padding:0 48px;height:58px;background:rgba(13,15,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+html.light nav{background:rgba(247,243,236,.96)}
+.nav-brand{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--orange);text-decoration:none;margin-right:8px}
+nav a:not(.nav-brand){color:var(--muted);text-decoration:none;font-size:.8rem;font-weight:500;transition:color .18s;white-space:nowrap}
+nav a:not(.nav-brand):hover{color:var(--text)}
+.lang-toggle{display:flex;gap:3px;margin-left:auto;background:var(--raised);border-radius:8px;padding:3px}
+.lang-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-family:'DM Mono',monospace;font-size:.76rem;padding:4px 13px;border-radius:6px;transition:all .18s}
+.lang-btn.active{background:var(--orange);color:#fff}
+.theme-btn{background:none;border:1px solid var(--border);cursor:pointer;color:var(--muted);font-family:'DM Mono',monospace;font-size:.76rem;padding:7px 12px;border-radius:8px;transition:all .18s}
+.theme-btn:hover{color:var(--text);border-color:var(--orange)}
+
+.hero{max-width:820px;margin:0 auto;padding:96px 48px 80px;border-bottom:1px solid var(--border)}
+.series-label{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--orange);letter-spacing:.14em;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.4rem,5.5vw,3.8rem);line-height:1.08;margin-bottom:24px}
+.hero h1 em{font-style:italic;color:var(--orange)}
+.hero-lead{color:var(--muted);font-size:1.08rem;max-width:640px;line-height:1.82}
+.problem-index{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px}
+.problem-pill{background:var(--raised);border:1px solid var(--border);border-radius:20px;padding:5px 15px;font-size:.8rem;color:var(--muted);font-family:'DM Mono',monospace;text-decoration:none;transition:border-color .18s,color .18s}
+.problem-pill:hover{border-color:var(--orange);color:var(--orange)}
+
+.article{max-width:820px;margin:0 auto;padding:0 48px 120px}
+.problem-block{padding-top:88px}
+.problem-num{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--orange);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.problem-title{font-family:'DM Serif Display',serif;font-size:2.1rem;margin-bottom:6px}
+.lc-tag{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:.74rem;padding:3px 11px;border-radius:20px;margin-bottom:24px}
+.lc-tag.easy{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.lc-tag.medium{background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.25)}
+.lc-tag.hard{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.section-rule{width:48px;height:2px;background:var(--orange);margin-bottom:28px}
+
+p{margin-bottom:18px;color:var(--muted)}
+p strong{color:var(--text)}
+h3{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text);margin:36px 0 12px}
+
+.problem-statement{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:0 10px 10px 0;padding:22px 24px;margin:24px 0}
+.problem-statement p{margin-bottom:10px}
+.problem-statement p:last-child{margin-bottom:0}
+.example-block{background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7;color:var(--muted);margin:12px 0}
+.example-block .ex-label{color:var(--text);font-weight:500;margin-bottom:4px;display:block}
+
+.phase{display:flex;align-items:center;gap:14px;padding:13px 18px;border-radius:9px;margin:28px 0 16px;border:1px solid transparent}
+.phase.brute{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)}
+.phase.better{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.22)}
+.phase.dp{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.22)}
+.phase-label{font-family:'DM Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.phase.brute .phase-label{color:var(--red)}
+.phase.better .phase-label{color:var(--yellow)}
+.phase.dp .phase-label{color:var(--green)}
+.phase-name{font-family:'DM Serif Display',serif;font-size:1.1rem}
+.phase-badge{margin-left:auto;white-space:nowrap;font-family:'DM Mono',monospace;font-size:.72rem;padding:3px 10px;border-radius:11px}
+.phase.brute .phase-badge{background:rgba(239,68,68,.14);color:var(--red)}
+.phase.better .phase-badge{background:rgba(245,158,11,.14);color:var(--yellow)}
+.phase.dp .phase-badge{background:rgba(16,185,129,.14);color:var(--green)}
+
+.callout{border-left:3px solid var(--orange);background:rgba(249,115,22,.07);padding:15px 20px;border-radius:0 8px 8px 0;margin:22px 0}
+.callout.blue{border-color:var(--blue);background:rgba(59,130,246,.07)}
+.callout.green{border-color:var(--green);background:rgba(16,185,129,.07)}
+.callout.yellow{border-color:var(--yellow);background:rgba(245,158,11,.07)}
+.callout.red{border-color:var(--red);background:rgba(239,68,68,.07)}
+.callout p{margin:0;font-size:.9rem}
+.callout strong{color:var(--text)}
+
+.code-block{background:var(--ink);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:18px 0}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+.code-title{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.cx{font-family:'DM Mono',monospace;font-size:.7rem;padding:2px 9px;border-radius:10px}
+.cx-bad{background:rgba(239,68,68,.14);color:var(--red)}
+.cx-mid{background:rgba(245,158,11,.14);color:var(--yellow)}
+.cx-good{background:rgba(16,185,129,.14);color:var(--green)}
+.lang-pane{display:none}.lang-pane.active{display:block}
+pre{padding:20px 24px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:.81rem;line-height:1.8}
+.k{color:#c792ea}.t{color:#82aaff}.f{color:#82cffd}.s{color:#c3e88d}.c{color:#546e7a;font-style:italic}.n{color:#f78c6c}
+
+.evo{display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:20px 0}
+.evo-step{flex:1;padding:12px 14px;text-align:center;background:var(--surface);border-right:1px solid var(--border)}
+.evo-step:last-child{border-right:none}
+.evo-step .el{font-family:'DM Mono',monospace;font-size:.67rem;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.evo-step .ev{font-family:'DM Mono',monospace;font-size:.85rem;font-weight:600}
+.evo-step.bad .ev{color:var(--red)}.evo-step.mid .ev{color:var(--yellow)}.evo-step.good .ev{color:var(--green)}
+
+.problem-divider{border:none;border-top:1px solid var(--border);margin:80px 0 0}
+
+/* VISUALIZER */
+.viz-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px;margin:24px 0}
+.viz-box-title{font-family:'DM Mono',monospace;font-size:.73rem;color:var(--orange);text-transform:uppercase;letter-spacing:.09em;margin-bottom:18px}
+.viz-log{background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:11px 15px;font-family:'DM Mono',monospace;font-size:.79rem;color:var(--green);line-height:1.65;min-height:52px;margin:14px 0;white-space:pre-wrap}
+.viz-controls{display:flex;gap:10px;margin-top:6px}
+.viz-btn{border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.86rem;font-weight:600;padding:8px 20px;transition:opacity .18s}
+.viz-btn:hover{opacity:.82}
+.viz-btn.primary{background:var(--orange);color:#fff}
+.viz-btn.ghost{background:var(--raised);color:var(--muted);border:1px solid var(--border)}
+
+/* DP ARRAY CELLS */
+.cell-row{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;align-items:flex-end}
+.cell{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cell .ci{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted)}
+.cell .cv{width:46px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.88rem;font-weight:600;border:2px solid var(--border);background:var(--raised);color:var(--muted);transition:all .28s}
+.cell .cv.done{background:rgba(16,185,129,.16);border-color:var(--green);color:var(--green)}
+.cell .cv.active{background:rgba(249,115,22,.2);border-color:var(--orange);color:var(--orange);transform:scale(1.1)}
+.cell .cv.dep{background:rgba(59,130,246,.14);border-color:var(--blue);color:var(--blue)}
+.cell .cv.inf{background:rgba(239,68,68,.1);border-color:var(--red);color:var(--red)}
+
+/* GRID */
+.grid-wrap{overflow-x:auto;margin:12px 0}
+.dp-grid{border-collapse:collapse;font-family:'DM Mono',monospace;font-size:.8rem}
+.dp-grid th,.dp-grid td{border:1px solid var(--border);padding:8px 13px;text-align:center;min-width:44px;transition:background .25s,color .25s}
+.dp-grid th{background:var(--raised);color:var(--text);font-weight:600}
+.dp-grid td{background:var(--surface);color:var(--muted)}
+.dp-grid td.g-done{background:rgba(16,185,129,.15);color:var(--green)}
+.dp-grid td.g-active{background:rgba(249,115,22,.2);color:var(--orange);font-weight:700}
+.dp-grid td.g-dep{background:rgba(59,130,246,.13);color:var(--blue)}
+
+/* HOUSE STRIP */
+.house-row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:flex-end}
+.house{display:flex;flex-direction:column;align-items:center;gap:4px}
+.house-box{width:52px;height:52px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.92rem;font-weight:700;border:2px solid var(--border);background:var(--raised);color:var(--muted);transition:all .28s}
+.house-box.rob{background:rgba(16,185,129,.18);border-color:var(--green);color:var(--green)}
+.house-box.skip{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);color:var(--red);opacity:.7}
+.house-box.active{background:rgba(249,115,22,.2);border-color:var(--orange);color:var(--orange);transform:scale(1.08)}
+.house-lbl{font-family:'DM Mono',monospace;font-size:.67rem;color:var(--muted)}
+
+/* TRIANGLE */
+.tri-wrap{display:flex;flex-direction:column;gap:6px;align-items:center;margin:12px 0}
+.tri-row-div{display:flex;gap:6px}
+.tri-cell{width:46px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;border:2px solid var(--border);background:var(--raised);color:var(--muted);transition:all .28s}
+.tri-cell.done{background:rgba(16,185,129,.15);border-color:var(--green);color:var(--green)}
+.tri-cell.active{background:rgba(249,115,22,.2);border-color:var(--orange);color:var(--orange)}
+.tri-cell.dep{background:rgba(59,130,246,.13);border-color:var(--blue);color:var(--blue)}
+.tri-cell.path{background:rgba(167,139,250,.18);border-color:var(--purple);color:var(--purple)}
+
+footer{text-align:center;padding:48px;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="dynamic_programming_series.html">AlgorithmCraft</a>
+  <a href="#mincoststairs">Min Cost Stairs</a>
+  <a href="#minpathsum">Min Path Sum</a>
+  <a href="#coinchange">Coin Change</a>
+  <a href="#triangle">Triangle</a>
+  <a href="#houserobber">House Robber</a>
+  <a href="#houserobber2">House Robber II</a>
+  <a href="#tickets">Min Cost Tickets</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
+</nav>
+
+<div class="hero">
+  <div class="series-label">Dynamic Programming · First Principles · Part 2 of 3</div>
+  <h1>Optimization:<br/><em>Minimum and Maximum</em></h1>
+  <p class="hero-lead">
+    Part 1 asked <em>how many ways</em>. Part 2 asks <em>what is the cheapest</em> or
+    <em>what is the most</em>. The shift from counting to optimizing changes exactly
+    one thing: the combination operator. Addition becomes min or max. The recurrence
+    structure — subproblems, dependencies, fill order — is identical.
+  </p>
+  <p class="hero-lead" style="margin-top:12px">
+    Seven problems. Each one introduces a new shape of subproblem: 1D stairs,
+    2D grids, triangles, circular arrays, sparse calendars.
+    Mastering the shape is mastering the problem.
+  </p>
+  <div class="problem-index">
+    <a class="problem-pill" href="#mincoststairs">① Min Cost Stairs</a>
+    <a class="problem-pill" href="#minpathsum">② Min Path Sum</a>
+    <a class="problem-pill" href="#coinchange">③ Coin Change</a>
+    <a class="problem-pill" href="#triangle">④ Triangle</a>
+    <a class="problem-pill" href="#houserobber">⑤ House Robber</a>
+    <a class="problem-pill" href="#houserobber2">⑥ House Robber II</a>
+    <a class="problem-pill" href="#tickets">⑦ Min Cost Tickets</a>
+  </div>
+</div>
+
+<div class="article">
+
+<!-- ════════════════════════════════════════
+     01  MIN COST CLIMBING STAIRS — LC 746
+════════════════════════════════════════ -->
+<div class="problem-block" id="mincoststairs">
+  <div class="problem-num">Problem 01 · LeetCode 746</div>
+  <div class="problem-title">Min Cost Climbing Stairs</div>
+  <span class="lc-tag easy">Easy</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      On a staircase, the <code>i</code>-th step has some non-negative cost <code>cost[i]</code>
+      assigned (0 indexed). Once you pay the cost, you can either climb one or two steps.
+      You need to find the minimum cost to reach the top of the floor, and you can either
+      start from the step with index 0, or the step with index 1.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:  cost = [10, 15, 20]
+      Output: 15
+      Explanation: Start on cost[1], pay 15, climb two steps to the top.
+
+      <span class="ex-label">Example 2:</span>
+      Input:  cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]
+      Output: 6
+      Explanation: Start on cost[0], step only on the 1s, skipping cost[3].
+    </div>
+  </div>
+
+  <div class="phase brute">
+    <div>
+      <div class="phase-label">Phase 1</div>
+      <div class="phase-name">Try every possible sequence of 1- and 2-steps</div>
+    </div>
+    <span class="phase-badge">O(2ⁿ)</span>
+  </div>
+  <p>
+    At each step try both moves and return the minimum total cost.
+    This is identical to the Climbing Stairs recursion from Part 1, but now
+    we're minimising cost instead of counting paths.
+  </p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Brute Force</span><span class="cx cx-bad">O(2ⁿ)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">minCost</span>(<span class="k">int</span>[] cost, <span class="k">int</span> i) {
+    <span class="k">if</span> (i >= cost.length) <span class="k">return</span> <span class="n">0</span>;     <span class="c">// reached or passed the top</span>
+    <span class="k">return</span> cost[i] + <span class="t">Math</span>.<span class="f">min</span>(
+        <span class="f">minCost</span>(cost, i + <span class="n">1</span>),              <span class="c">// take 1 step</span>
+        <span class="f">minCost</span>(cost, i + <span class="n">2</span>)               <span class="c">// take 2 steps</span>
+    );
+}
+<span class="c">// Answer: Math.min(minCost(cost, 0), minCost(cost, 1))</span></pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">min_cost</span>(cost, i):
+    <span class="k">if</span> i >= <span class="f">len</span>(cost): <span class="k">return</span> <span class="n">0</span>
+    <span class="k">return</span> cost[i] + <span class="f">min</span>(
+        <span class="f">min_cost</span>(cost, i + <span class="n">1</span>),
+        <span class="f">min_cost</span>(cost, i + <span class="n">2</span>)
+    )
+<span class="c"># Answer: min(min_cost(cost, 0), min_cost(cost, 1))</span></pre>
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Phase 2 — Key Insight</div>
+      <div class="phase-name">Define the subproblem as the cost to <em>leave</em> stair i</div>
+    </div>
+    <span class="phase-badge">Recurrence revealed</span>
+  </div>
+  <p>
+    The key design decision is how to define table[i]. Define it as:
+    <strong>the minimum cost to depart from stair i</strong> (paying cost[i] plus
+    the cheapest way to have arrived there). That gives:
+  </p>
+  <div class="callout green">
+    <p><strong>Recurrence:</strong> table[i] = cost[i] + min(table[i−1], table[i−2])<br/>
+    Base cases: table[0] = cost[0], table[1] = cost[1]<br/>
+    The trick: append a virtual stair 0 at the top. Returning table[−1] (the last
+    element after appending 0) gives the cost to reach the floor above the staircase.
+    In the Python solution: <code>cost.append(0)</code> adds this virtual stair.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Fill left-to-right, answer in last element</div>
+    </div>
+    <span class="phase-badge">O(n) · O(1)</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Bottom-Up DP</span><span class="cx cx-good">O(n) · O(1)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">minCostClimbingStairs</span>(<span class="k">int</span>[] cost) {
+    <span class="k">int</span> n = cost.length;
+    <span class="c">// table[i] = min cost to leave step i</span>
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">2</span>; i < n; i++)
+        cost[i] += <span class="t">Math</span>.<span class="f">min</span>(cost[i - <span class="n">1</span>], cost[i - <span class="n">2</span>]);
+    <span class="k">return</span> <span class="t">Math</span>.<span class="f">min</span>(cost[n - <span class="n">1</span>], cost[n - <span class="n">2</span>]); <span class="c">// can step off from either end</span>
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">min_cost_climbing_stairs</span>(cost):
+    cost.append(<span class="n">0</span>)   <span class="c"># virtual top stair with cost 0</span>
+    <span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<span class="n">2</span>, <span class="f">len</span>(cost)):
+        cost[i] += <span class="f">min</span>(cost[i - <span class="n">1</span>], cost[i - <span class="n">2</span>])
+    <span class="k">return</span> cost[-<span class="n">1</span>]</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — cost = [10, 15, 20, 5, 8, 12, 2]</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:6px">
+      Top row: the original cost array (fixed). Bottom row: the running DP table.
+      Blue = the two candidates being compared. Orange = filling now. Green = done.
+    </p>
+    <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:4px">cost[]:</div>
+    <div class="cell-row" id="mcs-cost-row"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);margin:8px 0 4px">table[]:</div>
+    <div class="cell-row" id="mcs-dp-row"></div>
+    <div class="viz-log" id="mcs-log">Press Step → to fill table[i] = cost[i] + min(table[i−1], table[i−2]).</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="mcs-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="mcsReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The transition from Part 1:</strong> Climbing Stairs (Part 1) asked how many paths.
+    This problem asks what the cheapest path costs. The recurrence shape is identical —
+    two predecessors, same fill order. Only the operator changes: + count becomes + min cost.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════
+     02  MINIMUM PATH SUM — LC 64
+════════════════════════════════════════ -->
+<div class="problem-block" id="minpathsum">
+  <div class="problem-num">Problem 02 · LeetCode 64</div>
+  <div class="problem-title">Minimum Path Sum</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      Given a <em>m</em> × <em>n</em> grid filled with non-negative numbers, find a path
+      from top left to bottom right which minimises the sum of all numbers along its path.
+    </p>
+    <p><strong>Note:</strong> You can only move either down or right at any point in time.</p>
+    <div class="example-block">
+      <span class="ex-label">Example:</span>
+      Input:
+        [ [1, 3, 1],
+          [1, 5, 1],
+          [4, 2, 1] ]
+      Output: 7
+      Explanation: Path 1 → 3 → 1 → 1 → 1 minimises the sum.
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">Same grid as Unique Paths — but take min, not sum</div>
+    </div>
+    <span class="phase-badge">One operator change</span>
+  </div>
+  <p>
+    In Part 1, Unique Paths asked how many ways to reach (r,c). Every cell got
+    dp[r][c] = dp[r−1][c] + dp[r][c−1]. Here, we ask for the cheapest cost to
+    reach (r,c). Every cell gets dp[r][c] = grid[r][c] + min(dp[r−1][c], dp[r][c−1]).
+    The fill order and dependency structure are identical. The operator changes from
+    addition to minimum-plus.
+  </p>
+  <div class="callout green">
+    <p><strong>Recurrence:</strong> dp[r][c] = grid[r][c] + min(dp[r−1][c], dp[r][c−1])<br/>
+    Base cases: top row fills cumulatively left; left column fills cumulatively down.<br/>
+    These edges have only one incoming direction so there's no min — just accumulate.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">DP Solution</div>
+      <div class="phase-name">Fill the grid in-place row by row</div>
+    </div>
+    <span class="phase-badge">O(m·n) · O(1)</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Bottom-Up DP — in-place</span><span class="cx cx-good">O(m·n) · O(1)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">minPathSum</span>(<span class="k">int</span>[][] grid) {
+    <span class="k">int</span> m = grid.length, n = grid[<span class="n">0</span>].length;
+    <span class="c">// Fill top row: only one way in (from the left)</span>
+    <span class="k">for</span> (<span class="k">int</span> c = <span class="n">1</span>; c < n; c++)
+        grid[<span class="n">0</span>][c] += grid[<span class="n">0</span>][c - <span class="n">1</span>];
+    <span class="c">// Fill left column: only one way in (from above)</span>
+    <span class="k">for</span> (<span class="k">int</span> r = <span class="n">1</span>; r < m; r++)
+        grid[r][<span class="n">0</span>] += grid[r - <span class="n">1</span>][<span class="n">0</span>];
+    <span class="c">// Fill interior: min(above, left) + this cell's cost</span>
+    <span class="k">for</span> (<span class="k">int</span> r = <span class="n">1</span>; r < m; r++)
+        <span class="k">for</span> (<span class="k">int</span> c = <span class="n">1</span>; c < n; c++)
+            grid[r][c] += <span class="t">Math</span>.<span class="f">min</span>(grid[r - <span class="n">1</span>][c], grid[r][c - <span class="n">1</span>]);
+    <span class="k">return</span> grid[m - <span class="n">1</span>][n - <span class="n">1</span>];
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">min_path_sum</span>(grid):
+    m, n = <span class="f">len</span>(grid), <span class="f">len</span>(grid[<span class="n">0</span>])
+    <span class="k">for</span> c <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, n):
+        grid[<span class="n">0</span>][c] += grid[<span class="n">0</span>][c - <span class="n">1</span>]        <span class="c"># top row</span>
+    <span class="k">for</span> r <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, m):
+        grid[r][<span class="n">0</span>] += grid[r - <span class="n">1</span>][<span class="n">0</span>]        <span class="c"># left column</span>
+    <span class="k">for</span> r <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, m):
+        <span class="k">for</span> c <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, n):
+            grid[r][c] += <span class="f">min</span>(grid[r-<span class="n">1</span>][c], grid[r][c-<span class="n">1</span>])
+    <span class="k">return</span> grid[-<span class="n">1</span>][-<span class="n">1</span>]</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — grid = [[1,3,1],[1,5,1],[4,2,1]]</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Each cell updates in-place to the minimum cost to reach it.
+      Blue = the two candidates (above, left). Orange = filling now. Green = done.
+    </p>
+    <div class="grid-wrap"><table class="dp-grid" id="mps-grid"></table></div>
+    <div class="viz-log" id="mps-log">Press Step → to fill the minimum path sum grid.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="mps-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="mpsReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> The same grid structure appears across three problems
+    in this series: Unique Paths (count), Min Path Sum (minimize), and Unique Paths
+    with Obstacles (count with zeroed cells). Recognising the grid shape immediately
+    tells you the fill order and dependency directions. The problem statement only
+    determines the operator.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════
+     03  COIN CHANGE — LC 322
+════════════════════════════════════════ -->
+<div class="problem-block" id="coinchange">
+  <div class="problem-num">Problem 03 · LeetCode 322</div>
+  <div class="problem-title">Coin Change</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      You are given coins of different denominations and a total amount of money
+      <em>amount</em>. Write a function to compute the fewest number of coins that
+      you need to make up that amount. If that amount of money cannot be made up by
+      any combination of the coins, return <code>−1</code>.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:  coins = [1, 2, 5],  amount = 11
+      Output: 3
+      Explanation: 11 = 5 + 5 + 1
+
+      <span class="ex-label">Example 2:</span>
+      Input:  coins = [2],  amount = 3
+      Output: −1
+
+      Note: You may assume that you have an infinite number of each kind of coin.
+    </div>
+  </div>
+
+  <div class="phase brute">
+    <div>
+      <div class="phase-label">Phase 1</div>
+      <div class="phase-name">Try every coin at every remaining amount</div>
+    </div>
+    <span class="phase-badge">O(Sⁿ) — exponential</span>
+  </div>
+  <p>
+    For each amount, try placing every possible coin and recurse on the remainder.
+    The same remainder can be reached from many different paths, recomputing the same
+    subproblem exponentially many times.
+  </p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Brute Force</span><span class="cx cx-bad">Exponential</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">minCoins</span>(<span class="k">int</span>[] coins, <span class="k">int</span> amount) {
+    <span class="k">if</span> (amount == <span class="n">0</span>) <span class="k">return</span> <span class="n">0</span>;
+    <span class="k">int</span> best = <span class="t">Integer</span>.MAX_VALUE;
+    <span class="k">for</span> (<span class="k">int</span> c : coins) {
+        <span class="k">if</span> (c <= amount) {
+            <span class="k">int</span> sub = <span class="f">minCoins</span>(coins, amount - c);
+            <span class="k">if</span> (sub != -<span class="n">1</span>) best = <span class="t">Math</span>.<span class="f">min</span>(best, sub + <span class="n">1</span>);
+        }
+    }
+    <span class="k">return</span> best == <span class="t">Integer</span>.MAX_VALUE ? -<span class="n">1</span> : best;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">min_coins</span>(coins, amount):
+    <span class="k">if</span> amount == <span class="n">0</span>: <span class="k">return</span> <span class="n">0</span>
+    best = <span class="f">float</span>(<span class="s">'inf'</span>)
+    <span class="k">for</span> c <span class="k">in</span> coins:
+        <span class="k">if</span> c <= amount:
+            sub = <span class="f">min_coins</span>(coins, amount - c)
+            <span class="k">if</span> sub >= <span class="n">0</span>: best = <span class="f">min</span>(best, sub + <span class="n">1</span>)
+    <span class="k">return</span> -<span class="n">1</span> <span class="k">if</span> best == <span class="f">float</span>(<span class="s">'inf'</span>) <span class="k">else</span> best</pre>
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Phase 2 — Key Insight</div>
+      <div class="phase-name">The subproblem is just the remaining amount — nothing else matters</div>
+    </div>
+    <span class="phase-badge">O(amount · |coins|)</span>
+  </div>
+  <p>
+    The minimum coins needed for amount = 7 is the same regardless of which coins
+    got you to 7. The state is only the remaining amount. There are only
+    <code>amount + 1</code> distinct states, so we build a table of that size.
+  </p>
+  <div class="callout green">
+    <p><strong>Recurrence:</strong> table[a] = min over all coins c where c ≤ a: table[a−c] + 1<br/>
+    Base case: table[0] = 0  (zero coins needed to make amount zero)<br/>
+    Sentinel: initialise every entry to amount+1 (a safe stand-in for infinity, since
+    you can never need more coins than the amount itself when using denomination 1).</p>
+  </div>
+  <div class="callout yellow">
+    <p><strong>Why greedy fails:</strong> With coins [1,3,4] and amount=6, greedy picks 4 first,
+    leaving 2, then 1+1 = three coins total. But 3+3 = two coins. Greedy makes a locally
+    optimal choice that isn't globally optimal. DP considers every coin for every amount.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Fill table[0..amount], try every coin at every slot</div>
+    </div>
+    <span class="phase-badge">O(amount · |coins|)</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Bottom-Up DP</span><span class="cx cx-good">O(S · n) · O(S)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">coinChange</span>(<span class="k">int</span>[] coins, <span class="k">int</span> amount) {
+    <span class="k">int</span>[] table = <span class="k">new int</span>[amount + <span class="n">1</span>];
+    <span class="t">Arrays</span>.<span class="f">fill</span>(table, amount + <span class="n">1</span>);   <span class="c">// "infinity" sentinel</span>
+    table[<span class="n">0</span>] = <span class="n">0</span>;
+    <span class="k">for</span> (<span class="k">int</span> a = <span class="n">1</span>; a <= amount; a++)
+        <span class="k">for</span> (<span class="k">int</span> c : coins)
+            <span class="k">if</span> (c <= a) table[a] = <span class="t">Math</span>.<span class="f">min</span>(table[a], table[a - c] + <span class="n">1</span>);
+    <span class="k">return</span> table[amount] > amount ? -<span class="n">1</span> : table[amount];
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">coin_change</span>(coins, amount):
+    table = [amount + <span class="n">1</span>] * (amount + <span class="n">1</span>)
+    table[<span class="n">0</span>] = <span class="n">0</span>
+    <span class="k">for</span> a <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, amount + <span class="n">1</span>):
+        <span class="k">for</span> c <span class="k">in</span> coins:
+            <span class="k">if</span> c <= a:
+                table[a] = <span class="f">min</span>(table[a], table[a - c] + <span class="n">1</span>)
+    <span class="k">return</span> -<span class="n">1</span> <span class="k">if</span> table[amount] > amount <span class="k">else</span> table[amount]</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — coins = [1, 3, 4], amount = 7</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Each slot fills with the minimum coins to make that amount. Orange = filling now.
+      Blue = the dependency cell being read (table[a−c]). The log shows which coin is tried.
+    </p>
+    <div class="cell-row" id="coin-arr"></div>
+    <div class="viz-log" id="coin-log">Press Step → to fill each amount from 0 to 7.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="coin-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="coinReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> This is the first problem where the number of predecessors
+    varies — one for each coin denomination. The DP table grows by amount, not by n (coins).
+    Whenever the state is an amount or capacity rather than an index, expect this structure.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════
+     04  TRIANGLE — LC 120
+════════════════════════════════════════ -->
+<div class="problem-block" id="triangle">
+  <div class="problem-num">Problem 04 · LeetCode 120</div>
+  <div class="problem-title">Triangle</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      Given a triangle, find the minimum path sum from top to bottom. Each step you
+      may move to adjacent numbers on the row below.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example:</span>
+      Input:
+        [
+             [2],
+            [3,4],
+           [6,5,7],
+          [4,1,8,3]
+        ]
+      Output: 11
+      Explanation: 2 + 3 + 5 + 1 = 11.
+
+      Bonus: can you do this using only O(n) extra space,
+      where n is the total number of rows?
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">Fill bottom-up: each cell absorbs the cheaper of its two children</div>
+    </div>
+    <span class="phase-badge">O(n²) · O(n)</span>
+  </div>
+  <p>
+    Top-down DP is natural here but bottom-up is cleaner. Start from the last row —
+    those values are already final. For every row above, replace each entry with
+    itself plus the minimum of its two children below. By the time you reach the
+    apex, triangle[0][0] holds the answer.
+  </p>
+  <div class="callout green">
+    <p><strong>Recurrence (bottom-up):</strong> triangle[r][k] += min(triangle[r+1][k], triangle[r+1][k+1])<br/>
+    Start at row n−2, work upward to row 0.<br/>
+    Answer: triangle[0][0]<br/>
+    Space optimisation: work on a single 1D array of length n, overwriting in-place.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">DP Solution</div>
+      <div class="phase-name">Overwrite the triangle in-place from the bottom up</div>
+    </div>
+    <span class="phase-badge">O(n²) · O(1) in-place</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Bottom-Up — in-place</span><span class="cx cx-good">O(n²) · O(1)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">minimumTotal</span>(<span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; triangle) {
+    <span class="k">int</span> n = triangle.size();
+    <span class="c">// Start from second-to-last row, move up to apex</span>
+    <span class="k">for</span> (<span class="k">int</span> r = n - <span class="n">2</span>; r >= <span class="n">0</span>; r--) {
+        <span class="k">for</span> (<span class="k">int</span> k = <span class="n">0</span>; k <= r; k++) {
+            <span class="k">int</span> best = triangle.get(r).get(k)
+                      + <span class="t">Math</span>.<span class="f">min</span>(triangle.get(r + <span class="n">1</span>).get(k),
+                                triangle.get(r + <span class="n">1</span>).get(k + <span class="n">1</span>));
+            triangle.get(r).set(k, best);
+        }
+    }
+    <span class="k">return</span> triangle.get(<span class="n">0</span>).get(<span class="n">0</span>);
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">minimum_total</span>(triangle):
+    <span class="k">for</span> r <span class="k">in</span> <span class="f">range</span>(<span class="f">len</span>(triangle) - <span class="n">2</span>, -<span class="n">1</span>, -<span class="n">1</span>):
+        <span class="k">for</span> k <span class="k">in</span> <span class="f">range</span>(r + <span class="n">1</span>):
+            triangle[r][k] += <span class="f">min</span>(triangle[r+<span class="n">1</span>][k], triangle[r+<span class="n">1</span>][k+<span class="n">1</span>])
+    <span class="k">return</span> triangle[<span class="n">0</span>][<span class="n">0</span>]</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Fills from the bottom up. Each cell absorbs the cheaper child below it.
+      Purple = optimal path cells. Orange = currently updating. Blue = the two children being compared.
+    </p>
+    <div class="tri-wrap" id="tri-viz"></div>
+    <div class="viz-log" id="tri-log">Press Step → to fill bottom-up, one cell at a time.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="tri-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="triReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> When a problem has a triangular or tree structure,
+    bottom-up DP almost always simplifies the logic. Each cell needs its children,
+    so process children first. The answer bubbles up to the root naturally.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════
+     05  HOUSE ROBBER — LC 198
+════════════════════════════════════════ -->
+<div class="problem-block" id="houserobber">
+  <div class="problem-num">Problem 05 · LeetCode 198</div>
+  <div class="problem-title">House Robber</div>
+  <span class="lc-tag easy">Easy</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      You are a professional robber planning to rob houses along a street.
+      Each house has a certain amount of money stashed, the only constraint
+      stopping you from robbing each of them is that adjacent houses have
+      security systems connected and <strong>it will automatically contact the
+      police if two adjacent houses were broken into on the same night</strong>.
+    </p>
+    <p>
+      Given a list of non-negative integers representing the amount of money
+      of each house, determine the maximum amount of money you can rob tonight
+      <strong>without alerting the police</strong>.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:  [1, 2, 3, 1]
+      Output: 4
+      Explanation: Rob house 1 (money=1) then house 3 (money=3). Total = 4.
+
+      <span class="ex-label">Example 2:</span>
+      Input:  [2, 7, 9, 3, 1]
+      Output: 12
+      Explanation: Rob house 1 (2), house 3 (9), house 5 (1). Total = 12.
+    </div>
+  </div>
+
+  <div class="phase brute">
+    <div>
+      <div class="phase-label">Phase 1</div>
+      <div class="phase-name">At every house: rob it or skip it</div>
+    </div>
+    <span class="phase-badge">O(2ⁿ)</span>
+  </div>
+  <p>
+    At each house make a binary decision: rob it (add its value, skip the next)
+    or skip it (move to the next). The two subproblems overlap — skipping house 2
+    from house 1 leads to the same state as robbing house 0 and then skipping house 1.
+  </p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Brute Force</span><span class="cx cx-bad">O(2ⁿ)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">rob</span>(<span class="k">int</span>[] nums, <span class="k">int</span> i) {
+    <span class="k">if</span> (i >= nums.length) <span class="k">return</span> <span class="n">0</span>;
+    <span class="k">int</span> take = nums[i] + <span class="f">rob</span>(nums, i + <span class="n">2</span>); <span class="c">// rob house i, skip i+1</span>
+    <span class="k">int</span> skip = <span class="f">rob</span>(nums, i + <span class="n">1</span>);            <span class="c">// skip house i</span>
+    <span class="k">return</span> <span class="t">Math</span>.<span class="f">max</span>(take, skip);
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">rob</span>(nums, i=<span class="n">0</span>):
+    <span class="k">if</span> i >= <span class="f">len</span>(nums): <span class="k">return</span> <span class="n">0</span>
+    take = nums[i] + <span class="f">rob</span>(nums, i + <span class="n">2</span>)
+    skip = <span class="f">rob</span>(nums, i + <span class="n">1</span>)
+    <span class="k">return</span> <span class="f">max</span>(take, skip)</pre>
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Phase 2 — Key Insight</div>
+      <div class="phase-name">table[i] = max money robbing houses 0 through i</div>
+    </div>
+    <span class="phase-badge">Recurrence revealed</span>
+  </div>
+  <div class="callout green">
+    <p><strong>Recurrence:</strong> table[i] = max(nums[i] + table[i−2],  table[i−1])<br/>
+    Either rob house i (get nums[i] plus the best from houses 0..i−2) or skip it
+    (take the best from houses 0..i−1).<br/>
+    Base cases: table[0] = nums[0],  table[1] = max(nums[0], nums[1])</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Two rolling variables — O(1) space</div>
+    </div>
+    <span class="phase-badge">O(n) · O(1)</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Bottom-Up DP</span><span class="cx cx-good">O(n) · O(1)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">rob</span>(<span class="k">int</span>[] nums) {
+    <span class="k">if</span> (nums.length == <span class="n">0</span>) <span class="k">return</span> <span class="n">0</span>;
+    <span class="k">if</span> (nums.length == <span class="n">1</span>) <span class="k">return</span> nums[<span class="n">0</span>];
+    <span class="k">int</span> prev2 = nums[<span class="n">0</span>];
+    <span class="k">int</span> prev1 = <span class="t">Math</span>.<span class="f">max</span>(nums[<span class="n">0</span>], nums[<span class="n">1</span>]);
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">2</span>; i < nums.length; i++) {
+        <span class="k">int</span> curr = <span class="t">Math</span>.<span class="f">max</span>(nums[i] + prev2, prev1);
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    <span class="k">return</span> prev1;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">rob</span>(nums):
+    <span class="k">if not</span> nums: <span class="k">return</span> <span class="n">0</span>
+    <span class="k">if</span> <span class="f">len</span>(nums) == <span class="n">1</span>: <span class="k">return</span> nums[<span class="n">0</span>]
+    prev2, prev1 = nums[<span class="n">0</span>], <span class="f">max</span>(nums[<span class="n">0</span>], nums[<span class="n">1</span>])
+    <span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<span class="n">2</span>, <span class="f">len</span>(nums)):
+        prev2, prev1 = prev1, <span class="f">max</span>(nums[i] + prev2, prev1)
+    <span class="k">return</span> prev1</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — nums = [2, 7, 9, 3, 1]</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Top row: house values. Bottom row: the DP table — max loot achievable through each house.
+      Green = robbed in the optimal solution. Red = skipped. Orange = currently deciding.
+    </p>
+    <div class="house-row" id="rob-houses"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);margin:8px 0 4px">table[]:</div>
+    <div class="cell-row" id="rob-dp-row"></div>
+    <div class="viz-log" id="rob-log">Press Step → to decide rob or skip for each house.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="rob-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="robReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> Every 1D DP where each step looks back exactly
+    two positions reduces to two rolling variables. No array needed. The same
+    compression worked for Fibonacci and Climbing Stairs — the pattern is always
+    the same: if table[i] only reads table[i−1] and table[i−2], you only need two variables.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════
+     06  HOUSE ROBBER II — LC 213
+════════════════════════════════════════ -->
+<div class="problem-block" id="houserobber2">
+  <div class="problem-num">Problem 06 · LeetCode 213</div>
+  <div class="problem-title">House Robber II</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      You are a professional robber planning to rob houses along a street.
+      Each house has a certain amount of money stashed. All houses at this place
+      are <strong>arranged in a circle</strong>. That means the first house is the
+      neighbor of the last one. Meanwhile, adjacent houses have security systems
+      connected and <strong>it will automatically contact the police if two adjacent
+      houses were broken into on the same night</strong>.
+    </p>
+    <p>
+      Given a list of non-negative integers representing the amount of money of each
+      house, determine the maximum amount of money you can rob tonight
+      <strong>without alerting the police</strong>.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:  [2, 3, 2]
+      Output: 3
+      Explanation: Cannot rob house 1 (money=2) and house 3 (money=2),
+                   because they are adjacent in the circle.
+
+      <span class="ex-label">Example 2:</span>
+      Input:  [1, 2, 3, 1]
+      Output: 4
+      Explanation: Rob house 1 (money=1) and house 3 (money=3). Total = 4.
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">Break the circle into two linear problems</div>
+    </div>
+    <span class="phase-badge">Two passes</span>
+  </div>
+  <p>
+    The circle creates one new constraint: house 0 and house n−1 cannot both be robbed.
+    This means exactly one of them is excluded from the optimal solution. Run House Robber
+    twice — once on houses 0..n−2 (excluding the last), once on houses 1..n−1 (excluding
+    the first). The answer is the maximum of the two results.
+  </p>
+  <div class="callout green">
+    <p><strong>Why two passes suffice:</strong> In the optimal solution, either house 0 is
+    robbed (forcing house n−1 to be skipped) or it is not (in which case houses 1..n−1
+    form a valid linear subproblem). These two cases are exhaustive and mutually exclusive.
+    Running House Robber on each range solves both cases simultaneously.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">DP Solution</div>
+      <div class="phase-name">Run linear House Robber twice, take the max</div>
+    </div>
+    <span class="phase-badge">O(n) · O(1)</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Two-Pass Solution</span><span class="cx cx-good">O(n) · O(1)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">rob</span>(<span class="k">int</span>[] nums) {
+    <span class="k">int</span> n = nums.length;
+    <span class="k">if</span> (n == <span class="n">1</span>) <span class="k">return</span> nums[<span class="n">0</span>];
+    <span class="k">if</span> (n == <span class="n">2</span>) <span class="k">return</span> <span class="t">Math</span>.<span class="f">max</span>(nums[<span class="n">0</span>], nums[<span class="n">1</span>]);
+    <span class="c">// Case 1: house 0 is robbed → must exclude house n-1</span>
+    <span class="k">int</span> case1 = <span class="f">robRange</span>(nums, <span class="n">0</span>, n - <span class="n">2</span>);
+    <span class="c">// Case 2: house 0 is not robbed → can include house n-1</span>
+    <span class="k">int</span> case2 = <span class="f">robRange</span>(nums, <span class="n">1</span>, n - <span class="n">1</span>);
+    <span class="k">return</span> <span class="t">Math</span>.<span class="f">max</span>(case1, case2);
+}
+
+<span class="k">int</span> <span class="f">robRange</span>(<span class="k">int</span>[] nums, <span class="k">int</span> lo, <span class="k">int</span> hi) {
+    <span class="k">int</span> prev2 = <span class="n">0</span>, prev1 = <span class="n">0</span>;
+    <span class="k">for</span> (<span class="k">int</span> i = lo; i <= hi; i++) {
+        <span class="k">int</span> curr = <span class="t">Math</span>.<span class="f">max</span>(nums[i] + prev2, prev1);
+        prev2 = prev1; prev1 = curr;
+    }
+    <span class="k">return</span> prev1;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">rob</span>(nums):
+    <span class="k">if</span> <span class="f">len</span>(nums) == <span class="n">1</span>: <span class="k">return</span> nums[<span class="n">0</span>]
+
+    <span class="k">def</span> <span class="f">rob_range</span>(lo, hi):
+        prev2 = prev1 = <span class="n">0</span>
+        <span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(lo, hi + <span class="n">1</span>):
+            prev2, prev1 = prev1, <span class="f">max</span>(nums[i] + prev2, prev1)
+        <span class="k">return</span> prev1
+
+    <span class="c"># Exclude last house OR exclude first house</span>
+    <span class="k">return</span> <span class="f">max</span>(<span class="f">rob_range</span>(<span class="n">0</span>, <span class="f">len</span>(nums) - <span class="n">2</span>),
+               <span class="f">rob_range</span>(<span class="n">1</span>, <span class="f">len</span>(nums) - <span class="n">1</span>))</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — nums = [2, 3, 2, 5, 4, 1]</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Both passes run simultaneously. Pass 1 excludes the last house (greyed out right).
+      Pass 2 excludes the first house (greyed out left). Answer = max of both.
+    </p>
+    <div style="display:flex;gap:28px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:6px">Pass 1 — houses 0..4:</div>
+        <div class="house-row" id="rob2-p1-houses"></div>
+        <div class="cell-row" id="rob2-p1-dp" style="margin-top:6px"></div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:6px">Pass 2 — houses 1..5:</div>
+        <div class="house-row" id="rob2-p2-houses"></div>
+        <div class="cell-row" id="rob2-p2-dp" style="margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="viz-log" id="rob2-log">Press Step → to advance both passes simultaneously.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="rob2-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="rob2Reset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> A circular constraint breaks into two linear subproblems.
+    This technique — "break the circle at the forced exclusion point" — reappears in
+    paint problems and any DP where first and last elements are adjacent.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════
+     07  MINIMUM COST FOR TICKETS — LC 983
+════════════════════════════════════════ -->
+<div class="problem-block" id="tickets">
+  <div class="problem-num">Problem 07 · LeetCode 983</div>
+  <div class="problem-title">Minimum Cost For Tickets</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      In a country popular for train travel, you have planned some train travelling
+      one year in advance. The days of the year that you will travel are given as an
+      array <code>days</code>. Each day is an integer from 1 to 365.
+    </p>
+    <p>Train tickets are sold in three different ways:</p>
+    <p>
+      · a 1-day pass for <code>costs[0]</code> dollars<br/>
+      · a 7-day pass for <code>costs[1]</code> dollars<br/>
+      · a 30-day pass for <code>costs[2]</code> dollars
+    </p>
+    <p>
+      The passes allow travel for that many consecutive days.
+      Return the minimum number of dollars you need to travel every day in the given list of days.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:  days = [1,4,6,7,8,20],  costs = [2,7,15]
+      Output: 11
+      Explanation:
+        Day 1:  buy 1-day pass ($2), covers day 1
+        Day 3:  buy 7-day pass ($7), covers days 3,4,...,9
+        Day 20: buy 1-day pass ($2), covers day 20
+        Total: $11
+
+      <span class="ex-label">Example 2:</span>
+      Input:  days = [1,2,3,4,5,6,7,8,9,10,30,31],  costs = [2,7,15]
+      Output: 17
+
+      Note: days is in strictly increasing order. 1 ≤ costs[i] ≤ 1000.
+    </div>
+  </div>
+
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">dp[i] = minimum cost to cover all travel up to day i</div>
+    </div>
+    <span class="phase-badge">O(365)</span>
+  </div>
+  <p>
+    Index by calendar day (1 to 365), not by the index into the days array.
+    On a non-travel day, no pass is needed: dp[i] = dp[i−1].
+    On a travel day, try buying each of the three passes and take the minimum:
+  </p>
+  <div class="callout green">
+    <p><strong>Recurrence:</strong><br/>
+    If day i is not a travel day: dp[i] = dp[i−1]<br/>
+    If day i is a travel day:<br/>
+    &nbsp;&nbsp;dp[i] = min(<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;dp[i−1] + costs[0],         &nbsp;&nbsp;// buy 1-day pass ending today<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;dp[max(0, i−7)] + costs[1],  &nbsp;&nbsp;// buy 7-day pass covering today<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;dp[max(0, i−30)] + costs[2]  &nbsp;&nbsp;// buy 30-day pass covering today<br/>
+    &nbsp;&nbsp;)</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">DP Solution</div>
+      <div class="phase-name">Sweep all 365 days, apply recurrence only on travel days</div>
+    </div>
+    <span class="phase-badge">O(365) · O(365)</span>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-title">Bottom-Up DP over calendar days</span><span class="cx cx-good">O(365) · O(365)</span></div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">mincostTickets</span>(<span class="k">int</span>[] days, <span class="k">int</span>[] costs) {
+    <span class="t">Set</span>&lt;<span class="t">Integer</span>&gt; travelDays = <span class="k">new</span> <span class="t">HashSet</span>&lt;&gt;();
+    <span class="k">for</span> (<span class="k">int</span> d : days) travelDays.add(d);
+
+    <span class="k">int</span>[] dp = <span class="k">new int</span>[<span class="n">366</span>];
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">1</span>; i <= <span class="n">365</span>; i++) {
+        <span class="k">if</span> (!travelDays.contains(i)) {
+            dp[i] = dp[i - <span class="n">1</span>];   <span class="c">// no travel today — no new cost</span>
+            <span class="k">continue</span>;
+        }
+        dp[i] = <span class="t">Math</span>.<span class="f">min</span>(dp[i - <span class="n">1</span>]                   + costs[<span class="n">0</span>],
+                 <span class="t">Math</span>.<span class="f">min</span>(dp[<span class="t">Math</span>.<span class="f">max</span>(<span class="n">0</span>, i - <span class="n">7</span>)]   + costs[<span class="n">1</span>],
+                          dp[<span class="t">Math</span>.<span class="f">max</span>(<span class="n">0</span>, i - <span class="n">30</span>)]  + costs[<span class="n">2</span>]));
+    }
+    <span class="k">return</span> dp[days[days.length - <span class="n">1</span>]];
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">mincost_tickets</span>(days, costs):
+    travel = <span class="f">set</span>(days)
+    dp = [<span class="n">0</span>] * <span class="n">366</span>
+
+    <span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, <span class="n">366</span>):
+        <span class="k">if</span> i <span class="k">not in</span> travel:
+            dp[i] = dp[i - <span class="n">1</span>]    <span class="c"># no travel today</span>
+        <span class="k">else</span>:
+            dp[i] = <span class="f">min</span>(dp[i - <span class="n">1</span>]              + costs[<span class="n">0</span>],
+                        dp[<span class="f">max</span>(<span class="n">0</span>, i - <span class="n">7</span>)]   + costs[<span class="n">1</span>],
+                        dp[<span class="f">max</span>(<span class="n">0</span>, i - <span class="n">30</span>)]  + costs[<span class="n">2</span>])
+    <span class="k">return</span> dp[days[-<span class="n">1</span>]]</pre>
+    </div>
+  </div>
+
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Visualizer — days=[1,4,6,7,8,20], costs=[2,7,15]</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Showing days 1–20. Orange cells = travel days. Grey = non-travel (carry forward).
+      The log shows which pass option wins on each travel day.
+    </p>
+    <div class="cell-row" id="ticket-arr" style="gap:4px"></div>
+    <div class="viz-log" id="ticket-log">Press Step → to advance one day at a time.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="ticket-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="ticketReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="evo">
+    <div class="evo-step bad"><div class="el">Brute Force</div><div class="ev">Exponential</div></div>
+    <div class="evo-step mid"><div class="el">Memo by day</div><div class="ev">O(365)</div></div>
+    <div class="evo-step good"><div class="el">Tabulation</div><div class="ev">O(365) · O(365)</div></div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> When the input is sparse (6 travel days out of 365),
+    index the DP over the full domain (all 365 days), not over the sparse input.
+    Non-event days become free carry-forwards. This technique generalises to any
+    problem with a sparse schedule over a bounded calendar.</p>
+  </div>
+</div>
+
+<!-- NEXT PART CALLOUT -->
+<div style="padding-top:80px;padding-bottom:20px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 32px">
+    <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--orange);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Up next · Part 3 of 3</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:10px">State Machines & Advanced Patterns</div>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:0">
+      Paint Fence · Paint House · Knight Dialer · Rod Cutting ·
+      Word Break · Edit Distance · Maximum Subarray
+    </p>
+  </div>
+</div>
+
+</div><!-- end .article -->
+<footer><a href="dynamic_programming_series.html" style="color:inherit;text-decoration:none;">Back to DP Series</a> · Dynamic Programming First Principles · Part 2: Optimization</footer>
+
+<script>
+function updateThemeButton(){const btn=document.getElementById('theme-toggle');if(btn)btn.textContent=document.documentElement.classList.contains('light')?'Dark mode':'Light mode'}
+function toggleTheme(){document.documentElement.classList.toggle('light');try{localStorage.setItem('dsa-theme',document.documentElement.classList.contains('light')?'light':'dark')}catch(e){}updateThemeButton()}
+/* ── LANG TOGGLE ── */
+function setLang(lang) {
+  document.getElementById('nav-java-btn').classList.toggle('active', lang==='java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang==='python');
+  document.querySelectorAll('.lang-pane').forEach(p=>p.classList.toggle('active',p.classList.contains(lang)));
+}
+
+/* ── HELPERS ── */
+function makeCell(lbl, val, state) {
+  const wrap = document.createElement('div'); wrap.className='cell';
+  const ci = document.createElement('div'); ci.className='ci'; ci.textContent=lbl;
+  const cv = document.createElement('div'); cv.className='cv';
+  if(state) cv.classList.add(state);
+  cv.textContent = val !== null ? val : '?';
+  wrap.appendChild(ci); wrap.appendChild(cv);
+  return wrap;
+}
+
+/* ════════════════════════════════════════
+   VIZ 1 — MIN COST CLIMBING STAIRS
+   cost = [10,15,20,5,8,12,2]
+════════════════════════════════════════ */
+const MCS_COST = [10,15,20,5,8,12,2];
+const mcsN = MCS_COST.length;
+// precompute table
+const mcsT = [...MCS_COST];
+for(let i=2;i<mcsN;i++) mcsT[i] = MCS_COST[i] + Math.min(mcsT[i-1],mcsT[i-2]);
+let mcsStep = 0;
+
+function mcsRender(active) {
+  const cr = document.getElementById('mcs-cost-row');
+  const dr = document.getElementById('mcs-dp-row');
+  cr.innerHTML=''; dr.innerHTML='';
+  for(let i=0;i<mcsN;i++) {
+    cr.appendChild(makeCell('c['+i+']', MCS_COST[i], 'done'));
+    const deps=[active-1,active-2];
+    const state = i===active?'active': deps.includes(i)&&i<active?'dep': i<active?'done':null;
+    dr.appendChild(makeCell('t['+i+']', i<active?mcsT[i]:i===active?mcsT[i]:null, state));
+  }
+}
+document.getElementById('mcs-step-btn').addEventListener('click',()=>{
+  if(mcsStep>mcsN) return;
+  mcsRender(mcsStep);
+  let msg;
+  if(mcsStep===0) msg='t[0] = cost[0] = '+mcsT[0]+'  (base case)';
+  else if(mcsStep===1) msg='t[1] = cost[1] = '+mcsT[1]+'  (base case)';
+  else if(mcsStep<mcsN) msg=`t[${mcsStep}] = cost[${mcsStep}](${MCS_COST[mcsStep]}) + min(t[${mcsStep-1}](${mcsT[mcsStep-1]}), t[${mcsStep-2}](${mcsT[mcsStep-2]})) = ${mcsT[mcsStep]}`;
+  else msg=`✅ Answer = min(t[${mcsN-1}](${mcsT[mcsN-1]}), t[${mcsN-2}](${mcsT[mcsN-2]})) = ${Math.min(mcsT[mcsN-1],mcsT[mcsN-2])}`;
+  document.getElementById('mcs-log').textContent=msg;
+  mcsStep++;
+});
+function mcsReset(){mcsStep=0;mcsRender(-1);document.getElementById('mcs-log').textContent="Press Step → to fill table[i] = cost[i] + min(table[i−1], table[i−2]).";}
+mcsRender(-1);
+
+/* ════════════════════════════════════════
+   VIZ 2 — MINIMUM PATH SUM
+   grid = [[1,3,1],[1,5,1],[4,2,1]]
+════════════════════════════════════════ */
+const MPS_ORIG = [[1,3,1],[1,5,1],[4,2,1]];
+const mpsM=3,mpsN=3;
+// precompute filled grid
+const mpsG = MPS_ORIG.map(r=>[...r]);
+for(let c=1;c<mpsN;c++) mpsG[0][c]+=mpsG[0][c-1];
+for(let r=1;r<mpsM;r++) mpsG[r][0]+=mpsG[r-1][0];
+for(let r=1;r<mpsM;r++) for(let c=1;c<mpsN;c++) mpsG[r][c]+=Math.min(mpsG[r-1][c],mpsG[r][c-1]);
+const mpsOrder=[];
+for(let r=0;r<mpsM;r++) for(let c=0;c<mpsN;c++) mpsOrder.push([r,c]);
+let mpsStep=0;
+
+function mpsDraw(filledCount,active) {
+  const tbl=document.getElementById('mps-grid'); tbl.innerHTML='';
+  const hdr=document.createElement('tr');
+  const h0=document.createElement('th');h0.textContent='';hdr.appendChild(h0);
+  for(let c=0;c<mpsN;c++){const th=document.createElement('th');th.textContent='c'+c;hdr.appendChild(th);}
+  tbl.appendChild(hdr);
+  for(let r=0;r<mpsM;r++){
+    const tr=document.createElement('tr');
+    const rh=document.createElement('th');rh.textContent='r'+r;rh.style.fontSize='.73rem';tr.appendChild(rh);
+    for(let c=0;c<mpsN;c++){
+      const td=document.createElement('td');
+      const idx=r*mpsN+c;
+      const isAct=active&&active[0]===r&&active[1]===c;
+      const isDep=active&&!isAct&&((r===active[0]-1&&c===active[1])||(r===active[0]&&c===active[1]-1));
+      if(isAct){td.classList.add('g-active');td.textContent=mpsG[r][c];}
+      else if(isDep&&filledCount>idx){td.classList.add('g-dep');td.textContent=mpsG[r][c];}
+      else if(filledCount>idx){td.classList.add('g-done');td.textContent=mpsG[r][c];}
+      else td.textContent=MPS_ORIG[r][c];
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+document.getElementById('mps-step-btn').addEventListener('click',()=>{
+  if(mpsStep>=mpsOrder.length){mpsDraw(mpsOrder.length,null);document.getElementById('mps-log').textContent='✅ Min path sum = '+mpsG[mpsM-1][mpsN-1]+'. Path: 1→3→1→1→1.';return;}
+  const[r,c]=mpsOrder[mpsStep];
+  mpsDraw(mpsStep,[r,c]);
+  let msg;
+  if(r===0&&c===0) msg=`Cell (0,0): start = ${mpsG[0][0]}`;
+  else if(r===0) msg=`Cell (${r},${c}): top row → cumulative = ${mpsG[r][c-1]} + ${MPS_ORIG[r][c]} = ${mpsG[r][c]}`;
+  else if(c===0) msg=`Cell (${r},${c}): left col → cumulative = ${mpsG[r-1][c]} + ${MPS_ORIG[r][c]} = ${mpsG[r][c]}`;
+  else msg=`Cell (${r},${c}): ${MPS_ORIG[r][c]} + min(above=${mpsG[r-1][c]}, left=${mpsG[r][c-1]}) = ${mpsG[r][c]}`;
+  document.getElementById('mps-log').textContent=msg;
+  mpsStep++;
+});
+function mpsReset(){mpsStep=0;mpsDraw(0,null);document.getElementById('mps-log').textContent='Press Step → to fill the minimum path sum grid.';}
+mpsDraw(0,null);
+
+/* ════════════════════════════════════════
+   VIZ 3 — COIN CHANGE
+   coins=[1,3,4], amount=7
+════════════════════════════════════════ */
+const CC_COINS=[1,3,4], CC_AMT=7;
+const ccT=new Array(CC_AMT+1).fill(CC_AMT+1); ccT[0]=0;
+for(let a=1;a<=CC_AMT;a++) for(const c of CC_COINS) if(c<=a) ccT[a]=Math.min(ccT[a],ccT[a-c]+1);
+let ccStep=0;
+
+function ccRender(active,depIdx) {
+  const row=document.getElementById('coin-arr'); row.innerHTML='';
+  for(let i=0;i<=CC_AMT;i++){
+    const val=i<active?ccT[i]:i===active?ccT[i]:null;
+    const state=i===active?'active':i===depIdx&&i<active?'dep':i<active?'done':null;
+    const display=val!==null?(val>CC_AMT?'∞':val):null;
+    row.appendChild(makeCell('a='+i,display,state));
+  }
+}
+document.getElementById('coin-step-btn').addEventListener('click',()=>{
+  if(ccStep>CC_AMT){ccRender(CC_AMT+1,-1);document.getElementById('coin-log').textContent='✅ Min coins for amount 7 = '+ccT[CC_AMT]+' (3+4 or 1+3+3)';return;}
+  ccRender(ccStep,-1);
+  if(ccStep===0){document.getElementById('coin-log').textContent='t[0] = 0  (base case: 0 coins to make amount 0)';ccStep++;return;}
+  // find best coin
+  let bestCoin=-1,bestVal=CC_AMT+1;
+  for(const c of CC_COINS) if(c<=ccStep&&ccT[ccStep-c]+1<bestVal){bestVal=ccT[ccStep-c]+1;bestCoin=c;}
+  ccRender(ccStep,ccStep-bestCoin);
+  const tries=CC_COINS.filter(c=>c<=ccStep).map(c=>`coin ${c}: t[${ccStep-c}]+1=${ccT[ccStep-c]+1}`).join(',  ');
+  document.getElementById('coin-log').textContent=`a=${ccStep}: try [${tries}]\n→ best = ${ccT[ccStep]} coin(s)`;
+  ccStep++;
+});
+function coinReset(){ccStep=0;ccRender(-1,-1);document.getElementById('coin-log').textContent='Press Step → to fill each amount from 0 to 7.';}
+ccRender(-1,-1);
+
+/* ════════════════════════════════════════
+   VIZ 4 — TRIANGLE
+   [[2],[3,4],[6,5,7],[4,1,8,3]]
+════════════════════════════════════════ */
+const TRI_ORIG=[[2],[3,4],[6,5,7],[4,1,8,3]];
+const triRows=TRI_ORIG.length;
+const triG=TRI_ORIG.map(r=>[...r]);
+// precompute bottom-up
+for(let r=triRows-2;r>=0;r--)
+  for(let k=0;k<=r;k++)
+    triG[r][k]=TRI_ORIG[r][k]+Math.min(triG[r+1][k],triG[r+1][k+1]);
+// path
+const triPath=new Set();
+let pr=0,pk=0;
+triPath.add(`${pr},${pk}`);
+while(pr<triRows-1){const a=triG[pr+1][pk],b=triG[pr+1][pk+1];pk=b<a?pk+1:pk;pr++;triPath.add(`${pr},${pk}`);}
+
+// steps: process bottom-up
+const triSteps=[];
+for(let r=triRows-2;r>=0;r--) for(let k=0;k<=r;k++) triSteps.push([r,k]);
+let triStep=0;
+// filled set
+const triFilled=new Set();
+for(let k=0;k<triRows;k++) triFilled.add(`${triRows-1},${k}`); // last row always shown
+
+function triDraw(activePair) {
+  const wrap=document.getElementById('tri-viz'); wrap.innerHTML='';
+  for(let r=0;r<triRows;r++){
+    const rowDiv=document.createElement('div'); rowDiv.className='tri-row-div';
+    for(let k=0;k<=r;k++){
+      const cell=document.createElement('div'); cell.className='tri-cell';
+      const key=`${r},${k}`;
+      const isAct=activePair&&activePair[0]===r&&activePair[1]===k;
+      const isDep=activePair&&r===activePair[0]+1&&(k===activePair[1]||k===activePair[1]+1);
+      const isFilled=triFilled.has(key);
+      if(isAct) cell.classList.add('active');
+      else if(isDep) cell.classList.add('dep');
+      else if(isFilled) cell.classList.add(triPath.has(key)?'path':'done');
+      cell.textContent=(isFilled||isAct)?triG[r][k]:TRI_ORIG[r][k];
+      rowDiv.appendChild(cell);
+    }
+    wrap.appendChild(rowDiv);
+  }
+}
+document.getElementById('tri-step-btn').addEventListener('click',()=>{
+  if(triStep>=triSteps.length){triDraw(null);document.getElementById('tri-log').textContent='✅ minimum_total = '+triG[0][0]+'. Purple = optimal path (2→3→5→1).';return;}
+  const[r,k]=triSteps[triStep];
+  triFilled.add(`${r},${k}`);
+  triDraw([r,k]);
+  const below1=triG[r+1][k], below2=triG[r+1][k+1];
+  document.getElementById('tri-log').textContent=`Row ${r}, pos ${k}: ${TRI_ORIG[r][k]} + min(${below1}, ${below2}) = ${triG[r][k]}`;
+  triStep++;
+});
+function triReset(){
+  triStep=0;
+  // reset filled to just last row
+  for(const k in triFilled) triFilled.clear();
+  for(let k=0;k<triRows;k++) triFilled.add(`${triRows-1},${k}`);
+  triDraw(null);
+  document.getElementById('tri-log').textContent='Press Step → to fill bottom-up, one cell at a time.';
+}
+triDraw(null);
+
+/* ════════════════════════════════════════
+   VIZ 5 — HOUSE ROBBER
+   nums=[2,7,9,3,1]
+════════════════════════════════════════ */
+const ROB_NUMS=[2,7,9,3,1];
+const robN=ROB_NUMS.length;
+const robT=new Array(robN).fill(0);
+robT[0]=ROB_NUMS[0];
+robT[1]=Math.max(ROB_NUMS[0],ROB_NUMS[1]);
+for(let i=2;i<robN;i++) robT[i]=Math.max(ROB_NUMS[i]+robT[i-2],robT[i-1]);
+let robStep=0;
+
+function robRender(active) {
+  const hr=document.getElementById('rob-houses'); hr.innerHTML='';
+  const dr=document.getElementById('rob-dp-row'); dr.innerHTML='';
+  ROB_NUMS.forEach((v,i)=>{
+    const h=document.createElement('div'); h.className='house';
+    const box=document.createElement('div'); box.className='house-box';
+    if(i===active) box.classList.add('active');
+    box.textContent='$'+v;
+    const lbl=document.createElement('div'); lbl.className='house-lbl'; lbl.textContent='H'+i;
+    h.appendChild(box); h.appendChild(lbl); hr.appendChild(h);
+  });
+  for(let i=0;i<robN;i++){
+    const deps=[active-1,active-2];
+    const state=i===active?'active':deps.includes(i)&&i<active?'dep':i<active?'done':null;
+    dr.appendChild(makeCell('t['+i+']',i<=active?robT[i]:null,state));
+  }
+}
+document.getElementById('rob-step-btn').addEventListener('click',()=>{
+  if(robStep>=robN){robRender(robN);document.getElementById('rob-log').textContent='✅ Max loot = $'+robT[robN-1]+'. Rob houses 0($2), 2($9), 4($1).';return;}
+  robRender(robStep);
+  let msg;
+  if(robStep===0) msg=`House 0: t[0] = $${robT[0]}  (only one house, must take it)`;
+  else if(robStep===1) msg=`House 1: t[1] = max($${ROB_NUMS[0]}, $${ROB_NUMS[1]}) = $${robT[1]}`;
+  else msg=`House ${robStep}: max(rob=$${ROB_NUMS[robStep]}+t[${robStep-2}]($${robT[robStep-2]})=$${ROB_NUMS[robStep]+robT[robStep-2]}, skip=t[${robStep-1}]($${robT[robStep-1]})) = $${robT[robStep]}`;
+  document.getElementById('rob-log').textContent=msg;
+  robStep++;
+});
+function robReset(){robStep=0;robRender(-1);document.getElementById('rob-log').textContent='Press Step → to decide rob or skip for each house.';}
+robRender(-1);
+
+/* ════════════════════════════════════════
+   VIZ 6 — HOUSE ROBBER II
+   nums=[2,3,2,5,4,1]
+════════════════════════════════════════ */
+const ROB2=[2,3,2,5,4,1];
+const rob2N=ROB2.length;
+function robRange(lo,hi){
+  let a=0,b=0;
+  for(let i=lo;i<=hi;i++){const c=Math.max(ROB2[i]+a,b);a=b;b=c;}
+  return b;
+}
+// build both dp arrays step by step
+function buildRobArr(lo,hi){
+  const t=[];
+  let a=0,b=0;
+  for(let i=lo;i<=hi;i++){const c=Math.max(ROB2[i]+a,b);a=b;b=c;t.push(b);}
+  return t;
+}
+const rob2T1=buildRobArr(0,rob2N-2); // houses 0..n-2
+const rob2T2=buildRobArr(1,rob2N-1); // houses 1..n-1
+let rob2Step=0;
+const rob2MaxSteps=Math.max(rob2T1.length,rob2T2.length)+1;
+
+function rob2Render(step) {
+  ['rob2-p1-houses','rob2-p2-houses'].forEach((id,pi)=>{
+    const container=document.getElementById(id); container.innerHTML='';
+    const range=pi===0?[0,rob2N-2]:[1,rob2N-1];
+    for(let i=0;i<rob2N;i++){
+      const h=document.createElement('div'); h.className='house';
+      const box=document.createElement('div'); box.className='house-box';
+      const excluded=(pi===0&&i===rob2N-1)||(pi===1&&i===0);
+      if(excluded){box.style.opacity='.25';box.style.borderStyle='dashed';}
+      const localIdx=i-range[0];
+      if(!excluded&&localIdx===step-1) box.classList.add('active');
+      box.textContent='$'+ROB2[i];
+      const lbl=document.createElement('div'); lbl.className='house-lbl'; lbl.textContent='H'+i;
+      h.appendChild(box); h.appendChild(lbl); container.appendChild(h);
+    }
+  });
+  ['rob2-p1-dp','rob2-p2-dp'].forEach((id,pi)=>{
+    const container=document.getElementById(id); container.innerHTML='';
+    const arr=pi===0?rob2T1:rob2T2;
+    const lo=pi===0?0:1;
+    for(let j=0;j<arr.length;j++){
+      const state=j===step-1?'active':j<step-1?'done':null;
+      container.appendChild(makeCell('H'+(lo+j),j<step?arr[j]:null,state));
+    }
+  });
+}
+document.getElementById('rob2-step-btn').addEventListener('click',()=>{
+  rob2Step++;
+  if(rob2Step>rob2MaxSteps){
+    rob2Render(rob2MaxSteps);
+    document.getElementById('rob2-log').textContent=`✅ Pass1 = $${rob2T1[rob2T1.length-1]}, Pass2 = $${rob2T2[rob2T2.length-1]}\nAnswer = max($${rob2T1[rob2T1.length-1]}, $${rob2T2[rob2T2.length-1]}) = $${Math.max(rob2T1[rob2T1.length-1],rob2T2[rob2T2.length-1])}`;
+    return;
+  }
+  rob2Render(rob2Step);
+  const i=rob2Step-1;
+  const p1=i<rob2T1.length?`Pass1: H${i} → $${rob2T1[i]}`:'Pass1: complete';
+  const p2=i<rob2T2.length?`Pass2: H${i+1} → $${rob2T2[i]}`:'Pass2: complete';
+  document.getElementById('rob2-log').textContent=`Step ${rob2Step}: ${p1}    ${p2}`;
+});
+function rob2Reset(){rob2Step=0;rob2Render(0);document.getElementById('rob2-log').textContent='Press Step → to advance both passes simultaneously.';}
+rob2Render(0);
+
+/* ════════════════════════════════════════
+   VIZ 7 — MIN COST TICKETS
+   days=[1,4,6,7,8,20], costs=[2,7,15]
+════════════════════════════════════════ */
+const TK_DAYS=new Set([1,4,6,7,8,20]);
+const TK_COSTS=[2,7,15];
+const tkDp=new Array(21).fill(0);
+for(let i=1;i<=20;i++){
+  if(!TK_DAYS.has(i)){tkDp[i]=tkDp[i-1];continue;}
+  tkDp[i]=Math.min(
+    tkDp[i-1]+TK_COSTS[0],
+    tkDp[Math.max(0,i-7)]+TK_COSTS[1],
+    tkDp[Math.max(0,i-30)]+TK_COSTS[2]
+  );
+}
+let tkStep=0;
+
+function tkRender(active) {
+  const row=document.getElementById('ticket-arr'); row.innerHTML='';
+  for(let i=1;i<=20;i++){
+    const cell=document.createElement('div'); cell.className='cell';
+    const ci=document.createElement('div'); ci.className='ci'; ci.textContent='d'+i;
+    const cv=document.createElement('div'); cv.className='cv';
+    const isTravel=TK_DAYS.has(i);
+    if(i<active){
+      cv.classList.add('done');
+      if(isTravel) cv.style.borderColor='var(--orange)';
+    } else if(i===active) cv.classList.add('active');
+    cv.textContent=i<=active?tkDp[i]:'?';
+    if(i<=active&&isTravel) cv.style.color='var(--orange)';
+    cell.appendChild(ci); cell.appendChild(cv); row.appendChild(cell);
+  }
+}
+document.getElementById('ticket-step-btn').addEventListener('click',()=>{
+  tkStep++;
+  if(tkStep>20){tkRender(21);document.getElementById('ticket-log').textContent='✅ Min total cost = $'+tkDp[20];return;}
+  tkRender(tkStep);
+  if(!TK_DAYS.has(tkStep)){
+    document.getElementById('ticket-log').textContent=`Day ${tkStep}: not a travel day → carry forward $${tkDp[tkStep]}`;
+  } else {
+    const c1=tkDp[tkStep-1]+TK_COSTS[0];
+    const c7=tkDp[Math.max(0,tkStep-7)]+TK_COSTS[1];
+    const c30=tkDp[Math.max(0,tkStep-30)]+TK_COSTS[2];
+    document.getElementById('ticket-log').textContent=`Day ${tkStep} (TRAVEL DAY):\n  1-day pass: dp[${tkStep-1}]+$${TK_COSTS[0]} = $${c1}\n  7-day pass: dp[${Math.max(0,tkStep-7)}]+$${TK_COSTS[1]} = $${c7}\n  30-day pass: dp[${Math.max(0,tkStep-30)}]+$${TK_COSTS[2]} = $${c30}\n  → best = $${tkDp[tkStep]}`;
+  }
+});
+function ticketReset(){tkStep=0;tkRender(0);document.getElementById('ticket-log').textContent='Press Step → to advance one day at a time.';}
+tkRender(0);
+updateThemeButton();
+</script>
+</body>
+</html>

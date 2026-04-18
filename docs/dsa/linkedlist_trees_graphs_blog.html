@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LinkedList · Binary Trees · Graphs — AlgorithmCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  } catch (e) {}
+})();
+</script>
+<style>
+:root {
+  --bg:#0d0f14; --bg2:#13161d; --bg3:#1a1e28; --border:#252a38;
+  --text:#e8eaf0; --muted:#7a8099;
+  --accent:#f97316; --accent2:#3b82f6; --accent3:#10b981;
+  --accent4:#f59e0b; --accent5:#a78bfa; --red:#ef4444;
+  --code-bg:#0a0c10;
+}
+html.light {
+  --bg:#f7f3ec; --bg2:#fffdfa; --bg3:#f0e8dd; --border:#ddcdbb;
+  --text:#2c2621; --muted:#786a5d;
+  --accent:#c86432; --accent2:#2563eb; --accent3:#0f9f6e;
+  --accent4:#c98507; --accent5:#8b5cf6; --red:#dc2626;
+  --code-bg:#f5efe7;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.7}
+
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:0 36px;height:56px;background:rgba(13,15,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+html.light nav{background:rgba(247,243,236,.95)}
+.nav-brand{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--accent);text-decoration:none;margin-right:4px}
+nav a{color:var(--muted);text-decoration:none;font-size:.82rem;font-weight:500;transition:color .2s}
+nav a:hover{color:var(--text)}
+.nav-sep{color:var(--border);font-size:.8rem}
+.lang-toggle{display:flex;gap:4px;margin-left:auto;background:var(--bg3);border-radius:8px;padding:3px}
+.lang-btn{background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:.78rem;padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .2s}
+.lang-btn.active{background:var(--accent);color:#fff}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.78rem;padding:7px 12px;border-radius:8px;cursor:pointer;transition:all .2s}
+.theme-btn:hover{color:var(--text);border-color:var(--accent)}
+
+.hero{padding:80px 40px 60px;max-width:860px;margin:0 auto;border-bottom:1px solid var(--border)}
+.hero-tag{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.12;margin-bottom:20px}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:640px}
+.hero-pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 14px;font-size:.78rem;color:var(--muted);font-family:'DM Mono',monospace}
+
+.topic-nav{display:flex;max-width:860px;margin:0 auto;padding:0 40px;border-bottom:1px solid var(--border)}
+.topic-tab{flex:1;padding:16px 12px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-family:'DM Serif Display',serif;font-size:1.05rem;cursor:pointer;transition:all .2s;text-align:center}
+.topic-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.topic-section{display:none}
+.topic-section.active{display:block}
+
+.content{max-width:860px;margin:0 auto;padding:0 40px 100px}
+.section-header{padding-top:60px;margin-bottom:26px}
+.section-num{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;display:block}
+.section-header h2{font-family:'DM Serif Display',serif;font-size:1.85rem}
+.section-divider{width:40px;height:2px;background:var(--accent);margin-top:12px}
+
+p{margin-bottom:15px;color:var(--muted)}
+p strong{color:var(--text)}
+h3{font-family:'DM Serif Display',serif;font-size:1.2rem;margin:26px 0 10px;color:var(--text)}
+h4{font-size:.92rem;font-weight:600;margin:18px 0 6px;color:var(--text)}
+
+.callout{border-left:3px solid var(--accent);background:rgba(249,115,22,.07);padding:13px 17px;border-radius:0 8px 8px 0;margin:18px 0}
+.callout.blue{border-color:var(--accent2);background:rgba(59,130,246,.07)}
+.callout.green{border-color:var(--accent3);background:rgba(16,185,129,.07)}
+.callout.yellow{border-color:var(--accent4);background:rgba(245,158,11,.07)}
+.callout p{margin:0;font-size:.88rem}
+.callout strong{color:var(--text)}
+
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+.lang-pane{display:none}
+.lang-pane.active{display:block}
+pre{padding:17px 21px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:.79rem;line-height:1.75}
+.kw{color:#c792ea}.type{color:#82aaff}.fn{color:#82cffd}.str{color:#c3e88d}.cm{color:#546e7a;font-style:italic}.num{color:#f78c6c}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.85rem}
+th{text-align:left;padding:9px 13px;background:var(--bg3);color:var(--text);font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:8px 13px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top}
+td:first-child{color:var(--text);font-family:'DM Mono',monospace;font-size:.79rem}
+tr:last-child td{border-bottom:none}
+.yes{color:var(--accent3)}.no{color:var(--red)}
+
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0}
+.method-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 14px}
+.method-card .mn{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--accent2);margin-bottom:4px}
+.method-card .md{font-size:.78rem;color:var(--muted);margin:0}
+.method-card .mr{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--accent3);margin-top:3px}
+@media(max-width:600px){.method-grid{grid-template-columns:1fr}}
+
+/* SVG VISUALIZERS */
+.visualizer{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin:22px 0}
+.viz-title{font-family:'DM Mono',monospace;font-size:.74rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.viz-svg-wrap{width:100%;overflow-x:auto;margin-bottom:12px}
+.viz-svg-wrap svg{max-width:100%;display:block;margin:0 auto}
+.viz-log{background:var(--code-bg);border:1px solid var(--border);border-radius:7px;padding:10px 13px;min-height:48px;font-family:'DM Mono',monospace;font-size:.77rem;color:var(--accent3);margin-bottom:13px}
+.viz-controls{display:flex;gap:9px}
+.viz-btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:7px 17px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.viz-btn:hover{opacity:.85}
+.viz-btn.sec{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+
+.pattern-badge{display:inline-block;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 9px;font-family:'DM Mono',monospace;font-size:.72rem;color:var(--accent5);margin-bottom:12px}
+.problem-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:20px;margin:16px 0}
+.problem-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.problem-title{font-weight:600;font-size:.96rem}
+.diff{font-size:.72rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:11px}
+.diff.easy{background:rgba(16,185,129,.15);color:var(--accent3)}
+.diff.medium{background:rgba(245,158,11,.15);color:var(--accent4)}
+.diff.hard{background:rgba(239,68,68,.15);color:var(--red)}
+
+.cheatsheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:18px 0}
+.cs-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:16px}
+.cs-card h4{color:var(--accent);font-family:'DM Mono',monospace;font-size:.78rem;margin-bottom:9px}
+.cs-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:.78rem}
+.cs-row:last-child{border:none}
+.cs-key{font-family:'DM Mono',monospace;color:var(--accent2);font-size:.76rem}
+.cs-val{color:var(--muted);font-size:.76rem;text-align:right}
+@media(max-width:640px){.cheatsheet-grid{grid-template-columns:1fr}}
+
+footer{text-align:center;padding:40px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">AlgorithmCraft</a>
+  <a href="#ll-core">LinkedList</a>
+  <a href="#bt-core">Binary Trees</a>
+  <a href="#gr-core">Graphs</a>
+  <span class="nav-sep">·</span>
+  <a href="#deepdive">Deep Dives</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <div class="lang-toggle" style="margin-left:auto">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Data Structures · DSA Foundations</div>
+  <h1>LinkedList · Trees · Graphs<br/><em>Pointers, Recursion &amp; Traversal.</em></h1>
+  <p>These three structures share a common thread: <strong>you navigate them with pointers</strong>. Master pointer manipulation, recursive thinking, and traversal order — and 80% of interview problems become recognizable patterns.</p>
+  <div class="hero-pills">
+    <span class="pill">Fast &amp; Slow pointers</span>
+    <span class="pill">DFS / BFS</span>
+    <span class="pill">In-order traversal</span>
+    <span class="pill">Cycle detection</span>
+    <span class="pill">Topological sort</span>
+    <span class="pill">Union-Find</span>
+  </div>
+</div>
+
+<div class="topic-nav">
+  <button class="topic-tab active" onclick="showTopic('ll',this)">LinkedList</button>
+  <button class="topic-tab" onclick="showTopic('bt',this)">Binary Trees</button>
+  <button class="topic-tab" onclick="showTopic('gr',this)">Graphs</button>
+</div>
+
+<!-- ══════════════════ LINKED LIST ══════════════════ -->
+<div id="topic-ll" class="topic-section active">
+<div class="content">
+
+  <div class="section-header" id="ll-core">
+    <span class="section-num">01 — Core Insight</span>
+    <h2>LinkedList: Pointer Surgery</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>Every LinkedList problem reduces to <strong>manipulating the next pointers</strong> without losing your place. The most common mistake is reassigning a pointer before saving the reference you still need. Draw the list, identify which pointers change, and save them before you overwrite.</p>
+
+  <div class="callout">
+    <p><strong>The Core Insight:</strong> Use a <strong>dummy head node</strong> to eliminate edge cases at the front of the list. Instead of special-casing "what if the head is removed?", prepend a dummy node and always return dummy.next. This single habit solves 90% of pointer-management bugs.</p>
+  </div>
+
+  <h3>Node Structure</h3>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Standard singly linked list node</span>
+<span class="kw">class</span> <span class="type">ListNode</span> {
+    <span class="kw">int</span> val;
+    <span class="type">ListNode</span> next;
+    <span class="type">ListNode</span>(<span class="kw">int</span> val) { <span class="kw">this</span>.val = val; }
+}
+
+<span class="cm">// Doubly linked list node</span>
+<span class="kw">class</span> <span class="type">DListNode</span> {
+    <span class="kw">int</span> val;
+    <span class="type">DListNode</span> prev, next;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">class</span> <span class="type">ListNode</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, val=<span class="num">0</span>, next=<span class="kw">None</span>):
+        self.val = val
+        self.next = next</pre>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-num">02 — The 4 Patterns</span>
+    <h2>LinkedList Patterns</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="pattern-badge">Pattern 1 · Fast &amp; Slow Pointers</div>
+  <p>Two pointers that move at different speeds. Fast moves 2 steps, slow moves 1. When fast reaches the end, slow is at the middle. When fast meets slow again, there's a cycle.</p>
+  <div class="callout green">
+    <p><strong>Why it works:</strong> In a cycle of length L, fast gains one step on slow per iteration. They must meet within L steps — like two runners on a circular track. Floyd's algorithm is the gold standard for cycle detection.</p>
+  </div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Detect cycle (LC 141)</span>
+<span class="kw">public boolean</span> <span class="fn">hasCycle</span>(<span class="type">ListNode</span> head) {
+    <span class="type">ListNode</span> slow = head, fast = head;
+    <span class="kw">while</span> (fast != <span class="kw">null</span> &amp;&amp; fast.next != <span class="kw">null</span>) {
+        slow = slow.next;
+        fast = fast.next.next;
+        <span class="kw">if</span> (slow == fast) <span class="kw">return true</span>;
+    }
+    <span class="kw">return false</span>;
+}
+
+<span class="cm">// Find middle node (LC 876)</span>
+<span class="kw">public</span> <span class="type">ListNode</span> <span class="fn">middleNode</span>(<span class="type">ListNode</span> head) {
+    <span class="type">ListNode</span> slow = head, fast = head;
+    <span class="kw">while</span> (fast != <span class="kw">null</span> &amp;&amp; fast.next != <span class="kw">null</span>) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    <span class="kw">return</span> slow; <span class="cm">// at middle when fast hits end</span>
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">has_cycle</span>(head):
+    slow = fast = head
+    <span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="kw">if</span> slow <span class="kw">is</span> fast: <span class="kw">return True</span>
+    <span class="kw">return False</span>
+
+<span class="kw">def</span> <span class="fn">middle_node</span>(head):
+    slow = fast = head
+    <span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    <span class="kw">return</span> slow</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 2 · Reversal</div>
+  <p>The classic three-pointer reversal. Save next, flip the arrow, advance. The iterative version is O(1) space; the recursive version is elegant but O(n) stack space.</p>
+  <div class="callout yellow">
+    <p><strong>Common bug:</strong> Saving <code>prev</code> but forgetting to update it. The three assignments must happen in this order every iteration: <code>next = curr.next</code> → <code>curr.next = prev</code> → <code>prev = curr</code> → <code>curr = next</code>.</p>
+  </div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Reverse entire list (LC 206)</span>
+<span class="kw">public</span> <span class="type">ListNode</span> <span class="fn">reverseList</span>(<span class="type">ListNode</span> head) {
+    <span class="type">ListNode</span> prev = <span class="kw">null</span>, curr = head;
+    <span class="kw">while</span> (curr != <span class="kw">null</span>) {
+        <span class="type">ListNode</span> next = curr.next; <span class="cm">// 1. save next</span>
+        curr.next = prev;          <span class="cm">// 2. flip arrow</span>
+        prev = curr;               <span class="cm">// 3. advance prev</span>
+        curr = next;               <span class="cm">// 4. advance curr</span>
+    }
+    <span class="kw">return</span> prev;
+}
+
+<span class="cm">// Reverse sublist from left to right (LC 92)</span>
+<span class="kw">public</span> <span class="type">ListNode</span> <span class="fn">reverseBetween</span>(<span class="type">ListNode</span> head, <span class="kw">int</span> left, <span class="kw">int</span> right) {
+    <span class="type">ListNode</span> dummy = <span class="kw">new</span> <span class="type">ListNode</span>(<span class="num">0</span>);
+    dummy.next = head;
+    <span class="type">ListNode</span> pre = dummy;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; left; i++) pre = pre.next;
+    <span class="type">ListNode</span> curr = pre.next;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; right - left; i++) {
+        <span class="type">ListNode</span> next = curr.next;
+        curr.next = next.next;
+        next.next = pre.next;
+        pre.next = next;
+    }
+    <span class="kw">return</span> dummy.next;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">reverse_list</span>(head):
+    prev, curr = <span class="kw">None</span>, head
+    <span class="kw">while</span> curr:
+        nxt = curr.next   <span class="cm"># 1. save next</span>
+        curr.next = prev  <span class="cm"># 2. flip</span>
+        prev = curr       <span class="cm"># 3. advance prev</span>
+        curr = nxt        <span class="cm"># 4. advance curr</span>
+    <span class="kw">return</span> prev</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 3 · Merge &amp; Sort</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Merge two sorted lists (LC 21)</span>
+<span class="kw">public</span> <span class="type">ListNode</span> <span class="fn">mergeTwoLists</span>(<span class="type">ListNode</span> l1, <span class="type">ListNode</span> l2) {
+    <span class="type">ListNode</span> dummy = <span class="kw">new</span> <span class="type">ListNode</span>(<span class="num">0</span>); <span class="cm">// dummy head eliminates edge cases</span>
+    <span class="type">ListNode</span> curr = dummy;
+    <span class="kw">while</span> (l1 != <span class="kw">null</span> &amp;&amp; l2 != <span class="kw">null</span>) {
+        <span class="kw">if</span> (l1.val &lt;= l2.val) { curr.next = l1; l1 = l1.next; }
+        <span class="kw">else</span>                   { curr.next = l2; l2 = l2.next; }
+        curr = curr.next;
+    }
+    curr.next = (l1 != <span class="kw">null</span>) ? l1 : l2; <span class="cm">// attach remaining</span>
+    <span class="kw">return</span> dummy.next;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">merge_two_lists</span>(l1, l2):
+    dummy = curr = <span class="type">ListNode</span>(<span class="num">0</span>)
+    <span class="kw">while</span> l1 <span class="kw">and</span> l2:
+        <span class="kw">if</span> l1.val &lt;= l2.val: curr.next = l1; l1 = l1.next
+        <span class="kw">else</span>:                curr.next = l2; l2 = l2.next
+        curr = curr.next
+    curr.next = l1 <span class="kw">or</span> l2
+    <span class="kw">return</span> dummy.next</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 4 · Remove / Nth from End</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Remove Nth node from end (LC 19) — one pass</span>
+<span class="kw">public</span> <span class="type">ListNode</span> <span class="fn">removeNthFromEnd</span>(<span class="type">ListNode</span> head, <span class="kw">int</span> n) {
+    <span class="type">ListNode</span> dummy = <span class="kw">new</span> <span class="type">ListNode</span>(<span class="num">0</span>);
+    dummy.next = head;
+    <span class="type">ListNode</span> fast = dummy, slow = dummy;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= n; i++) fast = fast.next; <span class="cm">// gap of n+1</span>
+    <span class="kw">while</span> (fast != <span class="kw">null</span>) { fast = fast.next; slow = slow.next; }
+    slow.next = slow.next.next; <span class="cm">// skip the nth node</span>
+    <span class="kw">return</span> dummy.next;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">remove_nth_from_end</span>(head, n):
+    dummy = <span class="type">ListNode</span>(<span class="num">0</span>)
+    dummy.next = head
+    fast = slow = dummy
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n + <span class="num">1</span>): fast = fast.next
+    <span class="kw">while</span> fast:
+        fast = fast.next
+        slow = slow.next
+    slow.next = slow.next.next
+    <span class="kw">return</span> dummy.next</pre>
+    </div>
+  </div>
+
+  <!-- LL VISUALIZER -->
+  <div class="section-header">
+    <span class="section-num">03 — Visualizer</span>
+    <h2>Fast &amp; Slow — Cycle Detection</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="visualizer">
+    <div class="viz-title">▶ Floyd's Cycle Detection — List with cycle at node 3</div>
+    <div class="viz-svg-wrap"><svg id="ll-svg" viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="height:120px"></svg></div>
+    <div class="viz-log" id="ll-log">Press Step → to begin. Slow=🟠 Fast=🔵</div>
+    <div class="viz-controls">
+      <button class="viz-btn" id="ll-step-btn">Step →</button>
+      <button class="viz-btn sec" onclick="llReset()">Reset</button>
+    </div>
+  </div>
+
+  <!-- LL DEEP DIVES -->
+  <div class="section-header" id="deepdive">
+    <span class="section-num">04 — Deep Dives</span>
+    <h2>LinkedList Problems Worth Studying</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 25 · Reverse Nodes in K-Group</span>
+      <span class="diff hard">Hard</span>
+    </div>
+    <p>Reverse every group of k nodes. If fewer than k remain, leave them as-is. Requires careful pointer management: find the k-th node, reverse the group, reconnect.</p>
+    <div class="callout green">
+      <p><strong>Key insight:</strong> Check if k nodes remain before reversing. Use a helper to reverse k nodes and return the new head and the node after the group. Recursively attach the result of the next group.</p>
+    </div>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public</span> <span class="type">ListNode</span> <span class="fn">reverseKGroup</span>(<span class="type">ListNode</span> head, <span class="kw">int</span> k) {
+    <span class="type">ListNode</span> curr = head;
+    <span class="kw">int</span> count = <span class="num">0</span>;
+    <span class="kw">while</span> (curr != <span class="kw">null</span> &amp;&amp; count &lt; k) { curr = curr.next; count++; }
+    <span class="kw">if</span> (count &lt; k) <span class="kw">return</span> head; <span class="cm">// fewer than k nodes remain</span>
+    <span class="type">ListNode</span> prev = <span class="kw">null</span>, node = head;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; k; i++) {
+        <span class="type">ListNode</span> next = node.next;
+        node.next = prev; prev = node; node = next;
+    }
+    head.next = <span class="fn">reverseKGroup</span>(node, k); <span class="cm">// head is now tail of reversed group</span>
+    <span class="kw">return</span> prev;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">reverse_k_group</span>(head, k):
+    curr, count = head, <span class="num">0</span>
+    <span class="kw">while</span> curr <span class="kw">and</span> count &lt; k:
+        curr = curr.next; count += <span class="num">1</span>
+    <span class="kw">if</span> count &lt; k: <span class="kw">return</span> head
+    prev, node = <span class="kw">None</span>, head
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(k):
+        nxt = node.next; node.next = prev; prev = node; node = nxt
+    head.next = <span class="fn">reverse_k_group</span>(node, k)
+    <span class="kw">return</span> prev</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 142 · Linked List Cycle II</span>
+      <span class="diff medium">Medium</span>
+    </div>
+    <p>Find the exact node where a cycle begins. After Floyd's detection (slow meets fast), reset one pointer to head, then advance both by 1. They meet at the cycle entrance.</p>
+    <div class="callout green">
+      <p><strong>Mathematical proof:</strong> When fast and slow meet inside the cycle, the distance from head to cycle entrance equals the distance from the meeting point to cycle entrance (going forward). So pointer from head + pointer from meeting point both reach entrance at the same step.</p>
+    </div>
+  </div>
+
+  <!-- LL CHEAT SHEET -->
+  <div class="section-header" id="cheatsheet">
+    <span class="section-num">05 — Cheat Sheet</span>
+    <h2>LinkedList Quick Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="cheatsheet-grid">
+    <div class="cs-card">
+      <h4>Patterns</h4>
+      <div class="cs-row"><span class="cs-key">Cycle detect</span><span class="cs-val">fast/slow — meet = cycle</span></div>
+      <div class="cs-row"><span class="cs-key">Find middle</span><span class="cs-val">fast/slow — slow at mid</span></div>
+      <div class="cs-row"><span class="cs-key">Nth from end</span><span class="cs-val">gap of n+1 between pointers</span></div>
+      <div class="cs-row"><span class="cs-key">Reverse</span><span class="cs-val">prev → curr → next, 3 ptrs</span></div>
+      <div class="cs-row"><span class="cs-key">Merge sorted</span><span class="cs-val">dummy head + compare vals</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Must-Know LCs</h4>
+      <div class="cs-row"><span class="cs-key">206</span><span class="cs-val">Reverse Linked List</span></div>
+      <div class="cs-row"><span class="cs-key">21</span><span class="cs-val">Merge Two Sorted Lists</span></div>
+      <div class="cs-row"><span class="cs-key">141 / 142</span><span class="cs-val">Cycle Detection I &amp; II</span></div>
+      <div class="cs-row"><span class="cs-key">19</span><span class="cs-val">Remove Nth From End</span></div>
+      <div class="cs-row"><span class="cs-key">25</span><span class="cs-val">Reverse K Group (Hard)</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>Interview sentence:</strong> "I'll use a dummy head node to avoid special-casing the front of the list, and a fast/slow pointer pair — fast advances two steps per iteration, so when it reaches the end, slow is exactly at the midpoint, which gives me O(n) with O(1) extra space."</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════ BINARY TREES ══════════════════ -->
+<div id="topic-bt" class="topic-section">
+<div class="content">
+
+  <div class="section-header" id="bt-core">
+    <span class="section-num">01 — Core Insight</span>
+    <h2>Binary Trees: Think Recursively</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>Every tree problem decomposes the same way: <strong>what do I need from my left child, what do I need from my right child, and how do I combine them with my current node?</strong> If you can answer that, you can write the recursive solution.</p>
+
+  <div class="callout">
+    <p><strong>The Core Insight:</strong> A binary tree IS recursion — the left subtree and right subtree are themselves binary trees. Trust the recursive call to return the correct answer for the subtree. Your only job at each node is to combine those two answers correctly with the current node's value.</p>
+  </div>
+
+  <h3>Node Structure &amp; Traversals</h3>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="kw">class</span> <span class="type">TreeNode</span> {
+    <span class="kw">int</span> val;
+    <span class="type">TreeNode</span> left, right;
+    <span class="type">TreeNode</span>(<span class="kw">int</span> val) { <span class="kw">this</span>.val = val; }
+}
+
+<span class="cm">// Inorder: left → root → right  (gives sorted order in BST)</span>
+<span class="kw">void</span> <span class="fn">inorder</span>(<span class="type">TreeNode</span> root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="fn">inorder</span>(root.left);
+    <span class="fn">process</span>(root.val);
+    <span class="fn">inorder</span>(root.right);
+}
+
+<span class="cm">// Preorder: root → left → right  (good for serialization)</span>
+<span class="cm">// Postorder: left → right → root  (good for deletion, heights)</span>
+<span class="cm">// Level-order: BFS with a queue</span></pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">class</span> <span class="type">TreeNode</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, val=<span class="num">0</span>, left=<span class="kw">None</span>, right=<span class="kw">None</span>):
+        self.val = val
+        self.left = left
+        self.right = right
+
+<span class="cm"># Inorder: left → root → right</span>
+<span class="kw">def</span> <span class="fn">inorder</span>(root):
+    <span class="kw">if not</span> root: <span class="kw">return</span>
+    <span class="fn">inorder</span>(root.left)
+    <span class="fn">process</span>(root.val)
+    <span class="fn">inorder</span>(root.right)</pre>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Traversal</th><th>Order</th><th>Key use case</th><th>Stack / Queue</th></tr></thead>
+    <tbody>
+      <tr><td>Inorder</td><td>Left → Root → Right</td><td>BST sorted output, kth smallest</td><td>Stack (iterative)</td></tr>
+      <tr><td>Preorder</td><td>Root → Left → Right</td><td>Serialize tree, clone tree</td><td>Stack (iterative)</td></tr>
+      <tr><td>Postorder</td><td>Left → Right → Root</td><td>Height, delete tree, evaluate expr</td><td>Stack (iterative)</td></tr>
+      <tr><td>Level-order</td><td>Level by level</td><td>Level sums, zigzag, rightmost view</td><td>Queue (BFS)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-header">
+    <span class="section-num">02 — The 4 Patterns</span>
+    <h2>Binary Tree Patterns</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="pattern-badge">Pattern 1 · Recursive Aggregation (Height / Diameter)</div>
+  <p>Post-order recursion: compute answers for both subtrees, combine at current node. Height and diameter are the canonical examples — height propagates upward, diameter is computed at every node.</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Diameter = longest path between any two nodes (LC 543)</span>
+<span class="kw">int</span> maxDiameter = <span class="num">0</span>;
+
+<span class="kw">public int</span> <span class="fn">diameterOfBinaryTree</span>(<span class="type">TreeNode</span> root) {
+    <span class="fn">height</span>(root);
+    <span class="kw">return</span> maxDiameter;
+}
+
+<span class="kw">private int</span> <span class="fn">height</span>(<span class="type">TreeNode</span> node) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">int</span> left  = <span class="fn">height</span>(node.left);
+    <span class="kw">int</span> right = <span class="fn">height</span>(node.right);
+    maxDiameter = <span class="type">Math</span>.<span class="fn">max</span>(maxDiameter, left + right); <span class="cm">// diameter at this node</span>
+    <span class="kw">return</span> <span class="num">1</span> + <span class="type">Math</span>.<span class="fn">max</span>(left, right);                 <span class="cm">// height propagates up</span>
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">diameter_of_binary_tree</span>(root):
+    res = [<span class="num">0</span>]
+    <span class="kw">def</span> <span class="fn">height</span>(node):
+        <span class="kw">if not</span> node: <span class="kw">return</span> <span class="num">0</span>
+        l, r = <span class="fn">height</span>(node.left), <span class="fn">height</span>(node.right)
+        res[<span class="num">0</span>] = <span class="fn">max</span>(res[<span class="num">0</span>], l + r)
+        <span class="kw">return</span> <span class="num">1</span> + <span class="fn">max</span>(l, r)
+    <span class="fn">height</span>(root)
+    <span class="kw">return</span> res[<span class="num">0</span>]</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 2 · Path Problems (Max Path Sum)</div>
+  <div class="callout green">
+    <p><strong>Two return values in one:</strong> When solving path problems, your recursive function returns the <em>best single branch going down</em> (for the parent to extend), but updates a global max that counts <em>both branches at once</em> (paths that go through this node). Never confuse these two values.</p>
+  </div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Binary Tree Maximum Path Sum (LC 124)</span>
+<span class="kw">int</span> maxSum = <span class="type">Integer</span>.MIN_VALUE;
+
+<span class="kw">public int</span> <span class="fn">maxPathSum</span>(<span class="type">TreeNode</span> root) {
+    <span class="fn">dfs</span>(root);
+    <span class="kw">return</span> maxSum;
+}
+
+<span class="kw">private int</span> <span class="fn">dfs</span>(<span class="type">TreeNode</span> node) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">int</span> left  = <span class="type">Math</span>.<span class="fn">max</span>(<span class="num">0</span>, <span class="fn">dfs</span>(node.left));  <span class="cm">// ignore negative branches</span>
+    <span class="kw">int</span> right = <span class="type">Math</span>.<span class="fn">max</span>(<span class="num">0</span>, <span class="fn">dfs</span>(node.right));
+    maxSum = <span class="type">Math</span>.<span class="fn">max</span>(maxSum, node.val + left + right); <span class="cm">// path through node</span>
+    <span class="kw">return</span> node.val + <span class="type">Math</span>.<span class="fn">max</span>(left, right); <span class="cm">// single best branch upward</span>
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">max_path_sum</span>(root):
+    res = [<span class="fn">float</span>(<span class="str">'-inf'</span>)]
+    <span class="kw">def</span> <span class="fn">dfs</span>(node):
+        <span class="kw">if not</span> node: <span class="kw">return</span> <span class="num">0</span>
+        l = <span class="fn">max</span>(<span class="num">0</span>, <span class="fn">dfs</span>(node.left))
+        r = <span class="fn">max</span>(<span class="num">0</span>, <span class="fn">dfs</span>(node.right))
+        res[<span class="num">0</span>] = <span class="fn">max</span>(res[<span class="num">0</span>], node.val + l + r)
+        <span class="kw">return</span> node.val + <span class="fn">max</span>(l, r)
+    <span class="fn">dfs</span>(root)
+    <span class="kw">return</span> res[<span class="num">0</span>]</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 3 · Level-Order BFS</div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Level order traversal (LC 102) — captures each level</span>
+<span class="kw">public</span> <span class="type">List</span>&lt;<span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; <span class="fn">levelOrder</span>(<span class="type">TreeNode</span> root) {
+    <span class="type">List</span>&lt;<span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; res = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> res;
+    <span class="type">Deque</span>&lt;<span class="type">TreeNode</span>&gt; q = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    q.<span class="fn">offer</span>(root);
+    <span class="kw">while</span> (!q.<span class="fn">isEmpty</span>()) {
+        <span class="kw">int</span> size = q.<span class="fn">size</span>();
+        <span class="type">List</span>&lt;<span class="type">Integer</span>&gt; level = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; size; i++) {
+            <span class="type">TreeNode</span> node = q.<span class="fn">poll</span>();
+            level.<span class="fn">add</span>(node.val);
+            <span class="kw">if</span> (node.left  != <span class="kw">null</span>) q.<span class="fn">offer</span>(node.left);
+            <span class="kw">if</span> (node.right != <span class="kw">null</span>) q.<span class="fn">offer</span>(node.right);
+        }
+        res.<span class="fn">add</span>(level);
+    }
+    <span class="kw">return</span> res;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">level_order</span>(root):
+    <span class="kw">if not</span> root: <span class="kw">return</span> []
+    q, res = <span class="fn">deque</span>([root]), []
+    <span class="kw">while</span> q:
+        level = []
+        <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(q)):
+            node = q.<span class="fn">popleft</span>()
+            level.<span class="fn">append</span>(node.val)
+            <span class="kw">if</span> node.left:  q.<span class="fn">append</span>(node.left)
+            <span class="kw">if</span> node.right: q.<span class="fn">append</span>(node.right)
+        res.<span class="fn">append</span>(level)
+    <span class="kw">return</span> res</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 4 · BST Properties</div>
+  <p>In a BST, inorder traversal gives sorted order. Use this to validate, find kth smallest, and convert to/from sorted arrays. The constraint <code>left &lt; root &lt; right</code> applies to the <em>entire</em> subtree, not just immediate children — pass bounds down recursively.</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Validate BST (LC 98) — pass bounds down</span>
+<span class="kw">public boolean</span> <span class="fn">isValidBST</span>(<span class="type">TreeNode</span> root) {
+    <span class="kw">return</span> <span class="fn">validate</span>(root, <span class="kw">null</span>, <span class="kw">null</span>);
+}
+<span class="kw">private boolean</span> <span class="fn">validate</span>(<span class="type">TreeNode</span> node, <span class="type">Integer</span> min, <span class="type">Integer</span> max) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return true</span>;
+    <span class="kw">if</span> (min != <span class="kw">null</span> &amp;&amp; node.val &lt;= min) <span class="kw">return false</span>;
+    <span class="kw">if</span> (max != <span class="kw">null</span> &amp;&amp; node.val &gt;= max) <span class="kw">return false</span>;
+    <span class="kw">return</span> <span class="fn">validate</span>(node.left, min, node.val)
+        &amp;&amp; <span class="fn">validate</span>(node.right, node.val, max);
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">is_valid_bst</span>(root):
+    <span class="kw">def</span> <span class="fn">validate</span>(node, lo, hi):
+        <span class="kw">if not</span> node: <span class="kw">return True</span>
+        <span class="kw">if not</span> (lo &lt; node.val &lt; hi): <span class="kw">return False</span>
+        <span class="kw">return</span> (<span class="fn">validate</span>(node.left, lo, node.val) <span class="kw">and</span>
+                <span class="fn">validate</span>(node.right, node.val, hi))
+    <span class="kw">return</span> <span class="fn">validate</span>(root, <span class="fn">float</span>(<span class="str">'-inf'</span>), <span class="fn">float</span>(<span class="str">'inf'</span>))</pre>
+    </div>
+  </div>
+
+  <!-- BT VISUALIZER -->
+  <div class="section-header">
+    <span class="section-num">03 — Visualizer</span>
+    <h2>DFS Traversal Orders</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="visualizer">
+    <div class="viz-title">▶ Inorder / Preorder / Postorder — toggle and step through</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="viz-btn" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);font-size:.8rem" id="bt-in-btn" onclick="btSetMode('in',this)">Inorder</button>
+      <button class="viz-btn" style="background:var(--accent);color:#fff;font-size:.8rem" id="bt-pre-btn" onclick="btSetMode('pre',this)">Preorder</button>
+      <button class="viz-btn" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);font-size:.8rem" id="bt-post-btn" onclick="btSetMode('post',this)">Postorder</button>
+    </div>
+    <div class="viz-svg-wrap"><svg id="bt-svg" viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg" style="height:200px"></svg></div>
+    <div style="font-family:'DM Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:10px">Visit order: <span id="bt-order" style="color:var(--accent3)">—</span></div>
+    <div class="viz-log" id="bt-log">Press Step → to begin</div>
+    <div class="viz-controls">
+      <button class="viz-btn" id="bt-step-btn">Step →</button>
+      <button class="viz-btn sec" onclick="btReset()">Reset</button>
+    </div>
+  </div>
+
+  <!-- BT DEEP DIVES -->
+  <div class="section-header">
+    <span class="section-num">04 — Deep Dives</span>
+    <h2>Tree Problems Worth Studying</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 124 · Binary Tree Maximum Path Sum</span>
+      <span class="diff hard">Hard</span>
+    </div>
+    <p>Find the path with the maximum sum. Paths can start and end at any node. The key: distinguish between "best gain going up to parent" and "best path through this node."</p>
+    <div class="callout yellow">
+      <p><strong>Common mistake:</strong> Returning <code>left + right + node.val</code> to the parent. That would mean the path goes down-left AND down-right, making a V-shape — you can't continue upward from a V. Return only the best single arm: <code>node.val + max(left, right)</code>.</p>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 297 · Serialize and Deserialize Binary Tree</span>
+      <span class="diff hard">Hard</span>
+    </div>
+    <p>Encode a tree to a string and decode it back. Preorder with null markers is the cleanest approach — the null markers uniquely reconstruct the tree's structure.</p>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="cm">// Serialize: preorder, null as "N"</span>
+<span class="kw">public</span> <span class="type">String</span> <span class="fn">serialize</span>(<span class="type">TreeNode</span> root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> <span class="str">"N,"</span>;
+    <span class="kw">return</span> root.val + <span class="str">","</span> + <span class="fn">serialize</span>(root.left) + <span class="fn">serialize</span>(root.right);
+}
+
+<span class="cm">// Deserialize using a queue of tokens</span>
+<span class="kw">public</span> <span class="type">TreeNode</span> <span class="fn">deserialize</span>(<span class="type">String</span> data) {
+    <span class="type">Queue</span>&lt;<span class="type">String</span>&gt; q = <span class="kw">new</span> <span class="type">LinkedList</span>&lt;&gt;(<span class="type">Arrays</span>.<span class="fn">asList</span>(data.<span class="fn">split</span>(<span class="str">","</span>)));
+    <span class="kw">return</span> <span class="fn">build</span>(q);
+}
+<span class="kw">private</span> <span class="type">TreeNode</span> <span class="fn">build</span>(<span class="type">Queue</span>&lt;<span class="type">String</span>&gt; q) {
+    <span class="type">String</span> val = q.<span class="fn">poll</span>();
+    <span class="kw">if</span> (<span class="str">"N"</span>.<span class="fn">equals</span>(val)) <span class="kw">return null</span>;
+    <span class="type">TreeNode</span> node = <span class="kw">new</span> <span class="type">TreeNode</span>(<span class="type">Integer</span>.<span class="fn">parseInt</span>(val));
+    node.left  = <span class="fn">build</span>(q);
+    node.right = <span class="fn">build</span>(q);
+    <span class="kw">return</span> node;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">serialize</span>(root):
+    <span class="kw">if not</span> root: <span class="kw">return</span> <span class="str">"N,"</span>
+    <span class="kw">return</span> <span class="fn">str</span>(root.val) + <span class="str">","</span> + <span class="fn">serialize</span>(root.left) + <span class="fn">serialize</span>(root.right)
+
+<span class="kw">def</span> <span class="fn">deserialize</span>(data):
+    tokens = <span class="fn">iter</span>(data.<span class="fn">split</span>(<span class="str">","</span>))
+    <span class="kw">def</span> <span class="fn">build</span>():
+        val = <span class="fn">next</span>(tokens)
+        <span class="kw">if</span> val == <span class="str">"N"</span>: <span class="kw">return None</span>
+        node = <span class="type">TreeNode</span>(<span class="fn">int</span>(val))
+        node.left  = <span class="fn">build</span>()
+        node.right = <span class="fn">build</span>()
+        <span class="kw">return</span> node
+    <span class="kw">return</span> <span class="fn">build</span>()</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- BT CHEAT SHEET -->
+  <div class="section-header">
+    <span class="section-num">05 — Cheat Sheet</span>
+    <h2>Binary Tree Quick Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="cheatsheet-grid">
+    <div class="cs-card">
+      <h4>Traversal Choice</h4>
+      <div class="cs-row"><span class="cs-key">BST sorted output</span><span class="cs-val">Inorder</span></div>
+      <div class="cs-row"><span class="cs-key">Clone / serialize</span><span class="cs-val">Preorder</span></div>
+      <div class="cs-row"><span class="cs-key">Height / delete</span><span class="cs-val">Postorder</span></div>
+      <div class="cs-row"><span class="cs-key">Level sums / views</span><span class="cs-val">Level-order BFS</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Recursive Template</h4>
+      <div class="cs-row"><span class="cs-key">Base case</span><span class="cs-val">if node == null return 0/null</span></div>
+      <div class="cs-row"><span class="cs-key">Left answer</span><span class="cs-val">dfs(node.left)</span></div>
+      <div class="cs-row"><span class="cs-key">Right answer</span><span class="cs-val">dfs(node.right)</span></div>
+      <div class="cs-row"><span class="cs-key">Combine + return</span><span class="cs-val">use node.val + l + r</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Must-Know LCs</h4>
+      <div class="cs-row"><span class="cs-key">104</span><span class="cs-val">Max Depth</span></div>
+      <div class="cs-row"><span class="cs-key">543</span><span class="cs-val">Diameter</span></div>
+      <div class="cs-row"><span class="cs-key">124</span><span class="cs-val">Max Path Sum (Hard)</span></div>
+      <div class="cs-row"><span class="cs-key">102</span><span class="cs-val">Level Order</span></div>
+      <div class="cs-row"><span class="cs-key">297</span><span class="cs-val">Serialize/Deserialize (Hard)</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Complexity</h4>
+      <div class="cs-row"><span class="cs-key">DFS traversal</span><span class="cs-val">O(n) time, O(h) space</span></div>
+      <div class="cs-row"><span class="cs-key">BFS level order</span><span class="cs-val">O(n) time, O(w) space</span></div>
+      <div class="cs-row"><span class="cs-key">BST ops (balanced)</span><span class="cs-val">O(log n)</span></div>
+      <div class="cs-row"><span class="cs-key">BST ops (skewed)</span><span class="cs-val">O(n) worst case</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>Interview sentence:</strong> "I'll use postorder DFS — I need the answers from both subtrees before I can compute the answer for the current node. My recursive function returns the best single branch going upward, but updates a global result with both branches combined at each node."</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════ GRAPHS ══════════════════ -->
+<div id="topic-gr" class="topic-section">
+<div class="content">
+
+  <div class="section-header" id="gr-core">
+    <span class="section-num">01 — Core Insight</span>
+    <h2>Graphs: Everything is BFS or DFS</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>Nearly every graph problem is solved by <strong>BFS for shortest paths and level-by-level problems</strong>, or <strong>DFS for connectivity, cycles, and exhaustive search</strong>. The key decisions are: directed or undirected? Weighted or unweighted? Then pick the traversal.</p>
+
+  <div class="callout">
+    <p><strong>The Core Insight:</strong> A graph problem in disguise is still a graph problem. Grid problems (islands, paths in a matrix) are graphs where each cell is a node and edges connect neighbors. Word ladders are graphs where words are nodes and single-letter-differences are edges. Once you model it, BFS or DFS does the rest.</p>
+  </div>
+
+  <h3>Graph Representations</h3>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Adjacency List (most common for interviews)</span>
+<span class="type">Map</span>&lt;<span class="type">Integer</span>, <span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;();
+
+<span class="cm">// Build from edge list</span>
+<span class="kw">int</span>[][] edges = {{<span class="num">0</span>,<span class="num">1</span>},{<span class="num">1</span>,<span class="num">2</span>},{<span class="num">2</span>,<span class="num">3</span>}};
+<span class="kw">for</span> (<span class="kw">int</span>[] e : edges) {
+    graph.<span class="fn">computeIfAbsent</span>(e[<span class="num">0</span>], k -> <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(e[<span class="num">1</span>]);
+    graph.<span class="fn">computeIfAbsent</span>(e[<span class="num">1</span>], k -> <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(e[<span class="num">0</span>]); <span class="cm">// undirected</span>
+}
+
+<span class="cm">// Grid as implicit graph — 4-directional neighbors</span>
+<span class="kw">int</span>[][] dirs = {{<span class="num">0</span>,<span class="num">1</span>},{<span class="num">0</span>,-<span class="num">1</span>},{<span class="num">1</span>,<span class="num">0</span>},{-<span class="num">1</span>,<span class="num">0</span>}};
+<span class="kw">for</span> (<span class="kw">int</span>[] d : dirs) {
+    <span class="kw">int</span> nr = row + d[<span class="num">0</span>], nc = col + d[<span class="num">1</span>];
+    <span class="kw">if</span> (nr &gt;= <span class="num">0</span> &amp;&amp; nr &lt; rows &amp;&amp; nc &gt;= <span class="num">0</span> &amp;&amp; nc &lt; cols) { <span class="cm">/* valid neighbor */</span> }
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+graph = <span class="fn">defaultdict</span>(list)
+
+<span class="cm"># Build from edge list</span>
+edges = [(<span class="num">0</span>,<span class="num">1</span>), (<span class="num">1</span>,<span class="num">2</span>), (<span class="num">2</span>,<span class="num">3</span>)]
+<span class="kw">for</span> u, v <span class="kw">in</span> edges:
+    graph[u].<span class="fn">append</span>(v)
+    graph[v].<span class="fn">append</span>(u)  <span class="cm"># undirected</span>
+
+<span class="cm"># Grid neighbors</span>
+dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+<span class="kw">for</span> dr, dc <span class="kw">in</span> dirs:
+    nr, nc = row+dr, col+dc
+    <span class="kw">if</span> <span class="num">0</span> &lt;= nr &lt; rows <span class="kw">and</span> <span class="num">0</span> &lt;= nc &lt; cols:
+        <span class="kw">pass</span>  <span class="cm"># valid neighbor</span></pre>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-num">02 — The 4 Patterns</span>
+    <h2>Graph Patterns</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="pattern-badge">Pattern 1 · BFS — Shortest Path / Level-by-Level</div>
+  <p>BFS guarantees the shortest path in unweighted graphs. The moment you visit a node in BFS, you have found the shortest path to it. A visited set prevents revisiting.</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// BFS shortest path — returns distance from src to dst</span>
+<span class="kw">public int</span> <span class="fn">bfsDistance</span>(<span class="type">Map</span>&lt;<span class="type">Integer</span>,<span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; graph, <span class="kw">int</span> src, <span class="kw">int</span> dst) {
+    <span class="type">Set</span>&lt;<span class="type">Integer</span>&gt; visited = <span class="kw">new</span> <span class="type">HashSet</span>&lt;&gt;();
+    <span class="type">Deque</span>&lt;<span class="kw">int</span>[]&gt; q = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    q.<span class="fn">offer</span>(<span class="kw">new int</span>[]{src, <span class="num">0</span>}); <span class="cm">// [node, distance]</span>
+    visited.<span class="fn">add</span>(src);
+    <span class="kw">while</span> (!q.<span class="fn">isEmpty</span>()) {
+        <span class="kw">int</span>[] curr = q.<span class="fn">poll</span>();
+        <span class="kw">if</span> (curr[<span class="num">0</span>] == dst) <span class="kw">return</span> curr[<span class="num">1</span>];
+        <span class="kw">for</span> (<span class="kw">int</span> nei : graph.<span class="fn">getOrDefault</span>(curr[<span class="num">0</span>], <span class="type">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (visited.<span class="fn">add</span>(nei)) q.<span class="fn">offer</span>(<span class="kw">new int</span>[]{nei, curr[<span class="num">1</span>] + <span class="num">1</span>});
+        }
+    }
+    <span class="kw">return</span> -<span class="num">1</span>;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">bfs_distance</span>(graph, src, dst):
+    visited = {src}
+    q = <span class="fn">deque</span>([(src, <span class="num">0</span>)])
+    <span class="kw">while</span> q:
+        node, dist = q.<span class="fn">popleft</span>()
+        <span class="kw">if</span> node == dst: <span class="kw">return</span> dist
+        <span class="kw">for</span> nei <span class="kw">in</span> graph.<span class="fn">get</span>(node, []):
+            <span class="kw">if</span> nei <span class="kw">not in</span> visited:
+                visited.<span class="fn">add</span>(nei)
+                q.<span class="fn">append</span>((nei, dist + <span class="num">1</span>))
+    <span class="kw">return</span> -<span class="num">1</span></pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 2 · DFS — Connectivity / Islands</div>
+  <p>DFS explores as deep as possible before backtracking. Perfect for connected component problems, flood fill, and counting islands. Mark nodes visited before recursing to avoid infinite loops in graphs with cycles.</p>
+  <div class="callout green">
+    <p><strong>Grid DFS template:</strong> The "mark before recursing" rule is critical. If you mark after recursing, you'll enter the same cell from multiple neighbors and stack overflow. Mark when you first visit — immediately set <code>grid[r][c] = '0'</code> before the recursive calls.</p>
+  </div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Number of Islands (LC 200) — DFS flood fill</span>
+<span class="kw">public int</span> <span class="fn">numIslands</span>(<span class="kw">char</span>[][] grid) {
+    <span class="kw">int</span> count = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="num">0</span>; r &lt; grid.length; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="num">0</span>; c &lt; grid[<span class="num">0</span>].length; c++)
+            <span class="kw">if</span> (grid[r][c] == <span class="str">'1'</span>) { <span class="fn">dfs</span>(grid, r, c); count++; }
+    <span class="kw">return</span> count;
+}
+
+<span class="kw">private void</span> <span class="fn">dfs</span>(<span class="kw">char</span>[][] grid, <span class="kw">int</span> r, <span class="kw">int</span> c) {
+    <span class="kw">if</span> (r &lt; <span class="num">0</span> || r &gt;= grid.length || c &lt; <span class="num">0</span> || c &gt;= grid[<span class="num">0</span>].length
+        || grid[r][c] != <span class="str">'1'</span>) <span class="kw">return</span>;
+    grid[r][c] = <span class="str">'0'</span>; <span class="cm">// mark visited immediately</span>
+    <span class="fn">dfs</span>(grid, r+<span class="num">1</span>, c); <span class="fn">dfs</span>(grid, r-<span class="num">1</span>, c);
+    <span class="fn">dfs</span>(grid, r, c+<span class="num">1</span>); <span class="fn">dfs</span>(grid, r, c-<span class="num">1</span>);
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">num_islands</span>(grid):
+    rows, cols = <span class="fn">len</span>(grid), <span class="fn">len</span>(grid[<span class="num">0</span>])
+    count = <span class="num">0</span>
+
+    <span class="kw">def</span> <span class="fn">dfs</span>(r, c):
+        <span class="kw">if</span> r &lt; <span class="num">0</span> <span class="kw">or</span> r &gt;= rows <span class="kw">or</span> c &lt; <span class="num">0</span> <span class="kw">or</span> c &gt;= cols <span class="kw">or</span> grid[r][c] != <span class="str">'1'</span>: <span class="kw">return</span>
+        grid[r][c] = <span class="str">'0'</span>  <span class="cm"># mark visited</span>
+        <span class="fn">dfs</span>(r+<span class="num">1</span>,c); <span class="fn">dfs</span>(r-<span class="num">1</span>,c); <span class="fn">dfs</span>(r,c+<span class="num">1</span>); <span class="fn">dfs</span>(r,c-<span class="num">1</span>)
+
+    <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(rows):
+        <span class="kw">for</span> c <span class="kw">in</span> <span class="fn">range</span>(cols):
+            <span class="kw">if</span> grid[r][c] == <span class="str">'1'</span>: <span class="fn">dfs</span>(r, c); count += <span class="num">1</span>
+    <span class="kw">return</span> count</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 3 · Topological Sort</div>
+  <p>For directed acyclic graphs (DAGs), topological sort gives a linear ordering of nodes where every edge points forward. Use Kahn's algorithm (BFS with in-degrees) for cycle detection plus ordering.</p>
+  <div class="callout yellow">
+    <p><strong>Cycle detection:</strong> After Kahn's algorithm, if the result list contains fewer nodes than the graph, a cycle exists — some nodes never had in-degree 0. This is how LC 207 (Course Schedule) detects impossible orderings.</p>
+  </div>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="cm">// Topological Sort — Kahn's BFS algorithm (LC 210)</span>
+<span class="kw">public int</span>[] <span class="fn">findOrder</span>(<span class="kw">int</span> n, <span class="kw">int</span>[][] prereqs) {
+    <span class="type">List</span>&lt;<span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; adj = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+    <span class="kw">int</span>[] indegree = <span class="kw">new int</span>[n];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) adj.<span class="fn">add</span>(<span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;());
+    <span class="kw">for</span> (<span class="kw">int</span>[] p : prereqs) { adj.<span class="fn">get</span>(p[<span class="num">1</span>]).<span class="fn">add</span>(p[<span class="num">0</span>]); indegree[p[<span class="num">0</span>]]++; }
+
+    <span class="type">Deque</span>&lt;<span class="type">Integer</span>&gt; q = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) <span class="kw">if</span> (indegree[i] == <span class="num">0</span>) q.<span class="fn">offer</span>(i);
+
+    <span class="kw">int</span>[] order = <span class="kw">new int</span>[n]; <span class="kw">int</span> idx = <span class="num">0</span>;
+    <span class="kw">while</span> (!q.<span class="fn">isEmpty</span>()) {
+        <span class="kw">int</span> node = q.<span class="fn">poll</span>();
+        order[idx++] = node;
+        <span class="kw">for</span> (<span class="kw">int</span> nei : adj.<span class="fn">get</span>(node))
+            <span class="kw">if</span> (--indegree[nei] == <span class="num">0</span>) q.<span class="fn">offer</span>(nei);
+    }
+    <span class="kw">return</span> idx == n ? order : <span class="kw">new int</span>[<span class="num">0</span>]; <span class="cm">// empty if cycle</span>
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque, defaultdict
+
+<span class="kw">def</span> <span class="fn">find_order</span>(n, prereqs):
+    adj = <span class="fn">defaultdict</span>(list)
+    indegree = [<span class="num">0</span>] * n
+    <span class="kw">for</span> a, b <span class="kw">in</span> prereqs:
+        adj[b].<span class="fn">append</span>(a); indegree[a] += <span class="num">1</span>
+
+    q = <span class="fn">deque</span>(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n) <span class="kw">if</span> indegree[i] == <span class="num">0</span>)
+    order = []
+    <span class="kw">while</span> q:
+        node = q.<span class="fn">popleft</span>()
+        order.<span class="fn">append</span>(node)
+        <span class="kw">for</span> nei <span class="kw">in</span> adj[node]:
+            indegree[nei] -= <span class="num">1</span>
+            <span class="kw">if</span> indegree[nei] == <span class="num">0</span>: q.<span class="fn">append</span>(nei)
+    <span class="kw">return</span> order <span class="kw">if</span> <span class="fn">len</span>(order) == n <span class="kw">else</span> []</pre>
+    </div>
+  </div>
+
+  <div class="pattern-badge" style="margin-top:26px">Pattern 4 · Union-Find (Disjoint Set)</div>
+  <p>Union-Find efficiently tracks connected components with two operations: <code>find</code> (which component does this belong to?) and <code>union</code> (merge two components). Path compression and union by rank make both operations near-O(1).</p>
+  <div class="code-block">
+    <div class="lang-pane java active">
+<pre><span class="kw">class</span> <span class="type">UnionFind</span> {
+    <span class="kw">int</span>[] parent, rank;
+
+    <span class="type">UnionFind</span>(<span class="kw">int</span> n) {
+        parent = <span class="kw">new int</span>[n]; rank = <span class="kw">new int</span>[n];
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) parent[i] = i;
+    }
+
+    <span class="kw">int</span> <span class="fn">find</span>(<span class="kw">int</span> x) {
+        <span class="kw">if</span> (parent[x] != x) parent[x] = <span class="fn">find</span>(parent[x]); <span class="cm">// path compression</span>
+        <span class="kw">return</span> parent[x];
+    }
+
+    <span class="kw">boolean</span> <span class="fn">union</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {
+        <span class="kw">int</span> px = <span class="fn">find</span>(x), py = <span class="fn">find</span>(y);
+        <span class="kw">if</span> (px == py) <span class="kw">return false</span>; <span class="cm">// already connected — cycle!</span>
+        <span class="kw">if</span> (rank[px] &lt; rank[py]) { <span class="kw">int</span> t=px; px=py; py=t; }
+        parent[py] = px;
+        <span class="kw">if</span> (rank[px] == rank[py]) rank[px]++;
+        <span class="kw">return true</span>;
+    }
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="kw">class</span> <span class="type">UnionFind</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n):
+        self.parent = <span class="fn">list</span>(<span class="fn">range</span>(n))
+        self.rank = [<span class="num">0</span>] * n
+
+    <span class="kw">def</span> <span class="fn">find</span>(self, x):
+        <span class="kw">if</span> self.parent[x] != x:
+            self.parent[x] = self.<span class="fn">find</span>(self.parent[x])  <span class="cm"># path compression</span>
+        <span class="kw">return</span> self.parent[x]
+
+    <span class="kw">def</span> <span class="fn">union</span>(self, x, y):
+        px, py = self.<span class="fn">find</span>(x), self.<span class="fn">find</span>(y)
+        <span class="kw">if</span> px == py: <span class="kw">return False</span>  <span class="cm"># cycle!</span>
+        <span class="kw">if</span> self.rank[px] &lt; self.rank[py]: px, py = py, px
+        self.parent[py] = px
+        <span class="kw">if</span> self.rank[px] == self.rank[py]: self.rank[px] += <span class="num">1</span>
+        <span class="kw">return True</span></pre>
+    </div>
+  </div>
+
+  <!-- GRAPH VISUALIZER -->
+  <div class="section-header">
+    <span class="section-num">03 — Visualizer</span>
+    <h2>BFS Step-Through</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="visualizer">
+    <div class="viz-title">▶ BFS Shortest Path — from node 0 to node 5</div>
+    <div class="viz-svg-wrap"><svg id="gr-svg" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" style="height:220px"></svg></div>
+    <div style="display:flex;gap:16px;margin-bottom:10px;font-family:'DM Mono',monospace;font-size:.75rem">
+      <span style="color:var(--accent)">■ Current</span>
+      <span style="color:var(--accent3)">■ Visited</span>
+      <span style="color:var(--accent2)">■ In Queue</span>
+      <span style="color:var(--muted)">■ Unvisited</span>
+    </div>
+    <div class="viz-log" id="gr-log">Press Step → to begin BFS from node 0</div>
+    <div class="viz-controls">
+      <button class="viz-btn" id="gr-step-btn">Step →</button>
+      <button class="viz-btn sec" onclick="grReset()">Reset</button>
+    </div>
+  </div>
+
+  <!-- GRAPH DEEP DIVES -->
+  <div class="section-header">
+    <span class="section-num">04 — Deep Dives</span>
+    <h2>Graph Problems Worth Studying</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 417 · Pacific Atlantic Water Flow</span>
+      <span class="diff medium">Medium</span>
+    </div>
+    <p>Find cells that can flow to both the Pacific and Atlantic oceans. The trick: reverse the problem — do BFS/DFS backwards from each ocean's border, then find the intersection.</p>
+    <div class="callout green">
+      <p><strong>Reverse thinking:</strong> Instead of simulating water flowing downhill from every cell (expensive), start from ocean borders and flood uphill. A cell can reach the Pacific if it's reachable from the Pacific border going uphill. Intersect the two reachable sets.</p>
+    </div>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public</span> <span class="type">List</span>&lt;<span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; <span class="fn">pacificAtlantic</span>(<span class="kw">int</span>[][] h) {
+    <span class="kw">int</span> R = h.length, C = h[<span class="num">0</span>].length;
+    <span class="kw">boolean</span>[][] pac = <span class="kw">new boolean</span>[R][C], atl = <span class="kw">new boolean</span>[R][C];
+    <span class="type">Deque</span>&lt;<span class="kw">int</span>[]&gt; pq = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;(), aq = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="num">0</span>; r &lt; R; r++) {
+        pac[r][<span class="num">0</span>] = atl[r][C-<span class="num">1</span>] = <span class="kw">true</span>;
+        pq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{r,<span class="num">0</span>}); aq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{r,C-<span class="num">1</span>});
+    }
+    <span class="kw">for</span> (<span class="kw">int</span> c = <span class="num">0</span>; c &lt; C; c++) {
+        pac[<span class="num">0</span>][c] = atl[R-<span class="num">1</span>][c] = <span class="kw">true</span>;
+        pq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{<span class="num">0</span>,c}); aq.<span class="fn">offer</span>(<span class="kw">new int</span>[]{R-<span class="num">1</span>,c});
+    }
+    <span class="fn">bfs</span>(h, pq, pac); <span class="fn">bfs</span>(h, aq, atl);
+    <span class="type">List</span>&lt;<span class="type">List</span>&lt;<span class="type">Integer</span>&gt;&gt; res = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="num">0</span>; r &lt; R; r++)
+        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="num">0</span>; c &lt; C; c++)
+            <span class="kw">if</span> (pac[r][c] &amp;&amp; atl[r][c]) res.<span class="fn">add</span>(<span class="type">Arrays</span>.<span class="fn">asList</span>(r, c));
+    <span class="kw">return</span> res;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">pacific_atlantic</span>(h):
+    R, C = <span class="fn">len</span>(h), <span class="fn">len</span>(h[<span class="num">0</span>])
+    <span class="kw">def</span> <span class="fn">bfs</span>(starts):
+        visited = <span class="fn">set</span>(starts)
+        q = <span class="fn">deque</span>(starts)
+        <span class="kw">while</span> q:
+            r, c = q.<span class="fn">popleft</span>()
+            <span class="kw">for</span> dr, dc <span class="kw">in</span> [(<span class="num">1</span>,<span class="num">0</span>),(-<span class="num">1</span>,<span class="num">0</span>),(<span class="num">0</span>,<span class="num">1</span>),(<span class="num">0</span>,-<span class="num">1</span>)]:
+                nr, nc = r+dr, c+dc
+                <span class="kw">if</span> <span class="num">0</span>&lt;=nr&lt;R <span class="kw">and</span> <span class="num">0</span>&lt;=nc&lt;C <span class="kw">and</span> (nr,nc) <span class="kw">not in</span> visited <span class="kw">and</span> h[nr][nc]&gt;=h[r][c]:
+                    visited.<span class="fn">add</span>((nr,nc)); q.<span class="fn">append</span>((nr,nc))
+        <span class="kw">return</span> visited
+    pac = <span class="fn">bfs</span>([(r,<span class="num">0</span>) <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(R)] + [(<span class="num">0</span>,c) <span class="kw">for</span> c <span class="kw">in</span> <span class="fn">range</span>(C)])
+    atl = <span class="fn">bfs</span>([(r,C-<span class="num">1</span>) <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(R)] + [(R-<span class="num">1</span>,c) <span class="kw">for</span> c <span class="kw">in</span> <span class="fn">range</span>(C)])
+    <span class="kw">return</span> [[r,c] <span class="kw">for</span> r,c <span class="kw">in</span> pac &amp; atl]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-header">
+      <span class="problem-title">LC 684 · Redundant Connection</span>
+      <span class="diff medium">Medium</span>
+    </div>
+    <p>Find the edge that creates a cycle in an undirected graph. Union-Find: if both endpoints of an edge are already in the same component, that edge is the redundant one.</p>
+    <div class="code-block">
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span>[] <span class="fn">findRedundantConnection</span>(<span class="kw">int</span>[][] edges) {
+    <span class="kw">int</span> n = edges.length;
+    <span class="type">UnionFind</span> uf = <span class="kw">new</span> <span class="type">UnionFind</span>(n + <span class="num">1</span>);
+    <span class="kw">for</span> (<span class="kw">int</span>[] e : edges) {
+        <span class="kw">if</span> (!uf.<span class="fn">union</span>(e[<span class="num">0</span>], e[<span class="num">1</span>])) <span class="kw">return</span> e; <span class="cm">// union returns false = cycle</span>
+    }
+    <span class="kw">return new int</span>[<span class="num">0</span>];
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">find_redundant_connection</span>(edges):
+    uf = <span class="type">UnionFind</span>(<span class="fn">len</span>(edges) + <span class="num">1</span>)
+    <span class="kw">for</span> u, v <span class="kw">in</span> edges:
+        <span class="kw">if not</span> uf.<span class="fn">union</span>(u, v): <span class="kw">return</span> [u, v]
+    <span class="kw">return</span> []</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAPH CHEAT SHEET -->
+  <div class="section-header" id="cheatsheet">
+    <span class="section-num">05 — Cheat Sheet</span>
+    <h2>Graph Quick Reference</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="cheatsheet-grid">
+    <div class="cs-card">
+      <h4>Pattern Selection</h4>
+      <div class="cs-row"><span class="cs-key">Shortest path (unweighted)</span><span class="cs-val">BFS</span></div>
+      <div class="cs-row"><span class="cs-key">Connected components</span><span class="cs-val">DFS or Union-Find</span></div>
+      <div class="cs-row"><span class="cs-key">Cycle detection (undirected)</span><span class="cs-val">Union-Find</span></div>
+      <div class="cs-row"><span class="cs-key">Cycle detection (directed)</span><span class="cs-val">DFS with 3 colors</span></div>
+      <div class="cs-row"><span class="cs-key">Ordering dependencies</span><span class="cs-val">Topological Sort (Kahn's)</span></div>
+      <div class="cs-row"><span class="cs-key">Flood fill / islands</span><span class="cs-val">DFS on grid</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>Must-Know LCs</h4>
+      <div class="cs-row"><span class="cs-key">200</span><span class="cs-val">Number of Islands</span></div>
+      <div class="cs-row"><span class="cs-key">207 / 210</span><span class="cs-val">Course Schedule I &amp; II</span></div>
+      <div class="cs-row"><span class="cs-key">417</span><span class="cs-val">Pacific Atlantic Water Flow</span></div>
+      <div class="cs-row"><span class="cs-key">684</span><span class="cs-val">Redundant Connection</span></div>
+      <div class="cs-row"><span class="cs-key">127</span><span class="cs-val">Word Ladder (Hard BFS)</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>BFS Template</h4>
+      <div class="cs-row"><span class="cs-key">Init</span><span class="cs-val">queue + visited set</span></div>
+      <div class="cs-row"><span class="cs-key">Mark visited</span><span class="cs-val">BEFORE enqueue, not after</span></div>
+      <div class="cs-row"><span class="cs-key">Level tracking</span><span class="cs-val">capture queue.size() per level</span></div>
+    </div>
+    <div class="cs-card">
+      <h4>DFS Template</h4>
+      <div class="cs-row"><span class="cs-key">Mark visited</span><span class="cs-val">BEFORE recursing</span></div>
+      <div class="cs-row"><span class="cs-key">Grid bounds</span><span class="cs-val">check r/c before access</span></div>
+      <div class="cs-row"><span class="cs-key">Directed cycle</span><span class="cs-val">WHITE / GRAY / BLACK colors</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>Interview sentence:</strong> "I'll model this as a graph problem — each X is a node and each Y is an edge. Since I need shortest path, I'll use BFS with a visited set, marking nodes visited before enqueuing to ensure each node is processed at most once, giving O(V + E) time."</p>
+  </div>
+
+</div>
+</div>
+
+<footer><a href="index.html" style="color:inherit;text-decoration:none;">Back to DSA</a> · LinkedList · Binary Trees · Graphs · DSA Foundations Series</footer>
+
+<script>
+function updateThemeButton(){const btn=document.getElementById('theme-toggle');if(btn)btn.textContent=document.documentElement.classList.contains('light')?'Dark mode':'Light mode'}
+function toggleTheme(){document.documentElement.classList.toggle('light');try{localStorage.setItem('dsa-theme',document.documentElement.classList.contains('light')?'light':'dark')}catch(e){}updateThemeButton()}
+// ─── LANGUAGE TOGGLE ───
+function setLang(lang) {
+  document.getElementById('nav-java-btn').classList.toggle('active', lang==='java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang==='python');
+  document.querySelectorAll('.lang-pane').forEach(p => {
+    p.classList.toggle('active', p.classList.contains(lang));
+  });
+}
+
+// ─── TOPIC TABS ───
+function showTopic(name, btn) {
+  document.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.topic-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('topic-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══ LINKED LIST VISUALIZER — Floyd's Cycle Detection ═══
+// List: 1→2→3→4→5→3 (cycle back to index 2)
+const LL_VALS = [1,2,3,4,5];
+const LL_CYCLE_TARGET = 2; // index of cycle back
+let llSlow = 0, llFast = 0, llStep = 0;
+
+const LSVG = document.getElementById('ll-svg');
+const NODE_X = [60,160,280,400,510]; // reduced for cycle
+const NODE_Y = [60,60,60,60,60];
+
+function llDraw(slowIdx, fastIdx, highlight) {
+  LSVG.innerHTML = '';
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  const marker = document.createElementNS('http://www.w3.org/2000/svg','marker');
+  marker.setAttribute('id','arr');marker.setAttribute('markerWidth','8');marker.setAttribute('markerHeight','8');
+  marker.setAttribute('refX','6');marker.setAttribute('refY','3');marker.setAttribute('orient','auto');
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d','M0,0 L0,6 L8,3 z');path.setAttribute('fill','#3b82f6');
+  marker.appendChild(path);defs.appendChild(marker);LSVG.appendChild(defs);
+
+  // edges
+  for (let i=0;i<LL_VALS.length-1;i++) {
+    const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1',NODE_X[i]+22);l.setAttribute('y1',NODE_Y[i]);
+    l.setAttribute('x2',NODE_X[i+1]-22);l.setAttribute('y2',NODE_Y[i+1]);
+    l.setAttribute('stroke','#3b82f6');l.setAttribute('stroke-width','2');
+    l.setAttribute('marker-end','url(#arr)');
+    LSVG.appendChild(l);
+  }
+  // cycle arc from node 4 back to node 2
+  const arc = document.createElementNS('http://www.w3.org/2000/svg','path');
+  arc.setAttribute('d',`M ${NODE_X[4]} 82 Q 385 150 ${NODE_X[2]} 82`);
+  arc.setAttribute('fill','none');arc.setAttribute('stroke','#f59e0b');arc.setAttribute('stroke-width','2');
+  arc.setAttribute('stroke-dasharray','6,3');arc.setAttribute('marker-end','url(#arr)');
+  LSVG.appendChild(arc);
+  const cycleLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+  cycleLabel.setAttribute('x','355');cycleLabel.setAttribute('y','155');
+  cycleLabel.setAttribute('fill','#f59e0b');cycleLabel.setAttribute('font-size','11');
+  cycleLabel.setAttribute('font-family','DM Mono,monospace');cycleLabel.textContent='cycle';
+  LSVG.appendChild(cycleLabel);
+
+  // nodes
+  LL_VALS.forEach((v,i) => {
+    const isSlow = i===slowIdx;
+    const isFast = i===fastIdx;
+    const isBoth = isSlow && isFast;
+    const color = isBoth ? '#a78bfa' : isFast ? '#3b82f6' : isSlow ? '#f97316' : '#1a1e28';
+    const stroke = (isSlow||isFast) ? (isBoth?'#a78bfa':isFast?'#3b82f6':'#f97316') : '#252a38';
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',NODE_X[i]);circle.setAttribute('cy',NODE_Y[i]);
+    circle.setAttribute('r','22');circle.setAttribute('fill',color);
+    circle.setAttribute('stroke',stroke);circle.setAttribute('stroke-width','2.5');
+    LSVG.appendChild(circle);
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x',NODE_X[i]);text.setAttribute('y',NODE_Y[i]+5);
+    text.setAttribute('text-anchor','middle');text.setAttribute('fill','#e8eaf0');
+    text.setAttribute('font-size','14');text.setAttribute('font-family','DM Mono,monospace');
+    text.textContent = v;LSVG.appendChild(text);
+  });
+  // legend
+  [[NODE_X[llSlow],'S','#f97316'],[NODE_X[llFast],'F','#3b82f6']].forEach(([x,lbl,col],idx) => {
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',x);t.setAttribute('y',NODE_Y[0]-30+idx*0);
+    // skip label render if same spot
+  });
+}
+
+// simulate: node indices map through the cycle
+function llNext(idx) {
+  if (idx === LL_VALS.length-1) return LL_CYCLE_TARGET; // cycle
+  return idx+1;
+}
+
+function llDoStep() {
+  if (llStep === 0) { llDraw(0,0,[]); document.getElementById('ll-log').textContent='Init: slow=1, fast=1 (both at head)'; llStep=1; return; }
+  llSlow = llNext(llSlow);
+  llFast = llNext(llNext(llFast));
+  llDraw(llSlow, llFast, []);
+  const log = `Slow→${LL_VALS[llSlow]} (idx ${llSlow})  Fast→${LL_VALS[llFast]} (idx ${llFast})`;
+  if (llSlow === llFast) {
+    document.getElementById('ll-log').textContent = log + ' 🔴 CYCLE DETECTED! slow == fast';
+    document.getElementById('ll-step-btn').disabled = true;
+    return;
+  }
+  document.getElementById('ll-log').textContent = log;
+  llStep++;
+}
+
+function llReset() {
+  llSlow=0;llFast=0;llStep=0;
+  llDraw(-1,-1,[]);
+  document.getElementById('ll-log').textContent='Press Step → to begin. Slow=🟠 Fast=🔵';
+  document.getElementById('ll-step-btn').disabled=false;
+}
+document.getElementById('ll-step-btn').onclick = llDoStep;
+llDraw(-1,-1,[]);
+
+// ═══ BINARY TREE VISUALIZER ═══
+//       1
+//      / \
+//     2   3
+//    / \ / \
+//   4  5 6  7
+const BT_NODES = [
+  {val:1,x:240,y:30,left:1,right:2},
+  {val:2,x:130,y:90,left:3,right:4},
+  {val:3,x:350,y:90,left:5,right:6},
+  {val:4,x:70,y:160,left:-1,right:-1},
+  {val:5,x:190,y:160,left:-1,right:-1},
+  {val:6,x:305,y:160,left:-1,right:-1},
+  {val:7,x:415,y:160,left:-1,right:-1}
+];
+let btMode='pre', btVisitOrder=[], btStep=0, btVisited=[];
+
+function btGetOrder(mode) {
+  const order=[];
+  function inorder(i) { if(i<0)return; inorder(BT_NODES[i].left); order.push(i); inorder(BT_NODES[i].right); }
+  function preorder(i) { if(i<0)return; order.push(i); preorder(BT_NODES[i].left); preorder(BT_NODES[i].right); }
+  function postorder(i) { if(i<0)return; postorder(BT_NODES[i].left); postorder(BT_NODES[i].right); order.push(i); }
+  if(mode==='in') inorder(0);
+  else if(mode==='pre') preorder(0);
+  else postorder(0);
+  return order;
+}
+
+const BSVG = document.getElementById('bt-svg');
+function btDraw(current, visited) {
+  BSVG.innerHTML='';
+  // edges
+  BT_NODES.forEach((n,i) => {
+    ['left','right'].forEach(side => {
+      const ci = n[side]; if(ci<0)return;
+      const ch=BT_NODES[ci];
+      const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1',n.x);l.setAttribute('y1',n.y+18);
+      l.setAttribute('x2',ch.x);l.setAttribute('y2',ch.y-18);
+      l.setAttribute('stroke','#252a38');l.setAttribute('stroke-width','2');
+      BSVG.appendChild(l);
+    });
+  });
+  // nodes
+  BT_NODES.forEach((n,i) => {
+    const isActive = i===current;
+    const isDone = visited.includes(i);
+    const fill = isActive?'#f97316':isDone?'#10b981':'#1a1e28';
+    const stroke = isActive?'#f97316':isDone?'#10b981':'#252a38';
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r','18');
+    c.setAttribute('fill',fill);c.setAttribute('stroke',stroke);c.setAttribute('stroke-width','2.5');
+    BSVG.appendChild(c);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',n.x);t.setAttribute('y',n.y+5);t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill','#e8eaf0');t.setAttribute('font-size','13');
+    t.setAttribute('font-family','DM Mono,monospace');t.textContent=n.val;
+    BSVG.appendChild(t);
+  });
+}
+
+function btDoStep() {
+  if (btStep >= btVisitOrder.length) {
+    document.getElementById('bt-log').textContent = '✅ Traversal complete!';
+    return;
+  }
+  const idx = btVisitOrder[btStep];
+  btVisited.push(idx);
+  btDraw(idx, btVisited.slice(0,-1));
+  document.getElementById('bt-order').textContent = btVisited.map(i=>BT_NODES[i].val).join(' → ');
+  document.getElementById('bt-log').textContent = `Visit node ${BT_NODES[idx].val}`;
+  btStep++;
+}
+
+function btReset() {
+  btStep=0; btVisited=[];
+  btVisitOrder = btGetOrder(btMode);
+  btDraw(-1,[]);
+  document.getElementById('bt-order').textContent='—';
+  document.getElementById('bt-log').textContent='Press Step → to begin';
+}
+
+function btSetMode(mode, btn) {
+  btMode=mode;
+  document.querySelectorAll('[id^=bt-][id$=-btn]:not(#bt-step-btn)').forEach(b=>{
+    b.style.background='var(--bg3)';b.style.color='var(--muted)';b.style.border='1px solid var(--border)';
+  });
+  btn.style.background='var(--accent)';btn.style.color='#fff';btn.style.border='none';
+  btReset();
+}
+document.getElementById('bt-step-btn').onclick = btDoStep;
+btVisitOrder = btGetOrder('pre');
+btDraw(-1,[]);
+
+// ═══ GRAPH BFS VISUALIZER ═══
+// 7 nodes, edges creating a connected graph
+const GR_NODES = [
+  {x:60,y:110},{x:160,y:40},{x:160,y:180},{x:280,y:40},
+  {x:280,y:180},{x:400,y:110},{x:490,y:110}
+];
+const GR_EDGES = [[0,1],[0,2],[1,3],[2,4],[3,5],[4,5],[5,6]];
+let grQueue=[], grVisited=[], grDistances=[], grStep=0, grCurrent=-1, grNeighborIdx=0;
+
+const GSVG = document.getElementById('gr-svg');
+function grDraw(current, visited, inQueue) {
+  GSVG.innerHTML='';
+  // edges
+  GR_EDGES.forEach(([u,v]) => {
+    const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    const isPath = visited.includes(u)&&visited.includes(v);
+    l.setAttribute('x1',GR_NODES[u].x);l.setAttribute('y1',GR_NODES[u].y);
+    l.setAttribute('x2',GR_NODES[v].x);l.setAttribute('y2',GR_NODES[v].y);
+    l.setAttribute('stroke',isPath?'#10b981':'#252a38');l.setAttribute('stroke-width',isPath?'2.5':'2');
+    GSVG.appendChild(l);
+  });
+  // nodes
+  GR_NODES.forEach((n,i) => {
+    const isAct=i===current, isVis=visited.includes(i), isQ=inQueue.includes(i);
+    const fill=isAct?'#f97316':isVis?'#10b981':isQ?'#3b82f6':'#1a1e28';
+    const stroke=isAct?'#f97316':isVis?'#10b981':isQ?'#3b82f6':'#252a38';
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r','20');
+    c.setAttribute('fill',fill);c.setAttribute('stroke',stroke);c.setAttribute('stroke-width','2.5');
+    GSVG.appendChild(c);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',n.x);t.setAttribute('y',n.y+5);t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill','#e8eaf0');t.setAttribute('font-size','13');
+    t.setAttribute('font-family','DM Mono,monospace');t.textContent=i;
+    GSVG.appendChild(t);
+    if(grDistances[i]!==undefined) {
+      const dt=document.createElementNS('http://www.w3.org/2000/svg','text');
+      dt.setAttribute('x',n.x);dt.setAttribute('y',n.y-26);dt.setAttribute('text-anchor','middle');
+      dt.setAttribute('fill','#f59e0b');dt.setAttribute('font-size','11');
+      dt.setAttribute('font-family','DM Mono,monospace');dt.textContent='d='+grDistances[i];
+      GSVG.appendChild(dt);
+    }
+  });
+}
+
+const grAdj = Array.from({length:7},()=>[]);
+GR_EDGES.forEach(([u,v])=>{grAdj[u].push(v);grAdj[v].push(u);});
+
+function grDoStep() {
+  if (grStep === 0) {
+    grVisited=[0]; grQueue=[0]; grDistances[0]=0;
+    grDraw(0,[],grQueue);
+    document.getElementById('gr-log').textContent='Init: enqueue node 0 (distance 0). Queue: [0]';
+    grStep=1; return;
+  }
+  if (grQueue.length===0) {
+    document.getElementById('gr-log').textContent='✅ BFS complete! All reachable nodes visited.';
+    return;
+  }
+  const curr = grQueue.shift(); grCurrent=curr;
+  const neighbors = grAdj[curr].filter(n=>!grVisited.includes(n));
+  neighbors.forEach(n=>{ grVisited.push(n); grQueue.push(n); grDistances[n]=grDistances[curr]+1; });
+  grDraw(curr, grVisited.filter(v=>v!==curr), [...grQueue]);
+  const log = `Dequeue node ${curr} (d=${grDistances[curr]}). `+(neighbors.length?`Enqueue neighbors: [${neighbors.join(', ')}].`:'No new neighbors.');
+  document.getElementById('gr-log').textContent = log + ` Queue: [${grQueue.join(', ')}]`;
+  grStep++;
+  if (curr===5) { setTimeout(()=>document.getElementById('gr-log').textContent+='\n🎯 Reached node 5!',100); }
+}
+
+function grReset() {
+  grQueue=[];grVisited=[];grDistances=[];grStep=0;grCurrent=-1;
+  grDraw(-1,[],[]);
+  document.getElementById('gr-log').textContent='Press Step → to begin BFS from node 0';
+}
+document.getElementById('gr-step-btn').onclick = grDoStep;
+grDraw(-1,[],[]);
+updateThemeButton();
+</script>
+</body>
+</html>

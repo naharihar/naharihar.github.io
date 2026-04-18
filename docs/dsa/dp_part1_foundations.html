@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DP From First Principles · Part 1: Foundations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  } catch (e) {}
+})();
+</script>
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:       #0d0f14;
+  --surface:  #13161d;
+  --raised:   #1a1e28;
+  --border:   #252a38;
+  --text:     #e8eaf0;
+  --muted:    #7a8099;
+  --orange:   #f97316;
+  --blue:     #3b82f6;
+  --green:    #10b981;
+  --yellow:   #f59e0b;
+  --purple:   #a78bfa;
+  --red:      #ef4444;
+  --ink:      #0a0c10;
+}
+html.light {
+  --bg:       #f7f3ec;
+  --surface:  #fffdfa;
+  --raised:   #f0e8dd;
+  --border:   #ddcdbb;
+  --text:     #2c2621;
+  --muted:    #786a5d;
+  --orange:   #c86432;
+  --blue:     #2563eb;
+  --green:    #0f9f6e;
+  --yellow:   #c98507;
+  --purple:   #8b5cf6;
+  --red:      #dc2626;
+  --ink:      #f5efe7;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 28px;
+  padding: 0 48px; height: 58px;
+  background: rgba(13,15,20,.96);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+html.light nav { background: rgba(247,243,236,.96); }
+.nav-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.05rem; color: var(--orange);
+  text-decoration: none; margin-right: 8px;
+}
+nav a:not(.nav-brand) {
+  color: var(--muted); text-decoration: none;
+  font-size: .82rem; font-weight: 500;
+  transition: color .18s;
+}
+nav a:not(.nav-brand):hover { color: var(--text); }
+.lang-toggle {
+  display: flex; gap: 3px; margin-left: auto;
+  background: var(--raised); border-radius: 8px; padding: 3px;
+}
+.lang-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  font-size: .76rem; padding: 4px 13px;
+  border-radius: 6px; transition: all .18s;
+}
+.lang-btn.active { background: var(--orange); color: #fff; }
+.theme-btn {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  font-size: .76rem; padding: 7px 12px; border-radius: 8px; transition: all .18s;
+}
+.theme-btn:hover { color: var(--text); border-color: var(--orange); }
+
+/* ── HERO ── */
+.hero {
+  max-width: 820px; margin: 0 auto;
+  padding: 96px 48px 80px;
+  border-bottom: 1px solid var(--border);
+}
+.series-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .72rem; color: var(--orange);
+  letter-spacing: .14em; text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+  line-height: 1.08; margin-bottom: 24px;
+}
+.hero h1 em { font-style: italic; color: var(--orange); }
+.hero-lead {
+  color: var(--muted); font-size: 1.08rem;
+  max-width: 640px; line-height: 1.82;
+}
+.problem-index {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 32px;
+}
+.problem-pill {
+  background: var(--raised); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 15px;
+  font-size: .8rem; color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  text-decoration: none; transition: border-color .18s, color .18s;
+}
+.problem-pill:hover { border-color: var(--orange); color: var(--orange); }
+
+/* ── MAIN LAYOUT ── */
+.article { max-width: 820px; margin: 0 auto; padding: 0 48px 120px; }
+
+/* ── PROBLEM HEADER ── */
+.problem-block { padding-top: 88px; }
+.problem-num {
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem; color: var(--orange);
+  letter-spacing: .16em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.problem-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.1rem; margin-bottom: 6px;
+}
+.lc-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'DM Mono', monospace; font-size: .74rem;
+  padding: 3px 11px; border-radius: 20px;
+  margin-bottom: 24px;
+}
+.lc-tag.easy   { background: rgba(16,185,129,.12); color: var(--green);  border: 1px solid rgba(16,185,129,.25); }
+.lc-tag.medium { background: rgba(245,158,11,.12); color: var(--yellow); border: 1px solid rgba(245,158,11,.25); }
+.lc-tag.hard   { background: rgba(239,68,68,.12);  color: var(--red);    border: 1px solid rgba(239,68,68,.25);  }
+.section-rule { width: 48px; height: 2px; background: var(--orange); margin-bottom: 28px; }
+
+/* ── PROSE ── */
+p { margin-bottom: 18px; color: var(--muted); }
+p strong { color: var(--text); }
+h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem; color: var(--text);
+  margin: 36px 0 12px;
+}
+h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: .82rem; color: var(--blue);
+  text-transform: uppercase; letter-spacing: .07em;
+  margin: 26px 0 8px;
+}
+
+/* ── PROBLEM STATEMENT BOX ── */
+.problem-statement {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 10px 10px 0;
+  padding: 22px 24px; margin: 24px 0;
+}
+.problem-statement p { margin-bottom: 10px; }
+.problem-statement p:last-child { margin-bottom: 0; }
+.example-block {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: .8rem; line-height: 1.7;
+  color: var(--muted); margin: 12px 0;
+}
+.example-block .ex-label {
+  color: var(--text); font-weight: 500;
+  margin-bottom: 4px; display: block;
+}
+
+/* ── PHASE BANNERS ── */
+.phase {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 18px; border-radius: 9px;
+  margin: 28px 0 16px;
+  border: 1px solid transparent;
+}
+.phase.brute  { background: rgba(239,68,68,.06);  border-color: rgba(239,68,68,.22); }
+.phase.better { background: rgba(245,158,11,.06); border-color: rgba(245,158,11,.22); }
+.phase.dp     { background: rgba(16,185,129,.06); border-color: rgba(16,185,129,.22); }
+.phase-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.phase.brute  .phase-label { color: var(--red); }
+.phase.better .phase-label { color: var(--yellow); }
+.phase.dp     .phase-label { color: var(--green); }
+.phase-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; }
+.phase-badge {
+  margin-left: auto; white-space: nowrap;
+  font-family: 'DM Mono', monospace; font-size: .72rem;
+  padding: 3px 10px; border-radius: 11px;
+}
+.phase.brute  .phase-badge { background: rgba(239,68,68,.14);  color: var(--red); }
+.phase.better .phase-badge { background: rgba(245,158,11,.14); color: var(--yellow); }
+.phase.dp     .phase-badge { background: rgba(16,185,129,.14); color: var(--green); }
+
+/* ── CALLOUTS ── */
+.callout {
+  border-left: 3px solid var(--orange);
+  background: rgba(249,115,22,.07);
+  padding: 15px 20px; border-radius: 0 8px 8px 0;
+  margin: 22px 0;
+}
+.callout.blue   { border-color: var(--blue);   background: rgba(59,130,246,.07); }
+.callout.green  { border-color: var(--green);  background: rgba(16,185,129,.07); }
+.callout.yellow { border-color: var(--yellow); background: rgba(245,158,11,.07); }
+.callout.red    { border-color: var(--red);    background: rgba(239,68,68,.07); }
+.callout p { margin: 0; font-size: .9rem; }
+.callout strong { color: var(--text); }
+
+/* ── CODE BLOCKS ── */
+.code-block {
+  background: var(--ink); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin: 18px 0;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 18px; border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.code-title { font-family: 'DM Mono', monospace; font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.complexity-badge {
+  font-family: 'DM Mono', monospace; font-size: .7rem;
+  padding: 2px 9px; border-radius: 10px;
+}
+.cx-bad  { background: rgba(239,68,68,.14);  color: var(--red); }
+.cx-mid  { background: rgba(245,158,11,.14); color: var(--yellow); }
+.cx-good { background: rgba(16,185,129,.14); color: var(--green); }
+.lang-pane { display: none; }
+.lang-pane.active { display: block; }
+pre {
+  padding: 20px 24px; overflow-x: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: .81rem; line-height: 1.8;
+}
+/* syntax */
+.k { color: #c792ea; } /* keyword */
+.t { color: #82aaff; } /* type */
+.f { color: #82cffd; } /* function */
+.s { color: #c3e88d; } /* string */
+.c { color: #546e7a; font-style: italic; } /* comment */
+.n { color: #f78c6c; } /* number */
+
+/* ── EVOLUTION STRIP ── */
+.evo {
+  display: flex; border: 1px solid var(--border);
+  border-radius: 9px; overflow: hidden; margin: 20px 0;
+}
+.evo-step {
+  flex: 1; padding: 12px 14px; text-align: center;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+.evo-step:last-child { border-right: none; }
+.evo-step .el { font-family: 'DM Mono', monospace; font-size: .67rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+.evo-step .ev { font-family: 'DM Mono', monospace; font-size: .85rem; font-weight: 600; }
+.evo-step.bad .ev  { color: var(--red); }
+.evo-step.mid .ev  { color: var(--yellow); }
+.evo-step.good .ev { color: var(--green); }
+
+/* ── DIVIDER ── */
+.problem-divider {
+  border: none; border-top: 1px solid var(--border);
+  margin: 80px 0 0;
+}
+
+/* ── VISUALIZER ── */
+.viz-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 26px; margin: 24px 0;
+}
+.viz-box-title {
+  font-family: 'DM Mono', monospace; font-size: .73rem;
+  color: var(--orange); text-transform: uppercase;
+  letter-spacing: .09em; margin-bottom: 18px;
+}
+.viz-log {
+  background: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; padding: 11px 15px;
+  font-family: 'DM Mono', monospace; font-size: .79rem;
+  color: var(--green); line-height: 1.65;
+  min-height: 52px; margin: 14px 0;
+  white-space: pre-wrap;
+}
+.viz-controls { display: flex; gap: 10px; margin-top: 6px; }
+.viz-btn {
+  border: none; border-radius: 8px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: .86rem;
+  font-weight: 600; padding: 8px 20px;
+  transition: opacity .18s;
+}
+.viz-btn:hover { opacity: .82; }
+.viz-btn.primary { background: var(--orange); color: #fff; }
+.viz-btn.ghost { background: var(--raised); color: var(--muted); border: 1px solid var(--border); }
+
+/* ── CELL ROW (dp array) ── */
+.cell-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; align-items: flex-end; }
+.cell {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+}
+.cell .ci { font-family: 'DM Mono', monospace; font-size: .66rem; color: var(--muted); }
+.cell .cv {
+  width: 46px; height: 46px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: .88rem;
+  font-weight: 600; border: 2px solid var(--border);
+  background: var(--raised); color: var(--muted);
+  transition: all .28s;
+}
+.cell .cv.done   { background: rgba(16,185,129,.16); border-color: var(--green);  color: var(--green); }
+.cell .cv.active { background: rgba(249,115,22,.2);  border-color: var(--orange); color: var(--orange); transform: scale(1.1); }
+.cell .cv.dep    { background: rgba(59,130,246,.14); border-color: var(--blue);   color: var(--blue); }
+
+/* ── GRID ── */
+.grid-wrap { overflow-x: auto; margin: 12px 0; }
+.dp-grid { border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: .8rem; }
+.dp-grid th, .dp-grid td {
+  border: 1px solid var(--border);
+  padding: 8px 13px; text-align: center;
+  min-width: 44px; transition: background .25s, color .25s;
+}
+.dp-grid th { background: var(--raised); color: var(--text); font-weight: 600; }
+.dp-grid td { background: var(--surface); color: var(--muted); }
+.dp-grid td.g-done   { background: rgba(16,185,129,.15); color: var(--green); }
+.dp-grid td.g-active { background: rgba(249,115,22,.2);  color: var(--orange); font-weight: 700; }
+.dp-grid td.g-dep    { background: rgba(59,130,246,.13); color: var(--blue); }
+.dp-grid td.g-block  { background: rgba(239,68,68,.1);   color: var(--red); }
+
+/* ── TREE SVG ── */
+.tree-wrap { overflow-x: auto; margin: 12px 0; }
+.tree-wrap svg { display: block; margin: 0 auto; max-width: 100%; }
+
+/* ── STAIR ── */
+.stair-row { display: flex; align-items: flex-end; gap: 5px; margin: 12px 0; overflow-x: auto; }
+.stair-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stair-block {
+  width: 48px; border-radius: 6px 6px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: .82rem;
+  font-weight: 600; border: 2px solid var(--border);
+  background: var(--raised); color: var(--muted);
+  transition: all .28s;
+}
+.stair-block.done   { background: rgba(16,185,129,.15); border-color: var(--green);  color: var(--green); }
+.stair-block.active { background: rgba(249,115,22,.2);  border-color: var(--orange); color: var(--orange); }
+.stair-block.dep    { background: rgba(59,130,246,.13); border-color: var(--blue);   color: var(--blue); }
+.stair-label { font-family: 'DM Mono', monospace; font-size: .67rem; color: var(--muted); }
+
+footer {
+  text-align: center; padding: 48px;
+  color: var(--muted); font-size: .8rem;
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="dynamic_programming_series.html">AlgorithmCraft</a>
+  <a href="#fibonacci">Fibonacci</a>
+  <a href="#climbing">Climbing Stairs</a>
+  <a href="#unique-paths">Unique Paths</a>
+  <a href="#obstacles">With Obstacles</a>
+  <a href="#pascal">Pascal's Triangle</a>
+  <a href="#rook">Rook Paths</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="series-label">Dynamic Programming · First Principles · Part 1 of 3</div>
+  <h1>Foundations:<br/><em>Counting Problems</em></h1>
+  <p class="hero-lead">
+    Every problem here is solved three times — brute force first, then the insight that
+    breaks it open, then DP. The goal is not to memorise solutions. It is to understand
+    why each brute force fails, what property makes DP legal, and how the table is
+    just the recursion tree with duplicates removed.
+  </p>
+  <p class="hero-lead" style="margin-top:12px">
+    This part covers six counting problems, from Fibonacci's 1202 rabbit problem
+    to paths on a chessboard. Each one teaches a distinct DP insight that
+    reappears in harder problems later.
+  </p>
+  <div class="problem-index">
+    <a class="problem-pill" href="#fibonacci">① Fibonacci</a>
+    <a class="problem-pill" href="#climbing">② Climbing Stairs</a>
+    <a class="problem-pill" href="#unique-paths">③ Unique Paths</a>
+    <a class="problem-pill" href="#obstacles">④ Paths + Obstacles</a>
+    <a class="problem-pill" href="#pascal">⑤ Pascal's Triangle</a>
+    <a class="problem-pill" href="#rook">⑥ Rook Shortest Paths</a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     WHAT IS DP
+════════════════════════════════════════════ -->
+<div class="article">
+
+<div class="problem-block" id="what-is-dp" style="padding-top:64px">
+  <h3 style="margin-top:0">Working definition: DP = Recursion without repetition</h3>
+  <p>
+    Dynamic programming has an intimidating reputation, but the core idea is
+    disarmingly simple. One definition sets the foundation before any algorithm:
+  </p>
+  <div class="callout">
+    <p><strong>Working definition:</strong> Dynamic Programming = Recursion without repetition.
+    The exponential brute-force recursion already contains the right answer at every node.
+    DP's only job is to stop recomputing the same node twice.</p>
+  </div>
+  <p>
+    Two mechanisms achieve this. <strong>Memoisation</strong> (top-down): run the recursion,
+    cache every result, return from cache on revisit. <strong>Tabulation</strong> (bottom-up):
+    compute answers in dependency order, filling a table directly without recursion.
+    Both produce identical results. These articles favour bottom-up tabulation throughout.
+  </p>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════════
+     01  FIBONACCI
+════════════════════════════════════════════ -->
+<div class="problem-block" id="fibonacci">
+  <div class="problem-num">Problem 01</div>
+  <div class="problem-title">Fibonacci Numbers</div>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p><strong>Liber Abaci, Chapter 12 — Leonardo of Pisa, 1202:</strong></p>
+    <p>
+      "A man put one pair of (newborn) rabbits in a certain place entirely surrounded by a wall.
+      How many pairs of rabbits can be produced from that pair in a year, if the nature of these
+      rabbits is such that every month, each pair bears a new pair which from the second month on
+      becomes productive? (Assume no rabbits die.)"
+    </p>
+    <div class="example-block">
+      <span class="ex-label">The sequence produced:</span>
+      Month:  1   2   3   4   5   6   7   8   9   10  11  12
+      Pairs:  1   1   2   3   5   8  13  21  34  55  89  144
+
+      F(n) = F(n-1) + F(n-2),  with F(1) = 1, F(2) = 1
+    </div>
+    <p style="margin-top:12px">
+      New month's adults = all rabbit pairs from the previous month.<br/>
+      New month's young = previous month's adults = the month-before-previous rabbit pairs.
+    </p>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase brute">
+    <div>
+      <div class="phase-label">Phase 1</div>
+      <div class="phase-name">Direct recursion — the definition is the code</div>
+    </div>
+    <span class="phase-badge">O(2ⁿ) time</span>
+  </div>
+
+  <p>
+    The mathematical recurrence is so clean it writes itself directly as code.
+    Two recursive calls per node. The tree doubles in size at every level.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Brute Force — Direct Recursion</span>
+      <span class="complexity-badge cx-bad">O(2ⁿ)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">fib</span>(<span class="k">int</span> n) {
+    <span class="c">// Base cases</span>
+    <span class="k">if</span> (n == <span class="n">1</span> || n == <span class="n">2</span>) <span class="k">return</span> <span class="n">1</span>;
+    <span class="c">// Two recursive calls — the tree doubles every level</span>
+    <span class="k">return</span> <span class="f">fib</span>(n - <span class="n">1</span>) + <span class="f">fib</span>(n - <span class="n">2</span>);
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">fib</span>(n):
+    <span class="k">if</span> n <= <span class="n">2</span>:
+        <span class="k">return</span> <span class="n">1</span>
+    <span class="k">return</span> <span class="f">fib</span>(n - <span class="n">1</span>) + <span class="f">fib</span>(n - <span class="n">2</span>)</pre>
+    </div>
+  </div>
+
+  <!-- TREE VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Recursion tree for fib(6) — watch duplicates accumulate</div>
+    <div class="tree-wrap">
+      <svg id="fib-svg" viewBox="0 0 740 310" style="height:310px;width:100%"></svg>
+    </div>
+    <div style="display:flex;gap:18px;font-family:'DM Mono',monospace;font-size:.74rem;margin-bottom:10px">
+      <span style="color:var(--orange)">■ expanding now</span>
+      <span style="color:var(--red)">■ duplicate call ⚠</span>
+      <span style="color:var(--green)">■ base case</span>
+      <span style="color:var(--raised);border:1px solid var(--border);padding:0 4px">■ not yet reached</span>
+    </div>
+    <div class="viz-log" id="fib-log">Press Step → to expand the call tree one node at a time.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="fib-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="fibReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout red">
+    <p><strong>Why it fails:</strong> fib(4) is computed twice, fib(3) three times,
+    fib(2) five times. For fib(50) the number of calls exceeds 2⁵⁰ ≈ one quadrillion.
+    As the old saying goes: <em>"Those who cannot remember the past are condemned to repeat it." — Dynamic Programming</em></p>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Phase 2 — Key Insight</div>
+      <div class="phase-name">fib(k) has exactly one answer. Write it down once.</div>
+    </div>
+    <span class="phase-badge">O(n) · O(n)</span>
+  </div>
+
+  <p>
+    Every call to fib(k) returns the same value regardless of which branch called it.
+    So compute it once and cache it. Every future call is a table lookup — O(1) instead
+    of an exponential subtree.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Memoised (Top-Down DP)</span>
+      <span class="complexity-badge cx-mid">O(n) time · O(n) space</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">fib</span>(<span class="k">int</span> n, <span class="k">int</span>[] memo) {
+    <span class="k">if</span> (n <= <span class="n">2</span>) <span class="k">return</span> <span class="n">1</span>;
+    <span class="k">if</span> (memo[n] != <span class="n">0</span>) <span class="k">return</span> memo[n];   <span class="c">// already solved</span>
+    memo[n] = <span class="f">fib</span>(n - <span class="n">1</span>, memo) + <span class="f">fib</span>(n - <span class="n">2</span>, memo);
+    <span class="k">return</span> memo[n];
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">from</span> functools <span class="k">import</span> lru_cache
+
+<span class="k">@lru_cache</span>(maxsize=<span class="k">None</span>)
+<span class="k">def</span> <span class="f">fib</span>(n):
+    <span class="k">if</span> n <= <span class="n">2</span>:
+        <span class="k">return</span> <span class="n">1</span>
+    <span class="k">return</span> <span class="f">fib</span>(n - <span class="n">1</span>) + <span class="f">fib</span>(n - <span class="n">2</span>)</pre>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Fill the table left-to-right — no recursion needed</div>
+    </div>
+    <span class="phase-badge">O(n) · O(1)</span>
+  </div>
+
+  <p>
+    Notice the direction of dependency: fib(n) needs fib(n-1) and fib(n-2).
+    Those are <em>smaller</em> values. So start from the smallest values and build up.
+    At each step you only need the previous two — shrink space to O(1).
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Bottom-Up Tabulation — O(n) time, O(1) space</span>
+      <span class="complexity-badge cx-good">O(n) · O(1)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">fib</span>(<span class="k">int</span> n) {
+    <span class="k">if</span> (n <= <span class="n">2</span>) <span class="k">return</span> <span class="n">1</span>;
+    <span class="k">int</span> prev2 = <span class="n">1</span>, prev1 = <span class="n">1</span>;
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">3</span>; i <= n; i++) {
+        <span class="k">int</span> curr = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    <span class="k">return</span> prev1;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">fib</span>(n):
+    <span class="k">if</span> n <= <span class="n">2</span>:
+        <span class="k">return</span> <span class="n">1</span>
+    prev2, prev1 = <span class="n">1</span>, <span class="n">1</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="f">range</span>(<span class="n">3</span>, n + <span class="n">1</span>):
+        prev2, prev1 = prev1, prev1 + prev2
+    <span class="k">return</span> prev1</pre>
+    </div>
+  </div>
+
+  <!-- DP TABLE VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ DP table filling — fib(8)</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Blue = the two dependencies being read. Orange = cell being computed now. Green = already filled.
+    </p>
+    <div class="cell-row" id="fib-dp-row"></div>
+    <div class="viz-log" id="fib-dp-log">Press Step → to fill the table from left to right.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="fib-dp-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="fibDpReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="evo">
+    <div class="evo-step bad">  <div class="el">Brute Force</div><div class="ev">O(2ⁿ)</div></div>
+    <div class="evo-step mid">  <div class="el">Memoisation</div><div class="ev">O(n) · O(n)</div></div>
+    <div class="evo-step good"> <div class="el">Tabulation</div><div class="ev">O(n) · O(1)</div></div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson from Fibonacci:</strong> The recurrence F(n) = F(n-1) + F(n-2) never
+    changes across all three phases. DP does not change the algorithm — it eliminates the
+    repeated work. The table is just the recursion tree with all duplicate subtrees pruned.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════════
+     02  CLIMBING STAIRS  — LC 70
+════════════════════════════════════════════ -->
+<div class="problem-block" id="climbing">
+  <div class="problem-num">Problem 02 · LeetCode 70</div>
+  <div class="problem-title">Climbing Stairs</div>
+  <span class="lc-tag easy">Easy</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      You are climbing a staircase. It takes <strong>n</strong> steps to reach the top.
+      Each time you can either climb <strong>1</strong> or <strong>2</strong> steps.
+      In how many distinct ways can you climb to the top?
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input: n = 2
+      Output: 2
+      Explanation: 1+1 steps,  or  2 steps.
+
+      <span class="ex-label">Example 2:</span>
+      Input: n = 3
+      Output: 3
+      Explanation: 1+1+1,  1+2,  2+1.
+
+      Note: given n will be a positive integer.
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase brute">
+    <div>
+      <div class="phase-label">Phase 1</div>
+      <div class="phase-name">Try every possible sequence of steps</div>
+    </div>
+    <span class="phase-badge">O(2ⁿ) time</span>
+  </div>
+
+  <p>
+    At each stair, branch into "take 1 step" and "take 2 steps." Count paths that
+    land exactly on stair n.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Brute Force</span>
+      <span class="complexity-badge cx-bad">O(2ⁿ)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">ways</span>(<span class="k">int</span> curr, <span class="k">int</span> n) {
+    <span class="k">if</span> (curr == n) <span class="k">return</span> <span class="n">1</span>;   <span class="c">// reached the top exactly</span>
+    <span class="k">if</span> (curr > n)  <span class="k">return</span> <span class="n">0</span>;   <span class="c">// overshot</span>
+    <span class="k">return</span> <span class="f">ways</span>(curr + <span class="n">1</span>, n)   <span class="c">// take 1 step</span>
+         + <span class="f">ways</span>(curr + <span class="n">2</span>, n);  <span class="c">// take 2 steps</span>
+}
+<span class="c">// Call: ways(0, n)</span></pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">ways</span>(curr, n):
+    <span class="k">if</span> curr == n: <span class="k">return</span> <span class="n">1</span>   <span class="c"># reached the top exactly</span>
+    <span class="k">if</span> curr > n:  <span class="k">return</span> <span class="n">0</span>   <span class="c"># overshot</span>
+    <span class="k">return</span> <span class="f">ways</span>(curr + <span class="n">1</span>, n) + <span class="f">ways</span>(curr + <span class="n">2</span>, n)
+
+<span class="c"># Call: ways(0, n)</span></pre>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Phase 2 — Key Insight</div>
+      <div class="phase-name">Ask backwards: how could I have arrived at step i?</div>
+    </div>
+    <span class="phase-badge">Recurrence revealed</span>
+  </div>
+
+  <p>
+    Instead of asking "where can I go from here?", flip the question:
+    <strong>how could I have arrived at step i?</strong> There are only two ways —
+    I stepped from stair i−1 (1-step), or from stair i−2 (2-step).
+    So the number of ways to reach stair i equals ways(i−1) + ways(i−2).
+    This is the same recurrence as Fibonacci, just with different base cases.
+  </p>
+
+  <div class="callout green">
+    <p><strong>Recurrence:</strong> ways(i) = ways(i−1) + ways(i−2)<br/>
+    Base cases: ways(1) = 1,  ways(2) = 2<br/>
+    The overlapping subproblem: ways(3) appears in the subtree rooted at ways(4) AND
+    in the subtree rooted at ways(5). Caching it eliminates all that repeated work.</p>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Fill the staircase bottom-up</div>
+    </div>
+    <span class="phase-badge">O(n) · O(1)</span>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Bottom-Up DP</span>
+      <span class="complexity-badge cx-good">O(n) · O(1)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">climbStairs</span>(<span class="k">int</span> n) {
+    <span class="k">if</span> (n <= <span class="n">2</span>) <span class="k">return</span> n;
+    <span class="k">int</span> prev2 = <span class="n">1</span>, prev1 = <span class="n">2</span>;   <span class="c">// ways(1)=1, ways(2)=2</span>
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">3</span>; i <= n; i++) {
+        <span class="k">int</span> curr = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    <span class="k">return</span> prev1;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">climb_stairs</span>(n):
+    <span class="k">if</span> n <= <span class="n">2</span>: <span class="k">return</span> n
+    prev2, prev1 = <span class="n">1</span>, <span class="n">2</span>   <span class="c"># ways(1)=1, ways(2)=2</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="f">range</span>(<span class="n">3</span>, n + <span class="n">1</span>):
+        prev2, prev1 = prev1, prev1 + prev2
+    <span class="k">return</span> prev1</pre>
+    </div>
+  </div>
+
+  <!-- STAIR VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Staircase DP fill — n = 8</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Each bar's height represents the number of ways to reach that step.
+      Blue = the two dependencies. Orange = computing now. Green = done.
+    </p>
+    <div class="stair-row" id="stair-row"></div>
+    <div class="viz-log" id="stair-log">Press Step → to fill ways(i) = ways(i-1) + ways(i-2).</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="stair-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="stairReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> Backwards thinking ("how did I get here?") reveals the
+    recurrence instantly. The brute-force tree was asking the wrong question.
+    Asking the right question — what could have preceded me? — collapses the problem to a
+    Fibonacci variant solvable in O(n) with two variables.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════════
+     03  UNIQUE PATHS  — LC 62
+════════════════════════════════════════════ -->
+<div class="problem-block" id="unique-paths">
+  <div class="problem-num">Problem 03 · LeetCode 62</div>
+  <div class="problem-title">Unique Paths</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      A robot is located at the top-left corner of a <strong>m × n</strong> grid.
+      The robot can only move either <strong>down</strong> or <strong>right</strong>
+      at any point in time. The robot is trying to reach the bottom-right corner of the grid.
+      How many possible unique paths are there?
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:  m = 3, n = 7
+      Output: 28
+
+      <span class="ex-label">Example 2:</span>
+      Input:  m = 3, n = 2
+      Output: 3
+      Explanation: Right→Down→Down, Down→Right→Down, Down→Down→Right.
+
+      Note: m and n will be at most 100.
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase brute">
+    <div>
+      <div class="phase-label">Phase 1</div>
+      <div class="phase-name">DFS — explore every route from (0,0)</div>
+    </div>
+    <span class="phase-badge">O(2^(m+n)) time</span>
+  </div>
+
+  <p>At each cell branch right or down. Count how many routes reach (m−1, n−1).</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Brute Force DFS</span>
+      <span class="complexity-badge cx-bad">O(2^(m+n))</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">paths</span>(<span class="k">int</span> r, <span class="k">int</span> c, <span class="k">int</span> m, <span class="k">int</span> n) {
+    <span class="k">if</span> (r == m - <span class="n">1</span> && c == n - <span class="n">1</span>) <span class="k">return</span> <span class="n">1</span>;  <span class="c">// reached destination</span>
+    <span class="k">if</span> (r >= m || c >= n) <span class="k">return</span> <span class="n">0</span>;             <span class="c">// out of bounds</span>
+    <span class="k">return</span> <span class="f">paths</span>(r + <span class="n">1</span>, c, m, n)               <span class="c">// go down</span>
+         + <span class="f">paths</span>(r, c + <span class="n">1</span>, m, n);              <span class="c">// go right</span>
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">paths</span>(r, c, m, n):
+    <span class="k">if</span> r == m - <span class="n">1</span> <span class="k">and</span> c == n - <span class="n">1</span>: <span class="k">return</span> <span class="n">1</span>
+    <span class="k">if</span> r >= m <span class="k">or</span> c >= n: <span class="k">return</span> <span class="n">0</span>
+    <span class="k">return</span> <span class="f">paths</span>(r + <span class="n">1</span>, c, m, n) + <span class="f">paths</span>(r, c + <span class="n">1</span>, m, n)</pre>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Phase 2 — Key Insight</div>
+      <div class="phase-name">paths(r,c) has one fixed answer — cache by (r,c)</div>
+    </div>
+    <span class="phase-badge">O(m·n) with memo</span>
+  </div>
+
+  <p>
+    Cell (2,3) can be reached by going down from (1,3) or right from (2,2).
+    Both paths call <code>paths(2,3)</code> independently and get the same answer.
+    The number of paths from any cell to the destination depends only on that cell's
+    position, not on how you got there. Cache by (r,c). There are m×n distinct cells.
+  </p>
+
+  <div class="callout green">
+    <p><strong>The backward recurrence:</strong> Instead of "paths from (r,c) forward",
+    think "paths to reach (r,c) from (0,0)". You can only arrive from above (r−1,c)
+    or from the left (r,c−1). So: <strong>dp[r][c] = dp[r−1][c] + dp[r][c−1]</strong>.
+    The entire top row and left column each have exactly 1 path (only one direction
+    to travel along an edge). These are the base cases.</p>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Fill the grid cell by cell, row by row</div>
+    </div>
+    <span class="phase-badge">O(m·n) · O(n)</span>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Bottom-Up DP — 1D Space Optimised</span>
+      <span class="complexity-badge cx-good">O(m·n) · O(n)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">uniquePaths</span>(<span class="k">int</span> m, <span class="k">int</span> n) {
+    <span class="k">int</span>[] dp = <span class="k">new int</span>[n];
+    <span class="t">Arrays</span>.<span class="f">fill</span>(dp, <span class="n">1</span>);                   <span class="c">// top row: 1 path to each cell</span>
+    <span class="k">for</span> (<span class="k">int</span> r = <span class="n">1</span>; r < m; r++) {
+        <span class="k">for</span> (<span class="k">int</span> c = <span class="n">1</span>; c < n; c++) {
+            dp[c] += dp[c - <span class="n">1</span>];           <span class="c">// from above + from left</span>
+        }
+    }
+    <span class="k">return</span> dp[n - <span class="n">1</span>];
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">unique_paths</span>(m, n):
+    dp = [<span class="n">1</span>] * n          <span class="c"># top row: 1 path to each cell</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, m):
+        <span class="k">for</span> c <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, n):
+            dp[c] += dp[c - <span class="n">1</span>]  <span class="c"># from above + from left</span>
+    <span class="k">return</span> dp[-<span class="n">1</span>]</pre>
+    </div>
+  </div>
+
+  <!-- GRID VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Grid DP fill — 4 × 5 grid</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Each cell shows the number of unique paths reaching it from the top-left.
+      Blue = the two cells being summed (above + left). Orange = currently filling.
+    </p>
+    <div class="grid-wrap"><table class="dp-grid" id="paths-grid"></table></div>
+    <div class="viz-log" id="paths-log">Press Step → to fill the grid one cell at a time.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="paths-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="pathsReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> A 2D problem produces a 2D DP table.
+    The grid itself is the table — each cell is a subproblem.
+    Fill it in topological order (left-to-right, top-to-bottom) and the answer
+    accumulates naturally in the bottom-right corner.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════════
+     04  UNIQUE PATHS II  — LC 63
+════════════════════════════════════════════ -->
+<div class="problem-block" id="obstacles">
+  <div class="problem-num">Problem 04 · LeetCode 63</div>
+  <div class="problem-title">Unique Paths II</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      Now consider if some obstacles are added to the grid. An obstacle and empty space
+      is marked as <code>1</code> and <code>0</code> respectively in the grid.
+      How many unique paths are there from top-left to bottom-right?
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example 1:</span>
+      Input:
+        [ [0,0,0],
+          [0,1,0],
+          [0,0,0] ]
+
+      Output: 2
+      Explanation: There is one obstacle in the middle of the 3×3 grid above.
+      There are two ways to reach the bottom-right corner:
+        1. Right → Right → Down → Down
+        2. Down → Down → Right → Right
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">An obstacle cell has 0 paths through it</div>
+    </div>
+    <span class="phase-badge">One extra rule</span>
+  </div>
+
+  <p>
+    The recurrence is identical to Unique Paths: dp[r][c] = dp[r−1][c] + dp[r][c−1].
+    The only addition: if <code>grid[r][c] == 1</code>, force dp[r][c] = 0.
+    Downstream cells naturally inherit the 0 — they cannot reach a blocked cell,
+    so they cannot receive paths from it.
+  </p>
+
+  <div class="callout green">
+    <p><strong>Why it works without special cases:</strong> When dp[r][c] is set to 0,
+    any cell that would read from it (to its right or below) adds 0 from that direction.
+    The obstacle propagates naturally. No additional logic is needed beyond a single
+    <code>if</code> check before filling.</p>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">Phase 3 — DP Solution</div>
+      <div class="phase-name">Same as Unique Paths with one extra check</div>
+    </div>
+    <span class="phase-badge">O(m·n) · O(n)</span>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Unique Paths with Obstacles</span>
+      <span class="complexity-badge cx-good">O(m·n) · O(n)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="k">int</span> <span class="f">uniquePathsWithObstacles</span>(<span class="k">int</span>[][] grid) {
+    <span class="k">int</span> m = grid.length, n = grid[<span class="n">0</span>].length;
+    <span class="k">if</span> (grid[<span class="n">0</span>][<span class="n">0</span>] == <span class="n">1</span>) <span class="k">return</span> <span class="n">0</span>;   <span class="c">// start is blocked</span>
+
+    <span class="k">int</span>[] dp = <span class="k">new int</span>[n];
+    dp[<span class="n">0</span>] = <span class="n">1</span>;  <span class="c">// one way to be at the start</span>
+    <span class="k">for</span> (<span class="k">int</span> r = <span class="n">0</span>; r < m; r++) {
+        <span class="k">for</span> (<span class="k">int</span> c = <span class="n">0</span>; c < n; c++) {
+            <span class="k">if</span> (grid[r][c] == <span class="n">1</span>) {
+                dp[c] = <span class="n">0</span>;          <span class="c">// obstacle — no paths through here</span>
+            } <span class="k">else if</span> (c > <span class="n">0</span>) {
+                dp[c] += dp[c - <span class="n">1</span>]; <span class="c">// from above (dp[c]) + from left (dp[c-1])</span>
+            }
+        }
+    }
+    <span class="k">return</span> dp[n - <span class="n">1</span>];
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">unique_paths_with_obstacles</span>(grid):
+    m, n = <span class="f">len</span>(grid), <span class="f">len</span>(grid[<span class="n">0</span>])
+    <span class="k">if</span> grid[<span class="n">0</span>][<span class="n">0</span>] == <span class="n">1</span>: <span class="k">return</span> <span class="n">0</span>
+
+    dp = [<span class="n">0</span>] * n
+    dp[<span class="n">0</span>] = <span class="n">1</span>
+    <span class="k">for</span> r <span class="k">in</span> <span class="f">range</span>(m):
+        <span class="k">for</span> c <span class="k">in</span> <span class="f">range</span>(n):
+            <span class="k">if</span> grid[r][c] == <span class="n">1</span>:
+                dp[c] = <span class="n">0</span>         <span class="c"># obstacle</span>
+            <span class="k">elif</span> c > <span class="n">0</span>:
+                dp[c] += dp[c - <span class="n">1</span>]
+    <span class="k">return</span> dp[-<span class="n">1</span>]</pre>
+    </div>
+  </div>
+
+  <!-- OBSTACLE GRID VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Obstacle grid fill — 4 × 4 with two obstacles</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Red cells are obstacles — they force dp = 0 and block all paths through them.
+    </p>
+    <div class="grid-wrap"><table class="dp-grid" id="obs-grid"></table></div>
+    <div class="viz-log" id="obs-log">Press Step → to fill the grid around the obstacles.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="obs-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="obsReset()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════════
+     05  PASCAL'S TRIANGLE  — LC 118
+════════════════════════════════════════════ -->
+<div class="problem-block" id="pascal">
+  <div class="problem-num">Problem 05 · LeetCode 118</div>
+  <div class="problem-title">Pascal's Triangle</div>
+  <span class="lc-tag easy">Easy</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      Given a non-negative integer <strong>numRows</strong>, generate the first
+      <strong>numRows</strong> of Pascal's triangle. In Pascal's triangle, each number
+      is the sum of the two numbers directly above it.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Example:</span>
+      Input: 5
+      Output:
+        [1]
+        [1,1]
+        [1,2,1]
+        [1,3,3,1]
+        [1,4,6,4,1]
+    </div>
+    <p style="margin-top:10px">
+      Pascal's triangle is also the DP table for C(n,k) — the number of ways to
+      choose k items from n. The recurrence C(n,k) = C(n−1,k−1) + C(n−1,k)
+      is the same as the include/exclude principle: either include item n in the
+      selection (C(n−1,k−1)) or exclude it (C(n−1,k)).
+    </p>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">Each entry is include-or-exclude on the item above it</div>
+    </div>
+    <span class="phase-badge">O(n²)</span>
+  </div>
+
+  <div class="callout green">
+    <p><strong>Pascal's Rule:</strong> C(n,k) = C(n−1,k−1) + C(n−1,k).<br/>
+    Think of the n-th item: either it is included in your selection of k
+    (then choose k−1 from the remaining n−1), or it is excluded
+    (then choose k from the remaining n−1). This is the include/exclude
+    pattern applied to combinatorics — the same structure as the knapsack problem.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">DP Solution</div>
+      <div class="phase-name">Build each row from the row above it</div>
+    </div>
+    <span class="phase-badge">O(n²) · O(n²)</span>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Pascal's Triangle</span>
+      <span class="complexity-badge cx-good">O(n²)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; <span class="f">generate</span>(<span class="k">int</span> numRows) {
+    <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; result = <span class="k">new</span> <span class="t">ArrayList</span>&lt;&gt;();
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">0</span>; i < numRows; i++) {
+        <span class="t">Integer</span>[] row = <span class="k">new</span> <span class="t">Integer</span>[i + <span class="n">1</span>];
+        row[<span class="n">0</span>] = row[i] = <span class="n">1</span>;           <span class="c">// edges are always 1</span>
+        <span class="k">for</span> (<span class="k">int</span> k = <span class="n">1</span>; k < i; k++) {
+            <span class="t">List</span>&lt;<span class="t">Integer</span>&gt; prev = result.get(i - <span class="n">1</span>);
+            row[k] = prev.get(k - <span class="n">1</span>) + prev.get(k);  <span class="c">// sum of two above</span>
+        }
+        result.add(<span class="t">Arrays</span>.<span class="f">asList</span>(row));
+    }
+    <span class="k">return</span> result;
+}</pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">generate</span>(num_rows):
+    result = []
+    <span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(num_rows):
+        row = [<span class="n">1</span>] * (i + <span class="n">1</span>)             <span class="c"># edges are always 1</span>
+        <span class="k">for</span> k <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, i):
+            row[k] = result[i-<span class="n">1</span>][k-<span class="n">1</span>] + result[i-<span class="n">1</span>][k]
+        result.append(row)
+    <span class="k">return</span> result</pre>
+    </div>
+  </div>
+
+  <!-- PASCAL VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Pascal's Triangle build — 7 rows</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Orange = currently computing. Blue = the two parent cells being summed above it.
+    </p>
+    <div id="pascal-viz" style="display:flex;flex-direction:column;gap:6px;align-items:center;margin:12px 0;min-height:200px"></div>
+    <div class="viz-log" id="pascal-log">Press Step → to grow the triangle one cell at a time.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="pascal-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="pascalReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The lesson:</strong> Pascal's triangle IS a 2D DP table for C(n,k).
+    Each row depends only on the row above it. The same include/exclude argument
+    that drives the Knapsack problem drives the combinatorics here.
+    Recognising this connection is the insight that makes the pattern transferable.</p>
+  </div>
+</div>
+
+<hr class="problem-divider"/>
+
+<!-- ════════════════════════════════════════════
+     06  ROOK SHORTEST PATHS
+════════════════════════════════════════════ -->
+<div class="problem-block" id="rook">
+  <div class="problem-num">Problem 06 · Shortest Path Counting</div>
+  <div class="problem-title">Rook Shortest Paths</div>
+  <span class="lc-tag medium">Medium</span>
+  <div class="section-rule"></div>
+
+  <div class="problem-statement">
+    <p>
+      A chess rook can move horizontally or vertically to any square in the same row
+      or in the same column of a chessboard. Find the number of shortest paths by which
+      a rook can move from one corner of a chessboard to the diagonally opposite corner.
+    </p>
+    <p style="margin-top:10px">
+      a) Use a dynamic programming algorithm.<br/>
+      b) Use elementary combinatorics.
+    </p>
+    <div class="example-block">
+      <span class="ex-label">Key observation:</span>
+      On an 8×8 board, the rook starts at (0,0) and must reach (7,7).
+      A shortest path covers exactly 14 squares (7 rights + 7 downs in some order)
+      because any extra move would have to be undone, making the path longer.
+
+      Each shortest path is a sequence of moves, where each move goes
+      right some number of squares OR down some number of squares.
+      The rook takes exactly 7 rightward and 7 downward moves, but each
+      individual move can cover multiple squares at once.
+
+      DP answer (8×8): C(14,7) = 3432
+    </div>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="phase better">
+    <div>
+      <div class="phase-label">Key Insight</div>
+      <div class="phase-name">Every shortest path is 7 rights + 7 downs in some order</div>
+    </div>
+    <span class="phase-badge">reduces to C(14,7)</span>
+  </div>
+
+  <p>
+    A shortest path from (0,0) to (7,7) on an 8×8 board must cover a net displacement
+    of 7 right and 7 down. Any step in a different direction would need to be undone,
+    making the path longer. So every shortest path consists of exactly <strong>7 rightward
+    moves</strong> and <strong>7 downward moves</strong>, in some interleaving.
+  </p>
+
+  <p>
+    The number of interleavings of 7 R's and 7 D's is C(14,7) = 3432.
+    The DP approach arrives at the same answer by treating this as a grid problem:
+    dp[r][c] = number of ways to reach square (r,c) from (0,0) using only right
+    and down moves, where each move can cover any distance.
+  </p>
+
+  <div class="callout green">
+    <p><strong>Connection to Unique Paths:</strong> If the rook could only move
+    one square at a time, this reduces exactly to the Unique Paths problem
+    (answer: C(14,7) = 3432 for an 8×8 board). The rook's ability to move
+    multiple squares per move does not change the count, because every shortest
+    path still consists of the same total rightward and downward displacement —
+    the number of distinct paths is the same regardless of step size.</p>
+  </div>
+
+  <div class="phase dp">
+    <div>
+      <div class="phase-label">DP Solution</div>
+      <div class="phase-name">Same grid DP as Unique Paths</div>
+    </div>
+    <span class="phase-badge">O(n²) · O(n)</span>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-title">Rook Shortest Paths — n×n board</span>
+      <span class="complexity-badge cx-good">O(n²) · O(n)</span>
+    </div>
+    <div class="lang-pane java active">
+<pre><span class="c">// Count shortest paths on an n×n chessboard corner to corner</span>
+<span class="k">int</span> <span class="f">rookPaths</span>(<span class="k">int</span> n) {
+    <span class="k">int</span>[] dp = <span class="k">new int</span>[n];
+    <span class="t">Arrays</span>.<span class="f">fill</span>(dp, <span class="n">1</span>);           <span class="c">// top row: 1 path to each cell</span>
+    <span class="k">for</span> (<span class="k">int</span> r = <span class="n">1</span>; r < n; r++) {
+        <span class="k">for</span> (<span class="k">int</span> c = <span class="n">1</span>; c < n; c++) {
+            dp[c] += dp[c - <span class="n">1</span>];
+        }
+    }
+    <span class="k">return</span> dp[n - <span class="n">1</span>];
+}
+<span class="c">// rookPaths(8) == C(14,7) == 3432</span></pre>
+    </div>
+    <div class="lang-pane python">
+<pre><span class="k">def</span> <span class="f">rook_paths</span>(n):
+    <span class="c"># Count shortest paths on an n×n board corner to corner</span>
+    dp = [<span class="n">1</span>] * n          <span class="c"># top row: 1 path to each cell</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, n):
+        <span class="k">for</span> c <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, n):
+            dp[c] += dp[c - <span class="n">1</span>]
+    <span class="k">return</span> dp[-<span class="n">1</span>]
+
+<span class="c"># rook_paths(8) == C(14,7) == 3432</span></pre>
+    </div>
+  </div>
+
+  <!-- ROOK VISUALIZER -->
+  <div class="viz-box">
+    <div class="viz-box-title">▶ Rook path count — 5×5 board</div>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px">
+      Each cell shows the number of shortest paths from the top-left to that cell.
+      The answer (bottom-right) should be C(8,4) = 70 for a 5×5 board.
+    </p>
+    <div class="grid-wrap"><table class="dp-grid" id="rook-grid"></table></div>
+    <div class="viz-log" id="rook-log">Press Step → to count shortest paths cell by cell.</div>
+    <div class="viz-controls">
+      <button class="viz-btn primary" id="rook-step-btn">Step →</button>
+      <button class="viz-btn ghost" onclick="rookReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <p><strong>The combinatorics connection:</strong> The DP answer for an n×n board is
+    always C(2(n-1), n-1). For 8×8: C(14,7) = 3432. The DP table is computing Pascal's
+    triangle entries — every cell dp[r][c] equals C(r+c, r). All three problems
+    (Unique Paths, Pascal's Triangle, Rook Paths) are computing the same underlying
+    combinatorial object.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     FOOTER / NEXT
+════════════════════════════════════════════ -->
+<div style="padding-top:80px;padding-bottom:20px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 32px">
+    <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--orange);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Up next · Part 2 of 3</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:10px">Optimization Problems</div>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:0">
+      Min Path Sum · Min Cost Climbing Stairs · Coin Change · Triangle ·
+      House Robber · House Robber II · Minimum Cost Tickets
+    </p>
+  </div>
+</div>
+
+</div><!-- end .article -->
+
+<footer><a href="dynamic_programming_series.html" style="color:inherit;text-decoration:none;">Back to DP Series</a> · Dynamic Programming First Principles · Part 1: Foundations</footer>
+
+<script>
+function updateThemeButton() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = document.documentElement.classList.contains('light') ? 'Dark mode' : 'Light mode';
+}
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('light');
+  try {
+    localStorage.setItem('dsa-theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  } catch (e) {}
+  updateThemeButton();
+}
+
+/* ── LANGUAGE TOGGLE ── */
+function setLang(lang) {
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p =>
+    p.classList.toggle('active', p.classList.contains(lang))
+  );
+}
+
+/* ═══════════════════════════════════════
+   VIZ 1 — FIBONACCI RECURSION TREE
+═══════════════════════════════════════ */
+const FIB_NODES = [
+  {id:0, lbl:'fib(6)', x:370, y:22,  par:-1},
+  {id:1, lbl:'fib(5)', x:190, y:85,  par:0, left:true},
+  {id:2, lbl:'fib(4)', x:550, y:85,  par:0, left:false},
+  {id:3, lbl:'fib(4)', x:95,  y:155, par:1, left:true},
+  {id:4, lbl:'fib(3)', x:285, y:155, par:1, left:false},
+  {id:5, lbl:'fib(3)', x:455, y:155, par:2, left:true},
+  {id:6, lbl:'fib(2)', x:645, y:155, par:2, left:false},
+  {id:7, lbl:'fib(3)', x:42,  y:225, par:3, left:true},
+  {id:8, lbl:'fib(2)', x:150, y:225, par:3, left:false},
+  {id:9, lbl:'fib(2)', x:248, y:225, par:4, left:true},
+  {id:10,lbl:'fib(1)', x:325, y:225, par:4, left:false},
+  {id:11,lbl:'fib(2)', x:415, y:225, par:5, left:true},
+  {id:12,lbl:'fib(1)', x:495, y:225, par:5, left:false},
+];
+/* dup ids: 3(fib4), 4(fib3), 5(fib3), 7(fib3), 9(fib2), 11(fib2) */
+const FIB_DUPS = new Set([3,4,5,7,9,11]);
+const FIB_BASES = new Set([6,8,10,12]);
+const FIB_LOGS = [
+  'Call fib(6) → needs fib(5) + fib(4)',
+  'Call fib(5) → needs fib(4) + fib(3)',
+  'Call fib(4) → needs fib(3) + fib(2)  [first time]',
+  'Call fib(4) ⚠ DUPLICATE! Same call as node 3 above — recomputing fib(4) again.',
+  'Call fib(3) → needs fib(2) + fib(1)  [first time]',
+  'Call fib(3) ⚠ DUPLICATE! fib(3) appeared already on the left side.',
+  'Call fib(2) → base case, returns 1',
+  'Call fib(3) ⚠ DUPLICATE! Third time computing fib(3).',
+  'Call fib(2) → base case, returns 1',
+  'Call fib(2) → base case, returns 1',
+  'Call fib(1) → base case, returns 1',
+  'Call fib(2) → base case, returns 1',
+  'Call fib(1) → base case, returns 1\n\n⚠ Total: 13 nodes for fib(6). For fib(50) this would be ~2⁵⁰ ≈ 1 quadrillion calls.',
+];
+
+let fibRevealed = [], fibTreeStep = 0;
+
+function fibDrawTree(revealed) {
+  const svg = document.getElementById('fib-svg');
+  const ns = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = '';
+  // edges
+  revealed.forEach(id => {
+    const n = FIB_NODES[id];
+    if (n.par < 0) return;
+    const p = FIB_NODES[n.par];
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', p.x); line.setAttribute('y1', p.y + 13);
+    line.setAttribute('x2', n.x); line.setAttribute('y2', n.y - 13);
+    line.setAttribute('stroke', n.left ? '#3b82f6' : '#a78bfa');
+    line.setAttribute('stroke-width', '1.6');
+    svg.appendChild(line);
+  });
+  // nodes
+  revealed.forEach(id => {
+    const n = FIB_NODES[id];
+    const isNew  = id === revealed[revealed.length - 1];
+    const isDup  = FIB_DUPS.has(id);
+    const isBase = FIB_BASES.has(id);
+    const fill   = isNew ? '#f97316' : isDup ? 'rgba(239,68,68,.45)' : isBase ? '#10b981' : '#1a1e28';
+    const stroke = isNew ? '#f97316' : isDup ? '#ef4444' : isBase ? '#10b981' : '#252a38';
+
+    const rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', n.x - 30); rect.setAttribute('y', n.y - 13);
+    rect.setAttribute('width', 60); rect.setAttribute('height', 26);
+    rect.setAttribute('rx', '6');
+    rect.setAttribute('fill', fill); rect.setAttribute('stroke', stroke);
+    rect.setAttribute('stroke-width', '1.5');
+    svg.appendChild(rect);
+
+    const txt = document.createElementNS(ns, 'text');
+    txt.setAttribute('x', n.x); txt.setAttribute('y', n.y + 5);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('font-size', '10'); txt.setAttribute('font-family', 'DM Mono, monospace');
+    txt.setAttribute('fill', '#e8eaf0');
+    txt.textContent = n.lbl;
+    svg.appendChild(txt);
+
+    if (isDup) {
+      const warn = document.createElementNS(ns, 'text');
+      warn.setAttribute('x', n.x + 33); warn.setAttribute('y', n.y - 8);
+      warn.setAttribute('font-size', '14'); warn.setAttribute('fill', '#ef4444');
+      warn.textContent = '⚠';
+      svg.appendChild(warn);
+    }
+  });
+}
+
+document.getElementById('fib-step-btn').addEventListener('click', () => {
+  if (fibTreeStep >= FIB_NODES.length) return;
+  fibRevealed.push(fibTreeStep);
+  fibDrawTree(fibRevealed);
+  document.getElementById('fib-log').textContent = FIB_LOGS[fibTreeStep] || '';
+  fibTreeStep++;
+});
+
+function fibReset() {
+  fibRevealed = []; fibTreeStep = 0;
+  fibDrawTree([]);
+  document.getElementById('fib-log').textContent = 'Press Step → to expand the call tree one node at a time.';
+}
+fibDrawTree([]);
+
+/* ═══════════════════════════════════════
+   VIZ 2 — FIBONACCI DP TABLE
+═══════════════════════════════════════ */
+const FIB_DP_N = 8;
+const FIB_DP_VALS = [0, 1, 1, 2, 3, 5, 8, 13, 21]; // index 1..8
+let fibDpStep = 0;
+
+function renderFibDp(activeIdx) {
+  const row = document.getElementById('fib-dp-row');
+  row.innerHTML = '';
+  for (let i = 1; i <= FIB_DP_N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const ci = document.createElement('div'); ci.className = 'ci'; ci.textContent = 'F(' + i + ')';
+    const cv = document.createElement('div'); cv.className = 'cv';
+    if (i < activeIdx) { cv.classList.add('done'); cv.textContent = FIB_DP_VALS[i]; }
+    else if (i === activeIdx) { cv.classList.add('active'); cv.textContent = FIB_DP_VALS[i]; }
+    else if ((i === activeIdx - 1 || i === activeIdx - 2) && i < activeIdx) { cv.classList.add('dep'); cv.textContent = FIB_DP_VALS[i]; }
+    else { cv.textContent = '?'; }
+    cell.appendChild(ci); cell.appendChild(cv);
+    row.appendChild(cell);
+  }
+}
+
+document.getElementById('fib-dp-step-btn').addEventListener('click', () => {
+  fibDpStep++;
+  if (fibDpStep > FIB_DP_N + 1) return;
+  // rerender with dep highlights
+  const row = document.getElementById('fib-dp-row');
+  row.innerHTML = '';
+  for (let i = 1; i <= FIB_DP_N; i++) {
+    const cell = document.createElement('div'); cell.className = 'cell';
+    const ci = document.createElement('div'); ci.className = 'ci'; ci.textContent = 'F(' + i + ')';
+    const cv = document.createElement('div'); cv.className = 'cv';
+    const deps = [fibDpStep - 1, fibDpStep - 2];
+    if (i < fibDpStep) { cv.classList.add(deps.includes(i) ? 'dep' : 'done'); cv.textContent = FIB_DP_VALS[i]; }
+    else if (i === fibDpStep && fibDpStep <= FIB_DP_N) { cv.classList.add('active'); cv.textContent = FIB_DP_VALS[i]; }
+    else { cv.textContent = '?'; }
+    cell.appendChild(ci); cell.appendChild(cv);
+    row.appendChild(cell);
+  }
+  if (fibDpStep <= 2)
+    document.getElementById('fib-dp-log').textContent = `F(${fibDpStep}) = 1  (base case)`;
+  else if (fibDpStep <= FIB_DP_N)
+    document.getElementById('fib-dp-log').textContent = `F(${fibDpStep}) = F(${fibDpStep-1}) + F(${fibDpStep-2}) = ${FIB_DP_VALS[fibDpStep-1]} + ${FIB_DP_VALS[fibDpStep-2]} = ${FIB_DP_VALS[fibDpStep]}`;
+  else
+    document.getElementById('fib-dp-log').textContent = `✅ Table complete. F(8) = 21.\nNotice: same answers as the recursion tree — zero repeated work.`;
+});
+
+function fibDpReset() {
+  fibDpStep = 0;
+  renderFibDp(0);
+  document.getElementById('fib-dp-log').textContent = 'Press Step → to fill the table from left to right.';
+}
+renderFibDp(0);
+
+/* ═══════════════════════════════════════
+   VIZ 3 — CLIMBING STAIRS
+═══════════════════════════════════════ */
+const STAIR_N = 8;
+const STAIR_VALS = [0, 1, 2, 3, 5, 8, 13, 21, 34];
+let stairStep = 0;
+
+function renderStairs(active) {
+  const row = document.getElementById('stair-row');
+  row.innerHTML = '';
+  for (let i = 1; i <= STAIR_N; i++) {
+    const col = document.createElement('div'); col.className = 'stair-col';
+    const h = 28 + STAIR_VALS[i] * 12;
+    const block = document.createElement('div');
+    block.className = 'stair-block';
+    block.style.height = h + 'px';
+    const deps = [active - 1, active - 2];
+    if (i < active) { block.classList.add(deps.includes(i) ? 'dep' : 'done'); block.textContent = STAIR_VALS[i]; }
+    else if (i === active) { block.classList.add('active'); block.textContent = STAIR_VALS[i]; }
+    else { block.textContent = '?'; }
+    const lbl = document.createElement('div'); lbl.className = 'stair-label'; lbl.textContent = 'n=' + i;
+    col.appendChild(block); col.appendChild(lbl);
+    row.appendChild(col);
+  }
+}
+
+document.getElementById('stair-step-btn').addEventListener('click', () => {
+  stairStep++;
+  if (stairStep > STAIR_N + 1) return;
+  renderStairs(stairStep);
+  if (stairStep <= 2)
+    document.getElementById('stair-log').textContent = `Step ${stairStep}: ${STAIR_VALS[stairStep]} way(s)  (base case)`;
+  else if (stairStep <= STAIR_N)
+    document.getElementById('stair-log').textContent = `Step ${stairStep}: ways(${stairStep-1}) + ways(${stairStep-2}) = ${STAIR_VALS[stairStep-1]} + ${STAIR_VALS[stairStep-2]} = ${STAIR_VALS[stairStep]}`;
+  else
+    document.getElementById('stair-log').textContent = `✅ climbStairs(8) = 34`;
+});
+
+function stairReset() {
+  stairStep = 0;
+  renderStairs(0);
+  document.getElementById('stair-log').textContent = 'Press Step → to fill ways(i) = ways(i-1) + ways(i-2).';
+}
+renderStairs(0);
+
+/* ═══════════════════════════════════════
+   GRID HELPER
+═══════════════════════════════════════ */
+function buildGrid(tableId, M, N, vals, obstacles, active, filled) {
+  const tbl = document.getElementById(tableId);
+  tbl.innerHTML = '';
+  // header row
+  const hdr = document.createElement('tr');
+  const th0 = document.createElement('th'); th0.textContent = ''; hdr.appendChild(th0);
+  for (let c = 0; c < N; c++) { const th = document.createElement('th'); th.textContent = 'c' + c; hdr.appendChild(th); }
+  tbl.appendChild(hdr);
+  for (let r = 0; r < M; r++) {
+    const tr = document.createElement('tr');
+    const rh = document.createElement('th'); rh.textContent = 'r' + r; rh.style.fontSize = '.73rem'; tr.appendChild(rh);
+    for (let c = 0; c < N; c++) {
+      const td = document.createElement('td');
+      const idx = r * N + c;
+      const isObs = obstacles && obstacles[r] && obstacles[r][c];
+      const isAct = active && active[0] === r && active[1] === c;
+      const isDep = active && !isAct && ((r === active[0]-1 && c === active[1]) || (r === active[0] && c === active[1]-1));
+      if (isObs) { td.classList.add('g-block'); td.textContent = '✗'; }
+      else if (isAct) { td.classList.add('g-active'); td.textContent = vals[r][c]; }
+      else if (isDep && filled > idx) { td.classList.add('g-dep'); td.textContent = vals[r][c]; }
+      else if (filled > idx) { td.classList.add('g-done'); td.textContent = vals[r][c]; }
+      else { td.textContent = (r===0||c===0) && !isObs ? '' : ''; }
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+/* ═══════════════════════════════════════
+   VIZ 4 — UNIQUE PATHS 4×5
+═══════════════════════════════════════ */
+const PM = 4, PN = 5;
+const pathsVals = Array.from({length:PM}, () => new Array(PN).fill(0));
+for (let r = 0; r < PM; r++) for (let c = 0; c < PN; c++) {
+  if (r === 0 || c === 0) pathsVals[r][c] = 1;
+  else pathsVals[r][c] = pathsVals[r-1][c] + pathsVals[r][c-1];
+}
+const pathsOrder = [];
+for (let r = 0; r < PM; r++) for (let c = 0; c < PN; c++) pathsOrder.push([r,c]);
+let pathsStep = 0;
+
+function pathsDraw(filledCount, active) {
+  const tbl = document.getElementById('paths-grid');
+  tbl.innerHTML = '';
+  const hdr = document.createElement('tr');
+  const th0 = document.createElement('th'); th0.textContent = ''; hdr.appendChild(th0);
+  for (let c = 0; c < PN; c++) { const th = document.createElement('th'); th.textContent = 'c' + c; hdr.appendChild(th); }
+  tbl.appendChild(hdr);
+  for (let r = 0; r < PM; r++) {
+    const tr = document.createElement('tr');
+    const rh = document.createElement('th'); rh.textContent = 'r' + r; rh.style.fontSize = '.73rem'; tr.appendChild(rh);
+    for (let c = 0; c < PN; c++) {
+      const td = document.createElement('td');
+      const idx = r * PN + c;
+      const isAct = active && active[0]===r && active[1]===c;
+      const isDep = active && !isAct && ((r===active[0]-1&&c===active[1]) || (r===active[0]&&c===active[1]-1));
+      if (isAct) { td.classList.add('g-active'); td.textContent = pathsVals[r][c]; }
+      else if (isDep && filledCount > idx) { td.classList.add('g-dep'); td.textContent = pathsVals[r][c]; }
+      else if (filledCount > idx) { td.classList.add('g-done'); td.textContent = pathsVals[r][c]; }
+      else { td.textContent = ''; }
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+document.getElementById('paths-step-btn').addEventListener('click', () => {
+  if (pathsStep >= pathsOrder.length) { pathsDraw(pathsOrder.length, null); document.getElementById('paths-log').textContent = '✅ uniquePaths(4,5) = ' + pathsVals[PM-1][PN-1]; return; }
+  const [r,c] = pathsOrder[pathsStep];
+  pathsDraw(pathsStep, [r,c]);
+  const msg = (r===0||c===0) ? `Cell (${r},${c}): edge → always 1 path` :
+    `Cell (${r},${c}): from above (${pathsVals[r-1][c]}) + from left (${pathsVals[r][c-1]}) = ${pathsVals[r][c]}`;
+  document.getElementById('paths-log').textContent = msg;
+  pathsStep++;
+});
+
+function pathsReset() { pathsStep = 0; pathsDraw(0, null); document.getElementById('paths-log').textContent = 'Press Step → to fill the grid one cell at a time.'; }
+pathsDraw(0, null);
+
+/* ═══════════════════════════════════════
+   VIZ 5 — OBSTACLE GRID 4×4
+═══════════════════════════════════════ */
+const OG_M = 4, OG_N = 4;
+const OG_OBS = [[0,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,0,0]];
+const ogVals = Array.from({length:OG_M}, () => new Array(OG_N).fill(0));
+ogVals[0][0] = 1;
+for (let r = 0; r < OG_M; r++) for (let c = 0; c < OG_N; c++) {
+  if (r===0 && c===0) continue;
+  if (OG_OBS[r][c]) { ogVals[r][c] = 0; continue; }
+  const up = r > 0 ? ogVals[r-1][c] : 0;
+  const lt = c > 0 ? ogVals[r][c-1] : 0;
+  ogVals[r][c] = up + lt;
+}
+const ogOrder = [];
+for (let r = 0; r < OG_M; r++) for (let c = 0; c < OG_N; c++) ogOrder.push([r,c]);
+let obsStep = 0;
+
+function obsDraw(filled, active) {
+  const tbl = document.getElementById('obs-grid');
+  tbl.innerHTML = '';
+  const hdr = document.createElement('tr');
+  const th0 = document.createElement('th'); th0.textContent=''; hdr.appendChild(th0);
+  for (let c=0;c<OG_N;c++){const th=document.createElement('th');th.textContent='c'+c;hdr.appendChild(th);}
+  tbl.appendChild(hdr);
+  for (let r=0;r<OG_M;r++){
+    const tr=document.createElement('tr');
+    const rh=document.createElement('th');rh.textContent='r'+r;rh.style.fontSize='.73rem';tr.appendChild(rh);
+    for (let c=0;c<OG_N;c++){
+      const td=document.createElement('td');
+      const idx=r*OG_N+c;
+      const isObs=OG_OBS[r][c]===1;
+      const isAct=active&&active[0]===r&&active[1]===c;
+      const isDep=active&&!isAct&&!isObs&&((r===active[0]-1&&c===active[1])||(r===active[0]&&c===active[1]-1));
+      if(isObs){td.classList.add('g-block');td.textContent='✗';}
+      else if(isAct){td.classList.add('g-active');td.textContent=ogVals[r][c];}
+      else if(isDep&&filled>idx){td.classList.add('g-dep');td.textContent=ogVals[r][c];}
+      else if(filled>idx){td.classList.add('g-done');td.textContent=ogVals[r][c];}
+      else td.textContent='';
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+document.getElementById('obs-step-btn').addEventListener('click', () => {
+  if (obsStep >= ogOrder.length) { obsDraw(ogOrder.length, null); document.getElementById('obs-log').textContent='✅ Paths = '+ogVals[OG_M-1][OG_N-1]; return; }
+  const [r,c]=ogOrder[obsStep];
+  obsDraw(obsStep,[r,c]);
+  const msg=OG_OBS[r][c]?`Cell (${r},${c}): OBSTACLE → dp = 0, blocks all paths through here`:
+    `Cell (${r},${c}): from above (${r>0?ogVals[r-1][c]:0}) + from left (${c>0?ogVals[r][c-1]:0}) = ${ogVals[r][c]}`;
+  document.getElementById('obs-log').textContent=msg;
+  obsStep++;
+});
+function obsReset(){obsStep=0;obsDraw(0,null);document.getElementById('obs-log').textContent='Press Step → to fill the grid around the obstacles.';}
+obsDraw(0,null);
+
+/* ═══════════════════════════════════════
+   VIZ 6 — PASCAL'S TRIANGLE 7 rows
+═══════════════════════════════════════ */
+const PASC_ROWS = 7;
+const pascVals = [];
+for (let r=0;r<PASC_ROWS;r++){
+  pascVals[r]=[];
+  for(let k=0;k<=r;k++){
+    if(k===0||k===r) pascVals[r][k]=1;
+    else pascVals[r][k]=pascVals[r-1][k-1]+pascVals[r-1][k];
+  }
+}
+const pascOrder=[];
+for(let r=0;r<PASC_ROWS;r++) for(let k=0;k<=r;k++) pascOrder.push([r,k]);
+let pascStep=0;
+
+function pascDraw(filled, active) {
+  const viz=document.getElementById('pascal-viz');
+  viz.innerHTML='';
+  for(let r=0;r<PASC_ROWS;r++){
+    const rowDiv=document.createElement('div');
+    rowDiv.style.cssText='display:flex;gap:5px;justify-content:center;';
+    for(let k=0;k<=r;k++){
+      const cell=document.createElement('div');
+      const flatIdx=r*(r+1)/2+k;
+      const isAct=active&&active[0]===r&&active[1]===k;
+      const isDep=active&&((r===active[0]-1&&k===active[1]-1)||(r===active[0]-1&&k===active[1]));
+      const isFilled=flatIdx<filled;
+      let bg='var(--raised)',border='var(--border)',color='var(--muted)';
+      if(isAct){bg='rgba(249,115,22,.2)';border='var(--orange)';color='var(--orange)';}
+      else if(isDep&&isFilled){bg='rgba(59,130,246,.13)';border='var(--blue)';color='var(--blue)';}
+      else if(isFilled){bg='rgba(16,185,129,.12)';border='var(--green)';color='var(--green)';}
+      cell.style.cssText=`width:44px;height:44px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;border:2px solid ${border};background:${bg};color:${color};transition:all .25s;`;
+      cell.textContent=(isFilled||isAct)?pascVals[r][k]:'';
+      rowDiv.appendChild(cell);
+    }
+    viz.appendChild(rowDiv);
+  }
+}
+
+document.getElementById('pascal-step-btn').addEventListener('click', () => {
+  if(pascStep>=pascOrder.length){pascDraw(pascOrder.length,null);document.getElementById('pascal-log').textContent='✅ Complete. Every entry is C(row, position).';return;}
+  const[r,k]=pascOrder[pascStep];
+  pascDraw(pascStep,[r,k]);
+  const msg=(k===0||k===r)?`C(${r},${k}) = 1  (edge of triangle — base case)`:
+    `C(${r},${k}) = C(${r-1},${k-1}) + C(${r-1},${k}) = ${pascVals[r-1][k-1]} + ${pascVals[r-1][k]} = ${pascVals[r][k]}`;
+  document.getElementById('pascal-log').textContent=msg;
+  pascStep++;
+});
+function pascalReset(){pascStep=0;pascDraw(0,null);document.getElementById('pascal-log').textContent='Press Step → to grow the triangle one cell at a time.';}
+pascDraw(0,null);
+
+/* ═══════════════════════════════════════
+   VIZ 7 — ROOK PATHS 5×5
+═══════════════════════════════════════ */
+const RK=5;
+const rkVals=Array.from({length:RK},()=>new Array(RK).fill(0));
+for(let r=0;r<RK;r++) for(let c=0;c<RK;c++){
+  if(r===0||c===0) rkVals[r][c]=1;
+  else rkVals[r][c]=rkVals[r-1][c]+rkVals[r][c-1];
+}
+const rkOrder=[];
+for(let r=0;r<RK;r++) for(let c=0;c<RK;c++) rkOrder.push([r,c]);
+let rkStep=0;
+
+function rkDraw(filled,active){
+  const tbl=document.getElementById('rook-grid');tbl.innerHTML='';
+  const hdr=document.createElement('tr');
+  const th0=document.createElement('th');th0.textContent='';hdr.appendChild(th0);
+  for(let c=0;c<RK;c++){const th=document.createElement('th');th.textContent='c'+c;hdr.appendChild(th);}
+  tbl.appendChild(hdr);
+  for(let r=0;r<RK;r++){
+    const tr=document.createElement('tr');
+    const rh=document.createElement('th');rh.textContent='r'+r;rh.style.fontSize='.73rem';tr.appendChild(rh);
+    for(let c=0;c<RK;c++){
+      const td=document.createElement('td');const idx=r*RK+c;
+      const isAct=active&&active[0]===r&&active[1]===c;
+      const isDep=active&&!isAct&&((r===active[0]-1&&c===active[1])||(r===active[0]&&c===active[1]-1));
+      if(isAct){td.classList.add('g-active');td.textContent=rkVals[r][c];}
+      else if(isDep&&filled>idx){td.classList.add('g-dep');td.textContent=rkVals[r][c];}
+      else if(filled>idx){td.classList.add('g-done');td.textContent=rkVals[r][c];}
+      else td.textContent='';
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+document.getElementById('rook-step-btn').addEventListener('click',()=>{
+  if(rkStep>=rkOrder.length){rkDraw(rkOrder.length,null);document.getElementById('rook-log').textContent='✅ 5×5 board: '+rkVals[RK-1][RK-1]+' shortest paths (= C(8,4) = 70)';return;}
+  const[r,c]=rkOrder[rkStep];
+  rkDraw(rkStep,[r,c]);
+  const msg=(r===0||c===0)?`Edge cell (${r},${c}): always 1 path`:
+    `Cell (${r},${c}): ${rkVals[r-1][c]} (from above) + ${rkVals[r][c-1]} (from left) = ${rkVals[r][c]}`;
+  document.getElementById('rook-log').textContent=msg;
+  rkStep++;
+});
+function rookReset(){rkStep=0;rkDraw(0,null);document.getElementById('rook-log').textContent='Press Step → to count shortest paths cell by cell.';}
+rkDraw(0,null);
+updateThemeButton();
+</script>
+</body>
+</html>
