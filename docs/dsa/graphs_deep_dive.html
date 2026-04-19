@@ -72,6 +72,25 @@
   .module-card h3{font-family:var(--font-serif);font-size:1.35rem;line-height:1.2}
   .module-links{display:flex;gap:.75rem;flex-wrap:wrap}
   .module-link{font-size:.8rem;font-family:var(--font-mono);padding:5px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--paper)}
+  .course-phases{display:grid;gap:1.25rem;margin-top:1rem}
+  .phase-card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:1.25rem}
+  .phase-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.85rem}
+  .phase-kicker{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warm)}
+  .phase-card h3{font-family:var(--font-serif);font-size:1.55rem;line-height:1.2}
+  .phase-card p{color:var(--ink2);margin-bottom:1rem}
+  .module-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+  @media(max-width:760px){.module-preview-grid{grid-template-columns:1fr}}
+  .module-preview{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:1rem}
+  .module-preview .module-num{display:block;margin-bottom:.35rem}
+  .module-preview h4{font-family:var(--font-serif);font-size:1.18rem;line-height:1.2;margin-bottom:.35rem}
+  .module-preview p{font-size:.92rem;color:var(--ink2);margin-bottom:.75rem}
+  .practice-preview{font-size:.88rem;color:var(--ink2);margin-bottom:.8rem}
+  .practice-preview strong{color:var(--ink)}
+  .badge-row{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.65rem}
+  .mini-badge{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.06em;padding:3px 9px;border-radius:999px;border:1px solid var(--rule);background:var(--paper2);color:var(--ink3)}
+  .mini-badge.start{border-color:var(--green);color:var(--green)}
+  .mini-badge.next{border-color:var(--blue);color:var(--blue)}
+  .mini-badge.advanced{border-color:var(--purple);color:var(--purple)}
   .practice-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
   @media(max-width:760px){.practice-cols{grid-template-columns:1fr}}
   .practice-box{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:.9rem 1rem}
@@ -160,133 +179,113 @@
         <span class="section-num">02 —</span>
         <h2>The 8-Module Course</h2>
       </div>
+      <p class="lead">Think of this as a course shelf, not a catalog. Move left to right through the phases: make graphs concrete, own traversal, then add recognition and advanced tools only after the templates feel automatic.</p>
 
-      <div class="grid">
-        <article class="module-card">
-          <div class="module-top">
+      <div class="course-phases">
+        <article class="phase-card">
+          <div class="phase-head">
             <div>
-              <div class="module-num">MODULE 01</div>
-              <h3>What Even Is a Graph?</h3>
+              <div class="phase-kicker">Phase 1</div>
+              <h3>Foundations</h3>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module1.html">Open lesson</a></div>
           </div>
-          <p>Remove the abstraction fear. Learn nodes, edges, paths, cycles, connectivity, and how graphs show up in maps, social networks, recommendations, and file systems.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Identify node vs edge from a story</li><li>Spot directed vs undirected examples</li><li>Tell whether a graph has a cycle by inspection</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>Convert real scenarios to graph language</li><li>Recognize connected vs disconnected graphs</li><li>Explain when weights matter</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>Explain trees as acyclic graphs</li><li>Contrast sparse vs dense graphs intuitively</li><li>Predict which graph type fits a system</li></ul></div>
+          <p>These modules remove the “graph input freezes me” problem first. Before shortest paths or topological sort, the learner should feel comfortable naming the graph shape and building it in code.</p>
+          <div class="module-preview-grid">
+            <div class="module-preview">
+              <div class="badge-row">
+                <span class="mini-badge start">Start here</span>
+              </div>
+              <span class="module-num">MODULE 01</span>
+              <h4>What Even Is a Graph?</h4>
+              <p>Learn nodes, edges, paths, cycles, connectivity, and how graph language maps to real systems.</p>
+              <div class="practice-preview"><strong>Practice:</strong> node vs edge, directed vs undirected, cycle spotting by inspection.</div>
+              <a class="module-link" href="graphs_module1.html">Open module</a>
+            </div>
+            <div class="module-preview">
+              <span class="module-num">MODULE 02</span>
+              <h4>Storing a Graph in Code</h4>
+              <p>Make adjacency lists feel automatic so BFS and DFS no longer stall at the input step.</p>
+              <div class="practice-preview"><strong>Practice:</strong> build adjacency lists, list neighbors, compare edge list vs matrix vs adjacency list.</div>
+              <a class="module-link" href="graphs_module2.html">Open module</a>
+            </div>
           </div>
         </article>
 
-        <article class="module-card">
-          <div class="module-top">
+        <article class="phase-card">
+          <div class="phase-head">
             <div>
-              <div class="module-num">MODULE 02</div>
-              <h3>Storing a Graph in Code</h3>
+              <div class="phase-kicker">Phase 2</div>
+              <h3>Traversal</h3>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module2.html">Open lesson</a></div>
           </div>
-          <p>Adjacency list becomes second nature. This is the module that removes the “I know BFS, but I freeze when input is edges[][]” problem.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Build an adjacency list from edges</li><li>List all neighbors of a node</li><li>Handle undirected edges both ways</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>Compare edge list vs matrix vs adjacency list</li><li>Choose storage for sparse graphs</li><li>Count node degree from adjacency list</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>Store weighted graphs</li><li>Store directed prerequisites</li><li>Transform raw input before traversal</li></ul></div>
+          <p>This is the heart of the track. DFS and BFS should stop feeling like tricks and start feeling like default moves you can recall under pressure.</p>
+          <div class="module-preview-grid">
+            <div class="module-preview">
+              <div class="badge-row">
+                <span class="mini-badge next">Best next step</span>
+              </div>
+              <span class="module-num">MODULE 03</span>
+              <h4>DFS From First Principles</h4>
+              <p>Build the recursive habit for reachability, components, flood fill, and region problems.</p>
+              <div class="practice-preview"><strong>Practice:</strong> 1971, 200, 695, 547.</div>
+              <a class="module-link" href="graphs_module3.html">Open module</a>
+            </div>
+            <div class="module-preview">
+              <span class="module-num">MODULE 04</span>
+              <h4>BFS From First Principles</h4>
+              <p>Own queue discipline, level order, multi-source BFS, and shortest path in unweighted graphs.</p>
+              <div class="practice-preview"><strong>Practice:</strong> 994, 542, 1091, 127.</div>
+              <a class="module-link" href="graphs_module4.html">Open module</a>
+            </div>
           </div>
         </article>
 
-        <article class="module-card">
-          <div class="module-top">
+        <article class="phase-card">
+          <div class="phase-head">
             <div>
-              <div class="module-num">MODULE 03</div>
-              <h3>DFS From First Principles</h3>
+              <div class="phase-kicker">Phase 3</div>
+              <h3>Recognition &amp; Advanced</h3>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module3.html">Open lesson</a></div>
           </div>
-          <p>Backtracking, visited sets, recursion, and connected components. This is the module where graph traversal becomes a reusable habit instead of a mystery.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>1971. Find if Path Exists in Graph</li><li>841. Keys and Rooms</li><li>733. Flood Fill</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>200. Number of Islands</li><li>695. Max Area of Island</li><li>547. Number of Provinces</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>130. Surrounded Regions</li><li>417. Pacific Atlantic</li><li>1020. Number of Enclaves</li></ul></div>
-          </div>
-        </article>
-
-        <article class="module-card">
-          <div class="module-top">
-            <div>
-              <div class="module-num">MODULE 04</div>
-              <h3>BFS From First Principles</h3>
+          <p>Only after traversal is stable do we broaden into recognition, guided repetition, dynamic connectivity, and weighted shortest paths.</p>
+          <div class="module-preview-grid">
+            <div class="module-preview">
+              <div class="badge-row">
+                <span class="mini-badge next">Pattern jump</span>
+              </div>
+              <span class="module-num">MODULE 05</span>
+              <h4>The 4 Core Graph Patterns</h4>
+              <p>Train the recognition layer: components, shortest path, cycle detection, and topological sort.</p>
+              <div class="practice-preview"><strong>Practice:</strong> 547, 207, 210, 684.</div>
+              <a class="module-link" href="graphs_module5.html">Open module</a>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module4.html">Open lesson</a></div>
-          </div>
-          <p>Shortest path in unweighted graphs, queue discipline, level order, and multi-source BFS. This is where “minimum steps” stops feeling vague.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>1971. Find if Path Exists in Graph</li><li>994. Rotting Oranges</li><li>1162. As Far from Land as Possible</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>542. 01 Matrix</li><li>1091. Shortest Path in Binary Matrix</li><li>752. Open the Lock</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>127. Word Ladder</li><li>317. Shortest Distance from All Buildings</li><li>1293. Shortest Path in a Grid with Obstacles Elimination</li></ul></div>
-          </div>
-        </article>
-
-        <article class="module-card">
-          <div class="module-top">
-            <div>
-              <div class="module-num">MODULE 05</div>
-              <h3>The 4 Core Graph Patterns</h3>
+            <div class="module-preview">
+              <span class="module-num">MODULE 06</span>
+              <h4>The Problem-Solving Playbook</h4>
+              <p>Repetition-heavy guided reps that force “name the pattern first, then write the template.”</p>
+              <div class="practice-preview"><strong>Practice:</strong> 200, 994, 127, 269.</div>
+              <a class="module-link" href="graphs_module6.html">Open module</a>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module5.html">Open lesson</a></div>
-          </div>
-          <p>Recognition practice: components, shortest path, cycle detection, topological sort. This is where the decision tree gets fast.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Components: 1971, 547</li><li>BFS: 994</li><li>Cycle: 207</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>200. Number of Islands</li><li>210. Course Schedule II</li><li>684. Redundant Connection</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>269. Alien Dictionary</li><li>802. Eventual Safe States</li><li>1136. Parallel Courses</li></ul></div>
-          </div>
-        </article>
-
-        <article class="module-card">
-          <div class="module-top">
-            <div>
-              <div class="module-num">MODULE 06</div>
-              <h3>The Problem-Solving Playbook</h3>
+            <div class="module-preview">
+              <div class="badge-row">
+                <span class="mini-badge advanced">Advanced</span>
+              </div>
+              <span class="module-num">MODULE 07</span>
+              <h4>Union-Find / Disjoint Set</h4>
+              <p>Switch from rerunning traversal to merging components efficiently when connectivity changes over time.</p>
+              <div class="practice-preview"><strong>Practice:</strong> 684, 1319, 721, 990.</div>
+              <a class="module-link" href="graphs_module7_union_find.html">Open module</a>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module6.html">Open lesson</a></div>
-          </div>
-          <p>Guided problems with hints. This is the repetition checkpoint: say the pattern first, then write the template, then adapt it.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>1971. Path Exists</li><li>200. Number of Islands</li><li>994. Rotting Oranges</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>207. Course Schedule</li><li>210. Course Schedule II</li><li>127. Word Ladder</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>130. Surrounded Regions</li><li>542. 01 Matrix</li><li>269. Alien Dictionary</li></ul></div>
-          </div>
-        </article>
-
-        <article class="module-card">
-          <div class="module-top">
-            <div>
-              <div class="module-num">MODULE 07</div>
-              <h3>Union-Find / Disjoint Set</h3>
+            <div class="module-preview">
+              <div class="badge-row">
+                <span class="mini-badge advanced">Advanced</span>
+              </div>
+              <span class="module-num">MODULE 08</span>
+              <h4>Weighted Graphs &amp; Dijkstra</h4>
+              <p>Learn the exact moment BFS stops working and the min-heap version of shortest path takes over.</p>
+              <div class="practice-preview"><strong>Practice:</strong> 743, 787, 1631, 1514.</div>
+              <a class="module-link" href="graphs_module8_weighted_graphs.html">Open module</a>
             </div>
-            <div class="module-links"><a class="module-link" href="graphs_module7_union_find.html">Open lesson</a></div>
-          </div>
-          <p>Dynamic connectivity, parent arrays, path compression, and union-by-rank. Use this when repeatedly merging groups is cheaper than rerunning DFS from scratch.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>684. Redundant Connection</li><li>1319. Make Network Connected</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>721. Accounts Merge</li><li>990. Equality Equations</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>305. Number of Islands II</li><li>947. Most Stones Removed</li></ul></div>
-          </div>
-        </article>
-
-        <article class="module-card">
-          <div class="module-top">
-            <div>
-              <div class="module-num">MODULE 08</div>
-              <h3>Weighted Graphs &amp; Dijkstra</h3>
-            </div>
-            <div class="module-links"><a class="module-link" href="graphs_module8_weighted_graphs.html">Open lesson</a></div>
-          </div>
-          <p>Learn the moment BFS stops working, then replace the queue with a min-heap. This is the weighted shortest path bridge from fundamentals to advanced graph work.</p>
-          <div class="practice-cols">
-            <div class="practice-box"><h4 class="starter">Starter</h4><ul><li>Local weighted shortest-path warmup</li><li>743. Network Delay Time</li></ul></div>
-            <div class="practice-box"><h4 class="core">Core</h4><ul><li>787. Cheapest Flights Within K Stops</li><li>1631. Path With Minimum Effort</li></ul></div>
-            <div class="practice-box"><h4 class="stretch">Stretch</h4><ul><li>1514. Path with Maximum Probability</li><li>2662. Minimum Cost of a Path With Special Roads</li></ul></div>
           </div>
         </article>
       </div>
