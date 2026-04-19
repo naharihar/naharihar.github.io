@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Series · State Machine · AlgorithmCraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('dsa-theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  } catch (e) {}
+})();
+</script>
+<style>
+:root {
+  --bg: #0e0e10; --surface: #16161a; --surface2: #1e1e24; --border: #2a2a35;
+  --text: #e8e8f0; --text-muted: #8888aa;
+  --accent: #f59e0b; --accent2: #10b981; --accent3: #3b82f6; --accent4: #ec4899;
+  --danger: #ef4444; --radius: 10px;
+}
+html.light {
+  --bg: #f7f3ec; --surface: #fffdfa; --surface2: #f0e8dd; --border: #ddcdbb;
+  --text: #2c2621; --text-muted: #786a5d;
+  --accent: #c98507; --accent2: #0f9f6e; --accent3: #2563eb; --accent4: #db2777;
+  --danger: #dc2626;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px; }
+
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(14,14,16,0.93); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px; padding: 0 28px; height: 56px;
+  font-size: 13px; font-weight: 500; overflow-x: auto;
+}
+html.light nav { background: rgba(247,243,236,0.93); }
+.nav-brand { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--accent); text-decoration: none; margin-right: 12px; white-space: nowrap; }
+nav a { color: var(--text-muted); text-decoration: none; padding: 5px 9px; border-radius: 6px; transition: all .15s; white-space: nowrap; }
+nav a:hover { color: var(--text); background: var(--surface2); }
+.lang-toggle { margin-left: auto; display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: 8px; flex-shrink: 0; }
+.lang-btn { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 12px; padding: 4px 12px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+.lang-btn.active { background: var(--accent); color: #000; font-weight: 500; }
+.theme-btn { background:none; border:1px solid var(--border); color:var(--text-muted); font-family:'DM Mono', monospace; font-size:12px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:all .15s; flex-shrink:0; }
+.theme-btn:hover { color:var(--text); border-color:var(--accent); }
+
+.hero { padding: 72px 28px 52px; max-width: 860px; margin: 0 auto; text-align: center; }
+.hero-tag { display: inline-block; background: rgba(245,158,11,0.12); color: var(--accent); border: 1px solid rgba(245,158,11,0.3); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 5px 14px; border-radius: 100px; margin-bottom: 22px; }
+.hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(34px,5vw,56px); line-height: 1.12; margin-bottom: 18px; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero p { font-size: 16px; color: var(--text-muted); max-width: 580px; margin: 0 auto 28px; }
+.problem-pills { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+.pill { font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 11px; border-radius: 6px; border: 1px solid var(--border); color: var(--text-muted); background: var(--surface); }
+.pill.easy { border-color: rgba(16,185,129,.4); color: var(--accent2); background: rgba(16,185,129,.06); }
+.pill.medium { border-color: rgba(245,158,11,.4); color: var(--accent); background: rgba(245,158,11,.06); }
+.pill.hard { border-color: rgba(239,68,68,.4); color: var(--danger); background: rgba(239,68,68,.06); }
+
+.container { max-width: 860px; margin: 0 auto; padding: 0 28px; }
+.section { padding: 52px 0; border-top: 1px solid var(--border); }
+.section-header { margin-bottom: 32px; }
+.section-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: .1em; margin-bottom: 7px; }
+.section-title { font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1.2; }
+.section-title em { font-style: italic; color: var(--accent); }
+.section p { color: var(--text-muted); margin-bottom: 14px; }
+.section p strong { color: var(--text); }
+
+.callout { background: rgba(245,158,11,.07); border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 18px; margin: 18px 0; font-size: 14px; }
+.callout.blue { background: rgba(59,130,246,.07); border-color: var(--accent3); }
+.callout.green { background: rgba(16,185,129,.07); border-color: var(--accent2); }
+.callout.yellow { background: rgba(234,179,8,.07); border-color: #eab308; }
+.callout-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 5px; opacity: .7; }
+
+.pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+@media(max-width:600px){ .pattern-grid { grid-template-columns: 1fr; } }
+.pattern-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color .15s; }
+.pattern-card:hover { border-color: var(--accent); }
+.pattern-card-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: .1em; margin-bottom: 5px; }
+.pattern-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 7px; }
+.pattern-card p { font-size: 13px; color: var(--text-muted); margin: 0; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 7px; background: var(--surface2); border-radius: 4px; color: var(--text-muted); }
+
+.code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 18px 0; }
+.code-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--text-muted); }
+.code-header .file { font-family: 'DM Mono', monospace; }
+pre { font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.65; padding: 18px; overflow-x: auto; tab-size: 2; }
+.lang-pane { display: none; } .lang-pane.active { display: block; }
+.kw { color: #c792ea; } .fn { color: #82aaff; } .cm { color: #546e7a; font-style: italic; }
+.st { color: #c3e88d; } .nm { color: #f78c6c; } .op { color: var(--accent); }
+
+/* STATE MACHINE DIAGRAM */
+.sm-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 20px 0; }
+.sm-states { display: flex; gap: 16px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+.sm-state { background: var(--surface2); border: 2px solid var(--border); border-radius: 50px; padding: 12px 28px; text-align: center; transition: all .2s; }
+.sm-state.not-holding { border-color: var(--accent2); }
+.sm-state.holding { border-color: var(--accent3); }
+.sm-state-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.sm-state-val { font-family: 'DM Serif Display', serif; font-size: 16px; }
+.sm-arrows { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.sm-arrow { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; font-size: 12px; font-family: 'DM Mono', monospace; text-align: center; transition: all .25s; }
+.sm-arrow.buy { border-color: rgba(59,130,246,.4); color: var(--accent3); }
+.sm-arrow.sell { border-color: rgba(16,185,129,.4); color: var(--accent2); }
+.sm-arrow.rest { border-color: var(--border); color: var(--text-muted); }
+.sm-arrow.active { transform: scale(1.04); }
+.sm-arrow.buy.active { background: rgba(59,130,246,.12); }
+.sm-arrow.sell.active { background: rgba(16,185,129,.12); }
+
+/* VISUALIZER */
+#viz-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 20px 0; }
+.viz-title { font-weight: 600; margin-bottom: 16px; font-size: 14px; }
+.price-strip { display: flex; gap: 5px; flex-wrap: wrap; margin: 12px 0; }
+.price-cell { width: 48px; height: 56px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; transition: all .22s; }
+.price-cell .pval { font-size: 15px; font-weight: 500; }
+.price-cell .pidx { font-size: 10px; color: var(--text-muted); }
+.price-cell.active { border-color: var(--accent3); background: rgba(59,130,246,.1); }
+.price-cell.done { opacity: .4; }
+.price-cell.answer { border-color: var(--accent2); background: rgba(16,185,129,.1); }
+
+.state-vars { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap: 10px; margin: 14px 0; }
+.svar { background: var(--surface2); border-radius: 8px; padding: 10px; text-align: center; }
+.svar-label { font-size: 10px; color: var(--text-muted); margin-bottom: 3px; font-family: 'DM Mono', monospace; }
+.svar-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; transition: color .2s; }
+.svar-val.updated { color: var(--accent2); }
+
+.viz-log { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; min-height: 54px; margin: 12px 0; color: var(--text-muted); line-height: 1.6; font-family: 'DM Mono', monospace; }
+.log-g { color: var(--accent2); } .log-b { color: var(--accent3); } .log-y { color: var(--accent); }
+
+.viz-ctrls { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+.btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: 7px; border: none; cursor: pointer; transition: all .15s; }
+.btn-primary { background: var(--accent); color: #000; } .btn-primary:hover { background: #fbbf24; }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); } .btn-ghost:hover { background: var(--border); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* PROBLEM BLOCKS */
+.problem-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 22px 0; }
+.problem-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.problem-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.problem-name { font-weight: 600; font-size: 15px; }
+.diff-badge { margin-left: auto; font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 100px; }
+.easy-badge { background: rgba(16,185,129,.15); color: var(--accent2); }
+.medium-badge { background: rgba(245,158,11,.15); color: var(--accent); }
+.hard-badge { background: rgba(239,68,68,.15); color: var(--danger); }
+.problem-body { padding: 18px; }
+.problem-statement { font-size: 13.5px; color: var(--text-muted); margin-bottom: 14px; }
+.example-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin: 10px 0; font-family: 'DM Mono', monospace; font-size: 12px; }
+.example-label { font-size: 10px; color: var(--accent); letter-spacing: .08em; margin-bottom: 7px; font-weight: 600; }
+
+/* RECURRENCE DISPLAY */
+.recurrence-block { background: var(--surface2); border-radius: var(--radius); padding: 16px; margin: 14px 0; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 2; }
+.rec-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rec-label { color: var(--text-muted); min-width: 140px; }
+.rec-formula { color: var(--text); }
+.rec-formula .sell-part { color: var(--accent2); }
+.rec-formula .buy-part { color: var(--accent3); }
+.rec-formula .fee-part { color: var(--accent); }
+.rec-formula .cool-part { color: var(--accent4); }
+.rec-diff { font-size: 11px; background: rgba(245,158,11,.15); color: var(--accent); padding: 2px 7px; border-radius: 4px; }
+
+/* CHEAT TABLE */
+.cheat-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+.cheat-table th { text-align: left; padding: 9px 12px; background: var(--surface2); color: var(--text-muted); font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.cheat-table td { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: top; }
+.cheat-table tr:hover td { background: rgba(255,255,255,.02); }
+.cheat-table td:first-child { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent3); }
+.cheat-table code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--surface2); padding: 2px 5px; border-radius: 3px; color: var(--accent); }
+
+/* TABS */
+.tabs { display: flex; gap: 3px; background: var(--surface2); padding: 3px; border-radius: 8px; width: fit-content; margin-bottom: 14px; }
+.tab-btn { background: none; border: none; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500; padding: 5px 13px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+.tab-btn.active { background: var(--surface); color: var(--text); }
+.tab-pane { display: none; } .tab-pane.active { display: block; }
+
+/* TIMELINE */
+.timeline { position: relative; padding-left: 26px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.timeline-item { position: relative; margin-bottom: 24px; }
+.timeline-item::before { content: ''; position: absolute; left: -23px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+.timeline-item h4 { font-size: 13.5px; font-weight: 600; margin-bottom: 5px; }
+.timeline-item p { font-size: 13px; color: var(--text-muted); }
+
+code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--surface2); padding: 2px 5px; border-radius: 4px; color: var(--accent); }
+
+/* SVG state machine */
+.sm-svg-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 20px 0; overflow-x: auto; }
+
+footer { padding: 36px 28px; text-align: center; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border); margin-top: 36px; }
+footer strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="dynamic_programming_series.html">AlgorithmCraft</a>
+  <a href="#core-idea">The Machine</a>
+  <a href="#patterns">6 Cases</a>
+  <a href="#visualizer">Visualizer</a>
+  <a href="#deepdive">Deep Dives</a>
+  <a href="#realworld">Real World</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="nav-java-btn" onclick="setLang('java')">Java</button>
+    <button class="lang-btn" id="nav-py-btn" onclick="setLang('python')">Python</button>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">Light mode</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">State Machine · DP · Series</div>
+  <h1>Stock Trading Series<br><em>One Machine, Six Problems</em></h1>
+  <p>Every stock problem in LeetCode reduces to the same two-state DP machine. Learn the machine once — derive every solution from first principles.</p>
+  <div class="problem-pills">
+    <span class="pill easy">#121 · k=1</span>
+    <span class="pill medium">#122 · k=∞</span>
+    <span class="pill hard">#123 · k=2</span>
+    <span class="pill hard">#188 · k=K</span>
+    <span class="pill medium">#309 · cooldown</span>
+    <span class="pill medium">#714 · fee</span>
+  </div>
+</section>
+
+<!-- ── SECTION 01: THE STATE MACHINE ── -->
+<div class="section" id="core-idea">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">01 — THE HIDDEN VARIABLE</div>
+    <h2 class="section-title">Three factors,<br><em>not two</em></h2>
+  </div>
+
+  <p>Most people think the state for these problems is just <strong>(day, transactions left)</strong>. That's incomplete. The missing factor — the one that controls what actions are legal — is whether you're currently <strong>holding stock</strong>.</p>
+
+  <p>You can't buy if you're already holding. You can't sell if you're not. So every state splits in two: <code>T[i][k][0]</code> (max profit ending day i, k transactions left, not holding) and <code>T[i][k][1]</code> (same, but holding). Once you accept this, the recurrence writes itself.</p>
+
+  <div class="callout">
+    <div class="callout-label">Core Insight</div>
+    <strong>T[i][k][0]</strong> — you can rest (do nothing) or sell today.<br>
+    <strong>T[i][k][1]</strong> — you can rest (do nothing) or buy today.<br>
+    Pick whichever maximizes profit. That's the entire algorithm.
+  </div>
+
+  <!-- SVG STATE MACHINE -->
+  <div class="sm-svg-wrap">
+    <svg width="100%" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <!-- Not-holding state -->
+      <rect x="40" y="75" width="200" height="70" rx="12" fill="#16161a" stroke="#10b981" stroke-width="1.5"/>
+      <text x="140" y="107" text-anchor="middle" font-family="DM Serif Display, serif" font-size="15" fill="#e8e8f0">not holding</text>
+      <text x="140" y="128" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" fill="#8888aa">T[i][k][0]</text>
+      <!-- Holding state -->
+      <rect x="460" y="75" width="200" height="70" rx="12" fill="#16161a" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="560" y="107" text-anchor="middle" font-family="DM Serif Display, serif" font-size="15" fill="#e8e8f0">holding</text>
+      <text x="560" y="128" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" fill="#8888aa">T[i][k][1]</text>
+      <!-- BUY arrow (not-holding → holding) -->
+      <path d="M240 95 C310 50 390 50 460 95" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr)"/>
+      <rect x="295" y="34" width="110" height="26" rx="6" fill="#1e1e24" stroke="#2a2a35" stroke-width=".5"/>
+      <text x="350" y="47" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" fill="#3b82f6">buy</text>
+      <text x="350" y="58" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" fill="#8888aa">−price, k−1</text>
+      <!-- SELL arrow (holding → not-holding) -->
+      <path d="M460 125 C390 170 310 170 240 125" fill="none" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr)"/>
+      <rect x="295" y="156" width="110" height="26" rx="6" fill="#1e1e24" stroke="#2a2a35" stroke-width=".5"/>
+      <text x="350" y="169" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" fill="#10b981">sell</text>
+      <text x="350" y="180" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" fill="#8888aa">+price</text>
+      <!-- REST self-loop left -->
+      <path d="M55 75 C20 48 20 122 55 145" fill="none" stroke="#2a2a35" stroke-width="1" marker-end="url(#arr)"/>
+      <text x="8" y="112" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" fill="#8888aa">rest</text>
+      <!-- REST self-loop right -->
+      <path d="M645 75 C680 48 680 122 645 145" fill="none" stroke="#2a2a35" stroke-width="1" marker-end="url(#arr)"/>
+      <text x="692" y="112" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" fill="#8888aa">rest</text>
+    </svg>
+  </div>
+
+  <p>The universal recurrence — four lines that cover <em>every</em> stock problem before any specialization:</p>
+
+  <div class="recurrence-block">
+    <div style="color:var(--text-muted); font-size:11px; margin-bottom:10px;">UNIVERSAL RECURRENCE (T[i][k][0/1])</div>
+    T[i][k][0] = max( T[i-1][k][0], &nbsp;&nbsp;<span class="sell-part" style="color:var(--accent2)">T[i-1][k][1] + price[i]</span> )<br>
+    <span style="color:var(--text-muted); font-size:11px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ rest &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ sell today</span><br><br>
+    T[i][k][1] = max( T[i-1][k][1], &nbsp;&nbsp;<span class="buy-part" style="color:var(--accent3)">T[i-1][k-1][0] − price[i]</span> )<br>
+    <span style="color:var(--text-muted); font-size:11px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ rest &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ buy today (k decrements)</span>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">Why k decrements on buy, not sell?</div>
+    A transaction = one buy + one sell pair. We count it as "used" the moment we buy — that's when we commit capital. This convention is consistent and arbitrary; you could decrement on sell instead as long as you adjust the base cases. Both work.
+  </div>
+
+  <div class="callout yellow">
+    <div class="callout-label">Base Cases</div>
+    <code>T[-1][k][0] = 0</code> — no days yet, no profit. Fine.<br>
+    <code>T[-1][k][1] = −∞</code> — can't be holding before day 0. Impossible state.<br>
+    <code>T[i][0][0] = 0</code> — no transactions left, no profit.<br>
+    <code>T[i][0][1] = −∞</code> — can't be holding with 0 transactions. Impossible.<br>
+    The −∞ values are <strong>guards</strong> — when you take max(), impossible states always lose.
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 02: THE 6 CASES ── -->
+<div class="section" id="patterns">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">02 — THE 6 CASES</div>
+    <h2 class="section-title">Specialize k,<br><em>get the solution</em></h2>
+  </div>
+
+  <p>Every problem is the same machine with k substituted. The last two add one small tweak to one transition. Click through each — notice how little changes.</p>
+
+  <div class="pattern-grid">
+    <div class="pattern-card">
+      <div class="pattern-card-num">CASE 1 · #121 · k = 1</div>
+      <h3>Single Transaction</h3>
+      <p>Since k=1 always, <code>T[k-1][0] = T[0][0] = 0</code> (base case). The buy line collapses to <code>max(hold, −price)</code> — just tracking the cheapest buy seen so far.</p>
+      <div class="tag-row"><span class="tag">2 vars</span><span class="tag">O(n) O(1)</span><span class="tag easy pill" style="font-size:9px">Easy</span></div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-card-num">CASE 2 · #122 · k = ∞</div>
+      <h3>Unlimited Transactions</h3>
+      <p>When k=∞, k and k−1 are indistinguishable, so <code>T[k-1][0] = T[k][0] = cash</code>. Both recurrences reference the same k. Collapses to 2 symmetric variables.</p>
+      <div class="tag-row"><span class="tag">2 vars</span><span class="tag">greedy possible</span><span class="tag medium pill" style="font-size:9px">Medium</span></div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-card-num">CASE 3 · #123 · k = 2</div>
+      <h3>At Most 2 Transactions</h3>
+      <p>Four variables: <code>T[1][0], T[1][1], T[2][0], T[2][1]</code>. They chain — k=2 buy reads from k=1 sell. Update in reverse order to avoid using stale values.</p>
+      <div class="tag-row"><span class="tag">4 vars</span><span class="tag">O(n) O(1)</span><span class="tag hard pill" style="font-size:9px">Hard</span></div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-card-num">CASE 4 · #188 · k = K</div>
+      <h3>At Most K Transactions</h3>
+      <p>Generalize case 3 to K. Use two arrays of size K+1. Key optimization: if <code>k ≥ n/2</code>, collapse to k=∞ solution (can't have more than n/2 profitable trades in n days).</p>
+      <div class="tag-row"><span class="tag">2K vars</span><span class="tag">O(nK)</span><span class="tag hard pill" style="font-size:9px">Hard</span></div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-card-num">CASE 5 · #309 · k=∞ + cooldown</div>
+      <h3>Unlimited + Cooldown</h3>
+      <p>Same as k=∞ but the buy transition can't use <em>yesterday's</em> cash — it must reach back two days: <code>T[i-2][0]</code>. Add one extra variable <code>prev_cash</code> to carry that value forward.</p>
+      <div class="tag-row"><span class="tag">3 vars</span><span class="tag">1 line changed</span><span class="tag medium pill" style="font-size:9px">Medium</span></div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-card-num">CASE 6 · #714 · k=∞ + fee</div>
+      <h3>Unlimited + Transaction Fee</h3>
+      <p>Same as k=∞ but subtract fee on buy (or on sell — both correct). Raises the bar for a trade to be profitable. One character changes in the buy line.</p>
+      <div class="tag-row"><span class="tag">2 vars</span><span class="tag">1 char changed</span><span class="tag medium pill" style="font-size:9px">Medium</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">Interview Decision Tree</div>
+    Hear "stock problem" → immediately ask: <strong>how many transactions are allowed?</strong> k=1 or k=∞ → 2-variable solution. k=2 → 4 variables. k=K → arrays of size K. Cooldown or fee → start from k=∞ and add one variable or one subtraction.
+  </div>
+
+  <!-- THE 6 RECURRENCES SIDE BY SIDE -->
+  <h3 style="margin:28px 0 16px;font-size:16px;font-weight:600;">All six recurrences, aligned</h3>
+  <p>The columns that change relative to k=∞ (case 2) are highlighted.</p>
+
+  <table class="cheat-table">
+    <thead><tr><th>Case</th><th>cash / T[k][0] update</th><th>hold / T[k][1] update</th><th>Δ from k=∞</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>#121 k=1</td>
+        <td><code>max(cash, hold + price)</code></td>
+        <td><code>max(hold, <strong>−price</strong>)</code></td>
+        <td>hold uses −price not cash−price</td>
+      </tr>
+      <tr>
+        <td>#122 k=∞</td>
+        <td><code>max(cash, hold + price)</code></td>
+        <td><code>max(hold, cash − price)</code></td>
+        <td>baseline</td>
+      </tr>
+      <tr>
+        <td>#123 k=2</td>
+        <td><code>T20=max(T20, T21+price)</code><br><code>T10=max(T10, T11+price)</code></td>
+        <td><code>T21=max(T21, <strong>T10</strong>−price)</code><br><code>T11=max(T11, −price)</code></td>
+        <td>4 variables; buy k=2 reads sell k=1</td>
+      </tr>
+      <tr>
+        <td>#188 k=K</td>
+        <td><code>T0[j]=max(T0[j], T1[j]+price)</code></td>
+        <td><code>T1[j]=max(T1[j], <strong>T0[j-1]</strong>−price)</code></td>
+        <td>arrays; buy uses j-1 level</td>
+      </tr>
+      <tr>
+        <td>#309 cooldown</td>
+        <td><code>max(cash, hold + price)</code></td>
+        <td><code>max(hold, <strong>prev_cash</strong> − price)</code></td>
+        <td>buy uses T[i-2] via prev_cash</td>
+      </tr>
+      <tr>
+        <td>#714 fee</td>
+        <td><code>max(cash, hold + price)</code></td>
+        <td><code>max(hold, cash − price <strong>− fee</strong>)</code></td>
+        <td>−fee on buy</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- ── SECTION 03: VISUALIZER ── -->
+<div class="section" id="visualizer">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">03 — VISUALIZER</div>
+    <h2 class="section-title">Watch the machine<br><em>step through each case</em></h2>
+  </div>
+  <p>Select a problem, then step through it day by day. The state variables update live. Watch how the same two-line template behaves differently with each specialization.</p>
+
+  <!-- Case selector -->
+  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;" id="viz-selector">
+    <button class="btn btn-primary" onclick="selectViz(0,this)" id="vbtn-0">#121 k=1</button>
+    <button class="btn btn-ghost" onclick="selectViz(1,this)" id="vbtn-1">#122 k=∞</button>
+    <button class="btn btn-ghost" onclick="selectViz(2,this)" id="vbtn-2">#123 k=2</button>
+    <button class="btn btn-ghost" onclick="selectViz(3,this)" id="vbtn-3">#309 cool</button>
+    <button class="btn btn-ghost" onclick="selectViz(4,this)" id="vbtn-4">#714 fee</button>
+  </div>
+
+  <div id="viz-container">
+    <div class="viz-title" id="viz-title">LC #121 · k=1 · prices = [1, 3, 2, 4]</div>
+    <div class="price-strip" id="viz-prices"></div>
+    <div class="state-vars" id="viz-vars"></div>
+    <div class="recurrence-block" id="viz-rec" style="font-size:12px;line-height:1.9;margin:10px 0;"></div>
+    <div class="viz-log" id="viz-log">Press Step → to begin.</div>
+    <div class="viz-ctrls">
+      <button class="btn btn-primary" id="viz-step-btn" onclick="vizStep()">Step →</button>
+      <button class="btn btn-ghost" onclick="vizReset()">Reset</button>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">The Collapse Principle</div>
+    Cases 1, 2, 5, 6 each use exactly 2–3 scalar variables because k is fixed or infinite — no array needed. Cases 3 and 4 need more variables because k changes and each level must be tracked independently. The code structure directly mirrors the state space size.
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 04: DEEP DIVES ── -->
+<div class="section" id="deepdive">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">04 — DEEP DIVES</div>
+    <h2 class="section-title">The two problems<br><em>worth studying deeply</em></h2>
+  </div>
+
+  <!-- DEEP DIVE 1: #123 k=2 -->
+  <div class="problem-block">
+    <div class="problem-header">
+      <span class="problem-id">#123</span>
+      <span class="problem-name">Best Time to Buy and Sell Stock III</span>
+      <span class="diff-badge hard-badge">Hard</span>
+    </div>
+    <div class="problem-body">
+      <p class="problem-statement">You are given an array <code>prices</code> where <code>prices[i]</code> is the price on day i. Find the maximum profit you can achieve with <strong>at most two transactions</strong>. You may not hold more than one stock at a time.</p>
+
+      <div class="example-block">
+        <div class="example-label">EXAMPLE</div>
+        Input: prices = [3, 3, 5, 0, 0, 3, 1, 4]<br>
+        Output: 6<br>
+        <span style="color:var(--text-muted)">// Buy day 4 (price=0), sell day 6 (price=3) = +3. Buy day 7 (price=1), sell day 8 (price=4) = +3.</span>
+      </div>
+
+      <h4 style="margin:18px 0 10px;font-size:14px;">Why four variables, not two?</h4>
+      <p>With k=2, k and k−1 are <em>not</em> interchangeable. We need to separately track profit at k=1 and k=2. The four states form a chain: k=2 buy can only happen after k=1 has been fully settled.</p>
+
+      <div class="recurrence-block" style="font-size:12px;line-height:2;">
+        <span style="color:var(--text-muted)">// States: T10 (k=1, not holding), T11 (k=1, holding), T20, T21</span><br>
+        T20 = max(T20, <span class="sell-part" style="color:var(--accent2)">T21 + price</span>) &nbsp;&nbsp;<span style="color:var(--text-muted)">← sell 2nd txn</span><br>
+        T21 = max(T21, <span class="buy-part" style="color:var(--accent3)">T10 − price</span>) &nbsp;&nbsp;<span style="color:var(--text-muted)">← buy 2nd txn (uses k=1 profit!)</span><br>
+        T10 = max(T10, <span class="sell-part" style="color:var(--accent2)">T11 + price</span>) &nbsp;&nbsp;<span style="color:var(--text-muted)">← sell 1st txn</span><br>
+        T11 = max(T11, <span class="buy-part" style="color:var(--accent3)">−price</span>) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted)">← buy 1st txn (T[0][0] = 0)</span>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-label">Critical Gotcha</div>
+        <code>T21 = max(T21, T10 − price)</code> — the second buy subtracts from <code>T10</code>, not zero. This means it <strong>carries forward the profit from the first transaction</strong> into the second. If you use <code>−price</code> instead, you'd restart from scratch and get wrong answers on cases where the two transactions overlap optimally.
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="file">LC #123 — At Most 2 Transactions</span></div>
+        <div class="lang-pane java active">
+<pre><span class="kw">class</span> <span class="fn">Solution</span> {
+  <span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices) {
+    <span class="kw">int</span> T10 = <span class="nm">0</span>, T11 = Integer.MIN_VALUE;
+    <span class="kw">int</span> T20 = <span class="nm">0</span>, T21 = Integer.MIN_VALUE;
+
+    <span class="kw">for</span> (<span class="kw">int</span> price : prices) {
+      <span class="cm">// Update in reverse k order: k=2 first, then k=1</span>
+      <span class="cm">// This ensures we read k=1 values from the PREVIOUS day</span>
+      T20 = Math.max(T20, T21 + price);
+      T21 = Math.max(T21, T10 - price); <span class="cm">// uses T10 from prev day</span>
+      T10 = Math.max(T10, T11 + price);
+      T11 = Math.max(T11, -price);      <span class="cm">// T[i-1][0][0] = 0</span>
+    }
+    <span class="kw">return</span> T20;
+  }
+}</pre>
+        </div>
+        <div class="lang-pane python">
+<pre><span class="kw">class</span> <span class="fn">Solution</span>:
+  <span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices: list[int]) -> int:
+    T10, T11 = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+    T20, T21 = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+
+    <span class="kw">for</span> price <span class="kw">in</span> prices:
+      <span class="cm"># Reverse k order so T10 is still from previous day</span>
+      T20 = <span class="fn">max</span>(T20, T21 + price)
+      T21 = <span class="fn">max</span>(T21, T10 - price)
+      T10 = <span class="fn">max</span>(T10, T11 + price)
+      T11 = <span class="fn">max</span>(T11, -price)
+
+    <span class="kw">return</span> T20</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEEP DIVE 2: #309 Cooldown -->
+  <div class="problem-block">
+    <div class="problem-header">
+      <span class="problem-id">#309</span>
+      <span class="problem-name">Best Time to Buy and Sell Stock with Cooldown</span>
+      <span class="diff-badge medium-badge">Medium</span>
+    </div>
+    <div class="problem-body">
+      <p class="problem-statement">After you sell your stock, you cannot buy stock on the next day (i.e., cooldown period is 1 day). You may complete as many transactions as you like. Find the maximum profit.</p>
+
+      <div class="example-block">
+        <div class="example-label">EXAMPLE</div>
+        Input: prices = [1, 2, 3, 0, 2]<br>
+        Output: 3<br>
+        <span style="color:var(--text-muted)">// Buy day 1, sell day 3. Cooldown day 4. Buy day 5, sell day 5 — or: buy 1, sell 3, buy 5, sell 5 = 3.</span>
+      </div>
+
+      <h4 style="margin:18px 0 10px;font-size:14px;">The one-line change that breaks greedy</h4>
+
+      <p>Start from k=∞ (LC #122). The buy transition normally uses <code>cash</code> from <em>yesterday</em>. With cooldown, you can't buy on the day after a sell — so the buy transition must reach back to <strong>two days ago</strong>: <code>T[i-2][0]</code>.</p>
+
+      <div class="recurrence-block" style="font-size:12px;line-height:2;">
+        <span style="color:var(--accent)">k=∞ original:</span>&nbsp;&nbsp;&nbsp;hold = max(hold, cash − price)<br>
+        <span style="color:var(--accent4)">cooldown:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hold = max(hold, <span class="cool-part" style="color:var(--accent4)">prev_cash</span> − price)
+        <span style="color:var(--text-muted); font-size:11px;">&nbsp;← T[i-2][0]</span>
+      </div>
+
+      <p>We need one extra variable <code>prev_cash</code> that holds what <code>cash</code> was <em>two days ago</em>. Update it at the end of each day: <code>prev_cash = old_cash</code> before you overwrite <code>cash</code>.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="file">LC #309 — Cooldown</span></div>
+        <div class="lang-pane java active">
+<pre><span class="kw">class</span> <span class="fn">Solution</span> {
+  <span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices) {
+    <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE, prevCash = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="kw">int</span> price : prices) {
+      <span class="kw">int</span> oldCash = cash;          <span class="cm">// save before overwrite</span>
+      cash    = Math.max(cash, hold + price);
+      hold    = Math.max(hold, prevCash - price); <span class="cm">// T[i-2][0]!</span>
+      prevCash = oldCash;           <span class="cm">// shift the window</span>
+    }
+    <span class="kw">return</span> cash;
+  }
+}</pre>
+        </div>
+        <div class="lang-pane python">
+<pre><span class="kw">class</span> <span class="fn">Solution</span>:
+  <span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices: list[int]) -> int:
+    cash, hold, prev_cash = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>), <span class="nm">0</span>
+
+    <span class="kw">for</span> price <span class="kw">in</span> prices:
+      cash, hold, prev_cash = (
+        <span class="fn">max</span>(cash, hold + price),
+        <span class="fn">max</span>(hold, prev_cash - price),  <span class="cm"># T[i-2][0]</span>
+        cash                              <span class="cm"># shift window</span>
+      )
+
+    <span class="kw">return</span> cash</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All 6 solutions compact -->
+  <h3 style="margin:32px 0 18px;font-size:16px;font-weight:600;">All six solutions in one place</h3>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(event,'t121')">#121</button>
+    <button class="tab-btn" onclick="showTab(event,'t122')">#122</button>
+    <button class="tab-btn" onclick="showTab(event,'t123')">#123</button>
+    <button class="tab-btn" onclick="showTab(event,'t188')">#188</button>
+    <button class="tab-btn" onclick="showTab(event,'t309')">#309</button>
+    <button class="tab-btn" onclick="showTab(event,'t714')">#714</button>
+  </div>
+
+  <div class="tab-pane active" id="t121">
+    <div class="code-block">
+      <div class="code-header"><span class="file">#121 · k=1 · Single Transaction</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices) {
+  <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE;
+  <span class="kw">for</span> (<span class="kw">int</span> p : prices) {
+    cash = Math.max(cash, hold + p);
+    hold = Math.max(hold, -p); <span class="cm">// T[0][0]-p = 0-p</span>
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices):
+  cash, hold = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+  <span class="kw">for</span> p <span class="kw">in</span> prices:
+    cash = <span class="fn">max</span>(cash, hold + p)
+    hold = <span class="fn">max</span>(hold, -p)
+  <span class="kw">return</span> cash</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="t122">
+    <div class="code-block">
+      <div class="code-header"><span class="file">#122 · k=∞ · Unlimited Transactions</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices) {
+  <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE;
+  <span class="kw">for</span> (<span class="kw">int</span> p : prices) {
+    <span class="kw">int</span> prev = cash;
+    cash = Math.max(cash, hold + p);
+    hold = Math.max(hold, prev - p); <span class="cm">// k-1=k when k=∞</span>
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices):
+  cash, hold = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+  <span class="kw">for</span> p <span class="kw">in</span> prices:
+    cash, hold = <span class="fn">max</span>(cash, hold + p), <span class="fn">max</span>(hold, cash - p)
+  <span class="kw">return</span> cash</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="t123">
+    <div class="code-block">
+      <div class="code-header"><span class="file">#123 · k=2 · At Most 2 Transactions</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices) {
+  <span class="kw">int</span> T10 = <span class="nm">0</span>, T11 = Integer.MIN_VALUE;
+  <span class="kw">int</span> T20 = <span class="nm">0</span>, T21 = Integer.MIN_VALUE;
+  <span class="kw">for</span> (<span class="kw">int</span> p : prices) {
+    T20 = Math.max(T20, T21 + p);
+    T21 = Math.max(T21, T10 - p);
+    T10 = Math.max(T10, T11 + p);
+    T11 = Math.max(T11, -p);
+  }
+  <span class="kw">return</span> T20;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices):
+  T10, T11, T20, T21 = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>), <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+  <span class="kw">for</span> p <span class="kw">in</span> prices:
+    T20 = <span class="fn">max</span>(T20, T21 + p)
+    T21 = <span class="fn">max</span>(T21, T10 - p)
+    T10 = <span class="fn">max</span>(T10, T11 + p)
+    T11 = <span class="fn">max</span>(T11, -p)
+  <span class="kw">return</span> T20</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="t188">
+    <div class="code-block">
+      <div class="code-header"><span class="file">#188 · k=K · Arbitrary K</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span> k, <span class="kw">int</span>[] prices) {
+  <span class="kw">int</span> n = prices.length;
+  <span class="kw">if</span> (k >= n / <span class="nm">2</span>) { <span class="cm">// collapse to k=∞</span>
+    <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE;
+    <span class="kw">for</span> (<span class="kw">int</span> p : prices) {
+      <span class="kw">int</span> prev = cash;
+      cash = Math.max(cash, hold + p);
+      hold = Math.max(hold, prev - p);
+    }
+    <span class="kw">return</span> cash;
+  }
+  <span class="kw">int</span>[] T0 = <span class="kw">new int</span>[k + <span class="nm">1</span>]; <span class="cm">// not holding per k level</span>
+  <span class="kw">int</span>[] T1 = <span class="kw">new int</span>[k + <span class="nm">1</span>]; <span class="cm">// holding per k level</span>
+  Arrays.fill(T1, Integer.MIN_VALUE);
+  <span class="kw">for</span> (<span class="kw">int</span> p : prices)
+    <span class="kw">for</span> (<span class="kw">int</span> j = k; j > <span class="nm">0</span>; j--) {
+      T0[j] = Math.max(T0[j], T1[j] + p);
+      T1[j] = Math.max(T1[j], T0[j-<span class="nm">1</span>] - p);
+    }
+  <span class="kw">return</span> T0[k];
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">maxProfit</span>(self, k: int, prices: list[int]) -> int:
+  n = <span class="fn">len</span>(prices)
+  <span class="kw">if</span> k >= n // <span class="nm">2</span>:
+    cash = hold = <span class="nm">0</span>; hold = <span class="fn">float</span>(<span class="st">'-inf'</span>)
+    <span class="kw">for</span> p <span class="kw">in</span> prices:
+      cash, hold = <span class="fn">max</span>(cash, hold+p), <span class="fn">max</span>(hold, cash-p)
+    <span class="kw">return</span> cash
+  T0 = [<span class="nm">0</span>]*(k+<span class="nm">1</span>); T1 = [<span class="fn">float</span>(<span class="st">'-inf'</span>)]*(k+<span class="nm">1</span>)
+  <span class="kw">for</span> p <span class="kw">in</span> prices:
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(k, <span class="nm">0</span>, -<span class="nm">1</span>):
+      T0[j] = <span class="fn">max</span>(T0[j], T1[j] + p)
+      T1[j] = <span class="fn">max</span>(T1[j], T0[j-<span class="nm">1</span>] - p)
+  <span class="kw">return</span> T0[k]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="t309">
+    <div class="code-block">
+      <div class="code-header"><span class="file">#309 · k=∞ + Cooldown</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices) {
+  <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE, prevCash = <span class="nm">0</span>;
+  <span class="kw">for</span> (<span class="kw">int</span> p : prices) {
+    <span class="kw">int</span> old = cash;
+    cash = Math.max(cash, hold + p);
+    hold = Math.max(hold, prevCash - p); <span class="cm">// T[i-2][0]</span>
+    prevCash = old;
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices):
+  cash, hold, prev = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>), <span class="nm">0</span>
+  <span class="kw">for</span> p <span class="kw">in</span> prices:
+    cash, hold, prev = (
+      <span class="fn">max</span>(cash, hold + p),
+      <span class="fn">max</span>(hold, prev - p),
+      cash
+    )
+  <span class="kw">return</span> cash</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="t714">
+    <div class="code-block">
+      <div class="code-header"><span class="file">#714 · k=∞ + Transaction Fee</span></div>
+      <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxProfit</span>(<span class="kw">int</span>[] prices, <span class="kw">int</span> fee) {
+  <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE;
+  <span class="kw">for</span> (<span class="kw">int</span> p : prices) {
+    <span class="kw">int</span> prev = cash;
+    cash = Math.max(cash, hold + p);
+    hold = Math.max(hold, prev - p - fee); <span class="cm">// subtract fee on buy</span>
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+      </div>
+      <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">maxProfit</span>(self, prices, fee):
+  cash, hold = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+  <span class="kw">for</span> p <span class="kw">in</span> prices:
+    cash, hold = (
+      <span class="fn">max</span>(cash, hold + p),
+      <span class="fn">max</span>(hold, cash - p - fee)  <span class="cm"># fee on buy</span>
+    )
+  <span class="kw">return</span> cash</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ── SECTION 05: REAL WORLD ── -->
+<div class="section" id="realworld">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">05 — REAL WORLD PROBLEMS</div>
+    <h2 class="section-title">Same machine,<br><em>production scenarios</em></h2>
+  </div>
+
+  <!-- RW 1: k=1 -->
+  <div class="problem-block">
+    <div class="problem-header">
+      <span class="problem-id">Case 1 · k=1</span>
+      <span class="problem-name">Cloud Spot Instance — Single Reservation Window</span>
+      <span class="diff-badge easy-badge">Infra / Finance</span>
+    </div>
+    <div class="problem-body">
+      <p class="problem-statement">Your team can reserve a cloud spot instance once (commit) and release it once (exit) to minimize cost. Given an hourly cost array, find the maximum cost savings from a single commit-release window compared to always paying on-demand.</p>
+      <div class="example-block">
+        <div class="example-label">EXAMPLE</div>
+        costs = [0.42, 0.18, 0.31, 0.12, 0.45, 0.38]<br>
+        Output: 0.33<br>
+        <span style="color:var(--text-muted)">// commit at 0.12 (hour 4), release at 0.45 (hour 5) → savings 0.33/hr</span><br>
+        Constraints: 1 ≤ n ≤ 10⁵, costs are non-negative floats
+      </div>
+      <p><strong>Why k=1:</strong> You get one opportunity to lock in a low price and benefit from it. The running minimum (hold = max(hold, −cost)) tracks the best entry point seen so far. At each step, you check if releasing now beats waiting.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="file">Spot Instance · Single Window</span></div>
+        <div class="lang-pane java active">
+<pre><span class="kw">public double</span> <span class="fn">maxSavings</span>(<span class="kw">double</span>[] costs) {
+  <span class="kw">double</span> cash = <span class="nm">0</span>, hold = Double.NEGATIVE_INFINITY;
+  <span class="kw">for</span> (<span class="kw">double</span> c : costs) {
+    cash = Math.max(cash, hold + c);
+    hold = Math.max(hold, -c);
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">max_savings</span>(costs: list[float]) -> float:
+  cash, hold = <span class="nm">0.0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+  <span class="kw">for</span> c <span class="kw">in</span> costs:
+    cash = <span class="fn">max</span>(cash, hold + c)
+    hold = <span class="fn">max</span>(hold, -c)
+  <span class="kw">return</span> cash</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RW 2: k=∞ + fee -->
+  <div class="problem-block">
+    <div class="problem-header">
+      <span class="problem-id">Case 6 · k=∞ + fee</span>
+      <span class="problem-name">API Gateway — Cost Arbitrage with Switching Fee</span>
+      <span class="diff-badge medium-badge">Platform Engineering</span>
+    </div>
+    <div class="problem-body">
+      <p class="problem-statement">Your service routes requests through two API providers whose per-request cost fluctuates each minute. Switching providers incurs a fixed switching fee. Given a cost-difference array (positive = provider A is cheaper), find the maximum savings from optimally switching providers, accounting for switching costs.</p>
+      <div class="example-block">
+        <div class="example-label">EXAMPLE</div>
+        cost_deltas = [5, 3, 8, 2, 7, 9, 4], fee = 2<br>
+        Output: 13<br>
+        <span style="color:var(--text-muted)">// Switch at delta=3 (pay fee), earn through delta=9, switch back (pay fee) → net 13</span><br>
+        Constraints: 1 ≤ n ≤ 10⁵, 0 ≤ fee ≤ 100
+      </div>
+      <p><strong>Why k=∞ + fee:</strong> Unlimited switches allowed but each costs a fee. Small delta windows aren't worth it. This is exactly LC #714 — the fee raises the bar for when switching pays off.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="file">API Gateway · Switching with Fee</span></div>
+        <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxSavings</span>(<span class="kw">int</span>[] deltas, <span class="kw">int</span> fee) {
+  <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE;
+  <span class="kw">for</span> (<span class="kw">int</span> d : deltas) {
+    <span class="kw">int</span> prev = cash;
+    cash = Math.max(cash, hold + d);
+    hold = Math.max(hold, prev - d - fee);
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">max_savings</span>(deltas: list[int], fee: int) -> int:
+  cash, hold = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>)
+  <span class="kw">for</span> d <span class="kw">in</span> deltas:
+    cash, hold = (
+      <span class="fn">max</span>(cash, hold + d),
+      <span class="fn">max</span>(hold, cash - d - fee)
+    )
+  <span class="kw">return</span> cash</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RW 3: cooldown -->
+  <div class="problem-block">
+    <div class="problem-header">
+      <span class="problem-id">Case 5 · k=∞ + cooldown</span>
+      <span class="problem-name">Feature Flag System — Mandatory Stabilization Window</span>
+      <span class="diff-badge medium-badge">Platform Engineering</span>
+    </div>
+    <div class="problem-body">
+      <p class="problem-statement">A feature flag controller enables or disables a feature based on observed error reduction per hour. Due to cache propagation delay, after disabling a feature (sell) you must wait one full hour before re-enabling it (cooldown). Given the hourly error-reduction value when the feature is on, find the optimal enable/disable schedule to maximize total error reduction.</p>
+      <div class="example-block">
+        <div class="example-label">EXAMPLE</div>
+        values = [1, 2, 3, 0, 2], cooldown = 1 hour<br>
+        Output: 3<br>
+        <span style="color:var(--text-muted)">// Enable hours 1-3 (gain +3), cooldown hour 4, re-enable hour 5 (gain +0)</span><br>
+        Constraints: 1 ≤ n ≤ 5000, 0 ≤ values[i] ≤ 1000
+      </div>
+      <p><strong>Why cooldown matters:</strong> After disabling (selling), the system is locked for one hour. This temporal coupling means greedy fails — taking a marginal gain today might block a larger gain tomorrow. The <code>prev_cash</code> variable carries the pre-sell state forward exactly two steps.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="file">Feature Flag · Cooldown Window</span></div>
+        <div class="lang-pane java active">
+<pre><span class="kw">public int</span> <span class="fn">maxReduction</span>(<span class="kw">int</span>[] values) {
+  <span class="kw">int</span> cash = <span class="nm">0</span>, hold = Integer.MIN_VALUE, prevCash = <span class="nm">0</span>;
+  <span class="kw">for</span> (<span class="kw">int</span> v : values) {
+    <span class="kw">int</span> old = cash;
+    cash    = Math.max(cash, hold + v);
+    hold    = Math.max(hold, prevCash - v);
+    prevCash = old;
+  }
+  <span class="kw">return</span> cash;
+}</pre>
+        </div>
+        <div class="lang-pane python">
+<pre><span class="kw">def</span> <span class="fn">max_reduction</span>(values: list[int]) -> int:
+  cash, hold, prev = <span class="nm">0</span>, <span class="fn">float</span>(<span class="st">'-inf'</span>), <span class="nm">0</span>
+  <span class="kw">for</span> v <span class="kw">in</span> values:
+    cash, hold, prev = (
+      <span class="fn">max</span>(cash, hold + v),
+      <span class="fn">max</span>(hold, prev - v),
+      cash
+    )
+  <span class="kw">return</span> cash</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">Mapping Back to LeetCode</div>
+    Spot instance single window → <strong>LC #121</strong> (k=1, running min). API gateway switching → <strong>LC #714</strong> (k=∞ + fee). Feature flag cooldown → <strong>LC #309</strong> (k=∞ + 1-day cooldown). The machine is identical — only the domain changes.
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 06: CHEAT SHEET ── -->
+<div class="section" id="cheatsheet">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">06 — REFERENCE</div>
+    <h2 class="section-title">Complete series<br><em>cheat sheet</em></h2>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(event,'cs-all')">All Problems</button>
+    <button class="tab-btn" onclick="showTab(event,'cs-derive')">Derivation Steps</button>
+    <button class="tab-btn" onclick="showTab(event,'cs-path')">Study Path</button>
+  </div>
+
+  <div class="tab-pane active" id="cs-all">
+    <table class="cheat-table">
+      <thead><tr><th>#</th><th>k</th><th>Variables</th><th>Key change from template</th><th>Edge case</th></tr></thead>
+      <tbody>
+        <tr><td>#121</td><td>1</td><td>cash, hold</td><td>hold = max(hold, −price) [T[0][0]=0]</td><td>All descending → 0</td></tr>
+        <tr><td>#122</td><td>∞</td><td>cash, hold</td><td>hold uses cash (k−1=k)</td><td>Single day → 0</td></tr>
+        <tr><td>#123</td><td>2</td><td>T10,T11,T20,T21</td><td>T21 uses T10 (profit chains)</td><td>1 good txn beats 2 bad</td></tr>
+        <tr><td>#188</td><td>K</td><td>T0[K+1],T1[K+1]</td><td>k≥n/2 → collapse to #122</td><td>k overflow</td></tr>
+        <tr><td>#309</td><td>∞+cd</td><td>cash,hold,prevCash</td><td>hold uses prevCash (T[i-2][0])</td><td>Save oldCash before overwrite</td></tr>
+        <tr><td>#714</td><td>∞+fee</td><td>cash, hold</td><td>hold = max(hold, cash−price−fee)</td><td>fee > all gains → 0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-pane" id="cs-derive">
+    <p style="color:var(--text-muted);margin-bottom:16px;">How to reconstruct any solution from the universal recurrence in an interview:</p>
+    <div style="background:var(--surface2);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:12.5px;line-height:2.1;">
+      <span style="color:var(--accent)">Step 1:</span> Write the universal template<br>
+      &nbsp;&nbsp;cash = max(cash, hold + price)<br>
+      &nbsp;&nbsp;hold = max(hold, T[i-1][k-1][0] − price)<br><br>
+      <span style="color:var(--accent)">Step 2:</span> Substitute k<br>
+      &nbsp;&nbsp;k=1: T[k-1][0] = T[0][0] = 0 → hold = max(hold, −price)<br>
+      &nbsp;&nbsp;k=∞: T[k-1][0] = T[k][0] = cash → hold = max(hold, cash−price)<br>
+      &nbsp;&nbsp;k=2: expand to 4 vars, T21 reads T10<br>
+      &nbsp;&nbsp;k=K: arrays, T1[j] reads T0[j-1]<br><br>
+      <span style="color:var(--accent)">Step 3:</span> Apply constraints<br>
+      &nbsp;&nbsp;cooldown: replace cash → prevCash in hold update<br>
+      &nbsp;&nbsp;fee: append −fee to hold update<br><br>
+      <span style="color:var(--accent)">Step 4:</span> Return cash (always end not-holding)
+    </div>
+  </div>
+
+  <div class="tab-pane" id="cs-path">
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>#121 (Easy)</h4>
+        <p>Understand the split: cash vs hold. Convince yourself that hold = max(hold, −price) is just tracking the minimum buy price.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>#122 (Medium)</h4>
+        <p>Why does hold use <code>cash</code> instead of <code>0</code>? Because k=∞ makes k−1 = k. Also confirm that this equals summing all positive daily deltas (the greedy equivalence).</p>
+      </div>
+      <div class="timeline-item">
+        <h4>#714 (Medium)</h4>
+        <p>Add <code>−fee</code> to hold. Run through examples where fee eliminates small trades. Verify that paying fee on buy vs sell gives the same answer.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>#309 (Medium)</h4>
+        <p>Add <code>prevCash</code>. Trace a 4-day example by hand. Notice that prevCash is always exactly one step behind cash.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>#123 (Hard)</h4>
+        <p>Expand to 4 variables. Trace the k=2 buy using T10 (not −price). This is the hardest conceptual leap — T21 inherits from T10.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>#188 (Hard)</h4>
+        <p>Generalize to arrays. Handle the k ≥ n/2 edge case. You now own the complete framework.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 07: MENTAL MODEL ── -->
+<div class="section" id="mental">
+<div class="container">
+  <div class="section-header">
+    <div class="section-num">07 — MENTAL MODEL</div>
+    <h2 class="section-title">The one question<br><em>behind every variant</em></h2>
+  </div>
+
+  <p>At each day, the machine asks: <em>given my current state (holding or not), what is the best total profit reachable from here?</em> The DP state is just a compact encoding of that answer.</p>
+
+  <p>The three-factor state <code>T[i][k][holding]</code> always compresses to scalars because each row only depends on the previous row. The number of scalars you need equals the number of distinct k-levels you must track — 1 for k=1 or k=∞, 2 for k=2, K for arbitrary k.</p>
+
+  <p>Constraints like cooldown and fees don't add new states — they tweak one transition. Cooldown changes <em>which day's</em> cash feeds the buy. Fee changes <em>how much</em> the buy costs. The machine shape stays the same.</p>
+
+  <div class="callout">
+    <div class="callout-label">The Single Rule</div>
+    At each day, in each holding-state, take the better of two options: stay as you are, or take the action that transitions you. The constraint (k, cooldown, fee) just modifies what "take the action" costs or requires.
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">Interview Signal Sentence</div>
+    "I model this as a two-state DP machine: T[i][k][0] for not holding and T[i][k][1] for holding. At each day, each state takes the max of resting or transitioning. The problem's constraint — whether that's k=1, a cooldown, or a fee — just specializes one of the two transition lines. The code falls out directly from the recurrence."
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">Acknowledgement</div>
+    This article was informed by the state-machine framing in
+    <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solutions/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems/" target="_blank" rel="noopener noreferrer">this LeetCode stock-series discussion</a>.
+    The explanations, visuals, and first-principles teaching flow here were adapted into this site’s own style.
+  </div>
+</div>
+</div>
+
+<footer>
+  <a href="dynamic_programming_series.html" style="color:inherit;text-decoration:none;"><strong>Back to DP Series</strong></a> · Stock Series · State Machine · Built from first principles<br>
+  <span style="opacity:.5;font-size:11px;margin-top:5px;display:block">Six problems. One machine. Zero memorization.</span>
+</footer>
+
+<script>
+function updateThemeButton() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = document.documentElement.classList.contains('light') ? 'Dark mode' : 'Light mode';
+}
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('light');
+  try {
+    localStorage.setItem('dsa-theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  } catch (e) {}
+  updateThemeButton();
+}
+
+// ── LANGUAGE TOGGLE ──
+let currentLang = 'java';
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('nav-java-btn').classList.toggle('active', lang === 'java');
+  document.getElementById('nav-py-btn').classList.toggle('active', lang === 'python');
+  document.querySelectorAll('.lang-pane').forEach(p => p.classList.toggle('active', p.classList.contains(lang)));
+}
+
+// ── TABS ──
+function showTab(e, id) {
+  const btn = e.target;
+  const container = btn.closest('.section') || btn.parentElement.parentElement;
+  container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ── VISUALIZER ──
+const VIZ_CONFIGS = [
+  {
+    title: "LC #121 · k=1 · prices = [1, 3, 2, 4]",
+    prices: [1,3,2,4],
+    vars: ['cash','hold'],
+    initVals: [0, -Infinity],
+    rec: `cash = max(cash, <span style="color:var(--accent2)">hold + price</span>)\nhold = max(hold, <span style="color:var(--accent3)">−price</span>)  ← T[0][0]−price = 0−price`,
+    steps: function(prices) {
+      let cash=0, hold=-Infinity; const out=[];
+      out.push({vars:[0,-Infinity],day:-1,activeArrow:'',log:'Init: cash=0, hold=−∞. No position yet.'});
+      for(let i=0;i<prices.length;i++){
+        const p=prices[i], nc=Math.max(cash,hold+p), nh=Math.max(hold,-p);
+        out.push({vars:[nc,nh],day:i,activeArrow:nc>cash?'sell':'rest-sell',
+          log:`Day ${i}, price=${p}. cash=max(${cash},${hold===(-Infinity)?'−∞':hold}+${p})=${nc}. hold=max(${hold===(-Infinity)?'−∞':hold},−${p})=${nh===(-Infinity)?'−∞':nh}.`});
+        cash=nc;hold=nh;
+      }
+      out.push({vars:[cash,hold],day:-1,activeArrow:'done',log:`Done. Answer = cash = ${cash}.`});
+      return out;
+    }
+  },
+  {
+    title: "LC #122 · k=∞ · prices = [1, 3, 2, 4]",
+    prices: [1,3,2,4],
+    vars: ['cash','hold'],
+    initVals: [0,-Infinity],
+    rec: `cash = max(cash, <span style="color:var(--accent2)">hold + price</span>)\nhold = max(hold, <span style="color:var(--accent3)">cash − price</span>)  ← k−1=k when k=∞`,
+    steps: function(prices) {
+      let cash=0, hold=-Infinity; const out=[];
+      out.push({vars:[0,-Infinity],day:-1,log:'Init: cash=0, hold=−∞.'});
+      for(let i=0;i<prices.length;i++){
+        const p=prices[i], prev=cash, nc=Math.max(cash,hold+p), nh=Math.max(hold,prev-p);
+        out.push({vars:[nc,nh],day:i,log:`Day ${i}, price=${p}. cash=max(${cash===0?0:cash},${hold===(-Infinity)?'−∞':hold}+${p})=${nc}. hold=max(${hold===(-Infinity)?'−∞':hold},${prev}−${p})=${nh===(-Infinity)?'−∞':nh}.`});
+        cash=nc;hold=nh;
+      }
+      out.push({vars:[cash,hold],day:-1,log:`Done. Answer = cash = ${cash}.`});
+      return out;
+    }
+  },
+  {
+    title: "LC #123 · k=2 · prices = [3,3,5,0,0,3,1,4]",
+    prices: [3,3,5,0,0,3,1,4],
+    vars: ['T10','T11','T20','T21'],
+    initVals: [0,-Infinity,0,-Infinity],
+    rec: `T20=max(T20,<span style="color:var(--accent2)">T21+price</span>); T21=max(T21,<span style="color:var(--accent3)">T10−price</span>)\nT10=max(T10,<span style="color:var(--accent2)">T11+price</span>); T11=max(T11,<span style="color:var(--accent3)">−price</span>)`,
+    steps: function(prices) {
+      let T10=0,T11=-Infinity,T20=0,T21=-Infinity; const out=[];
+      out.push({vars:[0,-Infinity,0,-Infinity],day:-1,log:'Init: all [0,−∞,0,−∞].'});
+      for(let i=0;i<prices.length;i++){
+        const p=prices[i];
+        const nT20=Math.max(T20,T21+p), nT21=Math.max(T21,T10-p);
+        const nT10=Math.max(T10,T11+p), nT11=Math.max(T11,-p);
+        out.push({vars:[nT10,nT11,nT20,nT21],day:i,
+          log:`Day ${i}, p=${p}. T20=${nT20}, T21=${nT21===(-Infinity)?'−∞':nT21}, T10=${nT10}, T11=${nT11===(-Infinity)?'−∞':nT11}.`});
+        T10=nT10;T11=nT11;T20=nT20;T21=nT21;
+      }
+      out.push({vars:[T10,T11,T20,T21],day:-1,log:`Done. Answer = T20 = ${T20}.`});
+      return out;
+    }
+  },
+  {
+    title: "LC #309 · Cooldown · prices = [1,2,3,0,2]",
+    prices: [1,2,3,0,2],
+    vars: ['cash','hold','prevCash'],
+    initVals: [0,-Infinity,0],
+    rec: `cash = max(cash, <span style="color:var(--accent2)">hold + price</span>)\nhold = max(hold, <span style="color:var(--accent4)">prevCash</span> − price)  ← T[i-2][0]\nprevCash = old cash`,
+    steps: function(prices) {
+      let cash=0,hold=-Infinity,prev=0; const out=[];
+      out.push({vars:[0,-Infinity,0],day:-1,log:'Init: cash=0, hold=−∞, prevCash=0.'});
+      for(let i=0;i<prices.length;i++){
+        const p=prices[i], old=cash;
+        const nc=Math.max(cash,hold+p), nh=Math.max(hold,prev-p);
+        out.push({vars:[nc,nh,old],day:i,
+          log:`Day ${i}, p=${p}. cash=${nc}. hold=max(${hold===(-Infinity)?'−∞':hold},prevCash(${prev})−${p})=${nh===(-Infinity)?'−∞':nh}. prevCash shifts to ${old}.`});
+        cash=nc;hold=nh;prev=old;
+      }
+      out.push({vars:[cash,hold,prev],day:-1,log:`Done. Answer = cash = ${cash}.`});
+      return out;
+    }
+  },
+  {
+    title: "LC #714 · Fee=2 · prices = [1,3,2,8,4,9]",
+    prices: [1,3,2,8,4,9],
+    vars: ['cash','hold'],
+    initVals: [0,-Infinity],
+    rec: `cash = max(cash, <span style="color:var(--accent2)">hold + price</span>)\nhold = max(hold, <span style="color:var(--accent3)">cash − price</span> <span style="color:var(--accent)">− 2</span>)  ← fee=2`,
+    steps: function(prices) {
+      const fee=2; let cash=0,hold=-Infinity; const out=[];
+      out.push({vars:[0,-Infinity],day:-1,log:`Init: cash=0, hold=−∞. Fee=2.`});
+      for(let i=0;i<prices.length;i++){
+        const p=prices[i], prev=cash, nc=Math.max(cash,hold+p), nh=Math.max(hold,prev-p-fee);
+        out.push({vars:[nc,nh],day:i,
+          log:`Day ${i}, p=${p}. cash=${nc}. hold=max(${hold===(-Infinity)?'−∞':hold},${prev}−${p}−2)=${nh===(-Infinity)?'−∞':nh}.`});
+        cash=nc;hold=nh;
+      }
+      out.push({vars:[cash,hold],day:-1,log:`Done. Answer = cash = ${cash}.`});
+      return out;
+    }
+  }
+];
+
+let currentViz = 0, vizSteps = [], vizIdx = 0;
+let prevVals = [];
+
+function fmt(v) { return v === -Infinity ? '−∞' : v; }
+
+function buildViz() {
+  const cfg = VIZ_CONFIGS[currentViz];
+  vizSteps = cfg.steps(cfg.prices);
+  vizIdx = 0;
+  prevVals = [...cfg.initVals];
+  document.getElementById('viz-title').textContent = cfg.title;
+  document.getElementById('viz-rec').innerHTML = cfg.rec;
+  renderPrices(-1);
+  renderVars(cfg.initVals, []);
+  document.getElementById('viz-log').textContent = 'Press Step → to begin.';
+  document.getElementById('viz-step-btn').disabled = false;
+}
+
+function renderPrices(activeDay) {
+  const cfg = VIZ_CONFIGS[currentViz];
+  const el = document.getElementById('viz-prices');
+  el.innerHTML = '';
+  cfg.prices.forEach((p, i) => {
+    const c = document.createElement('div');
+    c.className = 'price-cell' + (i === activeDay ? ' active' : i < activeDay ? ' done' : '');
+    c.innerHTML = `<span class="pval">${p}</span><span class="pidx">d${i}</span>`;
+    el.appendChild(c);
+  });
+}
+
+function renderVars(vals, changed) {
+  const cfg = VIZ_CONFIGS[currentViz];
+  const el = document.getElementById('viz-vars');
+  el.innerHTML = '';
+  cfg.vars.forEach((name, i) => {
+    const d = document.createElement('div');
+    d.className = 'svar';
+    d.innerHTML = `<div class="svar-label">${name}</div><div class="svar-val${changed.includes(i) ? ' updated' : ''}">${fmt(vals[i])}</div>`;
+    el.appendChild(d);
+  });
+}
+
+function vizStep() {
+  if (vizIdx >= vizSteps.length) return;
+  const s = vizSteps[vizIdx];
+  const changed = s.vars ? s.vars.map((v,i) => v !== prevVals[i] ? i : -1).filter(x => x >= 0) : [];
+  renderPrices(s.day);
+  if (s.vars) { renderVars(s.vars, changed); prevVals = [...s.vars]; }
+  document.getElementById('viz-log').innerHTML = s.log || '';
+  vizIdx++;
+  if (vizIdx >= vizSteps.length) document.getElementById('viz-step-btn').disabled = true;
+}
+
+function vizReset() { buildViz(); }
+
+function selectViz(n, btn) {
+  currentViz = n;
+  document.querySelectorAll('#viz-selector button').forEach(b => b.className = 'btn btn-ghost');
+  btn.className = 'btn btn-primary';
+  buildViz();
+}
+
+buildViz();
+updateThemeButton();
+</script>
+</body>
+</html>
